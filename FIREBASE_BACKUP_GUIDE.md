@@ -124,11 +124,16 @@ node scripts\backup.js
 
 ## 5. Automated Schedule in Windows Task Scheduler
 
-Configured via `scripts/setup-task.ps1` with task name **`X-29 Advance Automatic Backup`** with 4 daily triggers:
-- **11:00 AM**
-- **02:30 PM**
-- **07:30 PM**
-- **11:00 PM**
+Configured via `scripts/setup-task.ps1` with task name **`X-29 Advance Automatic Backup`** running **4 times every 24 hours** with a strict **6-hour interval** between each backup:
+
+| Backup | Time (12-Hour) | 24-Hour Equivalent | Interval |
+| :--- | :--- | :--- | :--- |
+| 1st | **8:00 AM** | `08:00` | — |
+| 2nd | **2:00 PM** | `14:00` | +6 Hours |
+| 3rd | **8:00 PM** | `20:00` | +6 Hours |
+| 4th | **2:00 AM** | `02:00` | +6 Hours |
+
+*Recurring cycle continues indefinitely:* `8:00 AM → 2:00 PM → 8:00 PM → 2:00 AM → 8:00 AM` (6 hours each step).
 
 Command executed:
 ```cmd
