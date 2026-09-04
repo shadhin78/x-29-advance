@@ -1,0 +1,369 @@
+                <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 md:gap-8 items-start">
+                    <!-- Left Column: Active Focus Panel -->
+                    <div id="timer-active-panel"
+                        class="xl:col-span-2 rounded-3xl p-4 sm:p-6 md:p-8 flex flex-col items-center justify-center text-center relative overflow-hidden transition-all duration-300 bg-slate-900/80 border border-slate-800/80 shadow-lg backdrop-blur-md">
+
+                        <!-- Fullscreen Top-Right Control Bar (Pause/Resume & Exit Fullview) -->
+                        <div id="timer-fs-actions" class="hidden absolute top-3 right-3 sm:top-5 sm:right-5 z-30 items-center gap-2">
+                            <!-- Fullscreen Pause / Resume Button -->
+                            <button id="timer-fs-btn-toggle" onclick="window.toggleTimerClick()"
+                                class="px-4 py-2 sm:px-5 sm:py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-black text-xs uppercase tracking-widest rounded-xl shadow-lg active:scale-95 transition-all touch-action-manipulation flex items-center justify-center min-h-[40px]">
+                                START
+                            </button>
+
+                            <!-- Exit Fullscreen Button -->
+                            <button onclick="window.toggleTimerFullscreen()" id="timer-fs-btn-exit"
+                                class="p-2 sm:p-2.5 bg-slate-800/90 hover:bg-slate-700/90 rounded-xl transition-all active:scale-95 text-slate-300 border border-slate-700/60 shadow-md touch-action-manipulation flex items-center justify-center min-h-[40px]"
+                                title="Exit Fullscreen">
+                                <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                        d="M4 14h6m0 0v6m0-6L4 20m16-6h-6m0 0v6m0-6l6 6M4 10h6m0 0V4m0 6L4 4m16 6h-6m0 0V4m0 6l6-6">
+                                    </path>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div class="relative z-10 w-full max-w-xl flex flex-col items-center gap-4 sm:gap-5">
+                            <!-- Mode Switcher Tabs & Subject Selector Grid (Balanced Horizontal Layout) -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 w-full items-end">
+                                <!-- Toggle Tabs -->
+                                <div id="timer-mode-switcher"
+                                    class="flex bg-slate-950/80 p-1.5 rounded-2xl border border-slate-800/80 shadow-inner w-full justify-between backdrop-blur-md h-[46px] items-center">
+                                    <button onclick="window.setTimerMode('stopwatch')" id="tm-mode-stopwatch"
+                                        class="w-1/3 h-full text-[10px] sm:text-xs font-black rounded-xl transition-all bg-blue-600 text-white shadow touch-action-manipulation flex items-center justify-center">STOPWATCH</button>
+                                    <button onclick="window.setTimerMode('timer')" id="tm-mode-timer"
+                                        class="w-1/3 h-full text-[10px] sm:text-xs font-black rounded-xl transition-all text-slate-400 hover:bg-slate-800/80 touch-action-manipulation flex items-center justify-center">TIMER</button>
+                                    <button onclick="window.setTimerMode('alarm')" id="tm-mode-alarm"
+                                        class="w-1/3 h-full text-[10px] sm:text-xs font-black rounded-xl transition-all text-slate-400 hover:bg-slate-800/80 touch-action-manipulation flex items-center justify-center">ALARM RANGE</button>
+                                </div>
+
+                                <!-- Subject/Program Selector + Side Fullscreen Button -->
+                                <div id="timer-subject-select-container" class="w-full min-w-0 max-w-full text-left flex flex-col gap-1">
+                                    <label class="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-slate-400">Track Time Against:</label>
+                                    <div class="flex items-center gap-2 w-full min-w-0 max-w-full">
+                                        <select id="timer-subject-select"
+                                            class="bg-slate-950 border border-slate-800 rounded-2xl p-2.5 sm:p-3 text-xs sm:text-sm text-white focus:ring-2 focus:ring-blue-500 font-bold flex-1 min-w-0 cursor-pointer shadow-sm outline-none touch-action-manipulation h-[46px] truncate">
+                                            <option value="General Study">General Study</option>
+                                            <!-- Options populated dynamically from tracks/programs/subjects -->
+                                        </select>
+                                        <!-- Fullscreen Toggle Button (Positioned right on the side of dropdown) -->
+                                        <button onclick="window.toggleTimerFullscreen()" id="timer-btn-fullscreen"
+                                            class="p-2.5 sm:p-3 bg-slate-800/90 hover:bg-slate-700/90 rounded-2xl transition-all active:scale-95 text-slate-300 border border-slate-700/60 shadow-md touch-action-manipulation flex items-center justify-center h-[46px] w-[46px] min-w-[46px] min-h-[46px] shrink-0 flex-shrink-0"
+                                            title="Toggle Fullscreen" aria-label="Toggle Fullscreen">
+                                            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                                    d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0-4l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4">
+                                                </path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Alarm / Range Mode Controls (Visible only in alarm mode) -->
+                            <div id="timer-alarm-container"
+                                class="hidden flex-col gap-3 w-full text-left bg-slate-950/60 p-4 rounded-2xl border border-slate-800/80">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">Alarm Range Configuration</span>
+                                    <label class="flex items-center gap-1.5 cursor-pointer select-none">
+                                        <input type="checkbox" id="timer-alarm-use-current"
+                                            class="rounded border-slate-700 text-blue-600 focus:ring-blue-500 w-3.5 h-3.5 bg-slate-900"
+                                            checked onchange="window.toggleAlarmUseCurrent()" />
+                                        <span class="text-[9px] font-black uppercase tracking-wider text-slate-400">Use Current Time</span>
+                                    </label>
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div class="flex flex-col gap-1.5">
+                                        <label for="timer-alarm-start" class="text-[9px] font-black uppercase tracking-wider text-slate-400">Start Time</label>
+                                        <input type="time" id="timer-alarm-start"
+                                            onchange="if(window.TimerService) window.TimerService.saveActiveStateToStore(); if(window.FirebaseService) window.FirebaseService.saveTimerToCloud();"
+                                            class="bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-white font-bold outline-none w-full shadow-sm touch-action-manipulation"
+                                            disabled />
+                                    </div>
+                                    <div class="flex flex-col gap-1.5">
+                                        <label for="timer-alarm-end" class="text-[9px] font-black uppercase tracking-wider text-slate-400">End Time</label>
+                                        <input type="time" id="timer-alarm-end"
+                                            onchange="if(window.TimerService) window.TimerService.saveActiveStateToStore(); if(window.FirebaseService) window.FirebaseService.saveTimerToCloud();"
+                                            class="bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-white font-bold outline-none w-full shadow-sm touch-action-manipulation" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Big Chronograph Clock Display (Flat Responsive Design) -->
+                            <div id="timer-clock-container"
+                                class="relative flex items-center justify-center w-64 h-64 xs:w-72 xs:h-72 sm:w-80 sm:h-80 md:w-96 md:h-96 transition-all duration-500 select-none rounded-full bg-transparent my-1 sm:my-2">
+                                <svg id="chronograph-svg" class="w-full h-full overflow-visible" viewBox="0 0 300 300">
+                                    <!-- Main Dial Ticks (60 ticks painted directly on background) -->
+                                    <g id="chrono-ticks-container"></g>
+
+                                    <!-- Main Dial Numbers (5, 10, ..., 60) -->
+                                    <g id="chrono-numbers-container"></g>
+
+                                    <!-- Sub-dial (30-Minute Accumulator at 6 o'clock: CX=150, CY=205, R=38) -->
+                                    <g id="chrono-subdial-group">
+                                        <circle cx="150" cy="205" r="38" fill="none" stroke="currentColor" stroke-opacity="0.15" stroke-width="1.5" class="text-slate-400 dark:text-slate-600" />
+                                        <g id="chrono-subdial-ticks"></g>
+                                        <g id="chrono-subdial-numbers"></g>
+                                        <!-- Subdial Needle -->
+                                        <line id="chrono-subdial-hand" x1="150" y1="205" x2="150" y2="175" stroke="var(--chrono-subdial-hand)" stroke-width="2" stroke-linecap="round" style="transform-origin: 150px 205px; transform: rotate(0deg);" />
+                                        <circle cx="150" cy="205" r="2.5" fill="var(--chrono-subdial-hand)" />
+                                    </g>
+
+                                    <!-- Center Axle Pivot Dot -->
+                                    <circle cx="150" cy="150" r="6" fill="var(--chrono-center-hub-outer)" />
+                                    <circle cx="150" cy="150" r="3" fill="var(--chrono-center-hub-inner)" />
+
+                                    <!-- Electric Blue Sweep Hand Needle -->
+                                    <line id="chrono-main-hand" x1="150" y1="150" x2="150" y2="22" stroke="var(--chrono-main-hand)" stroke-width="2.5" stroke-linecap="round" style="transform-origin: 150px 150px; transform: rotate(0deg);" />
+                                </svg>
+                            </div>
+
+                            <!-- Digital Time & Status Display (Outside Below Clock) -->
+                            <div id="timer-digital-display-container" class="flex flex-col items-center justify-center select-none">
+                                <div id="timer-clock-text-split" class="font-mono text-4xl sm:text-5xl md:text-6xl font-black tracking-tight drop-shadow-md leading-none flex items-baseline">
+                                    <span id="timer-clock-hhmm" class="text-slate-900 dark:text-white transition-colors duration-300">00:00:</span><span id="timer-clock-ssms" class="text-blue-600 dark:text-blue-500 transition-colors duration-300">00</span>
+                                </div>
+                                <!-- Hidden fallback element for existing text selectors -->
+                                <span id="timer-clock-text" class="hidden">00:00:00</span>
+                                <span id="timer-status-text" class="text-[9px] sm:text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mt-1.5 sm:mt-2">READY</span>
+                            </div>
+
+                            <!-- Preset Timers & Targets (Visible in Stopwatch & Timer mode) -->
+                            <div id="timer-presets-container" class="hidden flex-wrap justify-center gap-2 w-full max-w-xl my-1">
+                                <button onclick="window.setTimerPreset(0)" id="timer-preset-btn-0"
+                                    class="flex-1 min-w-[70px] py-2.5 px-3 bg-slate-800/80 hover:bg-blue-600 text-slate-300 hover:text-white rounded-xl text-xs font-black uppercase transition-all border border-slate-700/60 active:scale-95 touch-action-manipulation shadow-sm">Free</button>
+                                <button onclick="window.setTimerPreset(15)" id="timer-preset-btn-15"
+                                    class="flex-1 min-w-[70px] py-2.5 px-3 bg-slate-800/80 hover:bg-blue-600 text-slate-300 hover:text-white rounded-xl text-xs font-black uppercase transition-all border border-slate-700/60 active:scale-95 touch-action-manipulation shadow-sm">15 Min</button>
+                                <button onclick="window.setTimerPreset(25)" id="timer-preset-btn-25"
+                                    class="flex-1 min-w-[80px] py-2.5 px-3 bg-slate-800/80 hover:bg-blue-600 text-slate-300 hover:text-white rounded-xl text-xs font-black uppercase transition-all border border-slate-700/60 active:scale-95 touch-action-manipulation shadow-sm">25 Min</button>
+                                <button onclick="window.setTimerPreset(45)" id="timer-preset-btn-45"
+                                    class="flex-1 min-w-[70px] py-2.5 px-3 bg-slate-800/80 hover:bg-blue-600 text-slate-300 hover:text-white rounded-xl text-xs font-black uppercase transition-all border border-slate-700/60 active:scale-95 touch-action-manipulation shadow-sm">45 Min</button>
+                                <button onclick="window.setTimerPreset(60)" id="timer-preset-btn-60"
+                                    class="flex-1 min-w-[70px] py-2.5 px-3 bg-slate-800/80 hover:bg-blue-600 text-slate-300 hover:text-white rounded-xl text-xs font-black uppercase transition-all border border-slate-700/60 active:scale-95 touch-action-manipulation shadow-sm">60 Min</button>
+                                <button onclick="window.promptCustomTimer()" id="timer-preset-btn-custom"
+                                    class="flex-1 min-w-[70px] py-2.5 px-3 bg-slate-800/80 hover:bg-blue-600 text-slate-300 hover:text-white rounded-xl text-xs font-black uppercase transition-all border border-slate-700/60 active:scale-95 touch-action-manipulation shadow-sm">Custom</button>
+                            </div>
+
+                            <!-- Control Buttons Bar -->
+                            <div id="timer-control-buttons-bar" class="flex gap-2 sm:gap-4 w-full max-w-xl justify-center items-center mt-1 sm:mt-2">
+                                <button id="timer-btn-reset" onclick="window.resetTimerClick()"
+                                    class="flex-1 py-3 sm:py-3.5 bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/60 text-xs font-black uppercase tracking-widest rounded-2xl active:scale-95 transition-all text-slate-300 touch-action-manipulation min-h-[44px]">
+                                    RESET
+                                </button>
+                                <button id="timer-btn-toggle" onclick="window.toggleTimerClick()"
+                                    class="flex-[1.5] py-3 sm:py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-black text-xs uppercase tracking-widest rounded-2xl shadow-lg active:scale-95 transition-all touch-action-manipulation min-h-[44px]">
+                                    START
+                                </button>
+                                <button id="timer-btn-save" onclick="window.saveTimerSession()" disabled
+                                    class="flex-1 py-3 sm:py-3.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 disabled:pointer-events-none text-white font-black text-xs uppercase tracking-widest rounded-2xl shadow-lg active:scale-95 transition-all touch-action-manipulation min-h-[44px]">
+                                    SAVE
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Stats Panel -->
+                    <div class="space-y-6">
+                        <!-- Stat Summary Cards -->
+                        <div class="grid grid-cols-1 gap-4">
+                            <!-- Today Stats -->
+                            <div
+                                class="bg-white dark:bg-slate-800 border border-slate-200/50 dark:border-slate-700/50 p-5 rounded-3xl shadow-sm flex items-center justify-between">
+                                <div>
+                                    <span
+                                        class="block text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">Today's
+                                        Focus</span>
+                                    <h2 id="timer-stat-today"
+                                        class="text-3xl font-black text-slate-800 dark:text-white">00:00:00</h2>
+                                </div>
+                                <div
+                                    class="p-3 bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 rounded-2xl border border-blue-100 dark:border-blue-900/30 shadow-inner">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                            <!-- Weekly Stats -->
+                            <div
+                                class="bg-white dark:bg-slate-800 border border-slate-200/50 dark:border-slate-700/50 p-5 rounded-3xl shadow-sm flex items-center justify-between">
+                                <div>
+                                    <span
+                                        class="block text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">Weekly
+                                        Focus</span>
+                                    <h2 id="timer-stat-week" class="text-3xl font-black text-slate-800 dark:text-white">
+                                        00:00:00</h2>
+                                </div>
+                                <div
+                                    class="p-3 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 rounded-2xl border border-emerald-100 dark:border-emerald-900/30 shadow-inner">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                                        </path>
+                                    </svg>
+                                </div>
+                            </div>
+                            <!-- Monthly Stats -->
+                            <div
+                                class="bg-white dark:bg-slate-800 border border-slate-200/50 dark:border-slate-700/50 p-5 rounded-3xl shadow-sm flex items-center justify-between">
+                                <div>
+                                    <span
+                                        class="block text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">Monthly
+                                        Focus</span>
+                                    <h2 id="timer-stat-month"
+                                        class="text-3xl font-black text-slate-800 dark:text-white">00:00:00</h2>
+                                </div>
+                                <div
+                                    class="p-3 bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400 rounded-2xl border border-indigo-100 dark:border-indigo-900/30 shadow-inner">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
+                                        </path>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Time Allocation per Subject -->
+                        <div
+                            class="bg-white dark:bg-slate-800 border border-slate-200/50 dark:border-slate-700/50 p-5 rounded-3xl shadow-sm space-y-4">
+                            <div>
+                                <h4 class="text-xs font-black uppercase tracking-widest text-slate-800 dark:text-white">
+                                    Subject Time Breakdown</h4>
+                                <p class="text-[8px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">Focus
+                                    time allocation by topic</p>
+                            </div>
+                            <div id="timer-subject-breakdown-container" class="space-y-3">
+                                <!-- Dynamic breakdown progress bars -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Subject Focus Target Section -->
+                <div
+                    class="bg-white dark:bg-slate-800 rounded-3xl p-5 md:p-8 border border-slate-200/50 dark:border-slate-700/50 shadow-sm flex flex-col space-y-4">
+                    <div
+                        class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-700 pb-4">
+                        <div>
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <h3 class="text-base md:text-lg font-black dark:text-white leading-tight">Subject Target Tracker</h3>
+                            </div>
+                            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-0.5">
+                                Set study target and track progress
+                            </p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <!-- Section Filter Tabs: Uncompleted (Red) & Done (Green) -->
+                            <div id="subject-target-filter-bar" class="flex items-center gap-1 bg-slate-100 dark:bg-slate-900/80 p-1 rounded-2xl border border-slate-200/60 dark:border-slate-800">
+                                <button onclick="window.setSubjectTargetFilter('uncompleted')" id="st-filter-uncompleted"
+                                    class="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider rounded-xl transition-all bg-rose-600 text-white shadow shadow-rose-500/20 active:scale-95">
+                                    <span id="st-dot-uncompleted" class="w-2 h-2 rounded-full bg-rose-200 animate-pulse"></span>
+                                    <span>Uncompleted</span>
+                                    <span id="st-count-uncompleted" class="px-1.5 py-0.5 rounded-full bg-white/20 text-white text-[9px] font-mono leading-none">0</span>
+                                </button>
+                                <button onclick="window.setSubjectTargetFilter('done')" id="st-filter-done"
+                                    class="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider rounded-xl transition-all text-slate-500 dark:text-slate-400 hover:bg-slate-200/80 dark:hover:bg-slate-800 active:scale-95">
+                                    <span id="st-dot-done" class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                    <span>Done</span>
+                                    <span id="st-count-done" class="px-1.5 py-0.5 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[9px] font-mono leading-none">0</span>
+                                </button>
+                            </div>
+
+                            <button onclick="window.openSubjectTargetModal('')" id="timer-btn-add-subject-target"
+                                class="flex items-center gap-1.5 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white font-black text-[10px] uppercase tracking-widest rounded-xl shadow-md active:scale-95 transition-all"
+                                title="Add Subject Target">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                        d="M12 4v16m8-8H4"></path>
+                                </svg>
+                                <span class="hidden sm:inline">Add Target</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- List of active subject targets -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 max-h-[360px] overflow-y-auto custom-scrollbar pr-1"
+                        id="subject-targets-list">
+                        <!-- Dynamic subject targets list populated here -->
+                    </div>
+                </div>
+
+                <!-- Bottom Panel: History of Sessions -->
+                <div
+                    class="bg-white dark:bg-slate-800 rounded-3xl p-5 md:p-8 border border-slate-200/50 dark:border-slate-700/50 shadow-sm flex flex-col">
+                    <div
+                        class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-slate-100 dark:border-slate-700 pb-4">
+                        <div>
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <h3 class="text-base md:text-lg font-black dark:text-white leading-tight">Session History
+                                </h3>
+                                <span id="timer-history-count-badge" class="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">0 Sessions</span>
+                                <span id="timer-history-total-time-badge" class="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/40 flex items-center gap-1.5 shadow-xs">
+                                    <svg class="w-3 h-3 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <span id="timer-history-total-time-text">Total: 0 min</span>
+                                </span>
+                            </div>
+                            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-0.5">List of
+                                recorded study sessions</p>
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-2">
+                            <!-- Day, Week, Month, Year, All Filter Bar -->
+                            <div id="session-history-filter-bar" class="flex items-center gap-1 bg-slate-100 dark:bg-slate-900/80 p-1 rounded-2xl border border-slate-200/60 dark:border-slate-800">
+                                <button onclick="window.setSessionHistoryFilter('all')" id="sh-filter-all"
+                                    class="px-3 py-1 text-[10px] font-black uppercase tracking-wider rounded-xl transition-all bg-blue-600 text-white shadow shadow-blue-500/20">All</button>
+                                <button onclick="window.setSessionHistoryFilter('day')" id="sh-filter-day"
+                                    class="px-3 py-1 text-[10px] font-black uppercase tracking-wider rounded-xl transition-all text-slate-500 hover:bg-slate-200/80 dark:text-slate-400 dark:hover:bg-slate-800">Day</button>
+                                <button onclick="window.setSessionHistoryFilter('week')" id="sh-filter-week"
+                                    class="px-3 py-1 text-[10px] font-black uppercase tracking-wider rounded-xl transition-all text-slate-500 hover:bg-slate-200/80 dark:text-slate-400 dark:hover:bg-slate-800">Week</button>
+                                <button onclick="window.setSessionHistoryFilter('month')" id="sh-filter-month"
+                                    class="px-3 py-1 text-[10px] font-black uppercase tracking-wider rounded-xl transition-all text-slate-500 hover:bg-slate-200/80 dark:text-slate-400 dark:hover:bg-slate-800">Month</button>
+                                <button onclick="window.setSessionHistoryFilter('year')" id="sh-filter-year"
+                                    class="px-3 py-1 text-[10px] font-black uppercase tracking-wider rounded-xl transition-all text-slate-500 hover:bg-slate-200/80 dark:text-slate-400 dark:hover:bg-slate-800">Year</button>
+                            </div>
+
+                            <button onclick="window.openTimerAnalyticsModal()"
+                                class="flex items-center gap-1.5 px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-[10px] uppercase tracking-widest rounded-xl shadow-md active:scale-95 transition-all">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                                    </path>
+                                </svg>
+                                <span class="hidden sm:inline">Analytics</span>
+                            </button>
+                            <button onclick="window.openAddTimerSessionModal()"
+                                class="flex items-center gap-1.5 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-[10px] uppercase tracking-widest rounded-xl shadow-md active:scale-95 transition-all">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                        d="M12 4v16m8-8H4"></path>
+                                </svg>
+                                <span class="hidden sm:inline">Add Session</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Scrollable Session History Container (Scrollable after 30 sessions) -->
+                    <div id="timer-history-container" class="overflow-x-auto w-full transition-all duration-300">
+                        <table class="w-full text-left text-xs border-collapse">
+                            <thead>
+                                <tr class="text-slate-400 border-b border-slate-100 dark:border-slate-800 pb-3 sticky top-0 bg-white dark:bg-slate-800 z-10">
+                                    <th class="py-3 font-black uppercase tracking-widest">Date & Time</th>
+                                    <th class="py-3 font-black uppercase tracking-widest">Subject</th>
+                                    <th class="py-3 font-black uppercase tracking-widest">Duration</th>
+                                    <th class="py-3 font-black uppercase tracking-widest text-center">Mode</th>
+                                    <th class="py-3 font-black uppercase tracking-widest text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="timer-history-table-body"
+                                class="divide-y divide-slate-50 dark:divide-slate-800/50">
+                                <!-- Dynamic sessions populated here -->
+                            </tbody>
+                            <tfoot id="timer-history-table-foot" class="hidden sticky bottom-0 bg-white dark:bg-slate-800 z-10">
+                                <!-- Dynamic footer populated here -->
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>

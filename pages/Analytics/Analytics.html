@@ -1,0 +1,720 @@
+                <!-- Page Header with Ambient Glow -->
+                <div
+                    class="relative overflow-hidden bg-gradient-to-r from-slate-900 to-indigo-950 dark:from-slate-900 dark:to-slate-800 p-4 md:p-8 rounded-2xl md:rounded-[2rem] border border-slate-200/50 dark:border-slate-800 shadow-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-6">
+                    <div
+                        class="absolute -right-16 -top-16 w-64 h-64 bg-indigo-500/10 dark:bg-indigo-500/5 rounded-full blur-3xl pointer-events-none">
+                    </div>
+                    <div
+                        class="absolute -left-16 -bottom-16 w-64 h-64 bg-fuchsia-500/10 dark:bg-fuchsia-500/5 rounded-full blur-3xl pointer-events-none">
+                    </div>
+
+                    <div class="relative z-10 space-y-1">
+                        <div class="flex items-center gap-2.5">
+                            <span
+                                class="px-2.5 py-1 text-[9px] font-black uppercase tracking-widest text-indigo-400 bg-indigo-400/10 rounded-full border border-indigo-400/20">Analytical
+                                System</span>
+                            <span
+                                class="px-2.5 py-1 text-[9px] font-black uppercase tracking-widest text-fuchsia-400 bg-fuchsia-400/10 rounded-full border border-fuchsia-400/20">Live
+                                Sync</span>
+                        </div>
+                        <h2 class="text-xl md:text-2xl font-black text-white tracking-tight">Analytics</h2>
+                        <p class="text-slate-400 text-[10px] sm:text-xs">Comprehensive visual intelligence, track and
+                            program completion trends</p>
+                    </div>
+                </div>
+
+                <!-- Interactive Analytics Summary Grid -->
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 md:gap-6">
+                    <!-- Stat Card 1: Completion Progress -->
+                    <div
+                        class="bg-white dark:bg-slate-800 p-3 md:p-5 rounded-xl md:rounded-2xl border border-slate-200/50 dark:border-slate-700/50 shadow-sm flex flex-col hover:shadow-md transition-all group hover:-translate-y-1 duration-300 min-w-0">
+                        <span
+                            class="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 block">Avg
+                            Completion</span>
+                        <div class="flex items-baseline gap-1.5">
+                            <span id="analytics-avg-completion"
+                                class="text-lg md:text-2xl font-black text-slate-800 dark:text-slate-100">--%</span>
+                            <span class="text-[10px] text-emerald-500 font-bold flex items-center gap-0.5">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                        d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                                </svg>
+                                Live
+                            </span>
+                        </div>
+                        <div
+                            class="w-full bg-slate-100 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden mt-3 shadow-inner">
+                            <div id="analytics-avg-completion-bar"
+                                class="bg-gradient-to-r from-blue-500 to-indigo-600 h-full rounded-full transition-all duration-500 w-0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stat Card 2: Logged Actions -->
+                    <div
+                        class="bg-white dark:bg-slate-800 p-3 md:p-5 rounded-xl md:rounded-2xl border border-slate-200/50 dark:border-slate-700/50 shadow-sm flex flex-col hover:shadow-md transition-all group hover:-translate-y-1 duration-300 min-w-0">
+                        <span
+                            class="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 block">Logged
+                            Actions</span>
+                        <div class="flex items-baseline gap-1.5">
+                            <span id="analytics-total-actions"
+                                class="text-lg md:text-2xl font-black text-slate-800 dark:text-slate-100">--</span>
+                            <span class="text-[10px] text-blue-500 font-bold uppercase tracking-wide">Entries</span>
+                        </div>
+                        <p class="text-[9px] text-slate-400 dark:text-slate-500 mt-3 font-semibold">Total tracked action
+                            logs across all filters</p>
+                    </div>
+
+                    <!-- Stat Card 3: Current Streak -->
+                    <div
+                        class="bg-white dark:bg-slate-800 p-3 md:p-5 rounded-xl md:rounded-2xl border border-slate-200/50 dark:border-slate-700/50 shadow-sm flex flex-col hover:shadow-md transition-all group hover:-translate-y-1 duration-300 min-w-0">
+                        <span
+                            class="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 block">Active
+                            Streak</span>
+                        <div class="flex items-baseline gap-1.5">
+                            <span id="analytics-active-streak" class="text-lg md:text-2xl font-black text-orange-500">--
+                                days</span>
+                            <span class="text-xs">🔥</span>
+                        </div>
+                        <p class="text-[9px] text-slate-400 dark:text-slate-500 mt-3 font-semibold">Consecutive days
+                            with logged actions</p>
+                    </div>
+
+                    <!-- Stat Card 4: Plan Completion -->
+                    <div
+                        class="bg-white dark:bg-slate-800 p-3 md:p-5 rounded-xl md:rounded-2xl border border-slate-200/50 dark:border-slate-700/50 shadow-sm flex flex-col hover:shadow-md transition-all group hover:-translate-y-1 duration-300 min-w-0">
+                        <span
+                            class="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 block">Days
+                            Remaining</span>
+                        <div class="flex items-baseline gap-1.5">
+                            <span id="analytics-days-remaining"
+                                class="text-lg md:text-2xl font-black text-emerald-500">--</span>
+                            <span class="text-[9px] text-slate-400 uppercase tracking-widest font-black">Days</span>
+                        </div>
+                        <p class="text-[9px] text-slate-400 dark:text-slate-500 mt-3 font-semibold">Remaining days until
+                            target completion</p>
+                    </div>
+                </div>
+
+                <!-- Global Chapters Goal Chart (Full Row Card) -->
+                <div
+                    class="relative bg-white dark:bg-slate-800 p-6 md:p-8 rounded-2xl md:rounded-[2rem] border border-slate-200/50 dark:border-slate-700/50 shadow-sm flex flex-col md:flex-row items-center justify-around gap-8 w-full">
+                    <!-- Tooltip inside spectra page -->
+                    <div id="spectra-gcm-tooltip"
+                        class="absolute hidden bg-slate-950/95 text-white text-[11px] font-bold px-3 py-2 rounded-xl border border-white/10 shadow-2xl pointer-events-none z-[90] backdrop-blur-md transition-all duration-75">
+                    </div>
+
+                    <div class="flex flex-col max-w-sm space-y-4 w-full md:w-auto">
+                        <!-- Dropdown Selector -->
+                        <div class="flex flex-col gap-1.5 mb-2">
+                            <label
+                                class="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Filter
+                                Map View</label>
+                            <div class="relative w-full text-[11px] shrink-0">
+                                <!-- Dropdown Toggle Button -->
+                                <button id="spectra-filter-dropdown-btn" type="button"
+                                    class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 text-[11px] font-black uppercase tracking-wider px-3.5 py-2.5 rounded-xl outline-none focus:border-indigo-500 transition-all cursor-pointer shadow-sm flex items-center justify-between">
+                                    <span id="spectra-filter-dropdown-label">🌍 Global View</span>
+                                    <svg class="w-4 h-4 ml-2 transition-transform duration-200 text-slate-400"
+                                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                            d="M19 9l-7 7-7-7"></path>
+                                    </svg>
+                                </button>
+
+                                <!-- Dropdown Menu (Hidden by default) -->
+                                <div id="spectra-filter-dropdown-menu"
+                                    class="absolute left-0 mt-1.5 w-full bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700/80 rounded-2xl shadow-xl z-50 hidden flex flex-col max-h-[300px] overflow-y-auto p-2.5 scrollbar-thin">
+                                    <!-- Options with checkboxes populated dynamically -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <span
+                                class="px-2.5 py-1 text-[9px] font-black uppercase tracking-widest text-indigo-500 bg-indigo-50 dark:bg-indigo-950/40 rounded-full border border-indigo-100 dark:border-indigo-900/50 w-fit block">Interactive
+                                Map</span>
+                            <h3 id="spectra-analysis-title"
+                                class="text-lg md:text-xl font-black text-slate-800 dark:text-white uppercase tracking-tight">
+                                Syllabus Chapters Analysis</h3>
+                            <p id="spectra-analysis-desc"
+                                class="text-slate-500 dark:text-slate-400 text-xs leading-relaxed">A visual distribution
+                                of all chapters in your study goals. Hover over segments to view subject names, chapter
+                                index, and completion statuses.</p>
+                        </div>
+
+                        <!-- Legend Inside Spectra Page -->
+                        <div class="flex flex-col gap-2.5 pt-2 text-[10px] font-black uppercase tracking-wider">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-3 h-3 rounded bg-emerald-500"></div>
+                                <span class="text-slate-600 dark:text-slate-300">Complete (<span
+                                        id="spectra-legend-complete">0</span>)</span>
+                            </div>
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-3 h-3 rounded bg-rose-500"></div>
+                                <span class="text-slate-600 dark:text-slate-300">Incomplete (<span
+                                        id="spectra-legend-incomplete">0</span>)</span>
+                            </div>
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-3 h-3 rounded bg-slate-300 dark:bg-slate-600"></div>
+                                <span class="text-slate-600 dark:text-slate-300">Skipped (<span
+                                        id="spectra-legend-skipped">0</span>)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chart Display Container -->
+                    <div id="spectra-circle-chart-wrapper" class="relative flex items-center justify-center">
+                        <!-- Placed dynamically via JS to update automatically -->
+                    </div>
+                </div>
+
+                <!-- The 7 Officer Commitments Habit Radar Chart Card -->
+                <div class="relative bg-white dark:bg-slate-800 p-3.5 sm:p-4 md:p-5 rounded-2xl border border-slate-200/50 dark:border-slate-700/50 shadow-sm flex flex-col w-full overflow-hidden">
+                    <!-- Tooltip for Habit Radar -->
+                    <div id="spectra-commitments-tooltip"
+                        class="fixed hidden bg-slate-950/95 text-white text-[11px] font-bold px-3 py-2 rounded-xl border border-white/15 shadow-2xl pointer-events-none z-[100] backdrop-blur-md transition-all duration-75 flex flex-col gap-1">
+                    </div>
+
+                    <!-- Header & Controls Row -->
+                    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 pb-3 border-b border-slate-100 dark:border-slate-700/80 mb-3.5 shrink-0">
+                        <div class="space-y-0.5">
+                            <div class="flex items-center gap-2">
+                                <span class="px-2 py-0.5 text-[8.5px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 rounded-full border border-emerald-500/20">Habit Radar</span>
+                                <span class="px-2 py-0.5 text-[8.5px] font-black uppercase tracking-widest text-indigo-500 bg-indigo-500/10 rounded-full border border-indigo-500/20">Daily Consistency</span>
+                            </div>
+                            <h3 class="text-base md:text-lg font-black text-slate-800 dark:text-white uppercase tracking-tight flex items-center gap-2 mt-0.5">
+                                The X Commitments
+                            </h3>
+                            <p class="text-slate-500 dark:text-slate-400 text-[11px] leading-tight max-w-xl">
+                                Daily commitment tracker & radial habit grid. Click any cell to log or toggle completion for that day.
+                            </p>
+                        </div>
+
+                        <!-- Action & Navigation Controls -->
+                        <div class="flex flex-wrap items-center gap-2 sm:gap-2.5 w-full lg:w-auto justify-between lg:justify-end">
+                            <!-- Month Selector -->
+                            <div class="flex items-center bg-slate-100 dark:bg-slate-900/70 p-0.5 rounded-xl border border-slate-200/60 dark:border-slate-800">
+                                <button onclick="window.prevCommitmentMonth()" type="button" title="Previous Month"
+                                    class="p-1 rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white dark:hover:bg-slate-800 transition-all cursor-pointer">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
+                                </button>
+                                <span id="spectra-commitments-month-label" class="px-2.5 text-[11px] font-black text-slate-800 dark:text-slate-100 min-w-[95px] text-center uppercase tracking-wider">July 2026</span>
+                                <button onclick="window.nextCommitmentMonth()" type="button" title="Next Month"
+                                    class="p-1 rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white dark:hover:bg-slate-800 transition-all cursor-pointer">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Layout Container: Vertical Left-Side Stats + Chart -->
+                    <div class="flex flex-col lg:flex-row items-center lg:items-center justify-between gap-4 lg:gap-6 mt-3">
+                        <!-- Summary Stats Vertical Bar (Left Side) -->
+                        <div class="w-full lg:w-52 xl:w-60 flex-shrink-0 grid grid-cols-2 sm:grid-cols-4 lg:flex lg:flex-col gap-2.5">
+                            <div class="bg-slate-50 dark:bg-slate-900/40 p-3 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 flex flex-col justify-center">
+                                <span class="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Monthly Completion</span>
+                                <span id="spectra-commitments-pct" class="text-base sm:text-xl font-black text-emerald-600 dark:text-emerald-400 mt-0.5">0%</span>
+                            </div>
+                            <div class="bg-slate-50 dark:bg-slate-900/40 p-3 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 flex flex-col justify-center">
+                                <span class="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Total Fulfilled</span>
+                                <span id="spectra-commitments-count" class="text-base sm:text-xl font-black text-indigo-600 dark:text-indigo-400 mt-0.5">0 / 0</span>
+                            </div>
+                            <div class="bg-slate-50 dark:bg-slate-900/40 p-3 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 flex flex-col justify-center">
+                                <span class="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Active Streak</span>
+                                <span id="spectra-commitments-streak" class="text-base sm:text-xl font-black text-amber-500 mt-0.5">0 Days 🔥</span>
+                            </div>
+                            <div class="bg-slate-50 dark:bg-slate-900/40 p-3 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 flex flex-col justify-center">
+                                <span class="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Days Logged</span>
+                                <span id="spectra-commitments-days-logged" class="text-base sm:text-xl font-black text-slate-800 dark:text-slate-200 mt-0.5">0 Days</span>
+                            </div>
+                        </div>
+
+                        <!-- SVG Chart Display Container (Right Side) -->
+                        <div id="spectra-commitments-chart-wrapper" class="relative w-full flex-1 flex items-center justify-center min-h-[350px] sm:min-h-[440px] overflow-x-auto py-1">
+                            <!-- Rendered via JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Embedded Focus Analytics Section (Analytics Page) -->
+                <div class="bg-white dark:bg-slate-800 p-5 sm:p-7 md:p-8 rounded-2xl md:rounded-[2rem] border border-slate-200/50 dark:border-slate-700/50 shadow-sm overflow-hidden mb-6 md:mb-8 flex flex-col">
+                    <!-- Header Row -->
+                    <div class="flex justify-between items-center mb-5 sm:mb-6 border-b border-slate-100 dark:border-slate-700 pb-4 shrink-0">
+                        <div class="flex items-center space-x-3">
+                            <div class="p-2.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-xl">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                                    </path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h2 class="text-base sm:text-lg font-black text-slate-800 dark:text-slate-100 uppercase tracking-widest">Focus Analytics</h2>
+                                <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-0.5">Daywise focus hours compared to target</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4 my-2">
+                        <!-- Controls Selector Row -->
+                        <div class="flex flex-wrap sm:flex-nowrap items-center justify-center sm:justify-between gap-2 sm:gap-3 px-1 pb-3 border-b border-slate-200 dark:border-slate-700 shrink-0 w-full">
+                            <!-- Timeframe Selector -->
+                            <div class="flex shrink-0 bg-slate-100 dark:bg-slate-900/60 p-0.5 sm:p-1 rounded-xl border border-slate-200/40 dark:border-slate-800/40">
+                                <button onclick="window.setTimerAnalyticsRange(1)" id="spectra-tar-btn-1"
+                                    class="shrink-0 px-2 sm:px-2.5 py-1 text-[10px] sm:text-[11px] font-bold rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200">
+                                    <span class="inline sm:hidden">1D</span><span class="hidden sm:inline">1 Day</span>
+                                </button>
+                                <button onclick="window.setTimerAnalyticsRange(7)" id="spectra-tar-btn-7"
+                                    class="shrink-0 px-2 sm:px-2.5 py-1 text-[10px] sm:text-[11px] font-bold rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200">
+                                    <span class="inline sm:hidden">7D</span><span class="hidden sm:inline">7 Days</span>
+                                </button>
+                                <button onclick="window.setTimerAnalyticsRange(30)" id="spectra-tar-btn-30"
+                                    class="shrink-0 px-2 sm:px-2.5 py-1 text-[10px] sm:text-[11px] font-bold rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200">
+                                    <span class="inline sm:hidden">30D</span><span class="hidden sm:inline">30 Days</span>
+                                </button>
+                                <button onclick="window.setTimerAnalyticsRange(180)" id="spectra-tar-btn-180"
+                                    class="shrink-0 px-2 sm:px-2.5 py-1 text-[10px] sm:text-[11px] font-bold rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200">
+                                    <span class="inline sm:hidden">6M</span><span class="hidden sm:inline">6 Months</span>
+                                </button>
+                            </div>
+                            <!-- Day Stepper (< > for 1 Day filter) -->
+                            <div id="spectra-day-stepper" class="flex shrink-0 items-center bg-slate-100 dark:bg-slate-900/60 p-0.5 sm:p-1 rounded-xl border border-slate-200/40 dark:border-slate-800/40 transition-all">
+                                <button onclick="window.navigateTimerAnalyticsDay(-1)" id="spectra-day-prev-btn" title="Previous Day (-1 Day)"
+                                    class="shrink-0 px-1.5 sm:px-2 py-1 text-[10px] sm:text-[11px] font-bold rounded-lg transition-all text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800 hover:text-indigo-600 dark:hover:text-indigo-400">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+                                </button>
+                                <button onclick="window.resetTimerAnalyticsDayOffset()" id="spectra-day-label" title="Click to jump to Today"
+                                    class="px-2 py-0.5 text-[10px] sm:text-[11px] font-bold text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 min-w-[65px] text-center select-none cursor-pointer transition-colors">Today</button>
+                                <button onclick="window.navigateTimerAnalyticsDay(1)" id="spectra-day-next-btn" title="Next Day (+1 Day)"
+                                    class="shrink-0 px-1.5 sm:px-2 py-1 text-[10px] sm:text-[11px] font-bold rounded-lg transition-all text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800 hover:text-indigo-600 dark:hover:text-indigo-400">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                                </button>
+                            </div>
+                            <!-- Grouping Selector -->
+                            <div class="flex shrink-0 bg-slate-100 dark:bg-slate-900/60 p-0.5 sm:p-1 rounded-xl border border-slate-200/40 dark:border-slate-800/40">
+                                <button onclick="window.setTimerAnalyticsGrouping('daily')" id="spectra-tag-btn-daily"
+                                    class="shrink-0 px-2 sm:px-2.5 py-1 text-[10px] sm:text-[11px] font-bold rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200">
+                                    <span class="inline sm:hidden">Day</span><span class="hidden sm:inline">Daily</span>
+                                </button>
+                                <button onclick="window.setTimerAnalyticsGrouping('weekly')" id="spectra-tag-btn-weekly"
+                                    class="shrink-0 px-2 sm:px-2.5 py-1 text-[10px] sm:text-[11px] font-bold rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200">
+                                    <span class="inline sm:hidden">Week</span><span class="hidden sm:inline">Weekly</span>
+                                </button>
+                                <button onclick="window.setTimerAnalyticsGrouping('monthly')" id="spectra-tag-btn-monthly"
+                                    class="shrink-0 px-2 sm:px-2.5 py-1 text-[10px] sm:text-[11px] font-bold rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200">
+                                    <span class="inline sm:hidden">Month</span><span class="hidden sm:inline">Monthly</span>
+                                </button>
+                            </div>
+                            <!-- Chart Style Selector -->
+                            <div class="flex shrink-0 bg-slate-100 dark:bg-slate-900/60 p-0.5 sm:p-1 rounded-xl border border-slate-200/40 dark:border-slate-800/40">
+                                <button onclick="window.setTimerAnalyticsChartStyle('combo')" id="spectra-tas-btn-combo"
+                                    class="shrink-0 px-2 sm:px-2.5 py-1 text-[10px] sm:text-[11px] font-bold rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200">
+                                    <span class="inline sm:hidden">Combo</span><span class="hidden sm:inline">Combo</span>
+                                </button>
+                                <button onclick="window.setTimerAnalyticsChartStyle('bar')" id="spectra-tas-btn-bar"
+                                    class="shrink-0 px-2 sm:px-2.5 py-1 text-[10px] sm:text-[11px] font-bold rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200">
+                                    <span class="inline sm:hidden">Bar</span><span class="hidden sm:inline">Bar</span>
+                                </button>
+                                <button onclick="window.setTimerAnalyticsChartStyle('line')" id="spectra-tas-btn-line"
+                                    class="shrink-0 px-2 sm:px-2.5 py-1 text-[10px] sm:text-[11px] font-bold rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200">
+                                    <span class="inline sm:hidden">Line</span><span class="hidden sm:inline">Line/Area</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Line Chart Container -->
+                        <div class="relative w-full h-[330px] bg-slate-50 dark:bg-slate-900/20 p-4 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-inner backdrop-blur-sm">
+                            <canvas id="spectraFocusAnalyticsChart"></canvas>
+                        </div>
+
+                        <!-- Config/Stats Grid -->
+                        <div class="grid grid-cols-1 sm:grid-cols-6 gap-4">
+                            <!-- Daily Focus Target Config -->
+                            <div class="sm:col-span-2 flex items-center space-x-3 bg-slate-50 dark:bg-slate-900/40 p-3 rounded-2xl border border-slate-200/50 dark:border-slate-800/50">
+                                <div class="flex-1">
+                                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Focus Target</label>
+                                </div>
+                                <div class="shrink-0 w-20">
+                                    <input type="number" id="spectra-timer-target-input" value="0" min="0" step="0.1"
+                                        onchange="window.updateDailyFocusHoursTarget(this.value)"
+                                        oninput="window.updateDailyFocusHoursTarget(this.value)"
+                                        class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-2 text-center text-base md:text-lg font-black focus:ring-2 focus:ring-indigo-500 outline-none shadow-inner dark:text-white" />
+                                </div>
+                            </div>
+
+                            <!-- Average Focus Hours Display -->
+                            <div class="sm:col-span-2 flex items-center space-x-3 bg-slate-50 dark:bg-slate-900/40 p-3 rounded-2xl border border-slate-200/50 dark:border-slate-800/50">
+                                <div class="flex-1">
+                                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Average Focus</label>
+                                </div>
+                                <div class="shrink-0 w-20 text-center">
+                                    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl py-2 px-1 shadow-inner w-full flex justify-center">
+                                        <span id="spectra-timer-average-focus"
+                                            class="text-base md:text-lg font-black text-emerald-600 dark:text-emerald-400">0.00h</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Peak Day Display (Highest) -->
+                            <div class="sm:col-span-2 flex items-center space-x-3 bg-slate-50 dark:bg-slate-900/40 p-3 rounded-2xl border border-slate-200/50 dark:border-slate-800/50">
+                                <div class="flex-1 flex flex-col">
+                                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Highest Focus</label>
+                                    <span id="spectra-timer-peak-date"
+                                        class="text-[8px] font-bold uppercase tracking-widest text-rose-600 dark:text-rose-400 mt-0.5 leading-none">No Data</span>
+                                </div>
+                                <div class="shrink-0 w-24 text-center">
+                                    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl py-2 px-3 shadow-inner w-full flex justify-center">
+                                        <span id="spectra-timer-peak-value"
+                                            class="text-base md:text-lg font-black text-rose-600 dark:text-rose-400">0.00h</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Total Focus Hours -->
+                            <div class="sm:col-span-2 flex items-center space-x-3 bg-slate-50 dark:bg-slate-900/40 p-3 rounded-2xl border border-slate-200/50 dark:border-slate-800/50">
+                                <div class="flex-1">
+                                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Total Focus</label>
+                                </div>
+                                <div class="shrink-0 w-24 text-center">
+                                    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl py-2 px-3 shadow-inner w-full flex justify-center">
+                                        <span id="spectra-timer-total-focus"
+                                            class="text-base md:text-lg font-black text-indigo-600 dark:text-indigo-400">0 min</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Average Focus Target -->
+                            <div class="sm:col-span-2 flex items-center space-x-3 bg-slate-50 dark:bg-slate-900/40 p-3 rounded-2xl border border-slate-200/50 dark:border-slate-800/50">
+                                <div class="flex-1">
+                                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Average Target</label>
+                                </div>
+                                <div class="shrink-0 w-24 text-center">
+                                    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl py-2 px-3 shadow-inner w-full flex justify-center">
+                                        <span id="spectra-timer-average-target"
+                                            class="text-base md:text-lg font-black text-rose-500 dark:text-rose-400">0 min</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Goal Met / Success Rate -->
+                            <div class="sm:col-span-2 flex items-center space-x-3 bg-slate-50 dark:bg-slate-900/40 p-3 rounded-2xl border border-slate-200/50 dark:border-slate-800/50">
+                                <div class="flex-1">
+                                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Success Rate</label>
+                                    <span id="spectra-timer-success-rate-subtitle"
+                                        class="text-[9px] font-bold text-slate-400 dark:text-slate-500 block mt-0.5">0 of 0 days</span>
+                                </div>
+                                <div class="shrink-0 w-24 text-center">
+                                    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl py-2 px-3 shadow-inner w-full flex justify-center">
+                                        <span id="spectra-timer-success-rate"
+                                            class="text-base md:text-lg font-black text-amber-600 dark:text-amber-400">0%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Focus Analytics GitHub Box Chart Heatmap (Analytics Page) -->
+                <div class="bg-white dark:bg-slate-800 p-5 sm:p-7 md:p-8 rounded-2xl md:rounded-[2rem] border border-slate-200/50 dark:border-slate-700/50 shadow-sm overflow-hidden mb-6 md:mb-8 flex flex-col relative">
+                    <!-- Header Row -->
+
+                    <!-- Header Row -->
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-4 mb-5 border-b border-slate-100 dark:border-slate-700 gap-4 shrink-0">
+                        <div class="flex items-center space-x-3">
+                            <div class="p-2.5 bg-fuchsia-50 dark:bg-fuchsia-900/30 text-fuchsia-600 dark:text-fuchsia-400 rounded-xl">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                        d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z">
+                                    </path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-base sm:text-lg font-black text-slate-800 dark:text-slate-100 uppercase tracking-widest flex items-center gap-2">
+                                    Focus Matrix Heatmap
+                                    <span class="px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-emerald-500 bg-emerald-500/10 rounded-full border border-emerald-500/20">GitHub Style</span>
+                                </h3>
+                                <p class="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider mt-0.5">Daywise focus intensity distribution & achievement tiers</p>
+                            </div>
+                        </div>
+
+                        <!-- Timeframe selector for heatmap -->
+                        <div class="flex items-center space-x-1 bg-slate-100 dark:bg-slate-900/60 p-1 rounded-xl border border-slate-200/40 dark:border-slate-800/40">
+                            <button onclick="window.setSpectraHeatmapRange(30)" id="spectra-hm-btn-30"
+                                class="px-2.5 py-1 text-[10px] font-bold rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200">
+                                1 Month
+                            </button>
+                            <button onclick="window.setSpectraHeatmapRange(90)" id="spectra-hm-btn-90"
+                                class="px-2.5 py-1 text-[10px] font-bold rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200">
+                                3 Months
+                            </button>
+                            <button onclick="window.setSpectraHeatmapRange(180)" id="spectra-hm-btn-180"
+                                class="px-2.5 py-1 text-[10px] font-bold rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200">
+                                6 Months
+                            </button>
+                            <button onclick="window.setSpectraHeatmapRange(365)" id="spectra-hm-btn-365"
+                                class="px-2.5 py-1 text-[10px] font-bold rounded-lg transition-all bg-indigo-600 text-white shadow shadow-indigo-500/20">
+                                1 Year
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Summary Stat Badges Row -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2 sm:gap-2.5 mb-5">
+                        <div class="bg-slate-50 dark:bg-slate-900/40 p-2.5 rounded-xl border border-slate-200/40 dark:border-slate-800/40 flex flex-col items-center justify-center text-center">
+                            <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Active Days</span>
+                            <span id="spectra-hm-stat-active-days" class="text-base sm:text-lg font-black text-slate-800 dark:text-white mt-0.5">0</span>
+                        </div>
+                        <div class="bg-slate-50 dark:bg-slate-900/40 p-2.5 rounded-xl border border-slate-200/40 dark:border-slate-800/40 flex flex-col items-center justify-center text-center">
+                            <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Current Streak</span>
+                            <span id="spectra-hm-stat-streak" class="text-base sm:text-lg font-black text-orange-500 mt-0.5">0 days 🔥</span>
+                        </div>
+                        <div class="bg-rose-50/40 dark:bg-rose-950/20 p-2.5 rounded-xl border border-rose-200/40 dark:border-rose-900/30 flex flex-col items-center justify-center text-center">
+                            <span class="text-[9px] font-black text-rose-400 dark:text-rose-400 uppercase tracking-widest">0h (Faded Red)</span>
+                            <span id="spectra-hm-stat-zero" class="text-base sm:text-lg font-black text-rose-500 dark:text-rose-400 mt-0.5">0</span>
+                        </div>
+                        <div class="bg-rose-100/50 dark:bg-rose-950/40 p-2.5 rounded-xl border border-rose-300/40 dark:border-rose-800/50 flex flex-col items-center justify-center text-center">
+                            <span class="text-[9px] font-black text-rose-600 dark:text-rose-400 uppercase tracking-widest">0-2h (Deep Rose)</span>
+                            <span id="spectra-hm-stat-red" class="text-base sm:text-lg font-black text-rose-700 dark:text-rose-300 mt-0.5">0</span>
+                        </div>
+                        <div class="bg-blue-50/50 dark:bg-blue-950/20 p-2.5 rounded-xl border border-blue-200/40 dark:border-blue-900/40 flex flex-col items-center justify-center text-center">
+                            <span class="text-[9px] font-black text-blue-500 dark:text-blue-400 uppercase tracking-widest">2-4h (Blue)</span>
+                            <span id="spectra-hm-stat-blue" class="text-base sm:text-lg font-black text-blue-600 dark:text-blue-400 mt-0.5">0</span>
+                        </div>
+                        <div class="bg-emerald-50/50 dark:bg-emerald-950/20 p-2.5 rounded-xl border border-emerald-200/40 dark:border-emerald-900/40 flex flex-col items-center justify-center text-center">
+                            <span class="text-[9px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">&gt; 4h (Green)</span>
+                            <span id="spectra-hm-stat-green" class="text-base sm:text-lg font-black text-emerald-600 dark:text-emerald-400 mt-0.5">0</span>
+                        </div>
+                        <div class="bg-amber-50/50 dark:bg-amber-950/20 p-2.5 rounded-xl border border-amber-200/40 dark:border-amber-900/40 flex flex-col items-center justify-center text-center">
+                            <span class="text-[9px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-widest">≥ 6h (Golden)</span>
+                            <span id="spectra-hm-stat-gold" class="text-base sm:text-lg font-black text-amber-600 dark:text-amber-400 mt-0.5">0</span>
+                        </div>
+                        <div class="bg-purple-50/50 dark:bg-fuchsia-950/20 p-2.5 rounded-xl border border-purple-200/40 dark:border-fuchsia-900/40 flex flex-col items-center justify-center text-center">
+                            <span class="text-[9px] font-black text-fuchsia-600 dark:text-fuchsia-400 uppercase tracking-widest">≥ 8h (Diamond)</span>
+                            <span id="spectra-hm-stat-gem" class="text-base sm:text-lg font-black text-fuchsia-600 dark:text-fuchsia-400 mt-0.5">0</span>
+                        </div>
+                    </div>
+
+                    <!-- GitHub Box Heatmap Container -->
+                    <div class="w-full overflow-x-auto spectra-heatmap-scrollbar pb-3 pt-1">
+                        <div id="spectra-focus-heatmap-grid" class="min-w-[760px] flex flex-col gap-2">
+                            <!-- Populated dynamically via JavaScript -->
+                        </div>
+                    </div>
+
+                    <!-- Legend Footer & Interactive Day Detail Side Note Row -->
+                    <div id="spectra-heatmap-footer" class="flex flex-col gap-4 pt-4 mt-3 border-t border-slate-100 dark:border-slate-700/80">
+                        <!-- Compact Tier Colors Legend -->
+                        <div class="flex flex-col gap-2 shrink-0">
+                            <span class="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Tier Colors Legend</span>
+                            <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 text-[10px] font-bold text-slate-600 dark:text-slate-300">
+                                <div class="flex items-center gap-1.5 px-2 py-1 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-200/50 dark:border-slate-800/50">
+                                    <div class="w-3 h-3 rounded bg-rose-500/20 border border-rose-300/60 dark:bg-rose-950/40 dark:border-rose-800/50 flex items-center justify-center">
+                                        <svg class="w-2 h-2 text-rose-500/90 dark:text-rose-400/90 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                    </div>
+                                    <span>0h (Faded Red - ✕)</span>
+                                </div>
+                                <div class="flex items-center gap-1.5 px-2 py-1 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-200/50 dark:border-slate-800/50">
+                                    <div class="w-3 h-3 rounded bg-rose-600 border border-rose-500 shadow-[0_0_6px_rgba(225,29,72,0.45)] flex items-center justify-center">
+                                        <svg class="w-2 h-2 text-white/90 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/></svg>
+                                    </div>
+                                    <span>0-2h (Deep Rose - ⭕)</span>
+                                </div>
+                                <div class="flex items-center gap-1.5 px-2 py-1 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-200/50 dark:border-slate-800/50">
+                                    <div class="w-3 h-3 rounded bg-blue-500 border border-blue-400 shadow-[0_0_6px_rgba(59,130,246,0.4)]"></div>
+                                    <span>&gt; 2-4h (Blue)</span>
+                                </div>
+                                <div class="flex items-center gap-1.5 px-2 py-1 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-200/50 dark:border-slate-800/50">
+                                    <div class="w-3 h-3 rounded bg-emerald-500 border border-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.4)]"></div>
+                                    <span>&gt; 4h (Green)</span>
+                                </div>
+                                <div class="flex items-center gap-1.5 px-2 py-1 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-200/50 dark:border-slate-800/50">
+                                    <div class="w-3 h-3 rounded bg-amber-400 border border-amber-300 animate-gold-pulse"></div>
+                                    <span>≥ 6h (Golden)</span>
+                                </div>
+                                <div class="flex items-center gap-1.5 px-2 py-1 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-200/50 dark:border-slate-800/50">
+                                    <div class="w-3 h-3 rounded bg-gradient-to-tr from-cyan-400 via-sky-300 via-fuchsia-400 to-indigo-500 border border-cyan-300 animate-diamond-shimmer"></div>
+                                    <span>≥ 8h (Diamond)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Day Detail Side Note Card (Full Width Below Legend) -->
+                        <div id="spectra-heatmap-side-note" class="w-full bg-indigo-50/60 dark:bg-slate-900/80 p-3.5 sm:p-4 rounded-2xl border border-indigo-100 dark:border-indigo-900/40 shadow-sm flex flex-col gap-2.5 transition-all duration-200">
+                            <!-- Row 1: Date + Day + Focus Time + Tier Badge -->
+                            <div class="flex flex-wrap items-center gap-x-5 gap-y-2">
+                                <div class="flex items-center space-x-1.5 shrink-0">
+                                    <span class="text-[9px] font-black uppercase tracking-widest text-slate-400">Date:</span>
+                                    <span id="spectra-sn-day-name" class="text-xs font-black text-indigo-950 dark:text-indigo-200 uppercase tracking-wider">Select a Day</span>
+                                    <span id="spectra-sn-date" class="text-[10px] font-bold text-slate-500 dark:text-slate-400">(Click box)</span>
+                                </div>
+                                <div class="flex items-center space-x-1.5 shrink-0">
+                                    <span class="text-[9px] font-black uppercase tracking-widest text-slate-400">Focus Time:</span>
+                                    <span id="spectra-sn-focus-time" class="text-xs font-black text-slate-800 dark:text-white">0 min</span>
+                                </div>
+                                <div class="shrink-0">
+                                    <span id="spectra-sn-tier-badge" class="hidden px-2 py-0.5 text-[9px] font-black uppercase tracking-wider rounded-md">Tier</span>
+                                </div>
+                            </div>
+
+                            <!-- Row 2: Subjects left + Target Met right -->
+                            <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 pt-2 border-t border-indigo-100/60 dark:border-slate-800/60">
+                                <div class="flex flex-wrap items-center gap-x-2 gap-y-1.5 flex-1 min-w-0">
+                                    <span class="text-[9px] font-black uppercase tracking-widest text-slate-400 shrink-0">Subjects:</span>
+                                    <div id="spectra-sn-subjects-list" class="flex flex-wrap items-center gap-1.5">
+                                        <span class="text-[10px] text-slate-400 italic">Click a box in the heatmap above.</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-1.5 shrink-0">
+                                    <span class="text-[9px] font-black uppercase tracking-widest text-slate-400">Target Met:</span>
+                                    <span id="spectra-sn-target-pct" class="text-xs font-black text-indigo-600 dark:text-indigo-400">0%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts and Custom Filter Panel -->
+                <div
+                    class="bg-white dark:bg-slate-800 p-3 md:p-6 rounded-2xl md:rounded-[2rem] border border-slate-200/50 dark:border-slate-700/50 shadow-sm overflow-hidden">
+                    <div
+                        class="flex flex-col xl:flex-row justify-between items-start xl:items-center pb-4 mb-6 border-b border-slate-100 dark:border-slate-700 gap-4">
+                        <div class="space-y-1">
+                            <h3
+                                class="text-base font-black text-slate-800 dark:text-slate-200 uppercase tracking-widest">
+                                Visual Analysis</h3>
+                            <p class="text-[10px] text-slate-400 dark:text-slate-500">Interactive trends visualization
+                                and tracking metrics</p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-3">
+                            <span
+                                class="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Time
+                                Range:</span>
+                            <div
+                                class="flex bg-slate-100 dark:bg-slate-900/60 p-1 rounded-xl shadow-inner border border-slate-200/60 dark:border-slate-700/50">
+                                <button onclick="window.setTrendFilter('1Y')" id="tf-1Y"
+                                    class="px-3 md:px-4 py-1.5 text-[10px] md:text-xs font-black rounded-lg transition-all text-slate-500 hover:bg-slate-350 dark:text-slate-400 dark:hover:bg-slate-700">1Y</button>
+                                <button onclick="window.setTrendFilter('2Y')" id="tf-2Y"
+                                    class="px-3 md:px-4 py-1.5 text-[10px] md:text-xs font-black rounded-lg transition-all text-slate-500 hover:bg-slate-350 dark:text-slate-400 dark:hover:bg-slate-700">2Y</button>
+                                <button onclick="window.setTrendFilter('3Y')" id="tf-3Y"
+                                    class="px-3 md:px-4 py-1.5 text-[10px] md:text-xs font-black rounded-lg transition-all text-slate-500 hover:bg-slate-350 dark:text-slate-400 dark:hover:bg-slate-700">3Y</button>
+                                <button onclick="window.setTrendFilter('ALL')" id="tf-ALL"
+                                    class="px-3 md:px-4 py-1.5 text-[10px] md:text-xs font-black rounded-lg transition-all bg-blue-600 text-white shadow">Life
+                                    Time</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Program Completion & Daily Actions Grid (First) -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-8 mb-4 md:mb-8">
+                        <div
+                            class="flex flex-col bg-slate-50 dark:bg-slate-900/30 p-3 md:p-5 rounded-xl md:rounded-2xl border border-slate-100 dark:border-slate-800/80 overflow-hidden min-w-0">
+                            <div class="flex justify-between items-center mb-4 md:mb-6">
+                                <div class="space-y-0.5">
+                                    <h4
+                                        class="text-xs font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest">
+                                        Program Completion Trend</h4>
+                                    <p class="text-[9px] text-slate-400 dark:text-slate-500 font-semibold">Cumulative
+                                        progress percentages over time</p>
+                                </div>
+                                <button onclick="openSubjectTrendModal()"
+                                    class="text-[8px] sm:text-[9px] md:text-[10px] font-black text-white bg-indigo-600 hover:bg-indigo-700 px-3 py-2 rounded-xl shadow-sm hover:scale-105 active:scale-95 transition-all">Subject
+                                    View</button>
+                            </div>
+                            <div class="relative h-[200px] md:h-[280px] mt-auto w-full min-w-0"><canvas
+                                    id="mainChartPrograms"></canvas></div>
+                            <div class="mt-4 md:mt-6 flex flex-col gap-3">
+                                <div id="prog-legend" class="flex flex-wrap justify-center gap-1.5 sm:gap-2 md:gap-3">
+                                </div>
+                                <div id="prog-comment"
+                                    class="text-[9px] text-slate-400 dark:text-slate-500 font-medium"></div>
+                            </div>
+                        </div>
+                        <div
+                            class="flex flex-col bg-slate-50 dark:bg-slate-900/30 p-3 md:p-5 rounded-xl md:rounded-2xl border border-slate-100 dark:border-slate-800/80 overflow-hidden min-w-0">
+                            <div class="flex justify-between items-center mb-4 md:mb-6">
+                                <div class="space-y-0.5">
+                                    <h4 class="text-xs font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest"
+                                        id="daily-actions-month-title">
+                                        Daily Actions (Month)</h4>
+                                    <p class="text-[9px] text-slate-400 dark:text-slate-500 font-semibold">Daily habits
+                                        tracking and success rate</p>
+                                </div>
+                                <button onclick="openYearlyActionsModal()"
+                                    class="text-[8px] sm:text-[9px] md:text-[10px] font-black text-white bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded-xl shadow-sm hover:scale-105 active:scale-95 transition-all">Year
+                                    View</button>
+                            </div>
+                            <div class="relative h-[200px] md:h-[280px] mt-auto w-full min-w-0"><canvas
+                                    id="monthlyActionsChart"></canvas></div>
+                            <div class="mt-4 md:mt-6 flex flex-col gap-3">
+                                <div id="act-legend" class="flex flex-wrap justify-center gap-1.5 sm:gap-2 md:gap-3">
+                                </div>
+                                <div id="daily-actions-msg-bar" class="mt-2 text-[9px] font-bold"></div>
+                                <div id="act-comment" class="text-[9px] text-slate-400 dark:text-slate-500 font-medium">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pacing Trend charts (Second) -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+                        <!-- X Bar Pacing Trend (Burn-up Chart) -->
+                        <div
+                            class="flex flex-col bg-slate-50 dark:bg-slate-900/30 p-3 md:p-5 rounded-xl md:rounded-2xl border border-slate-100 dark:border-slate-800/80 overflow-hidden min-w-0">
+                            <div
+                                class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4 md:mb-6">
+                                <div class="space-y-0.5">
+                                    <h4 class="text-xs font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest"
+                                        id="spectra-pace-title">
+                                        Active Goal Pacing Trend (X Bar)</h4>
+                                    <p class="text-[9px] text-slate-400 dark:text-slate-500 font-semibold"
+                                        id="spectra-pace-desc">Burn-up comparison of Required vs Actual trajectories for
+                                        active goal</p>
+                                </div>
+                                <div
+                                    class="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] font-bold text-slate-500">
+                                    <div>Req Pace: <span id="spectra-pace-req"
+                                            class="font-black text-emerald-500">--</span></div>
+                                    <div class="hidden sm:block w-px h-3 bg-slate-200 dark:bg-slate-700"></div>
+                                    <div>Actual Pace: <span id="spectra-pace-act"
+                                            class="font-black text-indigo-500">--</span></div>
+                                    <div class="hidden sm:block w-px h-3 bg-slate-200 dark:bg-slate-700"></div>
+                                    <div>Est Finish: <span id="spectra-pace-finish"
+                                            class="font-black text-orange-500">--</span></div>
+                                </div>
+                            </div>
+                            <div class="relative h-[200px] md:h-[320px] w-full min-w-0">
+                                <canvas id="spectraPaceTrendCanvas"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Global Scope Trend (Burn-up Chart) -->
+                        <div
+                            class="flex flex-col bg-slate-50 dark:bg-slate-900/30 p-3 md:p-5 rounded-xl md:rounded-2xl border border-slate-100 dark:border-slate-800/80 overflow-hidden min-w-0">
+                            <div
+                                class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4 md:mb-6">
+                                <div class="space-y-0.5">
+                                    <h4 class="text-xs font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest"
+                                        id="global-pace-title">
+                                        Global Scope Trend</h4>
+                                    <p class="text-[9px] text-slate-400 dark:text-slate-500 font-semibold"
+                                        id="global-pace-desc">Burn-up comparison of Required vs Actual trajectories for
+                                        global scope</p>
+                                </div>
+                                <div
+                                    class="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] font-bold text-slate-500">
+                                    <div>Req Pace: <span id="global-pace-req"
+                                            class="font-black text-emerald-500">--</span></div>
+                                    <div class="hidden sm:block w-px h-3 bg-slate-200 dark:bg-slate-700"></div>
+                                    <div>Actual Pace: <span id="global-pace-act"
+                                            class="font-black text-indigo-500">--</span></div>
+                                    <div class="hidden sm:block w-px h-3 bg-slate-200 dark:bg-slate-700"></div>
+                                    <div>Est Finish: <span id="global-pace-finish"
+                                            class="font-black text-orange-500">--</span></div>
+                                </div>
+                            </div>
+                            <div class="relative h-[200px] md:h-[320px] w-full min-w-0">
+                                <canvas id="globalPaceTrendCanvas"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>

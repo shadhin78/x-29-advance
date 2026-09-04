@@ -1,0 +1,73 @@
+/* ==========================================================================
+   Dashboard Page Specific Styles (pages/Dashboard/Dashboard.css)
+   Preserves visual identity, responsiveness, and provides slide-up transition.
+   ========================================================================== */
+
+/* Slide-Up Transition for Dashboard Page */
+@keyframes dashboardSlideUp {
+    0% {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#page-dashboard.animate-page-enter,
+.dashboard-slide-up {
+    animation: dashboardSlideUp 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    will-change: transform, opacity;
+}
+
+/* Scoped Scrollbars for Dashboard Cards */
+#page-dashboard .custom-scrollbar::-webkit-scrollbar,
+#page-dashboard #db-weekly-targets-checklist::-webkit-scrollbar,
+#page-dashboard #db-monthly-targets-checklist::-webkit-scrollbar,
+#page-dashboard #db-daily-targets-checklist::-webkit-scrollbar,
+#page-dashboard #db-upcoming-exams-list::-webkit-scrollbar,
+#page-dashboard #db-passed-subjects-list::-webkit-scrollbar,
+#page-dashboard #dashboard-daily-actions-compact::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+}
+
+#page-dashboard .custom-scrollbar::-webkit-scrollbar-track,
+#page-dashboard #db-weekly-targets-checklist::-webkit-scrollbar-track,
+#page-dashboard #db-monthly-targets-checklist::-webkit-scrollbar-track,
+#page-dashboard #db-daily-targets-checklist::-webkit-scrollbar-track,
+#page-dashboard #db-upcoming-exams-list::-webkit-scrollbar-track,
+#page-dashboard #db-passed-subjects-list::-webkit-scrollbar-track,
+#page-dashboard #dashboard-daily-actions-compact::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#page-dashboard .custom-scrollbar::-webkit-scrollbar-thumb,
+#page-dashboard #db-weekly-targets-checklist::-webkit-scrollbar-thumb,
+#page-dashboard #db-monthly-targets-checklist::-webkit-scrollbar-thumb,
+#page-dashboard #db-daily-targets-checklist::-webkit-scrollbar-thumb,
+#page-dashboard #db-upcoming-exams-list::-webkit-scrollbar-thumb,
+#page-dashboard #db-passed-subjects-list::-webkit-scrollbar-thumb,
+#page-dashboard #dashboard-daily-actions-compact::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.3);
+    border-radius: 9999px;
+}
+
+#page-dashboard .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(148, 163, 184, 0.5);
+}
+
+/* Dashboard Focus Heatmap Container */
+#dashboard-focus-heatmap-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    #page-dashboard {
+        padding-bottom: 2rem;
+    }
+}

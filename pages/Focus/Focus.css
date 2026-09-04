@@ -1,0 +1,516 @@
+/* ==========================================================================
+   Focus Page Specific Styles (pages/Focus/Focus.css)
+   Preserves visual identity, responsiveness, and provides slide-up transition.
+   ========================================================================== */
+
+/* Slide-Up Transition for Focus Page */
+@keyframes focusSlideUp {
+    0% {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#page-timer.animate-page-enter,
+.focus-slide-up {
+    animation: focusSlideUp 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    will-change: transform, opacity;
+}
+
+/* ===== Hardware-Accelerated GPU Timer Fullscreen Animations ===== */
+@keyframes timerFsEnter {
+    from {
+        opacity: 0;
+        transform: scale(0.97) translate3d(0, 0, 0);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translate3d(0, 0, 0);
+    }
+}
+
+@keyframes timerFsContentEnter {
+    from {
+        opacity: 0;
+        transform: scale(0.96) translateY(8px) translate3d(0, 0, 0);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0) translate3d(0, 0, 0);
+    }
+}
+
+@keyframes timerFsExit {
+    from {
+        opacity: 1;
+        transform: scale(1) translate3d(0, 0, 0);
+    }
+
+    to {
+        opacity: 0;
+        transform: scale(0.97) translate3d(0, 0, 0);
+    }
+}
+
+@keyframes timerFsContentExit {
+    from {
+        opacity: 1;
+        transform: scale(1) translateY(0) translate3d(0, 0, 0);
+    }
+
+    to {
+        opacity: 0;
+        transform: scale(0.96) translateY(8px) translate3d(0, 0, 0);
+    }
+}
+
+/* Timer Fullscreen Mode (Ultra-Smooth Hardware-Accelerated) */
+#timer-active-panel.timer-fullscreen {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    z-index: 99999 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    padding: 1.5rem !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
+    background: #f8fafc;
+    border: none !important;
+    box-shadow: none !important;
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+    transform: translate3d(0, 0, 0);
+    animation: timerFsEnter 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Exit animation class */
+#timer-active-panel.timer-fs-exiting {
+    animation: timerFsExit 0.18s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Content animation inside fullscreen */
+#timer-active-panel.timer-fullscreen>.relative {
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+    transform: translate3d(0, 0, 0);
+    animation: timerFsContentEnter 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+#timer-active-panel.timer-fs-exiting>.relative {
+    animation: timerFsContentExit 0.15s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Fullscreen Toggle Button Hardware Enhancements & Icon Rotation */
+#timer-btn-fullscreen {
+    flex-shrink: 0 !important;
+    width: 46px !important;
+    min-width: 46px !important;
+    height: 46px !important;
+    min-height: 46px !important;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease !important;
+    will-change: transform;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+}
+
+#timer-subject-select {
+    min-width: 0 !important;
+    max-width: 100% !important;
+}
+
+#timer-btn-fullscreen:hover {
+    transform: scale(1.1) translate3d(0, 0, 0);
+}
+
+#timer-btn-fullscreen:active {
+    transform: scale(0.9) translate3d(0, 0, 0);
+}
+
+#timer-btn-fullscreen svg {
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: transform;
+}
+
+.timer-fullscreen #timer-btn-fullscreen svg {
+    transform: rotate(180deg);
+}
+
+/* Clean 3-Thing Fullscreen Layout Rules */
+.timer-fullscreen #timer-fs-actions {
+    display: flex !important;
+    position: fixed !important;
+    top: max(1rem, env(safe-area-inset-top)) !important;
+    right: max(1rem, env(safe-area-inset-right)) !important;
+    z-index: 99999 !important;
+}
+
+.timer-fullscreen #timer-panel-header-bar,
+.timer-fullscreen #timer-mode-switcher,
+.timer-fullscreen #timer-subject-select-container,
+.timer-fullscreen #timer-alarm-container,
+.timer-fullscreen #timer-presets-container,
+.timer-fullscreen #timer-control-buttons-bar {
+    display: none !important;
+}
+
+/* Program-wise Dropdown Optgroup Styling */
+#timer-subject-select optgroup {
+    background-color: #020617;
+    color: #3b82f6;
+    font-weight: 800;
+    font-size: 0.75rem;
+    padding: 6px 8px;
+}
+
+#timer-subject-select option {
+    background-color: #0f172a;
+    color: #f8fafc;
+    font-weight: 600;
+    font-size: 0.85rem;
+    padding: 6px 12px;
+}
+
+.light #timer-subject-select optgroup,
+html:not(.dark) #timer-subject-select optgroup {
+    background-color: #f1f5f9;
+    color: #2563eb;
+}
+
+.light #timer-subject-select option,
+html:not(.dark) #timer-subject-select option {
+    background-color: #ffffff;
+    color: #0f172a;
+}
+
+@media (min-width: 640px) {
+    #timer-active-panel.timer-fullscreen {
+        padding: 3rem !important;
+    }
+}
+
+@media (min-width: 1024px) {
+    #timer-active-panel.timer-fullscreen {
+        padding: 4rem !important;
+    }
+}
+
+.dark #timer-active-panel.timer-fullscreen,
+#timer-active-panel.timer-fullscreen.dark {
+    background: #0f172a;
+}
+
+@media (prefers-color-scheme: dark) {
+    #timer-active-panel.timer-fullscreen {
+        background: #0f172a;
+    }
+}
+
+/* Hide scrollbars and lock body during fullscreen active mode */
+body.timer-fullscreen-active {
+    overflow: hidden !important;
+    touch-action: none;
+}
+
+/* Remove bounding card style during fullscreen mode */
+.timer-fullscreen .relative.z-10.w-full.max-w-md {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 1rem;
+    max-width: 30rem !important;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.dark .timer-fullscreen .relative.z-10.w-full.max-w-md,
+#timer-active-panel.timer-fullscreen.dark .relative.z-10.w-full.max-w-md {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+@media (prefers-color-scheme: dark) {
+    .timer-fullscreen .relative.z-10.w-full.max-w-md {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
+}
+
+/* ===== Fullscreen Clock Sizes ===== */
+/* Phone (default) — keep same as normal view */
+.timer-fullscreen #timer-clock-container {
+    width: 15rem !important;
+    height: 15rem !important;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Tablet */
+@media (min-width: 640px) {
+    .timer-fullscreen #timer-clock-container {
+        width: 20rem !important;
+        height: 20rem !important;
+    }
+}
+
+/* Desktop — much bigger */
+@media (min-width: 1024px) {
+    .timer-fullscreen #timer-clock-container {
+        width: 24rem !important;
+        height: 24rem !important;
+    }
+
+    .timer-fullscreen .relative.z-10.w-full.max-w-md {
+        max-width: 40rem !important;
+        gap: 2rem;
+    }
+}
+
+/* Large desktop */
+@media (min-width: 1280px) {
+    .timer-fullscreen #timer-clock-container {
+        width: 28rem !important;
+        height: 28rem !important;
+    }
+}
+
+/* ===== Fullscreen Clock Text Sizes ===== */
+.timer-fullscreen #timer-clock-text {
+    font-size: 2.5rem !important;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-weight: 900;
+    letter-spacing: 0.05em;
+    color: #0f172a;
+    transition: font-size 0.3s ease;
+}
+
+.dark .timer-fullscreen #timer-clock-text,
+#timer-active-panel.timer-fullscreen.dark #timer-clock-text {
+    color: #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+    .timer-fullscreen #timer-clock-text {
+        color: #ffffff;
+    }
+}
+
+/* Tablet */
+@media (min-width: 640px) {
+    .timer-fullscreen #timer-clock-text {
+        font-size: 3.5rem !important;
+    }
+}
+
+/* Desktop */
+@media (min-width: 1024px) {
+    .timer-fullscreen #timer-clock-text {
+        font-size: 4.5rem !important;
+        letter-spacing: 0.06em;
+    }
+}
+
+/* Large desktop */
+@media (min-width: 1280px) {
+    .timer-fullscreen #timer-clock-text {
+        font-size: 5rem !important;
+    }
+}
+
+/* Status text bigger on desktop fullscreen */
+.timer-fullscreen #timer-status-text {
+    font-size: 9px;
+    margin-top: 0.5rem;
+}
+
+@media (min-width: 1024px) {
+    .timer-fullscreen #timer-status-text {
+        font-size: 11px !important;
+        letter-spacing: 0.15em;
+        margin-top: 0.75rem;
+    }
+}
+
+.timer-fullscreen #timer-progress-ring {
+    filter: none !important;
+}
+
+/* Bigger control buttons in fullscreen on desktop */
+.timer-fullscreen #timer-btn-toggle {
+    font-size: 0.75rem !important;
+}
+
+@media (min-width: 1024px) {
+    .timer-fullscreen #timer-btn-toggle {
+        font-size: 0.85rem !important;
+        padding: 1rem 3.5rem !important;
+        border-radius: 1.25rem;
+    }
+}
+
+.timer-fullscreen #timer-btn-save {
+    font-size: 0.75rem !important;
+}
+
+@media (min-width: 1024px) {
+    .timer-fullscreen #timer-btn-save {
+        font-size: 0.85rem !important;
+        padding: 1rem 2rem !important;
+        border-radius: 1.25rem;
+    }
+}
+
+.timer-fullscreen #timer-presets-container button {
+    font-size: 0.75rem !important;
+}
+
+/* Hide mode switcher, subject selector, presets, and reset button in fullscreen mode */
+.timer-fullscreen #timer-mode-switcher,
+.timer-fullscreen #timer-subject-select-container,
+.timer-fullscreen #timer-presets-container,
+.timer-fullscreen #timer-btn-reset {
+    display: none !important;
+}
+
+.timer-fullscreen .max-w-md {
+    max-width: 32rem !important;
+}
+
+@media (min-width: 1024px) {
+    .timer-fullscreen .max-w-md {
+        max-width: 42rem !important;
+    }
+}
+
+/* ===== Chronograph Clock Flat "Painted On Wall" Theme Styling ===== */
+:root {
+    --chrono-tick-major: #0f172a;
+    --chrono-tick-minor: #64748b;
+    --chrono-text-number: #0f172a;
+
+    --chrono-subdial-tick-major: #0f172a;
+    --chrono-subdial-tick-minor: #94a3b8;
+    --chrono-subdial-text: #0f172a;
+    --chrono-subdial-hand: #0f172a;
+
+    --chrono-center-hub-outer: #0f172a;
+    --chrono-center-hub-inner: #2563eb;
+    --chrono-main-hand: #2563eb;
+    --chrono-main-hand-glow: rgba(37, 99, 235, 0.4);
+
+    --chrono-digital-hhmm: #0f172a;
+    --chrono-digital-ssms: #2563eb;
+}
+
+.dark, body.dark, html.dark {
+    --chrono-tick-major: #ffffff;
+    --chrono-tick-minor: #94a3b8;
+    --chrono-text-number: #ffffff;
+
+    --chrono-subdial-tick-major: #ffffff;
+    --chrono-subdial-tick-minor: #64748b;
+    --chrono-subdial-text: #ffffff;
+    --chrono-subdial-hand: #ffffff;
+
+    --chrono-center-hub-outer: #ffffff;
+    --chrono-center-hub-inner: #3b82f6;
+    --chrono-main-hand: #3b82f6;
+    --chrono-main-hand-glow: rgba(59, 130, 246, 0.7);
+
+    --chrono-digital-hhmm: #ffffff;
+    --chrono-digital-ssms: #3b82f6;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --chrono-tick-major: #ffffff;
+        --chrono-tick-minor: #94a3b8;
+        --chrono-text-number: #ffffff;
+
+        --chrono-subdial-tick-major: #ffffff;
+        --chrono-subdial-tick-minor: #64748b;
+        --chrono-subdial-text: #ffffff;
+        --chrono-subdial-hand: #ffffff;
+
+        --chrono-center-hub-outer: #ffffff;
+        --chrono-center-hub-inner: #3b82f6;
+        --chrono-main-hand: #3b82f6;
+        --chrono-main-hand-glow: rgba(59, 130, 246, 0.7);
+
+        --chrono-digital-hhmm: #ffffff;
+        --chrono-digital-ssms: #3b82f6;
+    }
+}
+
+#timer-clock-container {
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+#chrono-main-hand {
+    stroke: var(--chrono-main-hand);
+    filter: drop-shadow(0 0 5px var(--chrono-main-hand-glow));
+    will-change: transform;
+}
+
+#chrono-subdial-hand {
+    stroke: var(--chrono-subdial-hand);
+    filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.4));
+    will-change: transform;
+}
+
+#timer-clock-text-split span {
+    font-variant-numeric: tabular-nums;
+}
+
+/* Scoped Scrollbars for Focus Page */
+#page-timer .custom-scrollbar::-webkit-scrollbar,
+#page-timer #subject-targets-list::-webkit-scrollbar,
+#page-timer #timer-history-container::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+}
+
+#page-timer .custom-scrollbar::-webkit-scrollbar-track,
+#page-timer #subject-targets-list::-webkit-scrollbar-track,
+#page-timer #timer-history-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#page-timer .custom-scrollbar::-webkit-scrollbar-thumb,
+#page-timer #subject-targets-list::-webkit-scrollbar-thumb,
+#page-timer #timer-history-container::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.3);
+    border-radius: 9999px;
+}
+
+#page-timer .custom-scrollbar::-webkit-scrollbar-thumb:hover,
+#page-timer #subject-targets-list::-webkit-scrollbar-thumb:hover,
+#page-timer #timer-history-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(148, 163, 184, 0.5);
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    #page-timer {
+        padding-bottom: 2rem;
+    }
+}

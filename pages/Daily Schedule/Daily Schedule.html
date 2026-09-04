@@ -1,0 +1,124 @@
+<!-- MOBILE Active Now (visible on phone only, above grid) -->
+<div id="schedule-active-now-mobile" class="block lg:hidden w-full">
+    <!-- Populated dynamically by updateActiveScheduleSlot() -->
+</div>
+
+<!-- Main Grid Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-4 md:gap-6 items-start">
+
+    <!-- LEFT COLUMN (appears 2nd on mobile, 1st on desktop) -->
+    <div class="lg:col-span-1 space-y-4 md:space-y-5 order-2 lg:order-1">
+
+        <!-- Active Now (Desktop only - hidden on mobile) -->
+        <div id="schedule-active-now-container" class="w-full hidden lg:block">
+            <!-- Populated dynamically by updateActiveScheduleSlot() -->
+        </div>
+
+        <!-- Routine Hours Summary -->
+        <div
+            class="bg-white dark:bg-slate-800 border border-slate-200/50 dark:border-slate-700/50 rounded-3xl p-5 shadow-sm space-y-4">
+            <div class="flex justify-between items-center gap-2">
+                <div>
+                    <h3
+                        class="text-xs font-black uppercase tracking-widest text-slate-800 dark:text-white">
+                        Routine Hours Summary</h3>
+                    <p class="text-[8px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">
+                        Summed durations by group</p>
+                </div>
+                <div class="flex items-center gap-1.5 shrink-0">
+                    <button onclick="window.openCreateScheduleGroup()"
+                        class="text-[8px] font-black uppercase tracking-widest px-2.5 py-1.5 rounded-lg border transition-all active:scale-95 bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-500 hover:bg-emerald-50 hover:text-emerald-600 dark:hover:bg-emerald-900/20 dark:hover:text-emerald-400"
+                        title="Create custom group">
+                        <span>+ Group</span>
+                    </button>
+                </div>
+            </div>
+            <div id="schedule-hours-summary-list"
+                class="space-y-3 max-h-[450px] overflow-y-auto pr-1 custom-scrollbar">
+                <!-- Populated dynamically -->
+            </div>
+        </div>
+
+        <!-- 24-Hour Routine Allocation (Work Hr Counting) -->
+        <div
+            class="bg-white dark:bg-slate-800 border border-slate-200/50 dark:border-slate-700/50 rounded-3xl p-5 shadow-sm space-y-3">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h4
+                        class="text-xs font-black uppercase tracking-widest text-slate-800 dark:text-white">
+                        24-Hour Routine Allocation</h4>
+                    <p class="text-[8px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">Work
+                        hour counting across the day</p>
+                </div>
+                <span id="schedule-allocation-total"
+                    class="text-sm font-black text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-3 py-1 rounded-xl border border-blue-100 dark:border-blue-800 shrink-0 tabular-nums">0
+                    hrs</span>
+            </div>
+            <div class="space-y-1.5 max-h-[350px] overflow-y-auto pr-1 custom-scrollbar"
+                id="schedule-visual-timeline-bar">
+                <!-- Dynamic vertical list rendered via JS -->
+            </div>
+            <div class="hidden" id="schedule-visual-legend">
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT COLUMN: Daily Timeline Grid (appears 1st on mobile, 2nd on desktop) -->
+    <div
+        class="lg:col-span-3 bg-white dark:bg-slate-800 border border-slate-200/50 dark:border-slate-700/50 rounded-3xl p-5 md:p-7 shadow-sm space-y-6 order-1 lg:order-2">
+        <div
+            class="flex justify-between items-center border-b border-slate-100 dark:border-slate-700/60 pb-4">
+            <div class="flex items-center gap-3">
+                <div>
+                    <h3
+                        class="text-sm md:text-base font-black dark:text-white leading-tight flex items-center gap-2">
+                        Daily Timeline Grid
+                        <!-- Arrow Switcher -->
+                        <span
+                            class="inline-flex items-center bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-0.5 ml-1 select-none">
+                            <button onclick="window.switchRoutineSet(-1)"
+                                class="p-1 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-colors active:scale-75">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24" stroke-width="3">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M15 19l-7-7 7-7" />
+                                </svg>
+                            </button>
+                            <span id="active-routine-badge"
+                                class="text-[9px] font-black uppercase px-1.5 text-slate-700 dark:text-slate-350 min-w-[50px] text-center">Routine
+                                1</span>
+                            <button onclick="window.switchRoutineSet(1)"
+                                class="p-1 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-colors active:scale-75">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24" stroke-width="3">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M9 5l7 7-7 7" />
+                                </svg>
+                            </button>
+                        </span>
+                    </h3>
+                    <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-0.5">
+                        1-hour segmented blocks of your routine</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <span id="schedule-slots-count-badge"
+                    class="text-[9px] bg-slate-100 dark:bg-slate-900 px-2.5 py-0.5 rounded-full font-bold text-slate-500 dark:text-slate-400">0
+                    Slots</span>
+                <button onclick="window.openAddScheduleModal()"
+                    class="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-black text-[10px] uppercase tracking-widest rounded-xl transition-all active:scale-95 shadow-md flex items-center justify-center gap-1.5 shrink-0">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                            d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    Add
+                </button>
+            </div>
+        </div>
+
+        <div id="schedule-timeline-grid"
+            class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+            <!-- Dynamically populated timeline cards -->
+        </div>
+    </div>
+</div>

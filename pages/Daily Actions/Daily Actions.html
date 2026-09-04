@@ -1,0 +1,421 @@
+                <!-- Daily Actions Tracker -->
+                <div id="daily-actions-tracker"
+                    class="mb-10 md:mb-14 pt-2 sm:pt-4 md:pt-6 scroll-mt-24 md:scroll-mt-32">
+                    <div
+                        class="mb-5 sm:mb-6 md:mb-8 bg-white dark:bg-slate-800 p-4 sm:p-5 md:p-6 rounded-2xl sm:rounded-3xl md:rounded-[2.5rem] border border-slate-200/50 dark:border-slate-700/50 shadow-sm flex flex-col gap-2 sm:gap-3 md:gap-4">
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center gap-3">
+                                <h3 class="text-[11px] sm:text-xs md:text-sm font-black uppercase tracking-widest">Daily
+                                    Actions
+                                    Tracker</h3>
+                                <button onclick="window.openDailyActionsDBModal()"
+                                    class="text-[8px] sm:text-[9px] md:text-[10px] font-black uppercase tracking-widest bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400 px-2 py-1 rounded shadow-sm hover:bg-blue-200 dark:hover:bg-blue-800/60 transition-colors border border-blue-200 dark:border-blue-800 active:scale-95 flex items-center gap-1.5"><svg
+                                        class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                            d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4">
+                                        </path>
+                                    </svg><span class="hidden sm:block">Database</span></button>
+                            </div>
+                            <span id="daily-actions-percent" class="text-lg sm:text-xl md:text-2xl font-black">0%</span>
+                        </div>
+                        <div
+                            class="w-full bg-slate-100 dark:bg-slate-900 h-3 sm:h-4 md:h-5 rounded-full overflow-hidden shadow-inner p-0.5 md:p-1 border border-slate-200 dark:border-slate-800">
+                            <div id="daily-actions-progress" class="h-full rounded-full transition-all duration-500">
+                            </div>
+                        </div>
+                    </div>
+                    <div id="daily-actions-grid"
+                        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6 items-stretch mb-8">
+                        <!-- Dynamically populated via JS -->
+                    </div>
+
+                    <!-- Monthly Targets Section -->
+                    <div id="monthly-targets-section"
+                        class="mt-8 md:mt-10 bg-white dark:bg-slate-800 p-5 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl md:rounded-[2.5rem] border border-slate-200/50 dark:border-slate-700/50 shadow-sm space-y-6">
+                        <!-- Header and Metrics -->
+                        <div
+                            class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-5 border-b border-slate-100 dark:border-slate-700/60 pb-5">
+                            <div class="flex flex-col md:flex-row md:items-center gap-4 w-full">
+                                <div class="flex items-center space-x-3">
+                                    <div
+                                        class="p-2.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-xl">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
+                                            </path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-base md:text-lg font-black dark:text-white leading-tight">Monthly
+                                            Targets</h3>
+                                        <div class="flex flex-wrap items-center gap-2 mt-1">
+                                            <span id="mt-selected-month-range"
+                                                class="text-[10px] text-indigo-600 dark:text-indigo-400 font-black tracking-wider uppercase bg-indigo-50 dark:bg-indigo-900/30 px-2 py-0.5 rounded border border-indigo-100 dark:border-indigo-800">[
+                                                Loading Month... ]</span>
+                                            <span id="mt-today-display"
+                                                class="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Today:
+                                                Thursday, 11 Jun 2026</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Month Navigation and Buttons -->
+                                <div
+                                    class="flex items-center space-x-2 md:ml-auto w-full md:w-auto mt-2 md:mt-0 flex-wrap gap-2 justify-end">
+                                    <!-- Arrow navigation buttons -->
+                                    <div
+                                        class="flex items-center space-x-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200/50 dark:border-slate-700/50 shrink-0">
+                                        <button id="mt-btn-past" onclick="window.navigateMonth('past')"
+                                            class="px-2.5 py-1.5 text-[9px] font-black rounded-lg transition-all text-slate-650 dark:text-slate-355 hover:bg-slate-200 dark:hover:bg-slate-600/50 flex items-center space-x-1">
+                                            <span>&lt;- Past Month</span>
+                                        </button>
+                                        <button id="mt-btn-present" onclick="window.navigateMonth('present')"
+                                            class="px-2.5 py-1.5 text-[9px] font-black rounded-lg transition-all bg-indigo-600 text-white shadow">
+                                            <span>Present Month</span>
+                                        </button>
+                                        <button id="mt-btn-future" onclick="window.navigateMonth('future')"
+                                            class="px-2.5 py-1.5 text-[9px] font-black rounded-lg transition-all text-slate-650 dark:text-slate-355 hover:bg-slate-200 dark:hover:bg-slate-600/50 flex items-center space-x-1">
+                                            <span>Future Month -&gt;</span>
+                                        </button>
+                                    </div>
+                                    <button onclick="window.openMonthlyTargetsDatabase()"
+                                        class="flex items-center justify-center space-x-2 bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-black uppercase tracking-widest px-4 py-2.5 rounded-lg transition-colors shadow-md shadow-indigo-500/10 active:scale-95 shrink-0">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4">
+                                            </path>
+                                        </svg>
+                                        <span>Targets Database</span>
+                                    </button>
+                                    <button onclick="window.openAddMonthlyTargetPage()"
+                                        class="flex items-center justify-center space-x-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-black uppercase tracking-widest px-3 py-2.5 rounded-lg transition-colors shadow-md shadow-emerald-500/10 active:scale-95 shrink-0"
+                                        title="Add Monthly Target">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                                d="M12 4v16m8-8H4"></path>
+                                        </svg>
+                                        <span>Add</span>
+                                    </button>
+                                    <select id="mt-select-month" class="hidden"></select>
+                                </div>
+                            </div>
+
+                            <!-- Metrics panel -->
+                            <div class="grid grid-cols-3 gap-2 sm:gap-4 w-full xl:w-auto shrink-0">
+                                <div
+                                    class="bg-slate-50 dark:bg-slate-900/50 px-3 py-2 rounded-xl border border-slate-100 dark:border-slate-800/80 text-center min-w-[80px] sm:min-w-[100px]">
+                                    <span
+                                        class="block text-[8px] font-black uppercase tracking-wider text-slate-400">Req.
+                                        Pace</span>
+                                    <span id="mt-req-pace"
+                                        class="text-xs font-black text-indigo-600 dark:text-indigo-400">0.00
+                                        Ch/D</span>
+                                </div>
+                                <div
+                                    class="bg-slate-50 dark:bg-slate-900/50 px-3 py-2 rounded-xl border border-slate-100 dark:border-slate-800/80 text-center min-w-[80px] sm:min-w-[100px]">
+                                    <span
+                                        class="block text-[8px] font-black uppercase tracking-wider text-slate-400">Actual
+                                        Pace</span>
+                                    <span id="mt-act-pace"
+                                        class="text-xs font-black text-emerald-600 dark:text-emerald-400">0.00
+                                        Ch/D</span>
+                                </div>
+                                <div
+                                    class="bg-slate-50 dark:bg-slate-900/50 px-3 py-2 rounded-xl border border-slate-100 dark:border-slate-800/80 text-center min-w-[80px] sm:min-w-[100px]">
+                                    <span
+                                        class="block text-[8px] font-black uppercase tracking-wider text-slate-400">Est.
+                                        Finish</span>
+                                    <span id="mt-est-finish"
+                                        class="text-xs font-black text-purple-600 dark:text-purple-400">N/A</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Targets List -->
+                        <div class="space-y-3">
+                            <div
+                                class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-1.5">
+                                <h4 class="text-[9px] font-black uppercase tracking-wider text-slate-400">
+                                    Monthly Target Checklist
+                                </h4>
+                            </div>
+                            <div id="monthly-targets-list" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <!-- Populated via JS -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Weekly Targets Section -->
+                    <div id="weekly-targets-section"
+                        class="mt-8 md:mt-10 bg-white dark:bg-slate-800 p-5 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl md:rounded-[2.5rem] border border-slate-200/50 dark:border-slate-700/50 shadow-sm space-y-6">
+                        <!-- Header and Metrics -->
+                        <div
+                            class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-5 border-b border-slate-100 dark:border-slate-700/60 pb-5">
+                            <div class="flex flex-col md:flex-row md:items-center gap-4 w-full">
+                                <div class="flex items-center space-x-3">
+                                    <div
+                                        class="p-2.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-xl">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
+                                            </path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-base md:text-lg font-black dark:text-white leading-tight">Weekly
+                                            Targets</h3>
+                                        <div class="flex flex-wrap items-center gap-2 mt-1">
+                                            <span id="wt-selected-week-range"
+                                                class="text-[10px] text-blue-600 dark:text-blue-400 font-black tracking-wider uppercase bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded border border-blue-100 dark:border-blue-800">[
+                                                Loading Week... ]</span>
+                                            <span id="wt-today-display"
+                                                class="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Today:
+                                                Thursday, 11 Jun 2026</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Week Selector Dropdown Replaced with Targets Database Button -->
+                                <div
+                                    class="flex items-center space-x-2 md:ml-auto w-full md:w-auto mt-2 md:mt-0 flex-wrap gap-2 justify-end">
+                                    <!-- Arrow navigation buttons -->
+                                    <div
+                                        class="flex items-center space-x-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200/50 dark:border-slate-700/50 shrink-0">
+                                        <button id="wt-btn-past" onclick="window.navigateWeek('past')"
+                                            class="px-2.5 py-1.5 text-[9px] font-black rounded-lg transition-all text-slate-650 dark:text-slate-355 hover:bg-slate-200 dark:hover:bg-slate-600/50 flex items-center space-x-1">
+                                            <span>&lt;- Past Week</span>
+                                        </button>
+                                        <button id="wt-btn-present" onclick="window.navigateWeek('present')"
+                                            class="px-2.5 py-1.5 text-[9px] font-black rounded-lg transition-all bg-blue-600 text-white shadow">
+                                            <span>Present Week</span>
+                                        </button>
+                                        <button id="wt-btn-future" onclick="window.navigateWeek('future')"
+                                            class="px-2.5 py-1.5 text-[9px] font-black rounded-lg transition-all text-slate-650 dark:text-slate-355 hover:bg-slate-200 dark:hover:bg-slate-600/50 flex items-center space-x-1">
+                                            <span>Future Week -&gt;</span>
+                                        </button>
+                                    </div>
+                                    <button onclick="window.openWeeklyTargetsDatabase()"
+                                        class="flex items-center justify-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black uppercase tracking-widest px-4 py-2.5 rounded-lg transition-colors shadow-md shadow-blue-500/10 active:scale-95 shrink-0">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4">
+                                            </path>
+                                        </svg>
+                                        <span>Targets Database</span>
+                                    </button>
+                                    <select id="wt-select-week" class="hidden"></select>
+                                </div>
+                            </div>
+
+                            <!-- Metrics panel -->
+                            <div class="grid grid-cols-3 gap-2 sm:gap-4 w-full xl:w-auto shrink-0">
+                                <div
+                                    class="bg-slate-50 dark:bg-slate-900/50 px-3 py-2 rounded-xl border border-slate-100 dark:border-slate-800/80 text-center min-w-[80px] sm:min-w-[100px]">
+                                    <span
+                                        class="block text-[8px] font-black uppercase tracking-wider text-slate-400">Req.
+                                        Pace</span>
+                                    <span id="wt-req-pace"
+                                        class="text-xs font-black text-blue-600 dark:text-blue-400">0.00
+                                        Ch/D</span>
+                                </div>
+                                <div
+                                    class="bg-slate-50 dark:bg-slate-900/50 px-3 py-2 rounded-xl border border-slate-100 dark:border-slate-800/80 text-center min-w-[80px] sm:min-w-[100px]">
+                                    <span
+                                        class="block text-[8px] font-black uppercase tracking-wider text-slate-400">Actual
+                                        Pace</span>
+                                    <span id="wt-act-pace"
+                                        class="text-xs font-black text-emerald-600 dark:text-emerald-400">0.00
+                                        Ch/D</span>
+                                </div>
+                                <div
+                                    class="bg-slate-50 dark:bg-slate-900/50 px-3 py-2 rounded-xl border border-slate-100 dark:border-slate-800/80 text-center min-w-[80px] sm:min-w-[100px]">
+                                    <span
+                                        class="block text-[8px] font-black uppercase tracking-wider text-slate-400">Est.
+                                        Finish</span>
+                                    <span id="wt-est-finish"
+                                        class="text-xs font-black text-purple-600 dark:text-purple-400">N/A</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Targets List -->
+                        <div class="space-y-3">
+                            <div
+                                class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-1.5">
+                                <h4 class="text-[9px] font-black uppercase tracking-wider text-slate-400">
+                                    Weekly Target Checklist
+                                </h4>
+                            </div>
+                            <div id="weekly-targets-list" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <!-- Populated via JS -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Daily Targets Section -->
+                    <div id="daily-targets-setup-section"
+                        class="mt-8 md:mt-10 bg-white dark:bg-slate-800 p-5 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl md:rounded-[2.5rem] border border-slate-200/50 dark:border-slate-700/50 shadow-sm space-y-6">
+                        <!-- Header and Metrics -->
+                        <div
+                            class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-5 border-b border-slate-100 dark:border-slate-700/60 pb-5">
+                            <div class="flex flex-col md:flex-row md:items-center gap-4 w-full">
+                                <div class="flex items-center space-x-3">
+                                    <div
+                                        class="p-2.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-xl">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
+                                            </path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-base md:text-lg font-black dark:text-white leading-tight">Daily
+                                            Targets</h3>
+                                        <div class="flex flex-wrap items-center gap-2 mt-1">
+                                            <span id="dt-selected-date"
+                                                class="text-[10px] text-blue-600 dark:text-blue-400 font-black tracking-wider uppercase bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded border border-blue-100 dark:border-blue-800">[
+                                                Loading Date... ]</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div
+                                    class="flex items-center space-x-2 md:ml-auto w-full md:w-auto mt-2 md:mt-0 flex-wrap gap-2 justify-end">
+                                    <!-- Arrow navigation buttons for day -->
+                                    <div
+                                        class="flex items-center space-x-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200/50 dark:border-slate-700/50 shrink-0">
+                                        <button id="dt-btn-past" onclick="window.navigateDay('past')"
+                                            class="px-2.5 py-1.5 text-[9px] font-black rounded-lg transition-all text-slate-650 dark:text-slate-355 hover:bg-slate-200 dark:hover:bg-slate-600/50">
+                                            <span>&lt;- Previous Day</span>
+                                        </button>
+                                        <button id="dt-btn-present" onclick="window.navigateDay('present')"
+                                            class="px-2.5 py-1.5 text-[9px] font-black rounded-lg transition-all bg-blue-600 text-white shadow">
+                                            <span>Today</span>
+                                        </button>
+                                        <button id="dt-btn-future" onclick="window.navigateDay('future')"
+                                            class="px-2.5 py-1.5 text-[9px] font-black rounded-lg transition-all text-slate-650 dark:text-slate-355 hover:bg-slate-200 dark:hover:bg-slate-600/50">
+                                            <span>Next Day -&gt;</span>
+                                        </button>
+                                    </div>
+                                    <button onclick="window.openDailyTargetsDatabase()"
+                                        class="flex items-center justify-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black uppercase tracking-widest px-4 py-2.5 rounded-lg transition-colors shadow-md shadow-blue-500/10 active:scale-95 shrink-0">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4">
+                                            </path>
+                                        </svg>
+                                        <span>Targets Database</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Targets List -->
+                        <div class="space-y-3">
+                            <div
+                                class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-1.5">
+                                <h4 class="text-[9px] font-black uppercase tracking-wider text-slate-400">
+                                    Daily Target Checklist
+                                </h4>
+                            </div>
+                            <div id="daily-targets-list" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <!-- Populated via JS -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Create Daily Action Section -->
+                    <details id="add-daily-action-section"
+                        class="mt-8 md:mt-10 bg-white dark:bg-slate-800 rounded-2xl md:rounded-[2.5rem] border border-slate-200/50 dark:border-slate-700/50 shadow-sm group overflow-hidden">
+                        <summary
+                            class="cursor-pointer p-5 md:p-8 outline-none select-none list-none flex items-center justify-between border-b border-slate-100 dark:border-slate-700/60 hover:bg-slate-50/50 dark:hover:bg-slate-800/80 transition-colors [&::-webkit-details-marker]:hidden">
+                            <div class="flex items-center space-x-3">
+                                <div
+                                    class="p-2.5 bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 rounded-xl">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="text-base md:text-lg font-black dark:text-white leading-tight">Create
+                                        Daily
+                                        Action Tracker</h3>
+                                    <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-0.5">
+                                        Click to
+                                        configure and add new daily habits or trackers</p>
+                                </div>
+                            </div>
+                            <div
+                                class="p-2 rounded-xl bg-slate-100 dark:bg-slate-700/50 text-slate-400 group-open:rotate-180 transition-all duration-300 shrink-0 border border-slate-200/50 dark:border-slate-600/30">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                        d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </div>
+                        </summary>
+                        <div class="p-5 md:p-8 space-y-6">
+                            <div
+                                class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 items-end bg-slate-50 dark:bg-slate-900/40 p-5 rounded-2xl border border-slate-200/50 dark:border-slate-700/50">
+                                <div class="flex flex-col gap-1.5 w-full">
+                                    <label
+                                        class="text-[10px] font-black uppercase tracking-widest text-slate-400">Action
+                                        Title</label>
+                                    <input type="text" id="add-act-title"
+                                        class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 font-bold w-full"
+                                        placeholder="Action Title">
+                                </div>
+                                <div class="flex flex-col gap-1.5 w-full">
+                                    <label
+                                        class="text-[10px] font-black uppercase tracking-widest text-slate-400">Question
+                                        / Description (Optional)</label>
+                                    <input type="text" id="add-act-desc"
+                                        class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 font-bold w-full"
+                                        placeholder="Description (Optional, e.g. Read 10 pages?)">
+                                </div>
+                                <div class="flex flex-col gap-1.5 w-full">
+                                    <label
+                                        class="text-[10px] font-black uppercase tracking-widest text-slate-400">Start Date (Optional)</label>
+                                    <input type="date" id="add-act-start-date"
+                                        class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 font-bold w-full">
+                                </div>
+                                <div class="flex flex-col gap-1.5 w-full">
+                                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Theme
+                                        Color</label>
+                                    <select id="add-act-color"
+                                        class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 font-bold w-full">
+                                        <option value="indigo">Indigo</option>
+                                        <option value="emerald">Emerald</option>
+                                        <option value="orange">Orange</option>
+                                        <option value="purple">Purple</option>
+                                        <option value="rose">Rose</option>
+                                        <option value="cyan">Cyan</option>
+                                    </select>
+                                </div>
+                                <div class="flex flex-col gap-1.5 w-full">
+                                    <label
+                                        class="text-[10px] font-black uppercase tracking-widest text-slate-400">Icon</label>
+                                    <select id="add-act-icon"
+                                        class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 font-bold w-full">
+                                        <option value="generic">List / Default</option>
+                                        <option value="book">Graduation Cap / Academic</option>
+                                        <option value="briefcase">Briefcase / Professional</option>
+                                        <option value="gym">Heart / Gym & Health</option>
+                                        <option value="freelance">Lightning / Work & Code</option>
+                                    </select>
+                                </div>
+                                <div class="flex flex-col gap-1.5 w-full">
+                                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Track
+                                        (Optional)</label>
+                                    <select id="add-act-track"
+                                        class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 font-bold w-full">
+                                    </select>
+                                </div>
+                                <div class="col-span-full pt-2 flex justify-end">
+                                    <button onclick="window.appendNewAction()"
+                                        class="w-full sm:w-auto px-6 bg-blue-600 hover:bg-blue-700 text-white font-black text-[10px] md:text-[11px] uppercase tracking-widest py-3 rounded-lg transition-all active:scale-95 shadow-md shadow-blue-500/10">Create
+                                        Action</button>
+                                </div>
+                            </div>
+                        </div>
+                    </details>
+                </div>

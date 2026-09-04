@@ -1,0 +1,66 @@
+/* ==========================================================================
+   Daily Actions Page Styles & Modular Component System
+   Target: pages/Daily Actions/Daily Actions.css
+   ========================================================================== */
+
+/* Page Transition: Smooth Slide-up with Hardware Acceleration */
+@keyframes dailyActionsSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(18px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#page-daily-actions.animate-page-enter {
+    animation: dailyActionsSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ==========================================================================
+   Daily Action Cards & Heat Map UI Enhancements (High Performance & GPU)
+   ========================================================================== */
+#daily-actions-grid > div {
+    will-change: transform, box-shadow, border-color;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+}
+
+/* Day log box buttons inside Action Cards */
+div[id^="dt-log-"] button {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    will-change: transform, box-shadow, background-color;
+    user-select: none;
+}
+
+div[id^="dt-log-"] button:active {
+    transform: scale(0.92) translateZ(0);
+}
+
+/* Custom scrollbar for action card heatmap container */
+div[id^="dt-log-"] .overflow-y-auto {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(148, 163, 184, 0.4) transparent;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+}
+
+div[id^="dt-log-"] .overflow-y-auto::-webkit-scrollbar {
+    width: 4px;
+}
+
+div[id^="dt-log-"] .overflow-y-auto::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+div[id^="dt-log-"] .overflow-y-auto::-webkit-scrollbar-thumb {
+    background-color: rgba(148, 163, 184, 0.4);
+    border-radius: 9999px;
+}
+
+.dark div[id^="dt-log-"] .overflow-y-auto::-webkit-scrollbar-thumb {
+    background-color: rgba(148, 163, 184, 0.25);
+}
