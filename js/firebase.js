@@ -193,10 +193,16 @@ window.FirebaseService = {
         if (cachedConfig) {
             try {
                 const parsed = JSON.parse(cachedConfig);
-                if (parsed && parsed.apiKey) {
+                // STRICT ISOLATION GUARD: Enforce projectId strictly matches x-29-advance
+                if (parsed && parsed.apiKey && parsed.projectId === 'x-29-advance') {
                     config = parsed;
+                } else {
+                    console.warn("Purged invalid or legacy cached firebaseConfig:", parsed && parsed.projectId);
+                    safeStorage.removeItem('firebaseConfig');
                 }
-            } catch(e) {}
+            } catch(e) {
+                safeStorage.removeItem('firebaseConfig');
+            }
         }
         if (!config) {
             config = firebaseConfig;
@@ -207,7 +213,7 @@ window.FirebaseService = {
         fetch('/api/config').then(async res => {
             if (!res.ok) return;
             const freshConfig = await res.json();
-            if (freshConfig && freshConfig.apiKey) {
+            if (freshConfig && freshConfig.apiKey && freshConfig.projectId === 'x-29-advance') {
                 safeStorage.setItem('firebaseConfig', JSON.stringify(freshConfig));
             }
             const serverDateStr = res.headers.get('Date');
@@ -1223,9 +1229,11 @@ window.initializeCloudWorkspace = window.FirebaseService.initializeCloudWorkspac
 window.resetLocalWorkspace = window.FirebaseService.resetLocalWorkspace.bind(window.FirebaseService);
 window.showSync = showSync;
 
-// Cross-tab real-time state synchronization listener
+// Cross-tab real-time state synchronization listener (strictly namespaced for X-29 Advance)
 window.addEventListener('storage', (e) => {
-    if ((e.key === 'local_app_state' || e.key === 'appState') && e.newValue) {
+    const targetKey1 = (window.safeStorage && window.safeStorage._k ? window.safeStorage._k('local_app_state') : 'x29_adv_local_app_state');
+    const targetKey2 = (window.safeStorage && window.safeStorage._k ? window.safeStorage._k('appState') : 'x29_adv_appState');
+    if ((e.key === targetKey1 || e.key === targetKey2) && e.newValue) {
         try {
             const data = JSON.parse(e.newValue);
             if (data && typeof data === 'object' && typeof window.applyFullAppState === 'function') {

@@ -1829,17 +1829,17 @@
 
     if (window.timerAnalyticsRange === undefined) {
         let stored = null;
-        try { stored = localStorage.getItem('x29_timerAnalyticsRange'); } catch (e) {}
+        try { stored = safeStorage.getItem('x29_timerAnalyticsRange'); } catch (e) {}
         window.timerAnalyticsRange = (stored !== null && !isNaN(parseInt(stored, 10))) ? parseInt(stored, 10) : ((window.AppState && window.AppState.timerAnalyticsRange) || 180);
     }
     if (window.timerAnalyticsChartStyle === undefined) {
         let stored = null;
-        try { stored = localStorage.getItem('x29_timerAnalyticsChartStyle'); } catch (e) {}
+        try { stored = safeStorage.getItem('x29_timerAnalyticsChartStyle'); } catch (e) {}
         window.timerAnalyticsChartStyle = stored || ((window.AppState && window.AppState.timerAnalyticsChartStyle) || 'combo');
     }
     if (window.timerAnalyticsGrouping === undefined) {
         let stored = null;
-        try { stored = localStorage.getItem('x29_timerAnalyticsGrouping'); } catch (e) {}
+        try { stored = safeStorage.getItem('x29_timerAnalyticsGrouping'); } catch (e) {}
         window.timerAnalyticsGrouping = (stored && stored !== 'hourly') ? stored : ((window.AppState && window.AppState.timerAnalyticsGrouping) || 'daily');
     }
     if (window.timerAnalyticsDayOffset === undefined) window.timerAnalyticsDayOffset = 0;
@@ -1859,7 +1859,7 @@
         if (window.timerAnalyticsRange !== 1) {
             window.timerAnalyticsRange = 1;
             if (window.AppState) window.AppState.timerAnalyticsRange = 1;
-            try { localStorage.setItem('x29_timerAnalyticsRange', '1'); } catch (e) {}
+            try { safeStorage.setItem('x29_timerAnalyticsRange', '1'); } catch (e) {}
         }
         const currentOffset = window.timerAnalyticsDayOffset || 0;
         const newOffset = currentOffset + delta;
@@ -2097,7 +2097,7 @@
             window.AppState._lastFilterChangeTime = Date.now();
         }
         try {
-            localStorage.setItem('x29_timerAnalyticsRange', String(days));
+            safeStorage.setItem('x29_timerAnalyticsRange', String(days));
         } catch (e) {}
         window.updateTimerAnalyticsControls();
         window.renderTimerAnalyticsChart();
@@ -2118,7 +2118,7 @@
             window.AppState._lastFilterChangeTime = Date.now();
         }
         try {
-            localStorage.setItem('x29_timerAnalyticsGrouping', String(grouping));
+            safeStorage.setItem('x29_timerAnalyticsGrouping', String(grouping));
         } catch (e) {}
         window.updateTimerAnalyticsControls();
         window.renderTimerAnalyticsChart();
@@ -2134,7 +2134,7 @@
             window.AppState._lastFilterChangeTime = Date.now();
         }
         try {
-            localStorage.setItem('x29_timerAnalyticsChartStyle', String(style));
+            safeStorage.setItem('x29_timerAnalyticsChartStyle', String(style));
         } catch (e) {}
         window.updateTimerAnalyticsControls();
         window.renderTimerAnalyticsChart();
@@ -3154,7 +3154,7 @@
             window.AppState._lastFilterChangeTime = Date.now();
         }
         try {
-            localStorage.setItem('x29_spectraHeatmapRange', String(days));
+            safeStorage.setItem('x29_spectraHeatmapRange', String(days));
         } catch (e) {}
         window.setSpectraHeatmapRangeUI(days);
         if (typeof window.debouncedSaveTimerPreferences === 'function') {
@@ -4035,7 +4035,7 @@
             window.AppState._lastFilterChangeTime = Date.now();
         }
         try {
-            localStorage.setItem('x29_sessionHistoryFilter', String(filter));
+            safeStorage.setItem('x29_sessionHistoryFilter', String(filter));
         } catch (e) {}
         window.setSessionHistoryFilterUI(filter);
         if (typeof window.debouncedSaveTimerPreferences === 'function') {

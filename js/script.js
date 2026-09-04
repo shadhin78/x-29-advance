@@ -1049,6 +1049,9 @@ window.toggleRevisionChapter = function (sub, chNum, isChecked) {
 
 
 function generateStudyPlan() {
+    if (!window.tracks || !Array.isArray(window.tracks) || window.tracks.length === 0) {
+        return [];
+    }
     const startDate = new Date(AppState.PLAN_START_DATE);
     const endDate = new Date(AppState.PLAN_END_DATE);
 
@@ -10141,13 +10144,13 @@ window.renderSuccessResults = function () {
 * Split during module extraction.
 * No logic changes in this phase.
 */
-window.outcomeDateSortOrder = (typeof localStorage !== 'undefined' ? localStorage.getItem('outcome_date_sort_order') : null) || 'desc';
+window.outcomeDateSortOrder = (typeof safeStorage !== 'undefined' ? safeStorage.getItem('outcome_date_sort_order') : null) || 'desc';
 
 window.toggleOutcomeDateSort = function () {
     window.outcomeDateSortOrder = (window.outcomeDateSortOrder === 'asc') ? 'desc' : 'asc';
     try {
-        if (typeof localStorage !== 'undefined') {
-            localStorage.setItem('outcome_date_sort_order', window.outcomeDateSortOrder);
+        if (typeof safeStorage !== 'undefined') {
+            safeStorage.setItem('outcome_date_sort_order', window.outcomeDateSortOrder);
         }
     } catch (e) {}
     window.renderResults();
@@ -22826,7 +22829,7 @@ window.renderDashboardOutcomeCard = function () {
     });
 
     // Sort by date according to the chosen/saved order
-    const sortOrder = window.outcomeDateSortOrder || (typeof localStorage !== 'undefined' ? localStorage.getItem('outcome_date_sort_order') : null) || 'desc';
+    const sortOrder = window.outcomeDateSortOrder || (typeof safeStorage !== 'undefined' ? safeStorage.getItem('outcome_date_sort_order') : null) || 'desc';
     const isAsc = sortOrder === 'asc';
 
     inputtedItems.sort((a, b) => {
