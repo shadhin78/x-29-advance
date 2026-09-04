@@ -4,7 +4,8 @@
   "description": "Dynamic Multi-Track Execution & Tracking Dashboard",
   "main": "js/dev-server.js",
   "scripts": {
-    "dev": "node js/dev-server.js"
+    "dev": "node js/dev-server.js",
+    "test:rules": "mocha tests/firestore-rules.test.js"
   },
   "dependencies": {
     "firebase": "^12.17.1",

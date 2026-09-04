@@ -1,42 +1,205 @@
 rules_version = '2';
 
+/**
+ * X-29 Advance Study Dashboard & PWA - Production-Grade Firestore Security Rules
+ * Project ID: x-29-advance
+ *
+ * Architecture Principles:
+ * 1. Default-Deny: Any path or operation not explicitly permitted is rejected.
+ * 2. Least Privilege: Authenticated users can only read, write, and delete their own user document.
+ * 3. UID Spoofing & Ownership Protection: Path parameter userId is strictly bound to request.auth.uid.
+ *    Any internal userId/uid fields cannot be spoofed or mutated during updates.
+ * 4. Privilege Escalation Prevention: Forbidden keys (isAdmin, role, permissions, etc.) are blocked.
+ * 5. Enumeration Guard: Listing or querying the entire /users collection is restricted to admins only.
+ * 6. Admin SDK Independence: Backup/restore systems running via Firebase Admin SDK bypass these
+ *    rules server-side; zero public backdoors or wildcards are created.
+ */
+
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Helper function: Check if user is authenticated
+    // =========================================================================
+    // HELPER FUNCTIONS
+    // =========================================================================
+
+    // 1. Check if the incoming request is authenticated with Firebase Authentication
     function isAuthenticated() {
-      return request.auth != null;
+      return request.auth != null && request.auth.uid != null;
     }
 
-    // Helper function: Check if the logged-in user matches the resource owner ID
+    // 2. Check if the authenticated user is the designated owner of the path
     function isOwner(userId) {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
-    // 1. User document & subcollections (/users/{userId}/...)
-    // Each user can read/write only their own document and subcollections
-    match /users/{userId} {
-      allow read, write: if isOwner(userId);
-      
-      match /{allSubcollections=**} {
-        allow read, write: if isOwner(userId);
-      }
-    }
-
-    // 2. Top-level documents indexed by userId (e.g., /appState/{userId}, /userState/{userId})
-    match /{collection}/{userId} {
-      allow read, write: if isOwner(userId);
-    }
-
-    // 3. Top-level collection documents containing a 'uid' or 'userId' field matching current user
-    match /{document=**} {
-      allow read, write: if isAuthenticated() && (
-        (resource != null && (resource.data.uid == request.auth.uid || resource.data.userId == request.auth.uid)) ||
-        (request.resource != null && (request.resource.data.uid == request.auth.uid || request.resource.data.userId == request.auth.uid))
+    // 3. Check if the caller has verified administrative privileges
+    // Supports Firebase Custom Claims (request.auth.token.admin == true)
+    // with secure fallback to verified primary admin email identity
+    function isAdmin() {
+      return isAuthenticated() && (
+        request.auth.token.get('admin', false) == true ||
+        (request.auth.token.email != null &&
+         request.auth.token.email.lower() == 'ris2k29@gmail.com' &&
+         request.auth.token.email_verified == true)
       );
     }
 
-    // 4. Fallback security: Deny all unauthenticated or unmatched access
+    // 4. Prevent privilege escalation or unauthorized security/role fields
+    // Normal users cannot inject or alter administrative and system fields
+    function hasNoPrivilegeEscalation() {
+      let forbiddenKeys = [
+        'admin', 'isAdmin', 'role', 'roles', 'permissions',
+        'isSuperUser', 'verified', 'disabled', 'claims'
+      ];
+      return !request.resource.data.keys().hasAny(forbiddenKeys);
+    }
+
+    // 5. Enforce ownership consistency on document CREATE:
+    // If 'userId' or 'uid' fields are included in the document body,
+    // they MUST match the path userId parameter and the caller's auth UID.
+    function isValidOwnerCreate(userId) {
+      return (!('userId' in request.resource.data) || request.resource.data.userId == userId) &&
+             (!('uid' in request.resource.data) || request.resource.data.uid == userId);
+    }
+
+    // 6. Enforce ownership immutability on document UPDATE:
+    // Prevent ownership transfer, UID alteration, or spoofing another user's identity.
+    function isValidOwnerUpdate(userId) {
+      let data = request.resource.data;
+      let prevData = resource.data;
+      let affected = data.diff(prevData).affectedKeys();
+
+      // If userId exists in the original document, it cannot be modified
+      let noUserIdTampering = (!('userId' in prevData) || !affected.hasAny(['userId']) || data.userId == prevData.userId);
+
+      // If uid exists in the original document, it cannot be modified
+      let noUidTampering = (!('uid' in prevData) || !affected.hasAny(['uid']) || data.uid == prevData.uid);
+
+      // Any written userId or uid must match the path userId and request.auth.uid
+      let matchesOwner = (!('userId' in data) || data.userId == userId) &&
+                         (!('uid' in data) || data.uid == userId);
+
+      return noUserIdTampering && noUidTampering && matchesOwner;
+    }
+
+    // 7. Whitelist allowed top-level keys for the user workspace document
+    // Rejects unexpected keys and arbitrary document structure injection
+    function hasOnlyAllowedUserKeys() {
+      let allowedKeys = [
+        'tasks', 'tracks', 'customSyllabus', 'syllabusStructure', 'customPrograms',
+        'customActions', 'paceGoals', 'passedItems', 'celebrationTargets', 'revisionData',
+        'programVisibility', 'subjectTimeLinks', 'successResults', 'timerLogs',
+        'dailyFocusHoursTarget', 'dailyFocusHoursTargetDate', 'dailyFocusHoursTargetHistory',
+        'timerAnalyticsRange', 'timerAnalyticsGrouping', 'timerAnalyticsChartStyle',
+        'spectraHeatmapRange', 'sessionHistoryFilter', 'subjectFocusTargets', 'dashboardConfig',
+        'weeklyTargetsDatabase', 'monthlyTargetsDatabase', 'dailyTargetsDatabase',
+        'scheduleBlocks', 'scheduleBlocks2', 'scheduleGroups', 'fiscalLedger',
+        'examSessions', 'examRoutine', 'selectedCountdownExamId', 'activeTimerState',
+        'activeRoutineSet', 'subjectColors', '_tombstones', '_lastWriteId',
+        '_clientWriteTimestamp', 'updatedAt', '_syncDiagnostic', 'userId', 'uid', 'createdAt'
+      ];
+      return request.resource.data.keys().hasOnly(allowedKeys) &&
+             request.resource.data.keys().size() <= 48;
+    }
+
+    // 8. Field-level data type verification: Ensure valid data integrity
+    function isValidUserDataTypes() {
+      let data = request.resource.data;
+      return (!('tasks' in data) || data.tasks is list) &&
+             (!('tracks' in data) || data.tracks is list) &&
+             (!('customSyllabus' in data) || data.customSyllabus is map) &&
+             (!('syllabusStructure' in data) || data.syllabusStructure is map) &&
+             (!('customPrograms' in data) || data.customPrograms is map) &&
+             (!('customActions' in data) || data.customActions is list) &&
+             (!('paceGoals' in data) || data.paceGoals is list) &&
+             (!('passedItems' in data) || data.passedItems is map) &&
+             (!('celebrationTargets' in data) || data.celebrationTargets is map) &&
+             (!('revisionData' in data) || data.revisionData is map) &&
+             (!('programVisibility' in data) || data.programVisibility is map) &&
+             (!('subjectTimeLinks' in data) || data.subjectTimeLinks is map) &&
+             (!('successResults' in data) || data.successResults is list) &&
+             (!('timerLogs' in data) || data.timerLogs is list) &&
+             (!('dailyFocusHoursTarget' in data) || (data.dailyFocusHoursTarget is number && data.dailyFocusHoursTarget >= 0)) &&
+             (!('dailyFocusHoursTargetDate' in data) || data.dailyFocusHoursTargetDate is string) &&
+             (!('dailyFocusHoursTargetHistory' in data) || data.dailyFocusHoursTargetHistory is list) &&
+             (!('timerAnalyticsRange' in data) || data.timerAnalyticsRange is number) &&
+             (!('timerAnalyticsGrouping' in data) || data.timerAnalyticsGrouping is string) &&
+             (!('timerAnalyticsChartStyle' in data) || data.timerAnalyticsChartStyle is string) &&
+             (!('spectraHeatmapRange' in data) || data.spectraHeatmapRange is number) &&
+             (!('sessionHistoryFilter' in data) || data.sessionHistoryFilter is string) &&
+             (!('subjectFocusTargets' in data) || data.subjectFocusTargets is map) &&
+             (!('dashboardConfig' in data) || data.dashboardConfig is map) &&
+             (!('weeklyTargetsDatabase' in data) || data.weeklyTargetsDatabase is map) &&
+             (!('monthlyTargetsDatabase' in data) || data.monthlyTargetsDatabase is map) &&
+             (!('dailyTargetsDatabase' in data) || data.dailyTargetsDatabase is map) &&
+             (!('scheduleBlocks' in data) || data.scheduleBlocks is list) &&
+             (!('scheduleBlocks2' in data) || data.scheduleBlocks2 is list) &&
+             (!('scheduleGroups' in data) || data.scheduleGroups is list) &&
+             (!('fiscalLedger' in data) || data.fiscalLedger is map) &&
+             (!('examSessions' in data) || data.examSessions is list) &&
+             (!('examRoutine' in data) || data.examRoutine is list) &&
+             (!('selectedCountdownExamId' in data) || data.selectedCountdownExamId is string) &&
+             (!('activeTimerState' in data) || data.activeTimerState is map) &&
+             (!('activeRoutineSet' in data) || (data.activeRoutineSet is number && data.activeRoutineSet > 0)) &&
+             (!('subjectColors' in data) || data.subjectColors is map) &&
+             (!('_tombstones' in data) || data._tombstones is map) &&
+             (!('_lastWriteId' in data) || data._lastWriteId is string) &&
+             (!('_clientWriteTimestamp' in data) || data._clientWriteTimestamp is number) &&
+             (!('_syncDiagnostic' in data) || data._syncDiagnostic is map) &&
+             (!('userId' in data) || data.userId is string) &&
+             (!('uid' in data) || data.uid is string) &&
+             (!('createdAt' in data) || data.createdAt is timestamp || data.createdAt is number || data.createdAt is string) &&
+             (!('updatedAt' in data) || data.updatedAt is timestamp || data.updatedAt is number);
+    }
+
+    // =========================================================================
+    // COLLECTION RULES
+    // =========================================================================
+
+    // 1. User Workspaces Collection (/users/{userId})
+    match /users/{userId} {
+      // Individual document read: strictly owner or admin
+      // Direct onSnapshot or getDoc on /users/{userId}
+      allow get: if isOwner(userId) || isAdmin();
+
+      // Collection enumeration protection:
+      // Prevent normal users from listing or querying all users in the collection
+      allow list: if isAdmin();
+
+      // Document creation: Owner can only create their own document with valid schema
+      allow create: if (
+        isOwner(userId) &&
+        isValidOwnerCreate(userId) &&
+        hasNoPrivilegeEscalation() &&
+        hasOnlyAllowedUserKeys() &&
+        isValidUserDataTypes()
+      ) || isAdmin();
+
+      // Document update: Owner can only update their own document, no ownership transfer
+      allow update: if (
+        isOwner(userId) &&
+        isValidOwnerUpdate(userId) &&
+        hasNoPrivilegeEscalation() &&
+        hasOnlyAllowedUserKeys() &&
+        isValidUserDataTypes()
+      ) || isAdmin();
+
+      // Document deletion: Only owner or admin can delete the user document
+      allow delete: if isOwner(userId) || isAdmin();
+
+      // 2. User Subcollections (/users/{userId}/{subcollection}/{subDocId})
+      // Sandboxes all nested user subcollections under the same owner
+      match /{subcollection}/{subDocId} {
+        allow get, list: if isOwner(userId) || isAdmin();
+        allow create, update: if (isOwner(userId) && hasNoPrivilegeEscalation()) || isAdmin();
+        allow delete: if isOwner(userId) || isAdmin();
+      }
+    }
+
+    // =========================================================================
+    // DEFAULT-DENY FALLBACK
+    // =========================================================================
+    // Deny all unauthenticated or unmatched access across any other collection path
     match /{document=**} {
       allow read, write: if false;
     }
