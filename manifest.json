@@ -1,0 +1,31 @@
+{
+  "name": "X-29",
+  "short_name": "X-29",
+  "description": "Dynamic Multi-Track Execution & Tracking Dashboard",
+  "start_url": "index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "natural",
+  "background_color": "#0b0f19",
+  "theme_color": "#0b0f19",
+  "icons": [
+    {
+      "src": "icons/logo-x.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/logo-x.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/logo-sticker.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

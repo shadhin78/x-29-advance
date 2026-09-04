@@ -1,0 +1,13 @@
+{
+  "name": "x-29",
+  "version": "1.0.0",
+  "description": "Dynamic Multi-Track Execution & Tracking Dashboard",
+  "main": "js/dev-server.js",
+  "scripts": {
+    "dev": "node js/dev-server.js"
+  },
+  "dependencies": {
+    "firebase": "^12.17.1",
+    "firebase-admin": "^14.2.0"
+  }
+}

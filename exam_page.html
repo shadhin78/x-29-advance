@@ -1,0 +1,1320 @@
+<!-- ====================================================================
+     EXAM PAGE ARCHIVE / DRAFT BACKUP
+     This file contains the full HTML markup and JavaScript logic
+     for the Exam Routine & Countdown system.
+     ==================================================================== -->
+
+<!-- 1. NAVIGATION LINK SNIPPET -->
+<!-- Add to index.html sidebar nav inside <nav class="space-y-1.5 md:space-y-2"> -->
+<button id="btn-nav-exam" onclick="window.switchPage('exam'); window.closeMobileSidebar()"
+    class="w-full text-left border-2 px-4 py-3 rounded-2xl font-black text-xs transition-all duration-300 hover:translate-x-1.5 hover:shadow-md active:scale-98 flex items-center gap-3">
+    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01m-.01 4h.01">
+        </path>
+    </svg>
+    Exam
+</button>
+
+<!-- 2. MAIN PAGE CONTAINER SNIPPET -->
+<!-- Add to index.html main page content container -->
+<div id="page-exam" class="hidden space-y-4 sm:space-y-6 md:space-y-8 animate-page-enter">
+    <!-- Top Hero Banner: Next Upcoming Exam Countdown -->
+    <div id="exam-countdown-hero" class="relative overflow-hidden bg-gradient-to-br from-slate-900 via-rose-950 to-slate-900 text-white rounded-2xl sm:rounded-3xl md:rounded-[2.5rem] p-4 sm:p-6 md:p-10 shadow-2xl border border-rose-500/20 mb-6 md:mb-10">
+        <!-- Background Decorative Glow -->
+        <div class="absolute -top-24 -right-24 w-96 h-96 bg-rose-600/20 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-24 -left-24 w-96 h-96 bg-amber-600/15 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="relative z-10 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-6 md:gap-8">
+            <!-- Left Info Block -->
+            <div class="flex-1 space-y-3 sm:space-y-4 min-w-0">
+                <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-rose-500/20 text-rose-400 border border-rose-500/30 shrink-0">
+                        <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
+                        Live Countdown
+                    </span>
+                    <span id="exam-hero-subject-badge" class="px-2.5 sm:px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-white/10 text-slate-200 border border-white/10 truncate max-w-[180px] sm:max-w-xs shrink-0">
+                        --
+                    </span>
+                    <div class="flex items-center gap-1.5 bg-black/40 border border-white/15 px-2.5 sm:px-3 py-1 rounded-xl text-xs font-bold text-slate-200 max-w-full min-w-0">
+                        <label for="exam-hero-select-target" class="text-[10px] font-black uppercase text-rose-300 tracking-wider shrink-0">Pin:</label>
+                        <select id="exam-hero-select-target" onchange="window.onSelectCountdownTarget(this.value)" class="bg-transparent text-white font-bold text-xs outline-none cursor-pointer truncate min-w-0 max-w-[190px] sm:max-w-xs md:max-w-sm">
+                            <option value="auto" class="bg-slate-900 text-white">⚡ Auto (Nearest Upcoming Subject Exam)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <h2 id="exam-hero-title" class="text-xl sm:text-2xl md:text-4xl font-black tracking-tight leading-tight text-white break-words">
+                        No Exam Scheduled
+                    </h2>
+                    <p id="exam-hero-details" class="text-xs sm:text-sm text-rose-200/80 font-medium mt-1 flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                        <svg class="w-4 h-4 text-rose-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span>Add an upcoming exam to activate the live countdown.</span>
+                    </p>
+                </div>
+
+                <div id="exam-hero-meta" class="flex flex-wrap items-center gap-2 sm:gap-4 text-xs font-bold text-slate-300 pt-1">
+                    <div class="flex items-center gap-1.5 bg-white/5 border border-white/10 px-2.5 sm:px-3 py-1.5 rounded-xl">
+                        <svg class="w-4 h-4 text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        <span id="exam-hero-venue">Venue: --</span>
+                    </div>
+                    <div class="flex items-center gap-1.5 bg-white/5 border border-white/10 px-2.5 sm:px-3 py-1.5 rounded-xl">
+                        <svg class="w-4 h-4 text-rose-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        <span id="exam-hero-datetime">Date: --</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Live Digital Countdown Timer -->
+            <div class="w-full lg:w-auto shrink-0 bg-black/40 backdrop-blur-xl border border-white/15 p-3.5 sm:p-5 md:p-6 rounded-2xl sm:rounded-3xl shadow-2xl flex flex-col items-center">
+                <span class="text-[9px] font-black uppercase tracking-widest text-rose-300/80 mb-2 sm:mb-3">Time Remaining</span>
+                <div class="grid grid-cols-4 gap-1.5 sm:gap-2.5 md:gap-3 text-center w-full sm:w-auto">
+                    <div class="bg-white/10 border border-white/15 p-2 sm:p-3 rounded-xl sm:rounded-2xl min-w-0 sm:min-w-[70px] md:min-w-[75px] flex-1 flex flex-col justify-center items-center">
+                        <div id="exam-cd-val-1" class="text-xl sm:text-2xl md:text-3xl font-black text-white tracking-wider tabular-nums leading-none sm:leading-tight">00</div>
+                        <div id="exam-cd-lbl-1" class="text-[8px] sm:text-[9px] font-black uppercase text-rose-300 mt-1 truncate">Days</div>
+                    </div>
+                    <div class="bg-white/10 border border-white/15 p-2 sm:p-3 rounded-xl sm:rounded-2xl min-w-0 sm:min-w-[70px] md:min-w-[75px] flex-1 flex flex-col justify-center items-center">
+                        <div id="exam-cd-val-2" class="text-xl sm:text-2xl md:text-3xl font-black text-white tracking-wider tabular-nums leading-none sm:leading-tight">00</div>
+                        <div id="exam-cd-lbl-2" class="text-[8px] sm:text-[9px] font-black uppercase text-rose-300 mt-1 truncate">Hours</div>
+                    </div>
+                    <div class="bg-white/10 border border-white/15 p-2 sm:p-3 rounded-xl sm:rounded-2xl min-w-0 sm:min-w-[70px] md:min-w-[75px] flex-1 flex flex-col justify-center items-center">
+                        <div id="exam-cd-val-3" class="text-xl sm:text-2xl md:text-3xl font-black text-white tracking-wider tabular-nums leading-none sm:leading-tight">00</div>
+                        <div id="exam-cd-lbl-3" class="text-[8px] sm:text-[9px] font-black uppercase text-rose-300 mt-1 truncate">Mins</div>
+                    </div>
+                    <div class="bg-white/10 border border-white/15 p-2 sm:p-3 rounded-xl sm:rounded-2xl min-w-0 sm:min-w-[70px] md:min-w-[75px] flex-1 flex flex-col justify-center items-center">
+                        <div id="exam-cd-val-4" class="text-xl sm:text-2xl md:text-3xl font-black text-rose-400 tracking-wider tabular-nums leading-none sm:leading-tight">00</div>
+                        <div id="exam-cd-lbl-4" class="text-[8px] sm:text-[9px] font-black uppercase text-rose-300 mt-1 truncate">Secs</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Routine Section -->
+    <div class="bg-white dark:bg-slate-800 p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl md:rounded-[2.5rem] border border-slate-200/50 dark:border-slate-700/50 shadow-sm flex flex-col">
+        <!-- Section Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5 md:mb-6 border-b border-slate-100 dark:border-slate-700/60 pb-4">
+            <div class="flex items-center space-x-3">
+                <div class="p-2.5 bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 rounded-2xl border border-rose-100 dark:border-rose-800/50 shadow-sm shrink-0">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01m-.01 4h.01"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-base md:text-lg font-black dark:text-white leading-tight">Exam Routine & Timetable</h3>
+                    <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-0.5">Manage schedules, venues, and study targets for upcoming tests</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <button onclick="window.openSessionModal()" class="w-full sm:w-auto justify-center bg-rose-600 hover:bg-rose-700 text-white font-black text-xs uppercase tracking-widest px-4 py-2.5 rounded-xl transition-all shadow-md active:scale-95 flex items-center gap-2 min-h-[42px]">
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+                    <span>Add Session</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Search & Filter Controls -->
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-6">
+            <!-- Search Box -->
+            <div class="relative flex-1 max-w-full sm:max-w-md">
+                <svg class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                <input id="exam-search-input" type="text" oninput="window.renderExamRoutine()" placeholder="Search exam title, subject, program..." class="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold text-slate-800 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-rose-500 outline-none transition-all min-h-[42px]">
+            </div>
+
+            <!-- Filter Tabs -->
+            <div class="grid grid-cols-3 w-full sm:w-auto sm:flex items-center bg-slate-100 dark:bg-slate-700/60 p-1 rounded-xl gap-1 shrink-0">
+                <button onclick="window.setExamFilter('all')" id="btn-exam-filter-all" class="justify-center py-2 px-2.5 sm:px-3 sm:py-1.5 rounded-lg text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-all min-h-[34px] flex items-center">All</button>
+                <button onclick="window.setExamFilter('upcoming')" id="btn-exam-filter-upcoming" class="justify-center py-2 px-2.5 sm:px-3 sm:py-1.5 rounded-lg text-[10px] sm:text-[11px] font-black uppercase tracking-wider bg-white dark:bg-slate-800 text-slate-800 dark:text-white shadow-sm transition-all min-h-[34px] flex items-center">Upcoming</button>
+                <button onclick="window.setExamFilter('completed')" id="btn-exam-filter-completed" class="justify-center py-2 px-2.5 sm:px-3 sm:py-1.5 rounded-lg text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-all min-h-[34px] flex items-center">Completed</button>
+            </div>
+        </div>
+
+        <!-- Exam Routine Session Blocks Container -->
+        <div id="exam-routine-container" class="flex flex-col gap-4 sm:gap-6 md:gap-8">
+            <!-- Dynamically populated via window.renderExamRoutine() -->
+        </div>
+    </div>
+</div>
+
+<!-- 3. MODAL SNIPPETS -->
+<!-- Add / Edit Session Modal -->
+<div id="session-modal" class="hidden fixed inset-0 z-[999999] bg-slate-900/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white dark:bg-slate-900 border-t sm:border border-slate-200 dark:border-slate-800 rounded-t-3xl sm:rounded-3xl shadow-2xl w-full max-w-lg max-h-[92vh] sm:max-h-[88vh] overflow-hidden transform transition-all flex flex-col">
+        <!-- Header -->
+        <div class="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/30 shrink-0">
+            <div class="flex items-center space-x-3 min-w-0">
+                <div class="p-2.5 bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 rounded-xl shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                </div>
+                <div class="min-w-0">
+                    <h3 id="session-modal-title" class="text-sm md:text-base font-black text-slate-800 dark:text-white uppercase tracking-wider truncate">Add Session</h3>
+                    <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider truncate">Create a timeframe group for exams</p>
+                </div>
+            </div>
+            <button onclick="window.closeSessionModal()" class="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all min-w-[36px] min-h-[36px] flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+
+        <!-- Form Body -->
+        <form onsubmit="window.saveSessionForm(event)" class="p-4 sm:p-5 md:p-6 space-y-4 overflow-y-auto max-h-[calc(92vh-75px)] sm:max-h-[calc(88vh-75px)]">
+            <input type="hidden" id="session-id">
+
+            <div>
+                <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Select Program *</label>
+                <select id="session-program" required class="w-full min-h-[42px] px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 dark:text-white focus:ring-2 focus:ring-rose-500 outline-none">
+                    <!-- Populated dynamically -->
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Session Name (Optional)</label>
+                <input type="text" id="session-name" placeholder="e.g. Midterm Exams, Quiz Week" class="w-full min-h-[42px] px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 dark:text-white focus:ring-2 focus:ring-rose-500 outline-none">
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Start Date (Optional)</label>
+                    <input type="date" id="session-start-date" class="w-full min-h-[42px] px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 dark:text-white focus:ring-2 focus:ring-rose-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">End Date (Optional)</label>
+                    <input type="date" id="session-end-date" class="w-full min-h-[42px] px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 dark:text-white focus:ring-2 focus:ring-rose-500 outline-none">
+                </div>
+            </div>
+
+            <div class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2.5 sm:gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+                <button type="button" onclick="window.closeSessionModal()" class="w-full sm:w-auto px-4 py-2.5 text-xs font-bold text-slate-500 hover:text-slate-800 dark:hover:text-white rounded-xl bg-slate-100 sm:bg-transparent dark:bg-slate-800 sm:dark:bg-transparent min-h-[42px] flex items-center justify-center transition-all">Cancel</button>
+                <button type="submit" class="w-full sm:w-auto bg-rose-600 hover:bg-rose-700 text-white text-xs font-black uppercase tracking-wider px-5 py-2.5 rounded-xl shadow-md transition-all active:scale-95 min-h-[42px] flex items-center justify-center">Save Session</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Add / Edit Exam Modal -->
+<div id="exam-modal" class="hidden fixed inset-0 z-[999999] bg-slate-900/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white dark:bg-slate-900 border-t sm:border border-slate-200 dark:border-slate-800 rounded-t-3xl sm:rounded-3xl shadow-2xl w-full max-w-lg max-h-[92vh] sm:max-h-[88vh] overflow-hidden transform transition-all flex flex-col">
+        <!-- Header -->
+        <div class="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/30 shrink-0">
+            <div class="flex items-center space-x-3 min-w-0">
+                <div class="p-2.5 bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 rounded-xl shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                </div>
+                <div class="min-w-0">
+                    <h3 id="exam-modal-title" class="text-sm md:text-base font-black text-slate-800 dark:text-white uppercase tracking-wider truncate">Add Exam</h3>
+                    <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider truncate">Configure exam routine item</p>
+                </div>
+            </div>
+            <button onclick="window.closeExamModal()" class="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all min-w-[36px] min-h-[36px] flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+
+        <!-- Form Body -->
+        <form onsubmit="window.saveExamForm(event)" class="p-4 sm:p-5 md:p-6 space-y-4 overflow-y-auto max-h-[calc(92vh-75px)] sm:max-h-[calc(88vh-75px)]">
+            <input type="hidden" id="exam-id">
+            <input type="hidden" id="exam-session-id">
+
+            <div id="exam-session-info-display" class="p-3 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs font-semibold text-slate-800 dark:text-white mb-2 hidden">
+                <!-- Loaded dynamically -->
+            </div>
+
+            <input type="hidden" id="exam-mode" value="program">
+
+            <!-- Mode Switcher: Program Wise vs Non-Program Wise -->
+            <div class="flex flex-col gap-1">
+                <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Exam Type / Mode *</label>
+                <div class="grid grid-cols-2 gap-2 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-2xl border border-slate-200/60 dark:border-slate-700/60">
+                    <button type="button" id="btn-exam-mode-program" onclick="window.setExamMode('program')" class="py-2 px-3 rounded-xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 bg-rose-600 text-white shadow-sm min-h-[38px]">
+                        🎓 Program Wise
+                    </button>
+                    <button type="button" id="btn-exam-mode-non-program" onclick="window.setExamMode('non-program')" class="py-2 px-3 rounded-xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 text-slate-600 dark:text-slate-300 hover:bg-white/50 dark:hover:bg-slate-700/50 min-h-[38px]">
+                        ⚙️ Non-Program Wise
+                    </button>
+                </div>
+            </div>
+
+            <!-- Program-Wise Container -->
+            <div id="exam-program-wise-fields" class="space-y-4">
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Select Program *</label>
+                    <select id="exam-program-select" onchange="window.onExamProgramChange()" class="w-full min-h-[42px] px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 dark:text-white focus:ring-2 focus:ring-rose-500 outline-none">
+                        <option value="">-- Select Program --</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Select Subject *</label>
+                    <select id="exam-subject-select" class="w-full min-h-[42px] px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 dark:text-white focus:ring-2 focus:ring-rose-500 outline-none">
+                        <option value="">-- Select Program First --</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Non-Program-Wise Container -->
+            <div id="exam-non-program-fields" class="hidden space-y-4">
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Custom Setting Name *</label>
+                    <input type="text" id="exam-custom-setting" placeholder="e.g. Custom Setting Name, Personal Test, Cert Exam" class="w-full min-h-[42px] px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 dark:text-white focus:ring-2 focus:ring-rose-500 outline-none">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Date *</label>
+                    <input type="date" id="exam-date" required class="w-full min-h-[42px] px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 dark:text-white focus:ring-2 focus:ring-rose-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Time *</label>
+                    <input type="time" id="exam-time" required class="w-full min-h-[42px] px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 dark:text-white focus:ring-2 focus:ring-rose-500 outline-none">
+                </div>
+            </div>
+
+            <div class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2.5 sm:gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+                <button type="button" onclick="window.closeExamModal()" class="w-full sm:w-auto px-4 py-2.5 text-xs font-bold text-slate-500 hover:text-slate-800 dark:hover:text-white rounded-xl bg-slate-100 sm:bg-transparent dark:bg-slate-800 sm:dark:bg-transparent min-h-[42px] flex items-center justify-center transition-all">Cancel</button>
+                <button type="submit" class="w-full sm:w-auto bg-rose-600 hover:bg-rose-700 text-white text-xs font-black uppercase tracking-wider px-5 py-2.5 rounded-xl shadow-md transition-all active:scale-95 min-h-[42px] flex items-center justify-center">Save Exam Routine</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 4. JAVASCRIPT SYSTEM LOGIC SNIPPET -->
+<script>
+/* ==========================================
+ * EXAM ROUTINE & COUNTDOWN SYSTEM (ARCHIVED)
+ * ========================================== */
+window.examCurrentFilter = 'upcoming';
+
+window.setExamFilter = function(filter) {
+    window.examCurrentFilter = filter;
+    ['all', 'upcoming', 'completed'].forEach(f => {
+        const btn = document.getElementById(`btn-exam-filter-${f}`);
+        if (btn) {
+            if (f === filter) {
+                btn.className = "justify-center py-2 px-2.5 sm:px-3 sm:py-1.5 rounded-lg text-[10px] sm:text-[11px] font-black uppercase tracking-wider bg-white dark:bg-slate-800 text-slate-800 dark:text-white shadow-sm transition-all min-h-[34px] flex items-center";
+            } else {
+                btn.className = "justify-center py-2 px-2.5 sm:px-3 sm:py-1.5 rounded-lg text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-all min-h-[34px] flex items-center";
+            }
+        }
+    });
+    window.renderExamRoutine();
+};
+
+window.renderExamPage = function() {
+    window.updateExamCountdown();
+    window.renderExamRoutine();
+};
+
+window.onSelectCountdownTarget = function(examId) {
+    AppState.selectedCountdownExamId = examId || 'auto';
+    window.updateExamCountdown();
+};
+
+/* Helper to calculate calendar-accurate remaining time */
+window.calculateExamTimeRemaining = function(fromDate, toDate) {
+    if (!fromDate || !toDate) {
+        return {
+            isPast: true,
+            years: 0,
+            months: 0,
+            days: 0,
+            hours: 0,
+            mins: 0,
+            secs: 0,
+            tier: 'days',
+            totalMs: 0,
+            diffMs: 0
+        };
+    }
+
+    const diffMs = toDate.getTime() - fromDate.getTime();
+    if (diffMs <= 0) {
+        return {
+            isPast: true,
+            years: 0,
+            months: 0,
+            days: 0,
+            hours: 0,
+            mins: 0,
+            secs: 0,
+            tier: 'days',
+            totalMs: 0,
+            diffMs: diffMs
+        };
+    }
+
+    let y1 = fromDate.getFullYear(), m1 = fromDate.getMonth(), d1 = fromDate.getDate();
+    let h1 = fromDate.getHours(), min1 = fromDate.getMinutes(), s1 = fromDate.getSeconds();
+
+    let y2 = toDate.getFullYear(), m2 = toDate.getMonth(), d2 = toDate.getDate();
+    let h2 = toDate.getHours(), min2 = toDate.getMinutes(), s2 = toDate.getSeconds();
+
+    let years = y2 - y1;
+    let months = m2 - m1;
+    let days = d2 - d1;
+    let hours = h2 - h1;
+    let mins = min2 - min1;
+    let secs = s2 - s1;
+
+    if (secs < 0) {
+        secs += 60;
+        mins -= 1;
+    }
+    if (mins < 0) {
+        mins += 60;
+        hours -= 1;
+    }
+    if (hours < 0) {
+        hours += 24;
+        days -= 1;
+    }
+    if (days < 0) {
+        // Borrow days from previous month relative to target month (m2 in year y2)
+        const daysInPrevMonth = new Date(y2, m2, 0).getDate();
+        days += daysInPrevMonth;
+        months -= 1;
+    }
+    if (months < 0) {
+        months += 12;
+        years -= 1;
+    }
+
+    // Determine tier based on remaining time:
+    // 1) >= 1 Year -> tier 'years' -> [ Year Year Month Month Day Day Hr Hr ]
+    // 2) >= 1 Month and < 1 Year -> tier 'months' -> [ Month Month Day Day Hr Hr Min Min ]
+    // 3) < 1 Month -> tier 'days' -> [ DD Hr Hr Min Min Sec Sec ]
+    let tier = 'days';
+    if (years >= 1) {
+        tier = 'years';
+    } else if (months >= 1) {
+        tier = 'months';
+    } else {
+        tier = 'days';
+    }
+
+    return {
+        isPast: false,
+        years,
+        months,
+        days,
+        hours,
+        mins,
+        secs,
+        tier,
+        totalMs: diffMs,
+        diffMs: diffMs
+    };
+};
+
+window.formatExamCountdownString = function(rem) {
+    if (!rem || rem.isPast) return 'Ended';
+    if (rem.tier === 'years') {
+        // More than 1 year: Year Year Month Month Day day Hr hr
+        return `${String(rem.years).padStart(2, '0')}y ${String(rem.months).padStart(2, '0')}mo ${String(rem.days).padStart(2, '0')}d ${String(rem.hours).padStart(2, '0')}h`;
+    } else if (rem.tier === 'months') {
+        // 1 month to 1 year: month month day day Hr Hr Min min
+        return `${String(rem.months).padStart(2, '0')}mo ${String(rem.days).padStart(2, '0')}d ${String(rem.hours).padStart(2, '0')}h ${String(rem.mins).padStart(2, '0')}m`;
+    } else {
+        // Below 1 month: DD Hr Hr Min Min sec sec
+        return `${String(rem.days).padStart(2, '0')}d ${String(rem.hours).padStart(2, '0')}h ${String(rem.mins).padStart(2, '0')}m ${String(rem.secs).padStart(2, '0')}s`;
+    }
+};
+
+window.updateExamCountdown = function() {
+    const heroTitle = document.getElementById('exam-hero-title');
+    const heroSub = document.getElementById('exam-hero-subject-badge');
+    const heroDetails = document.getElementById('exam-hero-details');
+    const heroVenue = document.getElementById('exam-hero-venue');
+    const heroDateTime = document.getElementById('exam-hero-datetime');
+    const targetSelect = document.getElementById('exam-hero-select-target');
+
+    const cdVal1 = document.getElementById('exam-cd-val-1') || document.getElementById('exam-cd-days');
+    const cdVal2 = document.getElementById('exam-cd-val-2') || document.getElementById('exam-cd-hours');
+    const cdVal3 = document.getElementById('exam-cd-val-3') || document.getElementById('exam-cd-mins');
+    const cdVal4 = document.getElementById('exam-cd-val-4') || document.getElementById('exam-cd-secs');
+
+    const cdLbl1 = document.getElementById('exam-cd-lbl-1');
+    const cdLbl2 = document.getElementById('exam-cd-lbl-2');
+    const cdLbl3 = document.getElementById('exam-cd-lbl-3');
+    const cdLbl4 = document.getElementById('exam-cd-lbl-4');
+
+    const setCountdownBoxes = (v1, l1, v2, l2, v3, l3, v4, l4) => {
+        if (cdVal1) cdVal1.textContent = String(v1).padStart(2, '0');
+        if (cdVal2) cdVal2.textContent = String(v2).padStart(2, '0');
+        if (cdVal3) cdVal3.textContent = String(v3).padStart(2, '0');
+        if (cdVal4) cdVal4.textContent = String(v4).padStart(2, '0');
+
+        if (cdLbl1) cdLbl1.textContent = l1;
+        if (cdLbl2) cdLbl2.textContent = l2;
+        if (cdLbl3) cdLbl3.textContent = l3;
+        if (cdLbl4) cdLbl4.textContent = l4;
+    };
+
+    const exams = AppState.examRoutine || [];
+    const sessions = AppState.examSessions || [];
+    const now = Date.now();
+
+    const getExamTimestamp = (dateStr, timeStr) => {
+        if (!dateStr) return NaN;
+        const parts = dateStr.split('-');
+        if (parts.length !== 3) return NaN;
+        const year = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10) - 1;
+        const day = parseInt(parts[2], 10);
+        
+        let hours = 0, minutes = 0;
+        if (timeStr) {
+            const timeParts = timeStr.split(':');
+            hours = parseInt(timeParts[0], 10) || 0;
+            minutes = parseInt(timeParts[1], 10) || 0;
+        }
+        return new Date(year, month, day, hours, minutes, 0, 0).getTime();
+    };
+
+    const userExams = exams
+        .filter(e => {
+            if (!e || !e.subject || !e.date) return false;
+            if (e.id && e.id.startsWith('exam_sample_')) return false;
+            if (e.subject === 'Software Engineering' || e.subject === 'Database Systems') return false;
+            return true;
+        })
+        .map(e => {
+            const timeMs = getExamTimestamp(e.date, e.time);
+            return { ...e, timeMs };
+        })
+        .filter(e => !isNaN(e.timeMs))
+        .sort((a, b) => a.timeMs - b.timeMs);
+
+    if (targetSelect) {
+        let selectHtml = `<option value="auto" class="bg-slate-900 text-white" ${AppState.selectedCountdownExamId === 'auto' ? 'selected' : ''}>⚡ Auto (Nearest Subject Exam)</option>`;
+        userExams.forEach(e => {
+            const parent = sessions.find(s => s.id === e.sessionId);
+            const tag = parent ? parent.program : (e.program || 'Custom');
+            const statusTag = e.status === 'completed' ? ' [Completed]' : '';
+            selectHtml += `<option value="${e.id}" class="bg-slate-900 text-white" ${AppState.selectedCountdownExamId === e.id ? 'selected' : ''}>📚 ${e.subject} (${e.date}) - ${tag}${statusTag}</option>`;
+        });
+        targetSelect.innerHTML = selectHtml;
+    }
+
+    const upcomingExams = userExams.filter(e => e.status !== 'completed' && e.timeMs > (now - 7200000));
+
+    let nextExam = null;
+    if (AppState.selectedCountdownExamId && AppState.selectedCountdownExamId !== 'auto') {
+        nextExam = userExams.find(e => e.id === AppState.selectedCountdownExamId);
+    }
+    if (!nextExam) {
+        nextExam = upcomingExams[0];
+    }
+
+    if (!nextExam) {
+        if (heroTitle) heroTitle.textContent = "No Subject Exam Scheduled";
+        if (heroSub) {
+            heroSub.textContent = "N/A";
+            heroSub.style.backgroundColor = "rgba(255, 255, 255, 0.1)";
+        }
+        if (heroDetails) heroDetails.innerHTML = `<svg class="w-4 h-4 text-rose-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><span>Add a subject exam inside a session block to activate the live countdown.</span>`;
+        if (heroVenue) heroVenue.style.display = 'none';
+        if (heroDateTime) heroDateTime.textContent = "Date: --";
+
+        setCountdownBoxes('00', 'Days', '00', 'Hours', '00', 'Mins', '00', 'Secs');
+    } else {
+        const parentSession = sessions.find(s => s.id === nextExam.sessionId);
+        const targetDate = new Date(nextExam.timeMs);
+        const currentDate = new Date(now);
+        const rem = window.calculateExamTimeRemaining(currentDate, targetDate);
+
+        const subjectDisplayName = nextExam.title && nextExam.title.toLowerCase() !== nextExam.subject.toLowerCase() 
+            ? `${nextExam.subject} — ${nextExam.title}` 
+            : nextExam.subject;
+
+        if (heroTitle) heroTitle.textContent = subjectDisplayName;
+
+        if (heroSub) {
+            const sessionNameStr = parentSession 
+                ? (parentSession.name ? `${parentSession.name} (${parentSession.program})` : `${parentSession.program} Session`)
+                : (nextExam.program || 'Session Exam');
+            heroSub.textContent = sessionNameStr;
+            const color = typeof getSubjectColor === 'function' ? getSubjectColor(nextExam.subject) : '#ef4444';
+            heroSub.style.backgroundColor = typeof hexToRgba === 'function' ? hexToRgba(color, 0.3) : 'rgba(244, 63, 94, 0.3)';
+        }
+
+        if (heroVenue) heroVenue.style.display = 'none';
+
+        const dateFormatted = targetDate.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }) + ' at ' + targetDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        if (heroDateTime) heroDateTime.textContent = `Date: ${dateFormatted}`;
+
+        if (rem.isPast) {
+            if (heroDetails) heroDetails.innerHTML = `<span class="text-emerald-400 font-black flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>${nextExam.subject.toUpperCase()} EXAM IS IN PROGRESS NOW!</span>`;
+            setCountdownBoxes('00', 'Days', '00', 'Hours', '00', 'Mins', '00', 'Secs');
+        } else {
+            if (heroDetails) {
+                heroDetails.innerHTML = `<svg class="w-4 h-4 text-rose-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><span>Target Subject Exam: <strong class="text-white font-black">${nextExam.subject}</strong> (${dateFormatted})</span>`;
+            }
+
+            if (rem.tier === 'years') {
+                // >= 1 Year: [ Year Year Month Month Day Day Hr Hr ]
+                setCountdownBoxes(rem.years, 'Years', rem.months, 'Months', rem.days, 'Days', rem.hours, 'Hours');
+            } else if (rem.tier === 'months') {
+                // 1 Month to 1 Year: [ Month Month Day Day Hr Hr Min Min ]
+                setCountdownBoxes(rem.months, 'Months', rem.days, 'Days', rem.hours, 'Hours', rem.mins, 'Mins');
+            } else {
+                // < 1 Month: [ DD Hr Hr Min Min Sec Sec ]
+                setCountdownBoxes(rem.days, 'Days', rem.hours, 'Hours', rem.mins, 'Mins', rem.secs, 'Secs');
+            }
+        }
+    }
+
+    // Live update all subject exam countdown cards inside session blocks
+    const cardCdElements = document.querySelectorAll('[data-exam-target-time]');
+    if (cardCdElements.length > 0) {
+        const nowDt = new Date(now);
+        cardCdElements.forEach(el => {
+            const timeMs = parseInt(el.getAttribute('data-exam-target-time'), 10);
+            if (!isNaN(timeMs)) {
+                const cRem = window.calculateExamTimeRemaining(nowDt, new Date(timeMs));
+                if (!cRem.isPast) {
+                    const cStr = window.formatExamCountdownString(cRem);
+                    if (el.textContent !== cStr) {
+                        el.textContent = cStr;
+                    }
+                } else if (cRem.diffMs > -7200000) {
+                    if (el.textContent !== 'Live Exam Today') {
+                        el.textContent = 'Live Exam Today';
+                    }
+                } else {
+                    if (el.textContent !== 'Ended') {
+                        el.textContent = 'Ended';
+                    }
+                }
+            }
+        });
+    }
+};
+
+window.setExamMode = function(mode) {
+    const modeInput = document.getElementById('exam-mode');
+    if (modeInput) modeInput.value = mode;
+
+    const btnProgram = document.getElementById('btn-exam-mode-program');
+    const btnNonProgram = document.getElementById('btn-exam-mode-non-program');
+    const programContainer = document.getElementById('exam-program-wise-fields');
+    const nonProgramContainer = document.getElementById('exam-non-program-fields');
+
+    const progSelect = document.getElementById('exam-program-select');
+    const subjSelect = document.getElementById('exam-subject-select');
+    const customSettingInput = document.getElementById('exam-custom-setting');
+
+    if (mode === 'program') {
+        if (btnProgram) {
+            btnProgram.className = "py-2 px-3 rounded-xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 bg-rose-600 text-white shadow-sm";
+        }
+        if (btnNonProgram) {
+            btnNonProgram.className = "py-2 px-3 rounded-xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 text-slate-600 dark:text-slate-300 hover:bg-white/50 dark:hover:bg-slate-700/50";
+        }
+        if (programContainer) programContainer.classList.remove('hidden');
+        if (nonProgramContainer) nonProgramContainer.classList.add('hidden');
+
+        if (progSelect) progSelect.setAttribute('required', 'required');
+        if (subjSelect) subjSelect.setAttribute('required', 'required');
+        if (customSettingInput) customSettingInput.removeAttribute('required');
+    } else {
+        if (btnNonProgram) {
+            btnNonProgram.className = "py-2 px-3 rounded-xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 bg-rose-600 text-white shadow-sm";
+        }
+        if (btnProgram) {
+            btnProgram.className = "py-2 px-3 rounded-xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 text-slate-600 dark:text-slate-300 hover:bg-white/50 dark:hover:bg-slate-700/50";
+        }
+        if (nonProgramContainer) nonProgramContainer.classList.remove('hidden');
+        if (programContainer) programContainer.classList.add('hidden');
+
+        if (customSettingInput) customSettingInput.setAttribute('required', 'required');
+        if (progSelect) progSelect.removeAttribute('required');
+        if (subjSelect) subjSelect.removeAttribute('required');
+    }
+};
+
+window.onExamProgramChange = function(selectedSubjToPreserve = null) {
+    const progSelect = document.getElementById('exam-program-select');
+    const subjSelect = document.getElementById('exam-subject-select');
+    if (!progSelect || !subjSelect) return;
+
+    const progName = progSelect.value;
+    if (!progName) {
+        subjSelect.innerHTML = `<option value="">-- Select Program First --</option>`;
+        return;
+    }
+
+    const allSubs = typeof window.getAllSubjects === 'function' ? window.getAllSubjects() : [];
+    const filteredSubs = allSubs.filter(s => s && s.program === progName);
+
+    let html = `<option value="">-- Select Subject --</option>`;
+    if (filteredSubs.length > 0) {
+        const uniqueSubNames = Array.from(new Set(filteredSubs.map(s => s.subject))).sort();
+        uniqueSubNames.forEach(sub => {
+            html += `<option value="${sub}">${sub}</option>`;
+        });
+    } else {
+        html += `<option value="" disabled>No subjects found under this program</option>`;
+    }
+    subjSelect.innerHTML = html;
+
+    if (selectedSubjToPreserve) {
+        subjSelect.value = selectedSubjToPreserve;
+    }
+};
+
+window.openSessionModal = function(sessionId = null) {
+    const modal = document.getElementById('session-modal');
+    if (!modal) return;
+
+    if (modal.parentElement !== document.body) {
+        document.body.appendChild(modal);
+    }
+
+    const modalTitle = document.getElementById('session-modal-title');
+    const idInput = document.getElementById('session-id');
+    const progSelect = document.getElementById('session-program');
+    const nameInput = document.getElementById('session-name');
+    const startInput = document.getElementById('session-start-date');
+    const endInput = document.getElementById('session-end-date');
+
+    if (progSelect) {
+        const programs = typeof window.getAllPrograms === 'function' ? window.getAllPrograms() : [];
+        const progNames = Array.from(new Set(programs.map(p => p.name || p))).sort();
+        let progHtml = `<option value="">-- Select Program --</option>`;
+        progHtml += `<option value="Non-Program">⚙️ Non-Program Wise (Custom)</option>`;
+        progNames.forEach(pName => {
+            progHtml += `<option value="${pName}">🎓 ${pName}</option>`;
+        });
+        progSelect.innerHTML = progHtml;
+    }
+
+    if (sessionId) {
+        const session = (AppState.examSessions || []).find(s => s.id === sessionId);
+        if (session) {
+            if (modalTitle) modalTitle.textContent = "Edit Session";
+            if (idInput) idInput.value = session.id || '';
+            if (progSelect) progSelect.value = session.program || 'Non-Program';
+            if (nameInput) nameInput.value = session.name || '';
+            if (startInput) startInput.value = session.startDate || '';
+            if (endInput) endInput.value = session.endDate || '';
+        }
+    } else {
+        if (modalTitle) modalTitle.textContent = "Add Session";
+        if (idInput) idInput.value = '';
+        if (progSelect) progSelect.value = '';
+        if (nameInput) nameInput.value = '';
+        if (startInput) startInput.value = '';
+        if (endInput) endInput.value = '';
+    }
+
+    modal.classList.remove('hidden');
+    modal.style.display = 'flex';
+    modal.style.zIndex = '999999';
+};
+
+window.closeSessionModal = function() {
+    const modal = document.getElementById('session-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+    }
+};
+
+window.saveSessionForm = function(event) {
+    event.preventDefault();
+    const id = document.getElementById('session-id')?.value;
+    const program = document.getElementById('session-program')?.value || 'Non-Program';
+    const name = document.getElementById('session-name')?.value.trim() || '';
+    const startDate = document.getElementById('session-start-date')?.value || '';
+    const endDate = document.getElementById('session-end-date')?.value || '';
+
+    if (startDate && endDate && startDate > endDate) {
+        if (typeof showToast === 'function') {
+            showToast("Start date cannot be after end date.", "warning");
+        }
+        return;
+    }
+
+    if (!Array.isArray(AppState.examSessions)) {
+        AppState.examSessions = [];
+    }
+
+    if (id) {
+        const idx = AppState.examSessions.findIndex(s => s.id === id);
+        if (idx !== -1) {
+            AppState.examSessions[idx] = {
+                ...AppState.examSessions[idx],
+                program, name, startDate, endDate,
+                updatedAt: Date.now()
+            };
+        }
+    } else {
+        const newSession = {
+            id: 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+            program, name, startDate, endDate,
+            createdAt: Date.now()
+        };
+        AppState.examSessions.push(newSession);
+    }
+
+    if (window.FirebaseService && typeof window.FirebaseService.saveToCloud === 'function') {
+        window.FirebaseService.saveToCloud(true);
+    }
+
+    window.closeSessionModal();
+    window.renderExamPage();
+    if (typeof showToast === 'function') showToast("Exam session saved successfully!", "success");
+};
+
+window.deleteSession = function(sessionId) {
+    const session = (AppState.examSessions || []).find(s => s.id === sessionId);
+    const sessionName = session ? (session.name ? `${session.program} - ${session.name}` : session.program) : 'this session';
+
+    window.openConfirmModal(
+        "Delete Exam Session",
+        `Are you sure you want to delete "${sessionName}"? All associated subject exams will also be deleted.`,
+        () => {
+            AppState.examSessions = (AppState.examSessions || []).filter(s => s.id !== sessionId);
+            AppState.examRoutine = (AppState.examRoutine || []).filter(e => e.sessionId !== sessionId);
+
+            if (window.FirebaseService && typeof window.FirebaseService.saveToCloud === 'function') {
+                window.FirebaseService.saveToCloud(true);
+            }
+
+            window.renderExamPage();
+            if (typeof showToast === 'function') showToast("Session and associated exams deleted.", "info");
+        }
+    );
+};
+
+window.renderExamRoutine = function() {
+    const container = document.getElementById('exam-routine-container');
+    if (!container) return;
+
+    const query = (document.getElementById('exam-search-input')?.value || '').toLowerCase().trim();
+    const sessions = (AppState.examSessions || []).slice();
+    let exams = (AppState.examRoutine || []).slice();
+    const now = Date.now();
+
+    const parseExamTime = (dStr, tStr) => {
+        if (!dStr) return NaN;
+        const parts = dStr.split('-');
+        if (parts.length !== 3) return NaN;
+        const [yr, mo, dy] = parts.map(Number);
+        const [hr, mn] = (tStr || '00:00').split(':').map(Number);
+        return new Date(yr, mo - 1, dy, hr || 0, mn || 0).getTime();
+    };
+
+    const isExamDoneOrOver = (ex) => {
+        if (!ex) return true;
+        if (ex.status === 'completed') return true;
+        const exTimeMs = parseExamTime(ex.date, ex.time);
+        if (isNaN(exTimeMs)) return false;
+        return exTimeMs <= (now - 7200000);
+    };
+
+    sessions.sort((a, b) => {
+        if (!a.startDate && !b.startDate) return (b.createdAt || 0) - (a.createdAt || 0);
+        if (!a.startDate) return 1;
+        if (!b.startDate) return -1;
+        return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
+    });
+
+    exams.sort((a, b) => {
+        const ta = parseExamTime(a.date, a.time) || 0;
+        const tb = parseExamTime(b.date, b.time) || 0;
+        return ta - tb;
+    });
+
+    let renderedBlocksCount = 0;
+    let blocksHtml = '';
+
+    sessions.forEach(session => {
+        let sessionExams = exams.filter(e => e.sessionId === session.id);
+        if (sessionExams.length === 0 && session.program !== 'Non-Program') {
+            sessionExams = exams.filter(e => !e.sessionId && e.program === session.program);
+            sessionExams.forEach(e => { e.sessionId = session.id; });
+        }
+
+        const totalCount = sessionExams.length;
+        const completedCount = sessionExams.filter(isExamDoneOrOver).length;
+        const upcomingCount = totalCount - completedCount;
+
+        const isFullSessionCompleted = (function() {
+            if (totalCount > 0) {
+                return sessionExams.every(isExamDoneOrOver);
+            } else if (session.endDate) {
+                const endMs = new Date(session.endDate + 'T23:59:59').getTime();
+                return !isNaN(endMs) && endMs < now;
+            }
+            return false;
+        })();
+
+        // Filter which exams are displayed based on active filter tab
+        let filteredSessionExams = sessionExams;
+        if (window.examCurrentFilter === 'upcoming') {
+            if (totalCount > 0 && upcomingCount === 0) {
+                return; // Entire session completed, omit from upcoming view
+            }
+            if (totalCount === 0 && isFullSessionCompleted) {
+                return;
+            }
+            // In upcoming filter, show ONLY upcoming subjects (not done and date not over)
+            filteredSessionExams = sessionExams.filter(e => !isExamDoneOrOver(e));
+        } else if (window.examCurrentFilter === 'completed') {
+            if (completedCount === 0 && !isFullSessionCompleted) {
+                return; // No completed subjects in this session, omit from completed view
+            }
+            // In completed filter, show ONLY completed/date-over subjects
+            filteredSessionExams = sessionExams.filter(e => isExamDoneOrOver(e));
+        }
+
+        // Search query filter
+        let displayExams = filteredSessionExams;
+        if (query) {
+            const matchesSessionName = (session.name || '').toLowerCase().includes(query) || (session.program || '').toLowerCase().includes(query);
+            const matchingExams = filteredSessionExams.filter(e =>
+                (e.title || '').toLowerCase().includes(query) ||
+                (e.subject || '').toLowerCase().includes(query) ||
+                (e.program || '').toLowerCase().includes(query)
+            );
+            if (!matchesSessionName && matchingExams.length === 0) {
+                return;
+            }
+            if (!matchesSessionName) {
+                displayExams = matchingExams;
+            }
+        }
+
+        renderedBlocksCount++;
+
+        const isNonProgramSession = session.program === 'Non-Program';
+        const sessionDisplayName = session.name ? `${session.program} - ${session.name}` : session.program;
+        const sessionIcon = isNonProgramSession ? '⚙️' : '🎓';
+
+        let dateRangeBadge = '';
+        if (session.startDate && session.endDate) {
+            dateRangeBadge = `<span class="text-[11px] sm:text-xs font-mono text-slate-400 font-bold break-all">(${formatSessionDate(session.startDate)} - ${formatSessionDate(session.endDate)})</span>`;
+        } else if (session.startDate) {
+            dateRangeBadge = `<span class="text-[11px] sm:text-xs font-mono text-slate-400 font-bold break-all">(${formatSessionDate(session.startDate)})</span>`;
+        } else if (session.endDate) {
+            dateRangeBadge = `<span class="text-[11px] sm:text-xs font-mono text-slate-400 font-bold break-all">(Until ${formatSessionDate(session.endDate)})</span>`;
+        }
+
+        let examsGridHtml = '';
+
+        if (displayExams.length === 0) {
+            examsGridHtml = `
+                <div class="col-span-full py-8 text-center bg-white/40 dark:bg-slate-800/10 border border-dashed border-slate-200/50 dark:border-slate-700/50 rounded-2xl">
+                    <p class="text-xs text-slate-400 font-medium">No exams scheduled in this session yet.</p>
+                </div>
+            `;
+        } else {
+            displayExams.forEach(ex => {
+                const isCompleted = ex.status === 'completed';
+                const exTimeMs = parseExamTime(ex.date, ex.time);
+                const targetExamDt = !isNaN(exTimeMs) ? new Date(exTimeMs) : null;
+                const rem = targetExamDt ? window.calculateExamTimeRemaining(new Date(now), targetExamDt) : null;
+
+                let countdownBadge = '';
+                if (isCompleted) {
+                    countdownBadge = `<span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 shrink-0">✓ Completed</span>`;
+                } else if (!rem || isNaN(exTimeMs)) {
+                    countdownBadge = `<span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-slate-100 dark:bg-slate-700/60 text-slate-500 shrink-0">No Date</span>`;
+                } else if (rem.isPast && rem.diffMs > -7200000) {
+                    countdownBadge = `<span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-rose-500 text-white animate-pulse shrink-0">● Live Exam Today</span>`;
+                } else if (!rem.isPast) {
+                    const countdownStr = window.formatExamCountdownString(rem);
+                    countdownBadge = `<span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 inline-flex items-center gap-1.5 min-w-0 max-w-[85%] truncate"><svg class="w-3 h-3 text-rose-500 animate-spin shrink-0" style="animation-duration: 4s;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><span id="exam-card-cd-${ex.id}" data-exam-target-time="${exTimeMs}" class="truncate">${countdownStr}</span></span>`;
+                } else {
+                    countdownBadge = `<span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-slate-100 dark:bg-slate-700/60 text-slate-500 shrink-0">Ended</span>`;
+                }
+
+                const subjColor = typeof getSubjectColor === 'function' ? getSubjectColor(ex.subject || 'General') : '#ef4444';
+                const dtObj = !isNaN(exTimeMs) ? new Date(exTimeMs) : new Date();
+                const dtFormatted = dtObj.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+
+                examsGridHtml += `
+                    <div class="bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 rounded-2xl p-4 sm:p-5 hover:shadow-lg transition-all duration-300 flex flex-col justify-between group ${isCompleted ? 'opacity-70' : ''}">
+                        <div>
+                            <div class="flex items-center justify-between gap-2 mb-2.5 sm:mb-3">
+                                ${countdownBadge}
+                                <span class="w-2.5 h-2.5 rounded-full shrink-0 shadow-sm" style="background-color: ${subjColor}" title="Subject Accent"></span>
+                            </div>
+
+                            <h4 class="text-base sm:text-lg font-black text-slate-800 dark:text-white leading-snug group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors break-words">
+                                ${ex.subject || 'General Subject'}
+                            </h4>
+
+                            <div class="mt-2.5 sm:mt-3 space-y-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300">
+                                <div class="flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-rose-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                    <span>${dtFormatted} at ${ex.time || '00:00'}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-3.5 sm:mt-4 pt-3 border-t border-slate-100 dark:border-slate-700/60 flex items-center justify-between gap-2">
+                            <button onclick="window.toggleExamStatus('${ex.id}')" class="flex-1 sm:flex-initial text-xs font-bold px-3 py-2 sm:py-1.5 rounded-xl transition-all min-h-[36px] flex items-center justify-center ${isCompleted ? 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-300' : 'bg-emerald-50 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100'}">
+                                ${isCompleted ? 'Mark Pending' : '✓ Mark Complete'}
+                            </button>
+                            <div class="flex items-center gap-1 shrink-0">
+                                <button onclick="window.openExamModal('${ex.id}', '${session.id}')" class="p-2 min-w-[36px] min-h-[36px] flex items-center justify-center text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-all" title="Edit Subject">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                </button>
+                                <button onclick="window.deleteExam('${ex.id}')" class="p-2 min-w-[36px] min-h-[36px] flex items-center justify-center text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 rounded-xl hover:bg-rose-50 dark:hover:bg-rose-900/30 transition-all" title="Delete Subject">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        const sessionStatusBadge = isFullSessionCompleted
+            ? `<span class="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 shrink-0">✓ Session Completed</span>`
+            : '';
+
+        blocksHtml += `
+            <div class="bg-slate-50/70 dark:bg-slate-900/40 border border-slate-200/80 dark:border-slate-700/70 rounded-2xl sm:rounded-3xl p-4 sm:p-5 md:p-6 shadow-sm space-y-3.5 sm:space-y-4 w-full">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-slate-200/60 dark:border-slate-700/60">
+                    <div class="flex items-center space-x-3 min-w-0">
+                        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center font-black text-lg border border-rose-500/20 shadow-sm shrink-0">
+                            ${sessionIcon}
+                        </div>
+                        <div class="min-w-0">
+                            <h4 class="text-base sm:text-lg font-black text-slate-800 dark:text-white leading-tight flex flex-wrap items-center gap-1.5 sm:gap-2 break-words">
+                                <span>${sessionDisplayName}</span>
+                                ${dateRangeBadge}
+                                ${sessionStatusBadge}
+                            </h4>
+                            <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-1">
+                                <span class="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 border border-rose-200/60 dark:border-rose-800/60 shrink-0">
+                                    ${upcomingCount} Upcoming
+                                </span>
+                                <span class="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/60 shrink-0">
+                                    ${completedCount} Completed
+                                </span>
+                                <span class="text-[10px] font-bold text-slate-400 shrink-0">
+                                    (${totalCount} Total Exam${totalCount === 1 ? '' : 's'})
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-1.5 sm:gap-2 w-full sm:w-auto justify-end sm:justify-start pt-2 sm:pt-0 border-t border-slate-200/40 dark:border-slate-700/40 sm:border-t-0">
+                        <button onclick="window.openSessionModal('${session.id}')" class="p-2 min-w-[36px] min-h-[36px] flex items-center justify-center text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-xl bg-white/60 dark:bg-slate-800/60 sm:bg-transparent border border-slate-200/40 dark:border-slate-700/40 sm:border-0 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-all" title="Edit Session">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                        </button>
+                        <button onclick="window.deleteSession('${session.id}')" class="p-2 min-w-[36px] min-h-[36px] flex items-center justify-center text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 rounded-xl bg-white/60 dark:bg-slate-800/60 sm:bg-transparent border border-slate-200/40 dark:border-slate-700/40 sm:border-0 hover:bg-rose-50 dark:hover:bg-rose-900/30 transition-all" title="Delete Session">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        </button>
+                        <button onclick="window.openExamModal(null, '${session.id}')" class="flex-1 sm:flex-initial bg-rose-600 hover:bg-rose-700 text-white font-black text-[11px] uppercase tracking-wider px-3.5 py-2 rounded-xl transition-all shadow-sm active:scale-95 flex items-center justify-center gap-1.5 min-h-[36px]">
+                            <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+                            <span>Add Subject</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4 w-full">
+                    ${examsGridHtml}
+                </div>
+            </div>
+        `;
+    });
+
+    if (renderedBlocksCount === 0) {
+        if (query) {
+            container.innerHTML = `
+                <div class="py-10 sm:py-12 px-4 text-center bg-slate-50 dark:bg-slate-800/40 rounded-2xl sm:rounded-3xl border border-dashed border-slate-200 dark:border-slate-700 w-full col-span-full">
+                    <div class="w-12 h-12 mx-auto mb-3 text-slate-400 flex items-center justify-center bg-white dark:bg-slate-800 rounded-2xl shadow-sm">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    </div>
+                    <h4 class="text-sm font-black text-slate-700 dark:text-slate-200 uppercase tracking-wider">No Results Found</h4>
+                    <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto">No sessions or exams match "${query}".</p>
+                </div>
+            `;
+        } else if (window.examCurrentFilter === 'upcoming') {
+            container.innerHTML = `
+                <div class="py-10 sm:py-12 px-4 text-center bg-slate-50 dark:bg-slate-800/40 rounded-2xl sm:rounded-3xl border border-dashed border-slate-200 dark:border-slate-700 w-full col-span-full">
+                    <div class="w-12 h-12 mx-auto mb-3 text-slate-400 flex items-center justify-center bg-white dark:bg-slate-800 rounded-2xl shadow-sm">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01m-.01 4h.01"></path></svg>
+                    </div>
+                    <h4 class="text-sm font-black text-slate-700 dark:text-slate-200 uppercase tracking-wider">No Upcoming Exam Sessions</h4>
+                    <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto">All scheduled exam sessions are completed, or click "Add Session" to schedule a new one.</p>
+                </div>
+            `;
+        } else if (window.examCurrentFilter === 'completed') {
+            container.innerHTML = `
+                <div class="py-10 sm:py-12 px-4 text-center bg-slate-50 dark:bg-slate-800/40 rounded-2xl sm:rounded-3xl border border-dashed border-slate-200 dark:border-slate-700 w-full col-span-full">
+                    <div class="w-12 h-12 mx-auto mb-3 text-emerald-500 flex items-center justify-center bg-white dark:bg-slate-800 rounded-2xl shadow-sm">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                    <h4 class="text-sm font-black text-slate-700 dark:text-slate-200 uppercase tracking-wider">No Completed Sessions</h4>
+                    <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto">Completed subjects and sessions will automatically appear here once their exam is over or marked complete.</p>
+                </div>
+            `;
+        } else {
+            container.innerHTML = `
+                <div class="py-10 sm:py-12 px-4 text-center bg-slate-50 dark:bg-slate-800/40 rounded-2xl sm:rounded-3xl border border-dashed border-slate-200 dark:border-slate-700 w-full col-span-full">
+                    <div class="w-12 h-12 mx-auto mb-3 text-slate-400 flex items-center justify-center bg-white dark:bg-slate-800 rounded-2xl shadow-sm">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01m-.01 4h.01"></path></svg>
+                    </div>
+                    <h4 class="text-sm font-black text-slate-700 dark:text-slate-200 uppercase tracking-wider">No Sessions Found</h4>
+                    <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto">No sessions have been created yet. Click "Add Session" to create your first session block.</p>
+                </div>
+            `;
+        }
+        return;
+    }
+
+    container.innerHTML = blocksHtml;
+};
+
+window.openExamModal = function(examId = null, sessionId = null) {
+    const modal = document.getElementById('exam-modal');
+    if (!modal) return;
+
+    if (modal.parentElement !== document.body) {
+        document.body.appendChild(modal);
+    }
+
+    const modalTitle = document.getElementById('exam-modal-title');
+    const idInput = document.getElementById('exam-id');
+    const sessIdInput = document.getElementById('exam-session-id');
+    const infoDisplay = document.getElementById('exam-session-info-display');
+    const progSelect = document.getElementById('exam-program-select');
+    const subjSelect = document.getElementById('exam-subject-select');
+    const customSettingInput = document.getElementById('exam-custom-setting');
+    const dateInput = document.getElementById('exam-date');
+    const timeInput = document.getElementById('exam-time');
+
+    if (progSelect) {
+        const programs = typeof window.getAllPrograms === 'function' ? window.getAllPrograms() : [];
+        const progNames = Array.from(new Set(programs.map(p => p.name || p))).sort();
+        let progHtml = `<option value="">-- Select Program --</option>`;
+        progHtml += `<option value="Non-Program">⚙️ Non-Program Wise (Custom)</option>`;
+        progNames.forEach(pName => {
+            progHtml += `<option value="${pName}">${pName}</option>`;
+        });
+        progSelect.innerHTML = progHtml;
+    }
+
+    let activeSessionId = sessionId;
+    if (examId) {
+        const exam = (AppState.examRoutine || []).find(e => e.id === examId);
+        if (exam) {
+            activeSessionId = exam.sessionId || activeSessionId;
+        }
+    }
+
+    const session = (AppState.examSessions || []).find(s => s.id === activeSessionId);
+    if (!session) {
+        if (typeof showToast === 'function') showToast("Please select a session first to add an exam.", "warning");
+        return;
+    }
+
+    if (sessIdInput) sessIdInput.value = session.id;
+    if (infoDisplay) {
+        const displayName = session.name ? `${session.program} - ${session.name}` : session.program;
+        let dateRangeText = '';
+        if (session.startDate && session.endDate) {
+            dateRangeText = ` (${formatSessionDate(session.startDate)} - ${formatSessionDate(session.endDate)})`;
+        } else if (session.startDate) {
+            dateRangeText = ` (${formatSessionDate(session.startDate)})`;
+        } else if (session.endDate) {
+            dateRangeText = ` (Until ${formatSessionDate(session.endDate)})`;
+        }
+        infoDisplay.innerHTML = `<span class="text-rose-500 font-black">Active Session:</span> ${displayName}${dateRangeText}`;
+        infoDisplay.classList.remove('hidden');
+    }
+
+    const isProgramWise = session.program !== 'Non-Program';
+    window.setExamMode(isProgramWise ? 'program' : 'non-program');
+
+    const switcherEl = document.getElementById('btn-exam-mode-program')?.parentElement;
+    if (switcherEl) switcherEl.parentElement.classList.add('hidden');
+
+    if (isProgramWise) {
+        if (progSelect) {
+            progSelect.value = session.program;
+            progSelect.disabled = true;
+        }
+        window.onExamProgramChange();
+    } else {
+        if (customSettingInput) {
+            customSettingInput.placeholder = "e.g. Custom Midterm Subject";
+        }
+    }
+
+    if (examId) {
+        const exam = (AppState.examRoutine || []).find(e => e.id === examId);
+        if (exam) {
+            if (modalTitle) modalTitle.textContent = "Edit Subject Exam";
+            if (idInput) idInput.value = exam.id || '';
+            if (dateInput) dateInput.value = exam.date || '';
+            if (timeInput) timeInput.value = exam.time || '';
+
+            if (isProgramWise) {
+                if (subjSelect) subjSelect.value = exam.subject || '';
+            } else {
+                if (customSettingInput) customSettingInput.value = exam.subject || '';
+            }
+        }
+    } else {
+        if (modalTitle) modalTitle.textContent = "Add Subject Exam";
+        if (idInput) idInput.value = '';
+        if (dateInput) dateInput.value = session.startDate || new Date().toISOString().split('T')[0];
+        if (timeInput) timeInput.value = '10:00';
+        if (isProgramWise) {
+            if (subjSelect) subjSelect.value = '';
+        } else {
+            if (customSettingInput) customSettingInput.value = '';
+        }
+    }
+
+    modal.classList.remove('hidden');
+    modal.style.display = 'flex';
+    modal.style.zIndex = '999999';
+};
+
+window.closeExamModal = function() {
+    const modal = document.getElementById('exam-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+    }
+    const switcherEl = document.getElementById('btn-exam-mode-program')?.parentElement;
+    if (switcherEl) switcherEl.parentElement.classList.remove('hidden');
+    const progSelect = document.getElementById('exam-program-select');
+    if (progSelect) progSelect.disabled = false;
+};
+
+window.saveExamForm = function(event) {
+    event.preventDefault();
+    const id = document.getElementById('exam-id')?.value;
+    const sessionId = document.getElementById('exam-session-id')?.value;
+    const mode = document.getElementById('exam-mode')?.value || 'program';
+    const date = document.getElementById('exam-date')?.value || new Date().toISOString().split('T')[0];
+    const time = document.getElementById('exam-time')?.value || '10:00';
+
+    if (!sessionId) {
+        if (typeof showToast === 'function') showToast("Parent session ID is missing.", "error");
+        return;
+    }
+
+    const session = (AppState.examSessions || []).find(s => s.id === sessionId);
+    if (!session) {
+        if (typeof showToast === 'function') showToast("Parent session not found.", "error");
+        return;
+    }
+
+    if (session.startDate && date < session.startDate) {
+        if (typeof showToast === 'function') {
+            showToast(`Exam date cannot be earlier than session start date (${session.startDate})`, "warning");
+        }
+        return;
+    }
+    if (session.endDate && date > session.endDate) {
+        if (typeof showToast === 'function') {
+            showToast(`Exam date cannot be later than session end date (${session.endDate})`, "warning");
+        }
+        return;
+    }
+
+    let program = '';
+    let subject = '';
+
+    if (mode === 'program') {
+        program = session.program;
+        subject = document.getElementById('exam-subject-select')?.value || '';
+        if (!program || !subject) {
+            if (typeof showToast === 'function') showToast("Please select a Subject.", "warning");
+            return;
+        }
+    } else {
+        const customSetting = document.getElementById('exam-custom-setting')?.value.trim();
+        if (!customSetting) {
+            if (typeof showToast === 'function') showToast("Please enter a Custom Setting Name.", "warning");
+            return;
+        }
+        program = 'Non-Program';
+        subject = customSetting;
+    }
+
+    const title = subject;
+
+    if (!Array.isArray(AppState.examRoutine)) {
+        AppState.examRoutine = [];
+    }
+
+    if (id) {
+        const idx = AppState.examRoutine.findIndex(e => e.id === id);
+        if (idx !== -1) {
+            AppState.examRoutine[idx] = {
+                ...AppState.examRoutine[idx],
+                sessionId, mode, program, subject, title, date, time,
+                updatedAt: Date.now()
+            };
+        }
+    } else {
+        const newExam = {
+            id: 'exam_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+            sessionId, mode, program, subject, title, date, time,
+            status: 'upcoming',
+            createdAt: Date.now()
+        };
+        AppState.examRoutine.push(newExam);
+    }
+
+    if (window.FirebaseService && typeof window.FirebaseService.saveToCloud === 'function') {
+        window.FirebaseService.saveToCloud(true);
+    }
+
+    window.closeExamModal();
+    window.renderExamPage();
+    if (typeof showToast === 'function') showToast("Exam routine saved successfully!", "success");
+};
+
+window.toggleExamStatus = function(examId) {
+    const exam = (AppState.examRoutine || []).find(e => e.id === examId);
+    if (exam) {
+        exam.status = exam.status === 'completed' ? 'upcoming' : 'completed';
+        if (window.FirebaseService && typeof window.FirebaseService.saveToCloud === 'function') {
+            window.FirebaseService.saveToCloud(true);
+        }
+        window.renderExamPage();
+        if (typeof showToast === 'function') {
+            showToast(exam.status === 'completed' ? "Exam marked as completed!" : "Exam status reset to upcoming.", "info");
+        }
+    }
+};
+
+window.deleteExam = function(examId) {
+    const exam = (AppState.examRoutine || []).find(e => e.id === examId);
+    const examName = exam ? (exam.subject || exam.title || 'this subject exam') : 'this subject exam';
+
+    window.openConfirmModal(
+        "Delete Subject Exam",
+        `Are you sure you want to delete "${examName}"? This action cannot be undone.`,
+        () => {
+            AppState.examRoutine = (AppState.examRoutine || []).filter(e => e.id !== examId);
+            if (window.FirebaseService && typeof window.FirebaseService.saveToCloud === 'function') {
+                window.FirebaseService.saveToCloud(true);
+            }
+            window.renderExamPage();
+            if (typeof showToast === 'function') showToast("Exam deleted.", "info");
+        }
+    );
+};
+
+setInterval(() => {
+    const pageEl = document.getElementById('page-exam');
+    if (pageEl && !pageEl.classList.contains('hidden')) {
+        window.updateExamCountdown();
+    }
+}, 1000);
+</script>
