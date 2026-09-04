@@ -1,5 +1,5 @@
 /**
- * X-29 (x-2k29) Local Firestore Backup System
+ * X-29 (x-29-advance) Local Firestore Backup System
  * scripts/backup.js
  * 
  * Performs local manual and automatic backup of X-29 Firebase Cloud Firestore database.
@@ -17,7 +17,7 @@ const CODE_DIR = path.resolve(__dirname, '..');
 const X29_ROOT_DIR = path.dirname(CODE_DIR);
 const SERVICE_ACCOUNT_PATH = path.join(CODE_DIR, 'firebase-service-account.json');
 const BACKUP_BASE_DIR = path.join(X29_ROOT_DIR, 'X-29-Backups');
-const EXPECTED_PROJECT_ID = 'x-2k29';
+const EXPECTED_PROJECT_ID = 'x-29-advance';
 const DEFAULT_KEEP_DAYS = 30;
 
 // 1. Generate Bangladesh Timezone Timestamp Format: Date (DD MM YYYY) & Time (HH MM AM/PM)

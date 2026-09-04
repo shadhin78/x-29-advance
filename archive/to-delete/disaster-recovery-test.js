@@ -1,6 +1,6 @@
 /**
- * X-29 (x-2k29) Automated & Interactive Real Disaster-Recovery Test Script
- * scripts/disaster-recovery-test.js
+ * X-29 (x-29-advance) Automated & Interactive Real Disaster-Recovery Test Script
+ * archive/to-delete/disaster-recovery-test.js
  */
 
 const fs = require('fs');
@@ -10,11 +10,11 @@ const readline = require('readline');
 const { initializeApp, cert } = require('firebase-admin/app');
 const { getFirestore, Timestamp, GeoPoint, DocumentReference, Bytes } = require('firebase-admin/firestore');
 
-const CODE_DIR = path.resolve(__dirname, '..');
+const CODE_DIR = path.resolve(__dirname, '..', '..');
 const X29_ROOT_DIR = path.dirname(CODE_DIR);
 const SERVICE_ACCOUNT_PATH = path.join(CODE_DIR, 'firebase-service-account.json');
 const BACKUP_BASE_DIR = path.join(X29_ROOT_DIR, 'X-29-Backups');
-const EXPECTED_PROJECT_ID = 'x-2k29';
+const EXPECTED_PROJECT_ID = 'x-29-advance';
 const PROJECT_NAME = 'X-29';
 const MAX_BATCH_SIZE = 400;
 

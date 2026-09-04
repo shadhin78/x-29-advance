@@ -91,12 +91,12 @@ function hasUserData(payload) {
 }
 
 const firebaseConfig = {
-    apiKey: "AIzaSyAiqf66FVpOM9UV20LEcOjOPkkFcS_qFIs",
-    authDomain: "x-2k29.firebaseapp.com",
-    projectId: "x-2k29",
-    storageBucket: "x-2k29.firebasestorage.app",
-    messagingSenderId: "17156117405",
-    appId: "1:17156117405:web:78cb75ef31f3ffdba15574"
+    apiKey: "AIzaSyD7kXQe7ovTuBlcWYGJpi678idYFdSHUWs",
+    authDomain: "x-29-advance.firebaseapp.com",
+    projectId: "x-29-advance",
+    storageBucket: "x-29-advance.firebasestorage.app",
+    messagingSenderId: "277295985303",
+    appId: "1:277295985303:web:4c36a1105fa16e8aa16fd2"
 };
 window.firebaseConfig = firebaseConfig;
 

@@ -1,5 +1,5 @@
 /**
- * X-29 (x-2k29) Read-Only Firestore Backup Deep Verification System
+ * X-29 (x-29-advance) Read-Only Firestore Backup Deep Verification System
  * scripts/verify-backup.js
  */
 
@@ -18,7 +18,7 @@ const BACKUP_BASE_DIR = path.join(X29_ROOT_DIR, 'X-29-Backups');
 const VERIFICATION_LOG_PATH = path.join(BACKUP_BASE_DIR, 'verification-log.txt');
 const BACKUP_LOG_PATH = path.join(BACKUP_BASE_DIR, 'backup-log.txt');
 
-const EXPECTED_PROJECT_ID = 'x-2k29';
+const EXPECTED_PROJECT_ID = 'x-29-advance';
 const PROJECT_NAME = 'X-29';
 
 // -----------------------------------------------------------------------------

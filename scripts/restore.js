@@ -1,5 +1,5 @@
 /**
- * X-29 (x-2k29) Local Firestore Restore System
+ * X-29 (x-29-advance) Local Firestore Restore System
  * scripts/restore.js
  */
 
@@ -14,7 +14,7 @@ const X29_ROOT_DIR = path.dirname(CODE_DIR);
 const SERVICE_ACCOUNT_PATH = path.join(CODE_DIR, 'firebase-service-account.json');
 const MANUAL_BACKUPS_DIR = path.join(X29_ROOT_DIR, 'X-29-Backups', 'Manual');
 const BACKUP_BASE_DIR = path.join(X29_ROOT_DIR, 'X-29-Backups');
-const EXPECTED_PROJECT_ID = 'x-2k29';
+const EXPECTED_PROJECT_ID = 'x-29-advance';
 const MAX_BATCH_SIZE = 400;
 
 // Helper to handle CLI user input
