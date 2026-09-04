@@ -22,6 +22,13 @@ Thumbs.db
 
 # Firebase Service Account Credentials & Local Backups
 firebase-service-account.json
+*.log
+backup-log.txt
+verification-log.txt
+restore-log.txt
+X-29-Backups/
+X-29-advance-backups/
+
 
 
 

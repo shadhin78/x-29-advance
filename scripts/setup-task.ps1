@@ -1,6 +1,6 @@
-# PowerShell script to register X-29 Firebase Automatic Backup in Windows Task Scheduler
-$TaskName = "X-29 Firebase Automatic Backup"
-$Action = New-ScheduledTaskAction -Execute "C:\Program Files\nodejs\node.exe" -Argument "scripts/backup.js --automatic" -WorkingDirectory "D:\X-29 Project\X-29\X-29-Code"
+# PowerShell script to register X-29 Advance Automatic Backup in Windows Task Scheduler
+$TaskName = "X-29 Advance Automatic Backup"
+$Action = New-ScheduledTaskAction -Execute "cmd.exe" -Argument "/c backup-auto.bat" -WorkingDirectory "D:\X-29-ADVANCE\X-29-advance-code"
 $Triggers = @(
     (New-ScheduledTaskTrigger -Daily -At "11:00AM"),
     (New-ScheduledTaskTrigger -Daily -At "02:30PM"),
@@ -9,5 +9,5 @@ $Triggers = @(
 )
 $Settings = New-ScheduledTaskSettingsSet -StartWhenAvailable -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries
 Register-ScheduledTask -TaskName $TaskName -Action $Action -Trigger $Triggers -Settings $Settings -User $env:USERNAME -Force
-Write-Host "Task '$TaskName' updated with 4 daily triggers (11:00 AM, 02:30 PM, 07:30 PM, 11:00 PM) successfully."
+Write-Host "Task '$TaskName' registered with 4 daily triggers (11:00 AM, 02:30 PM, 07:30 PM, 11:00 PM) successfully."
 

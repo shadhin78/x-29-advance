@@ -13,13 +13,14 @@ const { getFirestore, Timestamp, GeoPoint, DocumentReference } = require('fireba
 const CODE_DIR = path.resolve(__dirname, '..');
 const X29_ROOT_DIR = path.dirname(CODE_DIR);
 const SERVICE_ACCOUNT_PATH = path.join(CODE_DIR, 'firebase-service-account.json');
-const MANUAL_BACKUPS_DIR = path.join(X29_ROOT_DIR, 'X-29-Backups', 'Manual');
-const BACKUP_BASE_DIR = path.join(X29_ROOT_DIR, 'X-29-Backups');
-const VERIFICATION_LOG_PATH = path.join(BACKUP_BASE_DIR, 'verification-log.txt');
-const BACKUP_LOG_PATH = path.join(BACKUP_BASE_DIR, 'backup-log.txt');
+const BACKUP_BASE_DIR = path.join(X29_ROOT_DIR, 'X-29-advance-backups');
+const MANUAL_BACKUPS_DIR = path.join(BACKUP_BASE_DIR, 'Manual');
+const LOGS_DIR = path.join(BACKUP_BASE_DIR, 'logs');
+const VERIFICATION_LOG_PATH = path.join(LOGS_DIR, 'verification-log.txt');
+const BACKUP_LOG_PATH = path.join(LOGS_DIR, 'backup-log.txt');
 
 const EXPECTED_PROJECT_ID = 'x-29-advance';
-const PROJECT_NAME = 'X-29';
+const PROJECT_NAME = 'X-29 Advance';
 
 // -----------------------------------------------------------------------------
 // SAFETY AUDIT GUARANTEE:
@@ -79,8 +80,8 @@ function getBangladeshTimestamp() {
 
 function appendVerificationLog(text) {
     try {
-        if (!fs.existsSync(BACKUP_BASE_DIR)) {
-            fs.mkdirSync(BACKUP_BASE_DIR, { recursive: true });
+        if (!fs.existsSync(LOGS_DIR)) {
+            fs.mkdirSync(LOGS_DIR, { recursive: true });
         }
         fs.appendFileSync(VERIFICATION_LOG_PATH, text.trim() + '\n\n', 'utf8');
     } catch (e) {
@@ -90,8 +91,8 @@ function appendVerificationLog(text) {
 
 function appendBackupLog(summaryText) {
     try {
-        if (!fs.existsSync(BACKUP_BASE_DIR)) {
-            fs.mkdirSync(BACKUP_BASE_DIR, { recursive: true });
+        if (!fs.existsSync(LOGS_DIR)) {
+            fs.mkdirSync(LOGS_DIR, { recursive: true });
         }
         fs.appendFileSync(BACKUP_LOG_PATH, summaryText.trim() + '\n', 'utf8');
     } catch (e) {
@@ -280,14 +281,14 @@ function scanAvailableBackups() {
 
         const relPath = path.relative(BACKUP_BASE_DIR, fullPath);
         let backupType = 'LOCAL';
-        let relSource = 'X-29-Backups';
+        let relSource = 'X-29-advance-backups';
 
-        if (relPath.startsWith('Manual') || relPath.startsWith('Manual' + path.sep)) {
+        if (relPath.startsWith('Manual') || relPath.startsWith('manual') || relPath.startsWith('Manual' + path.sep) || relPath.startsWith('manual' + path.sep)) {
             backupType = 'MANUAL';
-            relSource = 'X-29-Backups\\Manual';
-        } else if (relPath.startsWith('Automatic') || relPath.startsWith('Automatic' + path.sep)) {
+            relSource = 'X-29-advance-backups\\Manual';
+        } else if (relPath.startsWith('Automatic') || relPath.startsWith('daily') || relPath.startsWith('Automatic' + path.sep) || relPath.startsWith('daily' + path.sep)) {
             backupType = 'AUTOMATIC';
-            relSource = 'X-29-Backups\\Automatic';
+            relSource = 'X-29-advance-backups\\Automatic';
         }
 
         results.push({
@@ -350,14 +351,14 @@ async function selectBackupFromCli(backupsList, args) {
 
             const fullPath = path.dirname(jsonPath);
             let backupType = 'LOCAL';
-            let relSource = 'X-29-Backups';
+            let relSource = 'X-29-advance-backups';
 
-            if (fullPath.includes(path.sep + 'Manual' + path.sep) || fullPath.endsWith(path.sep + 'Manual')) {
+            if (fullPath.includes(path.sep + 'Manual' + path.sep) || fullPath.endsWith(path.sep + 'Manual') || fullPath.includes(path.sep + 'manual' + path.sep) || fullPath.endsWith(path.sep + 'manual')) {
                 backupType = 'MANUAL';
-                relSource = 'X-29-Backups\\Manual';
-            } else if (fullPath.includes(path.sep + 'Automatic' + path.sep) || fullPath.endsWith(path.sep + 'Automatic')) {
+                relSource = 'X-29-advance-backups\\Manual';
+            } else if (fullPath.includes(path.sep + 'Automatic' + path.sep) || fullPath.endsWith(path.sep + 'Automatic') || fullPath.includes(path.sep + 'daily' + path.sep) || fullPath.endsWith(path.sep + 'daily')) {
                 backupType = 'AUTOMATIC';
-                relSource = 'X-29-Backups\\Automatic';
+                relSource = 'X-29-advance-backups\\Automatic';
             }
 
             return {
@@ -1557,7 +1558,7 @@ async function runSingleVerification(backupItem, db) {
     } else {
         if (result.verdict === 'VALID BUT OUTDATED BACKUP') {
             console.log(`\n⚠️ VALID BUT OUTDATED BACKUP\n`);
-            console.log(`Backup belongs to X-29 (${EXPECTED_PROJECT_ID}) and is structurally valid, but Live Firestore contains newer updates created after the backup snapshot.`);
+            console.log(`Backup belongs to X-29 Advance (${EXPECTED_PROJECT_ID}) and is structurally valid, but Live Firestore contains newer updates created after the backup snapshot.`);
         } else {
             console.log(`\n❌ BACKUP DATA MISMATCH\n`);
             console.log(`There are unexpected data/structural differences between Live Firestore and the selected backup.`);

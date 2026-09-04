@@ -1,5 +1,5 @@
 /**
- * X-29 (x-29-advance) Local Firestore Restore System
+ * X-29 Advance (x-29-advance) Local Firestore Restore System
  * scripts/restore.js
  */
 
@@ -12,8 +12,10 @@ const { getFirestore, Timestamp, GeoPoint, DocumentReference, Bytes } = require(
 const CODE_DIR = path.resolve(__dirname, '..');
 const X29_ROOT_DIR = path.dirname(CODE_DIR);
 const SERVICE_ACCOUNT_PATH = path.join(CODE_DIR, 'firebase-service-account.json');
-const MANUAL_BACKUPS_DIR = path.join(X29_ROOT_DIR, 'X-29-Backups', 'Manual');
-const BACKUP_BASE_DIR = path.join(X29_ROOT_DIR, 'X-29-Backups');
+const BACKUP_BASE_DIR = path.join(X29_ROOT_DIR, 'X-29-advance-backups');
+const MANUAL_BACKUPS_DIR = path.join(BACKUP_BASE_DIR, 'Manual');
+const LOGS_DIR = path.join(BACKUP_BASE_DIR, 'logs');
+const RESTORE_LOG_PATH = path.join(LOGS_DIR, 'restore-log.txt');
 const EXPECTED_PROJECT_ID = 'x-29-advance';
 const MAX_BATCH_SIZE = 400;
 
@@ -128,14 +130,14 @@ function scanAvailableBackupsForRestore() {
 
         const relPath = path.relative(BACKUP_BASE_DIR, fullPath);
         let backupType = 'LOCAL';
-        let relSource = 'X-29-Backups';
+        let relSource = 'X-29-advance-backups';
 
-        if (relPath.startsWith('Manual') || relPath.startsWith('Manual' + path.sep)) {
+        if (relPath.startsWith('Manual') || relPath.startsWith('manual') || relPath.startsWith('Manual' + path.sep) || relPath.startsWith('manual' + path.sep)) {
             backupType = 'MANUAL';
-            relSource = 'X-29-Backups\\Manual';
-        } else if (relPath.startsWith('Automatic') || relPath.startsWith('Automatic' + path.sep)) {
+            relSource = 'X-29-advance-backups\\Manual';
+        } else if (relPath.startsWith('Automatic') || relPath.startsWith('daily') || relPath.startsWith('Automatic' + path.sep) || relPath.startsWith('daily' + path.sep)) {
             backupType = 'AUTOMATIC';
-            relSource = 'X-29-Backups\\Automatic';
+            relSource = 'X-29-advance-backups\\Automatic';
         }
 
         let folderName = relPath;
@@ -143,8 +145,12 @@ function scanAvailableBackupsForRestore() {
             folderName = meta.backupFolderTimestamp;
         } else if (relPath.startsWith('Manual' + path.sep)) {
             folderName = relPath.substring(7);
+        } else if (relPath.startsWith('manual' + path.sep)) {
+            folderName = relPath.substring(7);
         } else if (relPath.startsWith('Automatic' + path.sep)) {
             folderName = relPath.substring(10);
+        } else if (relPath.startsWith('daily' + path.sep)) {
+            folderName = relPath.substring(6);
         }
 
         results.push({
@@ -311,13 +317,25 @@ async function recursiveWipeCollection(colRef, batchQueue, stats) {
 // Alias for backwards compatibility
 const wipeCollectionNode = recursiveWipeCollection;
 
+function logRestoreEvent(mode, backupName, stats, error = null) {
+    try {
+        if (!fs.existsSync(LOGS_DIR)) {
+            fs.mkdirSync(LOGS_DIR, { recursive: true });
+        }
+        const now = new Date().toISOString();
+        const status = error ? `FAILED: ${error.message || error}` : `SUCCESS (Restored ${stats ? stats.restoredDocuments : 0} docs, ${stats ? stats.restoredCollections : 0} collections)`;
+        const entry = `[${now}] RESTORE [${mode}] - Backup: ${backupName} - Status: ${status}\n`;
+        fs.appendFileSync(RESTORE_LOG_PATH, entry, 'utf8');
+    } catch (e) {}
+}
+
 // 6. Main Restore Execution Function
 async function runRestore() {
     const serviceAccount = loadServiceAccount();
 
     console.log(`\n==================================================`);
-    console.log(` X-29 FIRESTORE RESTORE SYSTEM`);
-    console.log(` Connected to X-29 Firebase Project: [${EXPECTED_PROJECT_ID}]`);
+    console.log(` X-29 ADVANCE FIRESTORE RESTORE SYSTEM`);
+    console.log(` Connected to X-29 Advance Firebase Project: [${EXPECTED_PROJECT_ID}]`);
     console.log(`==================================================\n`);
 
     const availableBackups = scanAvailableBackupsForRestore();
@@ -451,16 +469,19 @@ async function runRestore() {
     }
 
     console.log(`\n==================================================`);
-    console.log(`🎉 X-29 RESTORE SUCCESSFUL!`);
+    console.log(`🎉 X-29 ADVANCE RESTORE SUCCESSFUL!`);
     console.log(`   Project ID:          ${EXPECTED_PROJECT_ID}`);
     console.log(`   Restore Mode:        ${mode} RESTORE`);
-    console.log(`   Source Backup:       X-29-Backups/${backupFolderName}`);
+    console.log(`   Source Backup:       X-29-advance-backups/${backupFolderName}`);
     console.log(`   Restored Collections:${restoreStats.restoredCollections}`);
     console.log(`   Restored Documents:  ${restoreStats.restoredDocuments}`);
     console.log(`==================================================\n`);
+
+    logRestoreEvent(mode, backupFolderName, restoreStats);
 }
 
 runRestore().catch(err => {
     console.error(`\n❌ RESTORE FAILED WITH EXCEPTION:`, err);
+    logRestoreEvent('UNKNOWN', 'NONE', null, err);
     process.exit(1);
 });

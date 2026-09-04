@@ -1,10 +1,10 @@
 /**
- * X-29 (x-29-advance) Local Firestore Backup System
+ * X-29 Advance (x-29-advance) Local Firestore Backup System
  * scripts/backup.js
  * 
- * Performs local manual and automatic backup of X-29 Firebase Cloud Firestore database.
+ * Performs local manual and automatic backup of X-29 Advance Firebase Cloud Firestore database.
  * Strictly READ-ONLY with respect to Firestore.
- * Saves backups to: D:\X-29 Project\X-29\X-29-Backups\
+ * Saves backups to: D:\X-29-ADVANCE\X-29-advance-backups\
  */
 
 const fs = require('fs');
@@ -16,7 +16,8 @@ const { getFirestore, Timestamp, GeoPoint, DocumentReference } = require('fireba
 const CODE_DIR = path.resolve(__dirname, '..');
 const X29_ROOT_DIR = path.dirname(CODE_DIR);
 const SERVICE_ACCOUNT_PATH = path.join(CODE_DIR, 'firebase-service-account.json');
-const BACKUP_BASE_DIR = path.join(X29_ROOT_DIR, 'X-29-Backups');
+const BACKUP_BASE_DIR = path.join(X29_ROOT_DIR, 'X-29-advance-backups');
+const LOGS_DIR = path.join(BACKUP_BASE_DIR, 'logs');
 const EXPECTED_PROJECT_ID = 'x-29-advance';
 const DEFAULT_KEEP_DAYS = 30;
 
@@ -313,12 +314,12 @@ function applyRetentionPolicy(baseDir) {
     return;
 }
 
-const LOG_FILE_PATH = path.join(BACKUP_BASE_DIR, 'backup-log.txt');
+const LOG_FILE_PATH = path.join(LOGS_DIR, 'backup-log.txt');
 
 function logBackupEvent(event, mode, details = '') {
     try {
-        if (!fs.existsSync(BACKUP_BASE_DIR)) {
-            fs.mkdirSync(BACKUP_BASE_DIR, { recursive: true });
+        if (!fs.existsSync(LOGS_DIR)) {
+            fs.mkdirSync(LOGS_DIR, { recursive: true });
         }
         const nowStr = getBangladeshTimestampFolders();
         const timestamp = `${nowStr.dateFolder} ${nowStr.timeFolder}`;
@@ -343,7 +344,7 @@ async function runBackup() {
     logBackupEvent('STARTED', backupMode);
 
     console.log(`\n==================================================`);
-    console.log(` X-29 FIRESTORE LOCAL BACKUP SYSTEM (${backupMode.toUpperCase()} MODE)`);
+    console.log(` X-29 ADVANCE FIRESTORE LOCAL BACKUP SYSTEM (${backupMode.toUpperCase()} MODE)`);
     console.log(`==================================================\n`);
 
     try {
@@ -378,9 +379,10 @@ async function runBackup() {
         console.log(`[BACKUP] Collections found: ${stats.totalCollections}`);
         console.log(`[BACKUP] Documents found: ${stats.totalDocuments}`);
 
-        // Zero-Document Safeguard
+        // Zero-Document Handling (Supports initial empty database state safely)
         if (stats.totalDocuments === 0) {
-            throw new Error(`[BACKUP] ❌ Suspicious result: Firestore returned 0 total documents! Aborting backup to protect backup history.`);
+            console.log(`[BACKUP] ℹ️ Notice: Firestore currently contains 0 collections/documents (clean initial state).`);
+            console.log(`[BACKUP] Creating baseline backup snapshot for X-29 Advance.`);
         }
 
         console.log(`[BACKUP] Creating JSON...`);
@@ -408,7 +410,7 @@ async function runBackup() {
 
         const backupPayload = {
             metadata: {
-                project: 'X-29',
+                project: 'X-29 Advance',
                 backupType: backupMode,
                 version: '1.0',
                 createdAt: nowIso,
@@ -459,7 +461,7 @@ async function runBackup() {
         const duration = ((Date.now() - startTime) / 1000).toFixed(2);
 
         console.log(`\n==================================================`);
-        console.log(`🎉 X-29 ${backupMode.toUpperCase()} BACKUP SUCCESSFUL!`);
+        console.log(`🎉 X-29 ADVANCE ${backupMode.toUpperCase()} BACKUP SUCCESSFUL!`);
         console.log(`   Project ID:       ${EXPECTED_PROJECT_ID}`);
         console.log(`   Directory:        ${targetDir}`);
         console.log(`   Total Collections:${stats.totalCollections}`);

@@ -1,17 +1,17 @@
-# X-29 (`x-29-advance`) Firestore Local Backup, Restore & Verification Guide
+# X-29 Advance (`x-29-advance`) Firestore Backup, Restore & Verification Guide
 
-This guide describes the local backup, automatic post-backup verification, restore, and deep verification system for the X-29 Firebase Cloud Firestore database.
+This guide describes the local backup, automatic post-backup verification, restore, and deep verification system configured specifically for **X-29 Advance**.
 
 ---
 
 ## 1. System Architecture: Local System & Automatic Verification
 
-The X-29 backup system runs locally on your PC via Node.js scripts:
+The X-29 Advance backup system runs locally on your PC via Node.js scripts:
 
 ```text
 START
   ↓
-Create Firebase backup (READ-ONLY fetch)
+Create Firebase backup (READ-ONLY fetch from x-29-advance)
   ↓
 Backup successfully written (Automatic\DD MM YYYY\HH MM AM/PM)
   ↓
@@ -19,9 +19,9 @@ Automatically run verification
   ↓
 Compare exact backup against LIVE Firestore (READ-ONLY)
   ↓
-Record verification result in verification-log.txt & backup-log.txt
+Record verification result in logs/verification-log.txt & logs/backup-log.txt
   ↓
-Finish
+Finish (Exit code 0)
 ```
 
 > [!IMPORTANT]
@@ -37,9 +37,10 @@ Finish
 ### Location
 All local backups are stored under:
 
-`D:\X-29 Project\X-29\X-29-Backups\`
-- Automatic Backups: `D:\X-29 Project\X-29\X-29-Backups\Automatic\DD MM YYYY\HH MM AM/PM\`
-- Manual Backups: `D:\X-29 Project\X-29\X-29-Backups\Manual\DD MM YYYY\HH MM AM/PM\`
+`D:\X-29-ADVANCE\X-29-advance-backups\`
+- Automatic Backups: `D:\X-29-ADVANCE\X-29-advance-backups\Automatic\DD MM YYYY\HH MM AM/PM\`
+- Manual Backups: `D:\X-29-ADVANCE\X-29-advance-backups\Manual\DD MM YYYY\HH MM AM/PM\`
+- Centralized Logs: `D:\X-29-ADVANCE\X-29-advance-backups\logs\`
 
 ### Timestamp Naming Format
 Folder names use 12-hour Bangladesh local time (`Asia/Dhaka` / UTC+6):
@@ -47,119 +48,83 @@ Folder names use 12-hour Bangladesh local time (`Asia/Dhaka` / UTC+6):
 `DD MM YYYY\HH MM AM` or `DD MM YYYY\HH MM PM`
 
 Examples:
-- `Automatic\15 08 2026\11 00 PM\`
-- `Manual\15 08 2026\09 30 AM\`
+- `Automatic\04 09 2026\11 00 PM\`
+- `Manual\04 09 2026\03 30 PM\`
 
 ### Directory Layout
 ```text
-X-29-Backups/
+X-29-advance-backups/
 ├── Automatic/
-│   └── 15 08 2026/
+│   └── 04 09 2026/
 │       └── 11 00 PM/
 │           ├── firestore-backup.json
 │           ├── firestore.json
 │           └── metadata.json
 ├── Manual/
-│   └── 15 08 2026/
-│       └── 09 30 AM/
+│   └── 04 09 2026/
+│       └── 03 30 PM/
 │           ├── firestore-backup.json
 │           ├── firestore.json
 │           └── metadata.json
-├── backup-log.txt
-└── verification-log.txt
+└── logs/
+    ├── backup-log.txt
+    ├── verification-log.txt
+    └── restore-log.txt
 ```
 
 ---
 
-## 3. Dedicated Verification Log (`verification-log.txt`)
+## 3. Dedicated Logs
 
-Every automatic backup immediately verifies the exact folder created and records the result in:
+### `logs/backup-log.txt`
+Records start, completion, and failure for every manual and scheduled backup.
 
-`D:\X-29 Project\X-29\X-29-Backups\verification-log.txt`
+### `logs/verification-log.txt`
+Every automatic backup immediately verifies the exact folder created against live Firestore and records the outcome:
 
-### Exact Match Format Example
+#### Exact Match Format Example
 ```text
-[15 08 2026 11 00 PM] AUTOMATIC BACKUP VERIFICATION
-Backup: D:\X-29 Project\X-29\X-29-Backups\Automatic\15 08 2026\11 00 PM
+[04 09 2026 11 00 PM] AUTOMATIC BACKUP VERIFICATION
+Backup: D:\X-29-ADVANCE\X-29-advance-backups\Automatic\04 09 2026\11 00 PM
 Status: EXACT MATCH
 Collections: 1
 Documents: 1
-Fields: 8465
-Arrays: 791
-Objects: 1351
+Fields: 120
+Arrays: 12
+Objects: 24
 Differences: 0
 SHA-256: MATCH
 Result: VERIFIED SUCCESSFULLY
 Duration: 0.45s
 ```
 
-### Mismatch Format Example
-```text
-[15 08 2026 11 00 PM] AUTOMATIC BACKUP VERIFICATION
-Backup: D:\X-29 Project\X-29\X-29-Backups\Automatic\15 08 2026\11 00 PM
-Status: MISMATCH
-
-Collections:
-Expected: 5
-Backup: 5
-Difference: 0
-
-Documents:
-Expected: 320
-Backup: 318
-Difference: 2
-
-Fields:
-Expected: 8465
-Backup: 8441
-Difference: 24
-
-Arrays:
-Expected: 791
-Backup: 790
-Difference: 1
-
-Objects:
-Expected: 1351
-Backup: 1348
-Difference: 3
-
-SHA-256:
-Expected: abc...
-Backup: xyz...
-Status: MISMATCH
-
-Total Differences: 30
-Result: VERIFICATION FAILED
-Duration: 0.52s
-
-DIFFERING DOCUMENTS:
-- users/abc123
-
-FIELD DIFFERENCES:
-- users/abc123/profile/name
-```
-
 ---
 
 ## 4. How to Trigger Backups
 
-### Automatic Backup (with post-backup verification):
+### Automatic Scheduled Backup (Headless, Exit Codes):
+```cmd
+backup-auto.bat
+```
+or
 ```cmd
 node scripts\backup.js --automatic
 ```
 
-### Manual Backup:
+### Manual Interactive Backup:
+```cmd
+backup.bat
+```
+or
 ```cmd
 node scripts\backup.js
 ```
-(or double-click `backup.bat`)
 
 ---
 
 ## 5. Automated Schedule in Windows Task Scheduler
 
-Configured via `scripts/setup-task.ps1` with 4 daily triggers:
+Configured via `scripts/setup-task.ps1` with task name **`X-29 Advance Automatic Backup`** with 4 daily triggers:
 - **11:00 AM**
 - **02:30 PM**
 - **07:30 PM**
@@ -167,7 +132,17 @@ Configured via `scripts/setup-task.ps1` with 4 daily triggers:
 
 Command executed:
 ```cmd
-"C:\Program Files\nodejs\node.exe" scripts/backup.js --automatic
+cmd.exe /c backup-auto.bat
+```
+Working directory:
+```cmd
+D:\X-29-ADVANCE\X-29-advance-code
+```
+
+To register/update the task in Task Scheduler, run PowerShell as Administrator:
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\scripts\setup-task.ps1
 ```
 
 ---
@@ -181,37 +156,40 @@ node scripts\verify-backup.js --latest
 ```
 or
 ```cmd
-node scripts\verify-backup.js --backup "Automatic\15 08 2026\11 00 PM"
+verify.bat
 ```
-(or double-click `verify.bat`)
 
 ---
 
 ## 7. How to Run Manual Restoration
 
-Restoration is strictly manual and interactive:
+Restoration is strictly manual, interactive, and safe:
 
-1. Open terminal in `X-29-Code`.
+1. Open terminal in `D:\X-29-ADVANCE\X-29-advance-code`.
 2. Run:
+   ```cmd
+   restore.bat
+   ```
+   or
    ```cmd
    node scripts\restore.js
    ```
-   (or double-click `restore.bat`)
 3. Select the desired backup folder from the menu.
 4. Select restoration mode:
    - **`[1] SAFE RESTORE`**: Merges backup documents into Firestore non-destructively.
-   - **`[2] FULL RESTORE`**: Wipes existing Firestore documents then restores exact backup state (requires typing `RESTORE`).
+   - **`[2] FULL RESTORE`**: Destructive; wipes existing Firestore documents then restores exact backup state (requires typing `RESTORE`).
 
 ---
 
 ## 🛠 File Reference Overview
 | File | Description |
 | :--- | :--- |
-| [`scripts/backup.js`](file:///d:/X-29%20Project/X-29/X-29-Code/scripts/backup.js) | Core Firestore backup script with automatic post-backup verification. |
-| [`scripts/verify-backup.js`](file:///d:/X-29%20Project/X-29/X-29-Code/scripts/verify-backup.js) | Read-only deep verification system & verification logging engine. |
-| [`scripts/restore.js`](file:///d:/X-29%20Project/X-29/X-29-Code/scripts/restore.js) | Core safe/full Firestore restore script. |
-| [`scripts/setup-task.ps1`](file:///d:/X-29%20Project/X-29/X-29-Code/scripts/setup-task.ps1) | PowerShell script configuring Windows Task Scheduler with 4 daily triggers. |
-| [`backup.bat`](file:///d:/X-29%20Project/X-29/X-29-Code/backup.bat) | 1-click Windows batch launcher for manual backups. |
-| [`verify.bat`](file:///d:/X-29%20Project/X-29/X-29-Code/verify.bat) | 1-click Windows batch launcher for backup verification. |
-| [`restore.bat`](file:///d:/X-29%20Project/X-29/X-29-Code/restore.bat) | 1-click Windows batch launcher for restoration. |
-| [`.gitignore`](file:///d:/X-29%20Project/X-29/X-29-Code/.gitignore) | Configured to ignore service account credentials. |
+| [`scripts/backup.js`](file:///D:/X-29-ADVANCE/X-29-advance-code/scripts/backup.js) | Core Firestore backup script with automatic post-backup verification. |
+| [`scripts/verify-backup.js`](file:///D:/X-29-ADVANCE/X-29-advance-code/scripts/verify-backup.js) | Read-only deep verification system & verification logging engine. |
+| [`scripts/restore.js`](file:///D:/X-29-ADVANCE/X-29-advance-code/scripts/restore.js) | Core safe/full Firestore restore script. |
+| [`scripts/setup-task.ps1`](file:///D:/X-29-ADVANCE/X-29-advance-code/scripts/setup-task.ps1) | PowerShell script configuring Windows Task Scheduler for X-29 Advance. |
+| [`backup.bat`](file:///D:/X-29-ADVANCE/X-29-advance-code/backup.bat) | 1-click Windows batch launcher for interactive manual backups. |
+| [`backup-auto.bat`](file:///D:/X-29-ADVANCE/X-29-advance-code/backup-auto.bat) | Headless Windows batch launcher for Task Scheduler with exit codes. |
+| [`verify.bat`](file:///D:/X-29-ADVANCE/X-29-advance-code/verify.bat) | 1-click Windows batch launcher for backup verification. |
+| [`restore.bat`](file:///D:/X-29-ADVANCE/X-29-advance-code/restore.bat) | 1-click Windows batch launcher for restoration. |
+| [`.gitignore`](file:///D:/X-29-ADVANCE/X-29-advance-code/.gitignore) | Excludes service account credentials and backups from Git. |
