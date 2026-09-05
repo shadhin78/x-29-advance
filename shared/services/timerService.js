@@ -48,39 +48,8 @@
     window.isAnyTimerRunning = isAnyTimerRunning;
 
     function playCompletionChime() {
-        try {
-            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-            // First beep: D5
-            let osc = audioCtx.createOscillator();
-            let gain = audioCtx.createGain();
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
-            gain.gain.setValueAtTime(0, audioCtx.currentTime);
-            gain.gain.linearRampToValueAtTime(0.15, audioCtx.currentTime + 0.05);
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.4);
-
-            // Second beep: A5
-            setTimeout(() => {
-                let osc2 = audioCtx.createOscillator();
-                let gain2 = audioCtx.createGain();
-                osc2.type = 'sine';
-                osc2.frequency.setValueAtTime(880, audioCtx.currentTime);
-                osc2.frequency.setValueAtTime(880, audioCtx.currentTime);
-                gain2.gain.setValueAtTime(0, audioCtx.currentTime);
-                gain2.gain.linearRampToValueAtTime(0.15, audioCtx.currentTime + 0.05);
-                gain2.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
-                osc2.connect(gain2);
-                gain2.connect(audioCtx.destination);
-                osc2.start();
-                osc2.stop(audioCtx.currentTime + 0.5);
-            }, 150);
-        } catch (e) {
-            console.warn("Audio Context failed to play chime:", e);
+        if (typeof window.playCompletionChime === 'function') {
+            window.playCompletionChime();
         }
     }
 

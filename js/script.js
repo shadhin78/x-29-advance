@@ -53,9 +53,9 @@ window.getProgramColor = function (pName) {
     return '#6366f1';
 };
 
-function safeSetText(id, text) { const el = document.getElementById(id); if (el) el.textContent = text; }
-function safeSetHtml(id, html) { const el = document.getElementById(id); if (el) el.innerHTML = html; }
-function safeSetClass(id, className) { const el = document.getElementById(id); if (el) el.className = className; }
+// Generic DOM helpers extracted to ES module: js/utils/dom.js
+// Backward-compatibility references maintained by window.safeSetText, window.safeSetHtml, window.safeSetClass
+
 
 function getTaskDate(task) {
     if (!task) return new Date(NaN);
@@ -131,28 +131,9 @@ window.setLoadingProgress = function (pct, statusText) {
     if (text) text.textContent = statusText || 'Loading Application...';
 };
 
-window.sanitizeAllData = function (val) {
-    if (val === undefined) return undefined;
-    if (typeof val === 'string') {
-        return val.replace(/<[^>]*>/g, '');
-    } else if (Array.isArray(val)) {
-        return val.map(window.sanitizeAllData).filter(item => item !== undefined);
-    } else if (val !== null && typeof val === 'object') {
-        if (val instanceof Date) return val;
-        if (typeof val.toDate === 'function') return val;
-        const cleaned = {};
-        for (const key in val) {
-            if (Object.prototype.hasOwnProperty.call(val, key)) {
-                const cleanVal = window.sanitizeAllData(val[key]);
-                if (cleanVal !== undefined) {
-                    cleaned[key] = cleanVal;
-                }
-            }
-        }
-        return cleaned;
-    }
-    return val;
-};
+// HTML and data sanitization extracted to ES module: js/utils/sanitize.js
+// Backward-compatibility references maintained by window.sanitizeAllData
+
 
 /**
  * Master application configuration and user state model.
@@ -8074,40 +8055,9 @@ window.closeModal = function (modalId) {
     setTimeout(() => { modal.classList.add('hidden'); document.body.classList.remove('overflow-hidden'); }, 300);
 };
 
-window.pendingDeleteAction = null;
+// Deletion and confirmation modal helpers extracted to ES module: js/shared/deletion.js
+// Backward-compatibility references maintained by window.openConfirmModal, window.closeConfirmModal, window.executeConfirmedDelete
 
-window.openConfirmModal = function (title, message, actionCallback) {
-    document.getElementById('cm-title').textContent = title;
-    document.getElementById('cm-message').textContent = message;
-    window.pendingDeleteAction = actionCallback;
-    const modal = document.getElementById('confirm-modal');
-    const backdrop = document.getElementById('cm-backdrop');
-    const content = document.getElementById('cm-content');
-    if (!modal || !backdrop || !content) return;
-    if (modal.parentElement !== document.body) {
-        document.body.appendChild(modal);
-    }
-    modal.style.zIndex = '9999999';
-    modal.classList.remove('hidden'); void modal.offsetWidth;
-    backdrop.classList.remove('opacity-0'); backdrop.classList.add('opacity-100');
-    content.classList.remove('scale-95', 'opacity-0', 'translate-y-4'); content.classList.add('scale-100', 'opacity-100', 'translate-y-0');
-    document.body.classList.add('overflow-hidden');
-};
-
-window.closeConfirmModal = function () {
-    const modal = document.getElementById('confirm-modal');
-    const backdrop = document.getElementById('cm-backdrop');
-    const content = document.getElementById('cm-content');
-    if (!modal || !backdrop || !content) return;
-    backdrop.classList.remove('opacity-100'); backdrop.classList.add('opacity-0');
-    content.classList.remove('scale-100', 'opacity-100', 'translate-y-0'); content.classList.add('scale-95', 'opacity-0', 'translate-y-4');
-    setTimeout(() => { modal.classList.add('hidden'); window.pendingDeleteAction = null; document.body.classList.remove('overflow-hidden'); }, 300);
-};
-
-window.executeConfirmedDelete = function () {
-    if (window.pendingDeleteAction) window.pendingDeleteAction();
-    window.closeConfirmModal();
-};
 
 window.showCongratsModal = function (isCustom = false, corePassed = 0, coreTotal = 0) {
     const modal = document.getElementById('congrats-modal');
@@ -8234,93 +8184,9 @@ window.closeCongratsModal = function () {
     }, 500);
 };
 
-window.fireConfetti = function () {
-    const canvas = document.getElementById('confetti-canvas');
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+// Confetti visual effects extracted to ES module: js/shared/confetti.js
+// Backward-compatibility references maintained by window.fireConfetti
 
-    const particles = [];
-    const colors = ['#10b981', '#3b82f6', '#f59e0b', '#ec4899', '#8b5cf6', '#f43f5e', '#06b6d4'];
-
-    // Initial Firework Burst
-    for (let i = 0; i < 200; i++) {
-        particles.push({
-            x: canvas.width / 2,
-            y: canvas.height / 2 + 100,
-            r: Math.random() * 6 + 3,
-            dx: Math.random() * 24 - 12,
-            dy: Math.random() * -24 - 5,
-            color: colors[Math.floor(Math.random() * colors.length)],
-            tilt: Math.floor(Math.random() * 10) - 10,
-            tiltAngleIncrement: (Math.random() * 0.07) + 0.05,
-            tiltAngle: 0,
-            type: Math.random() > 0.5 ? 'circle' : 'rect'
-        });
-    }
-
-    let animationId;
-    function render() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        particles.forEach((p, index) => {
-            p.tiltAngle += p.tiltAngleIncrement;
-            p.y += (Math.cos(p.tiltAngle) + 1 + p.r / 2) / 2;
-            p.x += Math.sin(p.tiltAngle) * 2;
-            p.dy += 0.08; // gravity
-            p.x += p.dx;
-            p.y += p.dy;
-
-            ctx.beginPath();
-            if (p.type === 'circle') {
-                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-                ctx.fillStyle = p.color;
-                ctx.fill();
-            } else {
-                ctx.lineWidth = p.r;
-                ctx.strokeStyle = p.color;
-                ctx.moveTo(p.x + p.tilt + p.r, p.y);
-                ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r);
-                ctx.stroke();
-            }
-
-            if (p.y > canvas.height || p.x < -50 || p.x > canvas.width + 50) {
-                particles.splice(index, 1);
-            }
-        });
-
-        if (particles.length > 0) {
-            animationId = requestAnimationFrame(render);
-        } else {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-        }
-    }
-    render();
-
-    // Raining Flowers/Confetti phase
-    let shoots = 0;
-    let shootInterval = setInterval(() => {
-        shoots++;
-        if (shoots > 8) {
-            clearInterval(shootInterval);
-            return;
-        }
-        for (let i = 0; i < 40; i++) {
-            particles.push({
-                x: Math.random() * canvas.width,
-                y: -20,
-                r: Math.random() * 6 + 3,
-                dx: Math.random() * 4 - 2,
-                dy: Math.random() * 5 + 2,
-                color: colors[Math.floor(Math.random() * colors.length)],
-                tilt: Math.floor(Math.random() * 10) - 10,
-                tiltAngleIncrement: (Math.random() * 0.07) + 0.05,
-                tiltAngle: 0,
-                type: Math.random() > 0.5 ? 'circle' : 'rect'
-            });
-        }
-    }, 600);
-};
 
 window.openSubjectTrendModal = function () {
     window.activeSingleSubjectTrend = null;
@@ -19507,12 +19373,9 @@ window.deletePaceGoal = function (id) {
     FirebaseService.saveToCloud(); renderUI(); showToast("Pace Goal deleted.", "success");
 };
 
-function showToast(msg, type) {
-    const t = document.getElementById('toast-message'); if (!t) return;
-    t.textContent = msg;
-    t.className = `mt-5 text-[10px] md:text-xs font-black uppercase tracking-widest rounded-xl px-5 py-3 text-center transition-all duration-300 w-full md:w-auto self-start border shadow-md ${type === 'success' ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800' : 'bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border-red-200 dark:border-red-800'}`;
-    t.classList.remove('hidden'); setTimeout(() => t.classList.add('hidden'), 4000);
-}
+// Toast notification UI system extracted to ES module: js/shared/toast.js
+// Backward-compatibility references maintained by window.showToast
+
 
 // Fast global resize listener to ensure all canvas charts remain perfectly responsive across device orientations
 let resizeDebounceTimer = null;
@@ -20227,101 +20090,9 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-window.restoreLocalBackup = async function() {
-    if (typeof window.showToast === 'function') {
-        window.showToast("No local backup file stored on server. Use 'Import JSON' to restore from a local file.", "info");
-    } else {
-        alert("No local backup file stored on server. Use 'Import JSON' to restore from a local file.");
-    }
-};
+// JSON backup, export, and import orchestration extracted to ES module: js/services/backup.js
+// Backward-compatibility references maintained by window.restoreLocalBackup, window.importJSONBackup, window.exportJSONBackup
 
-window.importJSONBackup = function(event) {
-    const file = event.target.files && event.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        try {
-            const data = JSON.parse(e.target.result);
-            const success = window.applyFullAppState(data, true);
-            if (success) {
-                if (typeof window.showToast === 'function') {
-                    window.showToast("Workspace data imported successfully!", "success");
-                } else {
-                    alert("Workspace data imported successfully!");
-                }
-            }
-        } catch(err) {
-            console.error("Invalid JSON file:", err);
-            if (typeof window.showToast === 'function') {
-                window.showToast("Invalid JSON file: " + err.message, "error");
-            } else {
-                alert("Invalid JSON file: " + err.message);
-            }
-        }
-    };
-    reader.readAsText(file);
-};
-
-window.exportJSONBackup = function() {
-    try {
-        const currentPayload = {
-            _metadata: {
-                exportedAt: new Date().toISOString(),
-                source: "X-29 Backup Export"
-            },
-            tasks: AppState.tasks,
-            tracks: window.tracks,
-            customSyllabus: window.syllabusStructure,
-            customPrograms: window.customPrograms,
-            customActions: window.customActions,
-            paceGoals: window.paceGoals,
-            passedItems: window.passedItems,
-            celebrationTargets: window.celebrationTargets || AppState.celebrationTargets || { programs: [], subjects: [] },
-            revisionData: window.revisionData,
-            programVisibility: window.programVisibility || {},
-            subjectTimeLinks: window.subjectTimeLinks,
-            successResults: window.successResults,
-            timerLogs: window.timerLogs || [],
-            dailyFocusHoursTarget: window.dailyFocusHoursTarget !== undefined ? window.dailyFocusHoursTarget : 0,
-            dailyFocusHoursTargetDate: window.dailyFocusHoursTargetDate || "",
-            dailyFocusHoursTargetHistory: window.dailyFocusHoursTargetHistory || [],
-            timerAnalyticsRange: window.timerAnalyticsRange || 180,
-            timerAnalyticsGrouping: window.timerAnalyticsGrouping || 'daily',
-            timerAnalyticsChartStyle: window.timerAnalyticsChartStyle || 'combo',
-            spectraHeatmapRange: window.spectraHeatmapRange || 365,
-            sessionHistoryFilter: window.sessionHistoryFilter || 'all',
-            subjectFocusTargets: AppState.subjectFocusTargets || window.subjectFocusTargets || {},
-            dashboardConfig: window.dashboardConfig,
-            weeklyTargetsDatabase: window.weeklyTargetsDatabase || {},
-            monthlyTargetsDatabase: window.monthlyTargetsDatabase || {},
-            dailyTargetsDatabase: window.dailyTargetsDatabase || {},
-            scheduleBlocks: window.scheduleBlocks || [],
-            scheduleBlocks2: window.scheduleBlocks2 || [],
-            scheduleGroups: window.scheduleGroups || [],
-            fiscalLedger: AppState.fiscalLedger || { transactions: [], budgets: [], vaults: [] },
-            examSessions: AppState.examSessions || [],
-            examRoutine: AppState.examRoutine || [],
-            selectedCountdownExamId: AppState.selectedCountdownExamId || 'auto'
-        };
-
-        const jsonStr = JSON.stringify(currentPayload, null, 2);
-        const blob = new Blob([jsonStr], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `x-29_backup_${new Date().toISOString().split('T')[0]}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        if (typeof window.showToast === 'function') {
-            window.showToast("Backup exported successfully!", "success");
-        }
-    } catch(err) {
-        console.error("Export backup failed:", err);
-    }
-};
 
 /* ===== SHARED EXAM COUNTDOWN UTILITIES ===== */
 // Extracted to ES Module: js/features/exam/countdown.js
