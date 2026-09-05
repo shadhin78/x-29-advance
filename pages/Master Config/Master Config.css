@@ -1,0 +1,62 @@
+/* ==========================================================================
+   Master Config Page Specific Styles (pages/Master Config/Master Config.css)
+   Preserves exact visual identity, responsiveness, and provides slide-up transition.
+   ========================================================================== */
+
+/* Page Transition: Smooth Hardware-Accelerated Slide-up */
+@keyframes masterConfigSlideUp {
+    0% {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#page-master-config.animate-page-enter,
+.master-config-slide-up {
+    animation: masterConfigSlideUp 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    will-change: transform, opacity;
+}
+
+/* Render layer stabilization to fix Chromium and Safari backdrop-filter scroll glitches */
+#page-master-config,
+#sys-content-priority div,
+#sys-content-priority div.flex,
+#sys-content-track > div {
+    transform: translate3d(0, 0, 0);
+    -webkit-transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+/* Scoped Custom Scrollbars for Priority & Track Lists */
+#page-master-config .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+}
+
+#page-master-config .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#page-master-config .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(148, 163, 184, 0.35);
+    border-radius: 9999px;
+}
+
+.dark #page-master-config .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(148, 163, 184, 0.2);
+}
+
+#page-master-config .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(99, 102, 241, 0.6);
+}
+
+/* Ensure smooth input and dropdown focus states */
+#page-master-config input:focus,
+#page-master-config select:focus {
+    outline: none;
+}

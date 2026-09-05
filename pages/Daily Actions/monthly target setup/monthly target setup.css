@@ -1,0 +1,151 @@
+/**
+ * Monthly Target Studio Page Styles (pages/Daily Actions/monthly target setup/monthly target setup.css)
+ * Extracted dedicated stylesheet for Add/Edit Monthly Target Studio page.
+ */
+
+/* Monthly Target Studio Row Enhancements */
+.mt-chapter-row {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mt-chapter-row:hover {
+    transform: translateY(-1px);
+}
+
+.mt-subject-card {
+    transition: all 0.2s ease-in-out;
+}
+
+.mt-subject-card:hover {
+    transform: translateX(2px);
+}
+
+.mt-prog-card {
+    transition: all 0.2s ease-in-out;
+}
+
+.mt-prog-card:hover {
+    transform: translateX(2px);
+}
+
+.mt-subject-chapter-group {
+    transition: all 0.25s ease-in-out;
+}
+
+.mt-chapter-week-select,
+.mt-size-whole-subject-week {
+    transition: all 0.15s ease-in-out;
+}
+
+.mt-chapter-week-select:focus,
+.mt-size-whole-subject-week:focus {
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.25);
+}
+
+.mt-chapter-multiweek-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    white-space: nowrap;
+    user-select: none;
+    animation: fadeIn 0.2s ease-in-out;
+}
+
+#mt-progs-container {
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+#mt-subjects-container {
+    max-height: 350px;
+    overflow-y: auto;
+}
+
+/* Monthly Target Studio Mobile Enhancements */
+@media (max-width: 640px) {
+    #page-monthly-target-setup {
+        -webkit-tap-highlight-color: transparent;
+        padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 125px) !important;
+    }
+    .mt-chapter-row:hover,
+    .mt-subject-card:hover,
+    .mt-prog-card:hover {
+        transform: none; /* Avoid hover jumpiness on touch screens */
+    }
+    .mt-chapter-week-select,
+    .mt-size-whole-subject-week,
+    .mt-chapter-size-input,
+    .mt-size-whole-subject,
+    .mt-daily-day-select,
+    .mt-daily-size-input {
+        font-size: 13px; /* Prevents auto-zoom on iOS Safari */
+    }
+    .mt-chapter-row {
+        overflow: hidden !important;
+    }
+    .mt-chapter-week-select,
+    .mt-size-whole-subject-week {
+        min-width: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    #mt-progs-container,
+    #mt-subjects-container,
+    #mt-chapters-container,
+    #mt-daily-allocations-container {
+        -webkit-overflow-scrolling: touch;
+    }
+    #mt-bottom-action-block {
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        z-index: 50 !important;
+        margin: 0 !important;
+        border-radius: 1.5rem 1.5rem 0 0 !important;
+        background: rgba(255, 255, 255, 0.95) !important;
+        backdrop-filter: blur(16px) !important;
+        -webkit-backdrop-filter: blur(16px) !important;
+        border-top: 1px solid rgba(226, 232, 240, 0.9) !important;
+        box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.15) !important;
+        padding: 10px 16px !important;
+        padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 12px) !important;
+    }
+    .dark #mt-bottom-action-block {
+        background: rgba(15, 23, 42, 0.96) !important;
+        border-top: 1px solid rgba(51, 65, 85, 0.85) !important;
+        box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.5) !important;
+    }
+    #mt-btn-save-bottom {
+        font-size: 13px !important;
+        font-weight: 900 !important;
+        min-height: 44px !important;
+    }
+    .mt-fraction-pills-group button {
+        touch-action: manipulation;
+    }
+}
+
+#mt-daily-allocations-container::-webkit-scrollbar {
+    width: 4px;
+}
+
+#mt-daily-allocations-container::-webkit-scrollbar-thumb {
+    background: rgba(156, 163, 175, 0.5);
+    border-radius: 4px;
+}
+
+.dark #mt-daily-allocations-container::-webkit-scrollbar-thumb {
+    background: rgba(75, 85, 99, 0.5);
+}
+
+.mt-daily-alloc-row {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+.mt-daily-alloc-row::-webkit-scrollbar {
+    display: none;
+}

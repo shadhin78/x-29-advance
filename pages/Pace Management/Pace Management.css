@@ -1,0 +1,77 @@
+/* ==========================================================================
+   Pace Management Page Specific Styles (pages/Pace Management/Pace Management.css)
+   Preserves exact visual identity, responsiveness, and provides slide-up transition.
+   ========================================================================== */
+
+/* Page Transition: Smooth Hardware-Accelerated Slide-up */
+@keyframes paceManagementSlideUp {
+    0% {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#page-paces-management.animate-page-enter,
+.pace-management-slide-up {
+    animation: paceManagementSlideUp 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    will-change: transform, opacity;
+}
+
+/* Render layer stabilization for smoother scrolling & card interactions */
+#page-paces-management {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+}
+
+#pace-goals-container > div {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+}
+
+/* Custom Scrollbars Scoped to Pace Management */
+#page-paces-management .custom-scrollbar::-webkit-scrollbar,
+#add-pace-subjects-container::-webkit-scrollbar,
+#edit-pace-subjects-container::-webkit-scrollbar,
+#gdm-content .custom-scrollbar::-webkit-scrollbar,
+#ptm-content .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+}
+
+#page-paces-management .custom-scrollbar::-webkit-scrollbar-track,
+#add-pace-subjects-container::-webkit-scrollbar-track,
+#edit-pace-subjects-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#page-paces-management .custom-scrollbar::-webkit-scrollbar-thumb,
+#add-pace-subjects-container::-webkit-scrollbar-thumb,
+#edit-pace-subjects-container::-webkit-scrollbar-thumb {
+    background-color: rgba(148, 163, 184, 0.35);
+    border-radius: 9999px;
+}
+
+.dark #page-paces-management .custom-scrollbar::-webkit-scrollbar-thumb,
+.dark #add-pace-subjects-container::-webkit-scrollbar-thumb,
+.dark #edit-pace-subjects-container::-webkit-scrollbar-thumb {
+    background-color: rgba(148, 163, 184, 0.2);
+}
+
+#page-paces-management .custom-scrollbar::-webkit-scrollbar-thumb:hover,
+#add-pace-subjects-container::-webkit-scrollbar-thumb:hover,
+#edit-pace-subjects-container::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(249, 115, 22, 0.6);
+}
+
+/* Details & Summary Marker Customization */
+#page-paces-management details summary {
+    list-style: none;
+}
+
+#page-paces-management details summary::-webkit-details-marker {
+    display: none;
+}

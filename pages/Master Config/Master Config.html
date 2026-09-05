@@ -1,0 +1,264 @@
+<!-- Master Configuration System -->
+<div id="master-configuration-section"
+    class="mt-8 md:mt-12 bg-white dark:bg-slate-800 p-5 md:p-8 rounded-2xl md:rounded-[2.5rem] border border-slate-200/50 dark:border-slate-700/50 shadow-sm flex flex-col scroll-mt-24 md:scroll-mt-32">
+    <div
+        class="flex justify-between items-center mb-6 border-b border-slate-100 dark:border-slate-700 pb-4">
+        <div class="flex items-center space-x-3">
+            <div
+                class="p-2.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-xl">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
+                    </path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+            </div>
+            <div>
+                <h3 class="text-base md:text-lg font-black dark:text-white leading-tight">Master
+                    Configuration
+                </h3>
+                <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-0.5">Manage
+                    Syllabus
+                    & Daily Actions dynamically</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab Headers -->
+    <div
+        class="flex flex-wrap gap-2 md:gap-0 md:space-x-4 mb-4 md:mb-6 border-b border-slate-200 dark:border-slate-700 pb-2">
+        <button id="sys-tab-chapter" onclick="switchSysTab('chapter')"
+            class="px-5 py-2.5 text-[10px] md:text-xs font-black uppercase tracking-widest rounded-xl transition-all whitespace-nowrap bg-blue-600 text-white shadow-md active:scale-95">Add
+            Chapter</button>
+        <button id="sys-tab-subject" onclick="switchSysTab('subject')"
+            class="px-5 py-2.5 text-[10px] md:text-xs font-black uppercase tracking-widest rounded-xl transition-all whitespace-nowrap bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 active:scale-95">Add
+            Subject</button>
+        <button id="sys-tab-program" onclick="switchSysTab('program')"
+            class="px-5 py-2.5 text-[10px] md:text-xs font-black uppercase tracking-widest rounded-xl transition-all whitespace-nowrap bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 active:scale-95">Add
+            Program</button>
+        <button id="sys-tab-manage" onclick="switchSysTab('manage')"
+            class="px-5 py-2.5 text-[10px] md:text-xs font-black uppercase tracking-widest rounded-xl transition-all whitespace-nowrap bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 active:scale-95">Manage
+            Data</button>
+        <button id="sys-tab-priority" onclick="switchSysTab('priority')"
+            class="px-5 py-2.5 text-[10px] md:text-xs font-black uppercase tracking-widest rounded-xl transition-all whitespace-nowrap bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 active:scale-95">Set
+            Priority</button>
+        <button id="sys-tab-track" onclick="switchSysTab('track')"
+            class="px-5 py-2.5 text-[10px] md:text-xs font-black uppercase tracking-widest rounded-xl transition-all whitespace-nowrap bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 active:scale-95">Manage
+            Tracks</button>
+    </div>
+
+    <!-- Tab Contents -->
+    <div id="sys-content-chapter" class="transition-all">
+        <p class="text-xs text-slate-500 dark:text-slate-400 mb-4 font-bold">Add a new chapter to a
+            subject.
+            It
+            will automatically take the next available empty "Revision" slot.</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 items-end">
+            <div class="flex flex-col gap-1.5">
+                <label
+                    class="text-[10px] font-black uppercase tracking-widest text-slate-400">Track</label>
+                <select id="add-ch-track" onchange="updateChProgDropdown()"
+                    class="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 font-bold w-full">
+                </select>
+            </div>
+            <div class="flex flex-col gap-1.5 lg:col-span-1">
+                <label
+                    class="text-[10px] font-black uppercase tracking-widest text-slate-400">Program</label>
+                <select id="add-ch-program" onchange="updateChSubjDropdown()"
+                    class="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 font-bold w-full"></select>
+            </div>
+            <div class="flex flex-col gap-1.5 lg:col-span-1">
+                <label
+                    class="text-[10px] font-black uppercase tracking-widest text-slate-400">Subject</label>
+                <select id="add-ch-subject"
+                    class="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 font-bold w-full"></select>
+            </div>
+            <div class="flex flex-col gap-1.5">
+                <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Ch.
+                    No</label>
+                <input type="number" id="add-ch-num"
+                    class="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 font-bold w-full"
+                    placeholder="e.g. 17">
+            </div>
+            <div class="flex flex-col gap-1.5 lg:col-span-1">
+                <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Topic
+                    Name</label>
+                <input type="text" id="add-ch-title"
+                    class="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 font-bold w-full"
+                    placeholder="e.g. Auditing">
+            </div>
+            <button onclick="window.appendNewChapter()"
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black text-[10px] md:text-[11px] uppercase tracking-widest py-3 rounded-xl transition-all active:scale-95 shadow-md focus:ring-2 focus:ring-offset-2">Save
+                Chapter</button>
+        </div>
+    </div>
+
+    <div id="sys-content-subject" class="hidden transition-all">
+        <p class="text-xs text-slate-500 dark:text-slate-400 mb-4 font-bold">Create a new subject
+            heading
+            and
+            link it to an existing Program.</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 items-end">
+            <div class="flex flex-col gap-1.5 lg:col-span-1">
+                <label
+                    class="text-[10px] font-black uppercase tracking-widest text-slate-400">Track</label>
+                <select id="add-sub-track" onchange="updateSubProgDropdown()"
+                    class="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 font-bold w-full">
+                </select>
+            </div>
+            <div class="flex flex-col gap-1.5 lg:col-span-1">
+                <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Program
+                    Link</label>
+                <select id="add-sub-program"
+                    class="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 font-bold w-full"></select>
+            </div>
+            <div class="flex flex-col gap-1.5 lg:col-span-2">
+                <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">New
+                    Subject
+                    Name</label>
+                <input type="text" id="add-sub-name"
+                    class="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 font-bold w-full"
+                    placeholder="e.g. Financial Reporting">
+            </div>
+            <div class="flex flex-col gap-1.5 h-full justify-end pb-1 lg:col-span-1">
+                <label
+                    class="flex items-center space-x-2 cursor-pointer bg-slate-50 dark:bg-slate-900/50 p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm active:scale-95 transition-transform">
+                    <input type="checkbox" id="add-sub-bulk-cb"
+                        onchange="document.getElementById('add-sub-bulk-num').classList.toggle('hidden', !this.checked)"
+                        class="form-checkbox h-4 w-4 text-emerald-500 rounded border-slate-300 focus:ring-emerald-500 transition-all">
+                    <span class="text-[10px] font-black uppercase tracking-widest text-slate-500">Bulk
+                        Chapters</span>
+                </label>
+                <input type="number" id="add-sub-bulk-num" min="1"
+                    class="hidden mt-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 font-bold w-full shadow-sm"
+                    placeholder="Qty">
+            </div>
+            <button onclick="window.appendNewSubject()"
+                class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black text-[10px] md:text-[11px] uppercase tracking-widest py-3 rounded-xl transition-all active:scale-95 shadow-md lg:col-span-1">Create</button>
+        </div>
+    </div>
+
+    <div id="sys-content-program" class="hidden transition-all">
+        <div class="mb-8">
+            <p class="text-xs text-slate-500 dark:text-slate-400 mb-4 font-bold">Add a completely new
+                Program
+                bracket to any track.</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-end">
+                <div class="flex flex-col gap-1.5">
+                    <label
+                        class="text-[10px] font-black uppercase tracking-widest text-slate-400">Track</label>
+                    <select id="add-prog-track"
+                        class="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 font-bold w-full">
+                    </select>
+                </div>
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">New
+                        Program
+                        Name</label>
+                    <input type="text" id="add-prog-name"
+                        class="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 font-bold w-full"
+                        placeholder="e.g. Honours, Year 1">
+                </div>
+                <button onclick="window.appendNewProgram()"
+                    class="w-full bg-violet-600 hover:bg-violet-700 text-white font-black text-[10px] md:text-[11px] uppercase tracking-widest py-3 rounded-xl transition-all active:scale-95 shadow-md">Create
+                    Program</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="sys-content-manage" class="hidden transition-all">
+        <div class="mb-8">
+            <p class="text-xs text-slate-500 dark:text-slate-400 mb-4 font-bold">Safely rename or delete
+                existing items.</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-8 gap-4 items-end">
+                <div class="flex flex-col gap-1.5 lg:col-span-1">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Edit
+                        Type</label>
+                    <select id="manage-type" onchange="window.updateManageDropdown()"
+                        class="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 font-bold w-full">
+                        <option value="subject">Subject</option>
+                        <option value="program">Program</option>
+                        <option value="action">Daily Action</option>
+                    </select>
+                </div>
+                <div class="flex flex-col gap-1.5 lg:col-span-1" id="manage-track-box">
+                    <label
+                        class="text-[10px] font-black uppercase tracking-widest text-slate-400">Track</label>
+                    <select id="manage-track" onchange="window.updateManageDropdown()"
+                        class="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 font-bold w-full">
+                    </select>
+                </div>
+                <div class="flex flex-col gap-1.5 lg:col-span-1" id="manage-program-box">
+                    <label
+                        class="text-[10px] font-black uppercase tracking-widest text-slate-400">Program
+                        Filter</label>
+                    <select id="manage-program" onchange="window.updateManageSubjects()"
+                        class="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 font-bold w-full"></select>
+                </div>
+                <div class="flex flex-col gap-1.5 lg:col-span-1">
+                    <label
+                        class="text-[10px] font-black uppercase tracking-widest text-slate-400">Select
+                        Item</label>
+                    <select id="manage-target"
+                        class="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 font-bold w-full"></select>
+                </div>
+                <div class="flex flex-col gap-1.5 lg:col-span-1">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">New
+                        Name
+                        /
+                        Title</label>
+                    <input type="text" id="manage-new-name"
+                        class="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 font-bold w-full"
+                        placeholder="Enter new name...">
+                </div>
+                <div class="flex gap-2 lg:col-span-2 w-full">
+                    <button onclick="window.executeManageEdit()"
+                        class="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-black text-[10px] md:text-[11px] uppercase tracking-widest py-3 rounded-xl transition-all active:scale-95 shadow-md">Rename</button>
+                    <button onclick="window.requestManageDelete()"
+                        class="flex-1 bg-red-500 hover:bg-red-600 text-white font-black text-[10px] md:text-[11px] uppercase tracking-widest py-3 rounded-xl transition-all active:scale-95 shadow-md">Delete</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="border-t border-slate-100 dark:border-slate-700/60 pt-6">
+            <p class="text-xs text-slate-500 dark:text-slate-400 mb-4 font-bold">Update the main
+                dashboard
+                titles and subheadings.</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Top
+                        Tag</label>
+                    <input type="text" id="edit-header-tag"
+                        class="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 font-bold w-full"
+                        placeholder="e.g. X-29">
+                </div>
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Main
+                        Title</label>
+                    <input type="text" id="edit-header-title"
+                        class="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 font-bold w-full"
+                        placeholder="e.g. X-29 Dashboard">
+                </div>
+                <div class="flex flex-col gap-1.5 lg:col-span-1">
+                    <label
+                        class="text-[10px] font-black uppercase tracking-widest text-slate-400">Subtitle</label>
+                    <input type="text" id="edit-header-sub"
+                        class="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 font-bold w-full"
+                        placeholder="e.g. Study Tracker Dashboard">
+                </div>
+                <button onclick="window.saveHeaderConfigFromForm()"
+                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black text-[10px] md:text-[11px] uppercase tracking-widest py-3 rounded-xl transition-all active:scale-95 shadow-md">Update
+                    Headers</button>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div id="sys-content-priority" class="hidden transition-all"></div>
+    <div id="sys-content-track" class="hidden transition-all"></div>
+
+    <div id="toast-message" class="hidden mt-4"></div>
+</div>

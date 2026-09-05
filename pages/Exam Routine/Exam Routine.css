@@ -1,0 +1,86 @@
+/* ==========================================================================
+   Exam Routine Page Specific Styles (pages/Exam Routine/Exam Routine.css)
+   Preserves exact visual identity, responsiveness, and provides slide-up transition.
+   ========================================================================== */
+
+/* Page Transition: Smooth Hardware-Accelerated Slide-up */
+@keyframes examRoutineSlideUp {
+    0% {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#page-exam.animate-page-enter,
+.exam-routine-slide-up {
+    animation: examRoutineSlideUp 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    will-change: transform, opacity;
+}
+
+/* Render layer stabilization for smoother scrolling & card interactions */
+#page-exam {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+}
+
+#exam-countdown-hero,
+#exam-routine-container > div {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+}
+
+/* Custom Scrollbars Scoped to Exam Routine & Modals */
+#page-exam .custom-scrollbar::-webkit-scrollbar,
+#exam-routine-container::-webkit-scrollbar,
+#session-modal form::-webkit-scrollbar,
+#exam-modal form::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+}
+
+#page-exam .custom-scrollbar::-webkit-scrollbar-track,
+#exam-routine-container::-webkit-scrollbar-track,
+#session-modal form::-webkit-scrollbar-track,
+#exam-modal form::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#page-exam .custom-scrollbar::-webkit-scrollbar-thumb,
+#exam-routine-container::-webkit-scrollbar-thumb,
+#session-modal form::-webkit-scrollbar-thumb,
+#exam-modal form::-webkit-scrollbar-thumb {
+    background-color: rgba(244, 63, 94, 0.25);
+    border-radius: 9999px;
+}
+
+#page-exam .custom-scrollbar::-webkit-scrollbar-thumb:hover,
+#session-modal form::-webkit-scrollbar-thumb:hover,
+#exam-modal form::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(244, 63, 94, 0.45);
+}
+
+/* Tabular countdown numbers stabilization */
+#page-exam .tabular-nums {
+    font-variant-numeric: tabular-nums;
+}
+
+/* Session Block & Exam Card Interactive Polish */
+.exam-session-card {
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
+}
+
+.exam-session-card:hover {
+    border-color: rgba(244, 63, 94, 0.3);
+}
+
+.exam-item-row {
+    transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+
+.exam-item-row:hover {
+    transform: translateX(2px);
+}

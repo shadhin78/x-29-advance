@@ -162,6 +162,188 @@
                         window.DailySchedulePage.destroy();
                     }
                 }
+            },
+            'monthly-target-setup': {
+                containerId: 'page-monthly-target-setup',
+                htmlUrl: 'pages/Daily Actions/monthly target setup/monthly target setup.html',
+                cssUrl: 'pages/Daily Actions/monthly target setup/monthly target setup.css',
+                jsUrl: 'pages/Daily Actions/monthly target setup/monthly target setup.js',
+                cssId: 'route-monthly-target-css',
+                jsId: 'route-monthly-target-js',
+                onMount: function () {
+                    if (window.MonthlyTargetPage && typeof window.MonthlyTargetPage.mount === 'function') {
+                        window.MonthlyTargetPage.mount();
+                    }
+                },
+                onDestroy: function () {
+                    if (window.MonthlyTargetPage && typeof window.MonthlyTargetPage.destroy === 'function') {
+                        window.MonthlyTargetPage.destroy();
+                    }
+                }
+            },
+            'monthly target': {
+                containerId: 'page-monthly-target-setup',
+                htmlUrl: 'pages/Daily Actions/monthly target setup/monthly target setup.html',
+                cssUrl: 'pages/Daily Actions/monthly target setup/monthly target setup.css',
+                jsUrl: 'pages/Daily Actions/monthly target setup/monthly target setup.js',
+                cssId: 'route-monthly-target-css',
+                jsId: 'route-monthly-target-js',
+                onMount: function () {
+                    if (window.MonthlyTargetPage && typeof window.MonthlyTargetPage.mount === 'function') {
+                        window.MonthlyTargetPage.mount();
+                    }
+                },
+                onDestroy: function () {
+                    if (window.MonthlyTargetPage && typeof window.MonthlyTargetPage.destroy === 'function') {
+                        window.MonthlyTargetPage.destroy();
+                    }
+                }
+            },
+            'monthly target setup': {
+                containerId: 'page-monthly-target-setup',
+                htmlUrl: 'pages/Daily Actions/monthly target setup/monthly target setup.html',
+                cssUrl: 'pages/Daily Actions/monthly target setup/monthly target setup.css',
+                jsUrl: 'pages/Daily Actions/monthly target setup/monthly target setup.js',
+                cssId: 'route-monthly-target-css',
+                jsId: 'route-monthly-target-js',
+                onMount: function () {
+                    if (window.MonthlyTargetPage && typeof window.MonthlyTargetPage.mount === 'function') {
+                        window.MonthlyTargetPage.mount();
+                    }
+                },
+                onDestroy: function () {
+                    if (window.MonthlyTargetPage && typeof window.MonthlyTargetPage.destroy === 'function') {
+                        window.MonthlyTargetPage.destroy();
+                    }
+                }
+            },
+            'subjects': {
+                containerId: 'page-subjects',
+                htmlUrl: 'pages/Subjects/Subjects.html',
+                cssUrl: 'pages/Subjects/Subjects.css',
+                jsUrl: 'pages/Subjects/Subjects.js',
+                cssId: 'route-subjects-css',
+                jsId: 'route-subjects-js',
+                onMount: function () {
+                    if (window.SubjectsPage && typeof window.SubjectsPage.mount === 'function') {
+                        window.SubjectsPage.mount();
+                    } else {
+                        if (typeof window.renderSubjectNavigation === 'function') window.renderSubjectNavigation();
+                        if (typeof window.renderSubjectProgress === 'function') window.renderSubjectProgress(window.lastSubjectStats || {});
+                        if (typeof window.renderTaskList === 'function') window.renderTaskList();
+                        if (typeof window.updateMetrics === 'function') window.updateMetrics();
+                    }
+                },
+                onDestroy: function () {
+                    if (window.SubjectsPage && typeof window.SubjectsPage.destroy === 'function') {
+                        window.SubjectsPage.destroy();
+                    }
+                }
+            },
+            'paces-management': {
+                containerId: 'page-paces-management',
+                htmlUrl: 'pages/Pace Management/Pace Management.html',
+                cssUrl: 'pages/Pace Management/Pace Management.css',
+                jsUrl: 'pages/Pace Management/Pace Management.js',
+                cssId: 'route-pace-management-css',
+                jsId: 'route-pace-management-js',
+                onMount: function () {
+                    if (window.PaceManagementPage && typeof window.PaceManagementPage.mount === 'function') {
+                        window.PaceManagementPage.mount();
+                    } else if (typeof window.renderPaceGoals === 'function') {
+                        window.renderPaceGoals(window.lastSubjectStats || (typeof updateMetrics === 'function' ? (updateMetrics(), window.lastSubjectStats) : {}));
+                    }
+                },
+                onDestroy: function () {
+                    if (window.PaceManagementPage && typeof window.PaceManagementPage.destroy === 'function') {
+                        window.PaceManagementPage.destroy();
+                    }
+                }
+            },
+            'master-config': {
+                containerId: 'page-master-config',
+                htmlUrl: 'pages/Master Config/Master Config.html',
+                cssUrl: 'pages/Master Config/Master Config.css',
+                jsUrl: 'pages/Master Config/Master Config.js',
+                cssId: 'route-master-config-css',
+                jsId: 'route-master-config-js',
+                onMount: function () {
+                    if (window.MasterConfigPage && typeof window.MasterConfigPage.mount === 'function') {
+                        window.MasterConfigPage.mount();
+                    } else {
+                        if (typeof window.populateTrackDropdowns === 'function') window.populateTrackDropdowns();
+                        if (typeof window.updateManageDropdown === 'function') window.updateManageDropdown();
+                        if (typeof window.renderPriorityConfig === 'function') window.renderPriorityConfig();
+                        if (typeof window.renderTrackList === 'function') window.renderTrackList();
+                    }
+                },
+                onDestroy: function () {
+                    if (window.MasterConfigPage && typeof window.MasterConfigPage.destroy === 'function') {
+                        window.MasterConfigPage.destroy();
+                    }
+                }
+            },
+            'outcome': {
+                containerId: 'page-outcome',
+                htmlUrl: 'pages/Outcome/Outcome.html',
+                cssUrl: 'pages/Outcome/Outcome.css',
+                jsUrl: 'pages/Outcome/Outcome.js',
+                cssId: 'route-outcome-css',
+                jsId: 'route-outcome-js',
+                onMount: function () {
+                    if (window.OutcomePage && typeof window.OutcomePage.mount === 'function') {
+                        window.OutcomePage.mount();
+                    } else {
+                        if (typeof window.renderResults === 'function') window.renderResults();
+                        if (typeof window.renderPassConfig === 'function') window.renderPassConfig();
+                        if (typeof window.renderCelebrationConfig === 'function') window.renderCelebrationConfig();
+                    }
+                },
+                onDestroy: function () {
+                    if (window.OutcomePage && typeof window.OutcomePage.destroy === 'function') {
+                        window.OutcomePage.destroy();
+                    }
+                }
+            },
+            'exam': {
+                containerId: 'page-exam',
+                htmlUrl: 'pages/Exam Routine/Exam Routine.html',
+                cssUrl: 'pages/Exam Routine/Exam Routine.css',
+                jsUrl: 'pages/Exam Routine/Exam Routine.js',
+                cssId: 'route-exam-routine-css',
+                jsId: 'route-exam-routine-js',
+                onMount: function () {
+                    if (window.ExamRoutinePage && typeof window.ExamRoutinePage.mount === 'function') {
+                        window.ExamRoutinePage.mount();
+                    } else if (typeof window.renderExamPage === 'function') {
+                        window.renderExamPage();
+                    }
+                },
+                onDestroy: function () {
+                    if (window.ExamRoutinePage && typeof window.ExamRoutinePage.destroy === 'function') {
+                        window.ExamRoutinePage.destroy();
+                    }
+                }
+            },
+            'exam-routine': {
+                containerId: 'page-exam',
+                htmlUrl: 'pages/Exam Routine/Exam Routine.html',
+                cssUrl: 'pages/Exam Routine/Exam Routine.css',
+                jsUrl: 'pages/Exam Routine/Exam Routine.js',
+                cssId: 'route-exam-routine-css',
+                jsId: 'route-exam-routine-js',
+                onMount: function () {
+                    if (window.ExamRoutinePage && typeof window.ExamRoutinePage.mount === 'function') {
+                        window.ExamRoutinePage.mount();
+                    } else if (typeof window.renderExamPage === 'function') {
+                        window.renderExamPage();
+                    }
+                },
+                onDestroy: function () {
+                    if (window.ExamRoutinePage && typeof window.ExamRoutinePage.destroy === 'function') {
+                        window.ExamRoutinePage.destroy();
+                    }
+                }
             }
         },
 
@@ -196,16 +378,17 @@
          * Dynamically inject page CSS if not already present.
          */
         loadCss: function (url, id) {
+            const cleanUrl = encodeURI(decodeURI(url));
             return new Promise((resolve) => {
-                if (document.getElementById(id) || this.cssCache[url]) {
+                if (document.getElementById(id) || this.cssCache[cleanUrl]) {
                     return resolve();
                 }
                 const link = document.createElement('link');
                 link.id = id;
                 link.rel = 'stylesheet';
-                link.href = url;
+                link.href = cleanUrl;
                 link.onload = () => {
-                    this.cssCache[url] = true;
+                    this.cssCache[cleanUrl] = true;
                     resolve();
                 };
                 link.onerror = () => {
@@ -220,16 +403,17 @@
          * Dynamically inject page JS if not already loaded.
          */
         loadJs: function (url, id) {
+            const cleanUrl = encodeURI(decodeURI(url));
             return new Promise((resolve) => {
-                if (document.getElementById(id) || this.jsLoaded[url]) {
+                if (document.getElementById(id) || this.jsLoaded[cleanUrl]) {
                     return resolve();
                 }
                 const script = document.createElement('script');
                 script.id = id;
-                script.src = url;
+                script.src = cleanUrl;
                 script.async = false;
                 script.onload = () => {
-                    this.jsLoaded[url] = true;
+                    this.jsLoaded[cleanUrl] = true;
                     resolve();
                 };
                 script.onerror = () => {
@@ -244,16 +428,17 @@
          * Fetch and cache page HTML.
          */
         loadHtml: async function (url) {
-            if (this.htmlCache[url]) {
-                return this.htmlCache[url];
+            const cleanUrl = encodeURI(decodeURI(url));
+            if (this.htmlCache[cleanUrl]) {
+                return this.htmlCache[cleanUrl];
             }
             try {
-                const res = await fetch(url);
+                const res = await fetch(cleanUrl);
                 if (!res.ok) {
                     throw new Error(`HTTP error ${res.status}`);
                 }
                 const html = await res.text();
-                this.htmlCache[url] = html;
+                this.htmlCache[cleanUrl] = html;
                 return html;
             } catch (err) {
                 console.error(`[Router] Error fetching HTML from ${url}:`, err);
@@ -290,103 +475,121 @@
             if (pageId === 'focus') pageId = 'timer';
             if (pageId === 'daily actions' || pageId === 'Daily Actions') pageId = 'daily-actions';
             if (pageId === 'daily-schedule' || pageId === 'Daily Schedule' || pageId === 'daily schedule') pageId = 'schedule';
+            if (pageId === 'monthly target' || pageId === 'Monthly Target' || pageId === 'monthly-target' || pageId === 'monthly target setup' || pageId === 'Monthly Target Setup' || pageId === 'monthly-target-setup' || pageId === 'add-monthly-target' || pageId === 'Add Monthly Target') pageId = 'monthly-target-setup';
+            if (pageId === 'subjects' || pageId === 'Subjects' || pageId === 'subject' || pageId === 'Subject') pageId = 'subjects';
+            if (pageId === 'paces-management' || pageId === 'pace-management' || pageId === 'Pace Management' || pageId === 'pace management' || pageId === 'paces' || pageId === 'pace') pageId = 'paces-management';
+            if (pageId === 'master-config' || pageId === 'master-configuration' || pageId === 'Master Config' || pageId === 'master config' || pageId === 'Master Configuration' || pageId === 'master configuration') pageId = 'master-config';
+            if (pageId === 'outcome' || pageId === 'Outcome' || pageId === 'results' || pageId === 'Results') pageId = 'outcome';
+            if (pageId === 'exam' || pageId === 'exam-routine' || pageId === 'Exam Routine' || pageId === 'exam routine') pageId = 'exam';
 
             const previousPageId = this.activePageId;
             const isSamePage = previousPageId === pageId;
 
-            // 1. Cleanup previous page if navigating away
-            if (!isSamePage && this.routes[previousPageId] && typeof this.routes[previousPageId].onDestroy === 'function') {
-                try {
-                    this.routes[previousPageId].onDestroy();
-                } catch (e) {
-                    console.warn(`[Router] Error in onDestroy for ${previousPageId}:`, e);
-                }
+            // Prevent redundant recursive navigation if already navigating to the same target page
+            if (this.isNavigating && isSamePage) {
+                return;
             }
+            this.isNavigating = true;
 
-            // 2. Load and mount modular page (e.g. Dashboard)
-            if (this.routes[pageId]) {
-                const route = this.routes[pageId];
-                let container = document.getElementById(route.containerId);
-
-                if (!container) {
-                    const mainPanel = document.getElementById('main-content-panel');
-                    if (mainPanel) {
-                        container = document.createElement('div');
-                        container.id = route.containerId;
-                        container.className = 'space-y-6 md:space-y-8';
-                        mainPanel.prepend(container);
-                    }
-                }
-
-                // If container is empty or needs HTML injection
-                if (container && (!container.hasChildNodes() || container.children.length === 0)) {
-                    // Concurrently load CSS and HTML
-                    const [, htmlContent] = await Promise.all([
-                        this.loadCss(route.cssUrl, route.cssId),
-                        this.loadHtml(route.htmlUrl)
-                    ]);
-
-                    if (htmlContent) {
-                        container.innerHTML = htmlContent;
-                    }
-
-                    // Load JS module
-                    await this.loadJs(route.jsUrl, route.jsId);
-                } else {
-                    // Ensure CSS is loaded even if container was pre-populated
-                    this.loadCss(route.cssUrl, route.cssId);
-                    this.loadJs(route.jsUrl, route.jsId);
-                }
-
-                // Call mount / render
-                if (typeof route.onMount === 'function') {
+            try {
+                // 1. Cleanup previous page if navigating away
+                if (!isSamePage && this.routes[previousPageId] && typeof this.routes[previousPageId].onDestroy === 'function') {
                     try {
-                        route.onMount();
+                        this.routes[previousPageId].onDestroy();
+                    } catch (e) {
+                        console.warn(`[Router] Error in onDestroy for ${previousPageId}:`, e);
+                    }
+                }
+
+                // 2. Load modular page (HTML, CSS, JS)
+                if (this.routes[pageId]) {
+                    const route = this.routes[pageId];
+                    let container = document.getElementById(route.containerId);
+
+                    if (!container) {
+                        const mainPanel = document.getElementById('main-content-panel');
+                        if (mainPanel) {
+                            container = document.createElement('div');
+                            container.id = route.containerId;
+                            container.className = 'space-y-6 md:space-y-8';
+                            mainPanel.prepend(container);
+                        }
+                    }
+
+                    // Check if container is empty or needs HTML injection
+                    const needsHtml = container && (!container.hasChildNodes() || container.children.length === 0 || container.innerHTML.trim() === '');
+                    if (needsHtml) {
+                        // Concurrently load CSS and HTML
+                        const [, htmlContent] = await Promise.all([
+                            this.loadCss(route.cssUrl, route.cssId),
+                            this.loadHtml(route.htmlUrl)
+                        ]);
+
+                        if (htmlContent && container) {
+                            container.innerHTML = htmlContent;
+                        }
+
+                        // Load JS module
+                        await this.loadJs(route.jsUrl, route.jsId);
+                    } else {
+                        // Ensure CSS is loaded even if container was pre-populated
+                        this.loadCss(route.cssUrl, route.cssId);
+                        this.loadJs(route.jsUrl, route.jsId);
+                    }
+                }
+
+                // 3. Toggle page visibility & slide-up animation FIRST so elements are visible
+                this.allPages.forEach(p => {
+                    const el = document.getElementById(`page-${p}`);
+                    if (el) {
+                        if (p === pageId) {
+                            el.classList.remove('hidden');
+                            if (!isSamePage) {
+                                el.classList.add('animate-page-enter');
+                            }
+                        } else {
+                            el.classList.add('hidden');
+                            el.classList.remove('animate-page-enter');
+                        }
+                    }
+                });
+
+                // 4. Update Navigation Buttons
+                this.updateNavButtons(pageId);
+                this.activePageId = pageId;
+
+                // 5. Call mount / render on active route
+                if (this.routes[pageId] && typeof this.routes[pageId].onMount === 'function') {
+                    try {
+                        this.routes[pageId].onMount();
                     } catch (e) {
                         console.warn(`[Router] Error mounting ${pageId}:`, e);
                     }
                 }
-            }
-
-            // 3. Toggle page visibility & slide-up animation
-            this.allPages.forEach(p => {
-                const el = document.getElementById(`page-${p}`);
-                if (el) {
-                    if (p === pageId) {
-                        el.classList.remove('hidden');
-                        if (!isSamePage) {
-                            el.classList.add('animate-page-enter');
-                        }
-                    } else {
-                        el.classList.add('hidden');
-                        el.classList.remove('animate-page-enter');
-                    }
-                }
-            });
-
-            // 4. Update Navigation Buttons
-            this.updateNavButtons(pageId);
 
             // 5. Special logic for other monolithic pages
-            if (pageId === 'exam' && typeof window.renderExamPage === 'function') {
-                window.renderExamPage();
-            } else if (pageId === 'subjects') {
-                if (typeof renderSubjectNavigation === 'function') renderSubjectNavigation();
-                if (typeof renderCategoryProgress === 'function') renderCategoryProgress(window.lastSubjectStats || (typeof updateMetrics === 'function' ? (updateMetrics(), window.lastSubjectStats) : {}));
-                if (typeof updateMetrics === 'function') updateMetrics();
-                const refreshSubjectProgressChart = () => {
-                    const canvas = document.getElementById('progressChart');
-                    if (canvas && AppState.progressChart && typeof AppState.progressChart.resize === 'function') {
-                        AppState.progressChart.resize();
-                        if (typeof AppState.progressChart.update === 'function') {
-                            AppState.progressChart.update('none');
+            if (pageId === 'subjects') {
+                if (window.SubjectsPage && typeof window.SubjectsPage.mount === 'function') {
+                    window.SubjectsPage.mount();
+                } else {
+                    if (typeof renderSubjectNavigation === 'function') renderSubjectNavigation();
+                    if (typeof renderSubjectProgress === 'function') renderSubjectProgress(window.lastSubjectStats || {});
+                    if (typeof renderTaskList === 'function') renderTaskList();
+                    if (typeof updateMetrics === 'function') updateMetrics();
+                    const refreshSubjectProgressChart = () => {
+                        const canvas = document.getElementById('progressChart');
+                        if (canvas && AppState.progressChart && typeof AppState.progressChart.resize === 'function') {
+                            AppState.progressChart.resize();
+                            if (typeof AppState.progressChart.update === 'function') {
+                                AppState.progressChart.update('none');
+                            }
+                        } else if (typeof renderChart === 'function') {
+                            renderChart();
                         }
-                    } else if (typeof renderChart === 'function') {
-                        renderChart();
-                    }
-                };
-                setTimeout(refreshSubjectProgressChart, 50);
-                setTimeout(refreshSubjectProgressChart, 420);
+                    };
+                    setTimeout(refreshSubjectProgressChart, 50);
+                    setTimeout(refreshSubjectProgressChart, 420);
+                }
             } else if (pageId === 'daily-actions') {
                 if (typeof window.renderDailyTracker === 'function') window.renderDailyTracker();
                 if (typeof window.renderDailyLogs === 'function') window.renderDailyLogs();
@@ -394,11 +597,19 @@
                 if (typeof window.renderWeeklyTargets === 'function') window.renderWeeklyTargets();
                 if (typeof window.renderDailyTargets === 'function') window.renderDailyTargets();
             } else if (pageId === 'paces-management') {
-                if (typeof window.renderPaceGoals === 'function') window.renderPaceGoals(window.lastSubjectStats || (typeof updateMetrics === 'function' ? (updateMetrics(), window.lastSubjectStats) : {}));
+                if (window.PaceManagementPage && typeof window.PaceManagementPage.mount === 'function') {
+                    window.PaceManagementPage.mount();
+                } else if (typeof window.renderPaceGoals === 'function') {
+                    window.renderPaceGoals(window.lastSubjectStats || (typeof updateMetrics === 'function' ? (updateMetrics(), window.lastSubjectStats) : {}));
+                }
             } else if (pageId === 'outcome') {
-                if (typeof window.renderResults === 'function') window.renderResults();
-                if (typeof window.renderPassConfig === 'function') window.renderPassConfig();
-                if (typeof window.renderCelebrationConfig === 'function') window.renderCelebrationConfig();
+                if (window.OutcomePage && typeof window.OutcomePage.mount === 'function') {
+                    window.OutcomePage.mount();
+                } else {
+                    if (typeof window.renderResults === 'function') window.renderResults();
+                    if (typeof window.renderPassConfig === 'function') window.renderPassConfig();
+                    if (typeof window.renderCelebrationConfig === 'function') window.renderCelebrationConfig();
+                }
                 setTimeout(() => {
                     if (window.resultsTrendChartInstance) window.resultsTrendChartInstance.resize();
                 }, 50);
@@ -466,8 +677,9 @@
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
             }
-
-            this.activePageId = pageId;
+            } finally {
+                this.isNavigating = false;
+            }
         },
 
         /**
@@ -476,7 +688,7 @@
         init: function () {
             // Bind global switchPage to Router.loadPage
             window.switchPage = (pageId, sectionId) => {
-                this.loadPage(pageId, sectionId);
+                return this.loadPage(pageId, sectionId);
             };
 
             // Pre-load and mount Dashboard module if page-dashboard is in DOM

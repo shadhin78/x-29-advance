@@ -1,0 +1,82 @@
+/* ==========================================================================
+   Outcome Page Specific Styles (pages/Outcome/Outcome.css)
+   Preserves exact visual identity, responsiveness, and provides slide-up transition.
+   ========================================================================== */
+
+/* Page Transition: Smooth Hardware-Accelerated Slide-up */
+@keyframes outcomeSlideUp {
+    0% {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#page-outcome.animate-page-enter,
+.outcome-slide-up {
+    animation: outcomeSlideUp 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    will-change: transform, opacity;
+}
+
+/* Render layer stabilization for smoother scrolling & card interactions */
+#page-outcome {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+}
+
+#results-container > div {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+}
+
+/* Custom Scrollbars Scoped to Outcome */
+#page-outcome .custom-scrollbar::-webkit-scrollbar,
+#results-trend-container .custom-scrollbar::-webkit-scrollbar,
+#outcome-pass-container .custom-scrollbar::-webkit-scrollbar,
+#outcome-celebration-container .custom-scrollbar::-webkit-scrollbar,
+#res-subjects-list::-webkit-scrollbar,
+#csm-checklist-container::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+}
+
+#page-outcome .custom-scrollbar::-webkit-scrollbar-track,
+#results-trend-container .custom-scrollbar::-webkit-scrollbar-track,
+#outcome-pass-container .custom-scrollbar::-webkit-scrollbar-track,
+#outcome-celebration-container .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#page-outcome .custom-scrollbar::-webkit-scrollbar-thumb,
+#results-trend-container .custom-scrollbar::-webkit-scrollbar-thumb,
+#outcome-pass-container .custom-scrollbar::-webkit-scrollbar-thumb,
+#outcome-celebration-container .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(148, 163, 184, 0.35);
+    border-radius: 9999px;
+}
+
+.dark #page-outcome .custom-scrollbar::-webkit-scrollbar-thumb,
+.dark #results-trend-container .custom-scrollbar::-webkit-scrollbar-thumb,
+.dark #outcome-pass-container .custom-scrollbar::-webkit-scrollbar-thumb,
+.dark #outcome-celebration-container .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(148, 163, 184, 0.2);
+}
+
+#page-outcome .custom-scrollbar::-webkit-scrollbar-thumb:hover,
+#results-trend-container .custom-scrollbar::-webkit-scrollbar-thumb:hover,
+#outcome-pass-container .custom-scrollbar::-webkit-scrollbar-thumb:hover,
+#outcome-celebration-container .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(234, 179, 8, 0.6);
+}
+
+/* Details & Summary Marker Customization */
+#page-outcome details summary {
+    list-style: none;
+}
+
+#page-outcome details summary::-webkit-details-marker {
+    display: none;
+}

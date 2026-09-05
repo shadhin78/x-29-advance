@@ -1,0 +1,173 @@
+<!-- Success & Results System -->
+<div id="success-results-section"
+    class="mt-8 md:mt-12 bg-white dark:bg-slate-800 p-5 md:p-8 rounded-2xl md:rounded-[2.5rem] border border-slate-200/50 dark:border-slate-700/50 shadow-sm flex flex-col scroll-mt-24 md:scroll-mt-32">
+    <div
+        class="flex justify-between items-center mb-6 border-b border-slate-100 dark:border-slate-700 pb-4">
+        <div class="flex items-center space-x-3">
+            <div
+                class="p-2.5 bg-yellow-50 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400 rounded-xl">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z">
+                    </path>
+                </svg>
+            </div>
+            <div>
+                <h3 class="text-base md:text-lg font-black dark:text-white leading-tight">Success &
+                    Results
+                </h3>
+                <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-0.5">Log
+                    Program
+                    CGPAs and Major Achievements</p>
+            </div>
+        </div>
+        <button onclick="window.openResultModal()"
+            class="bg-yellow-500 hover:bg-yellow-600 text-white font-black text-[10px] md:text-xs uppercase tracking-widest px-4 py-2 md:px-5 md:py-2.5 rounded-xl transition-all shadow-md active:scale-95 flex items-center gap-2 whitespace-nowrap"><svg
+                class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                    d="M12 4v16m8-8H4">
+                </path>
+            </svg> <span class="hidden sm:block">Add Result</span></button>
+    </div>
+    <!-- Outcome Programs Toggle Bar -->
+    <div id="outcome-programs-toggle-bar" class="flex flex-wrap items-center gap-2 mb-6"></div>
+
+    <div id="results-trend-container"
+        class="hidden mb-6 md:mb-8 w-full bg-white dark:bg-slate-800 p-4 sm:p-5 md:p-7 rounded-2xl sm:rounded-3xl md:rounded-[2rem] border border-slate-200/50 dark:border-slate-700/50 shadow-sm flex flex-col hover:shadow-lg transition-shadow">
+
+        <div
+            class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 md:mb-6 gap-3">
+            <h3
+                class="text-[9px] sm:text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest">
+                Results & Performance Trend</h3>
+            <div class="flex items-center gap-2 flex-wrap">
+                <select id="trend-program-filter" onchange="window.renderResults()"
+                    class="bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg px-2.5 py-1 text-[8px] sm:text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-200 focus:ring-1 focus:ring-blue-500 outline-none cursor-pointer">
+                    <option value="ALL">All Programs</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="relative h-[180px] md:h-[250px] mt-auto w-full">
+            <canvas id="resultsTrendChart"></canvas>
+        </div>
+
+        <div class="mt-4 md:mt-6 flex flex-col gap-3">
+            <div id="results-legend" class="flex flex-wrap justify-center gap-1.5 sm:gap-2 md:gap-3">
+            </div>
+            <div id="track-averages-container"
+                class="mt-2 pt-2 border-t border-slate-100 dark:border-slate-700/60 flex flex-wrap justify-center gap-2.5">
+            </div>
+        </div>
+    </div>
+    <!-- Results Header & Date Sort Controls Bar -->
+    <div class="flex items-center justify-between gap-3 mb-4 flex-wrap">
+        <div class="flex items-center gap-2">
+            <span
+                class="text-[10px] md:text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Logged
+                Results</span>
+            <span id="outcome-results-count-badge"
+                class="text-[9px] font-black px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">0</span>
+        </div>
+        <div class="flex items-center gap-2">
+            <button id="outcome-date-sort-btn" onclick="window.toggleOutcomeDateSort()"
+                class="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/60 text-slate-700 dark:text-slate-200 text-[10px] md:text-xs font-black uppercase tracking-wider transition-all shadow-2xs active:scale-95 flex items-center gap-2 cursor-pointer group"
+                title="Toggle date sort order (Newest / Oldest)">
+                <span
+                    class="text-slate-400 dark:text-slate-500 group-hover:text-yellow-500 transition-colors">Sort:</span>
+                <span id="outcome-date-sort-text" class="text-slate-800 dark:text-slate-100">Date:
+                    Newest First</span>
+                <svg id="outcome-date-sort-icon"
+                    class="w-3.5 h-3.5 text-yellow-500 transition-transform duration-200" fill="none"
+                    stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                        d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <div id="results-container"
+        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5">
+        <!-- Populated via JS -->
+    </div>
+
+    <!-- Pass/Freeze Section -->
+    <details id="outcome-pass-freeze-section"
+        class="mt-8 md:mt-12 bg-white dark:bg-slate-800 rounded-2xl md:rounded-[2.5rem] border border-slate-200/50 dark:border-slate-700/50 shadow-sm flex flex-col scroll-mt-24 md:scroll-mt-32 group overflow-hidden">
+        <summary
+            class="cursor-pointer p-5 md:p-8 outline-none select-none list-none flex items-center justify-between border-b border-slate-100 dark:border-slate-700/60 hover:bg-slate-50/50 dark:hover:bg-slate-800/80 transition-colors [&::-webkit-details-marker]:hidden">
+            <div class="flex items-center space-x-3">
+                <div
+                    class="p-2.5 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-xl">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z">
+                        </path>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-base md:text-lg font-black dark:text-white leading-tight">Pass /
+                        Freeze
+                        Configuration</h3>
+                    <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-0.5">
+                        Click to
+                        view program or subject freeze settings</p>
+                </div>
+            </div>
+            <div
+                class="p-2 rounded-xl bg-slate-100 dark:bg-slate-700/50 text-slate-400 group-open:rotate-180 transition-all duration-300 shrink-0 border border-slate-200/50 dark:border-slate-600/30">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                        d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </div>
+        </summary>
+        <div class="p-5 md:p-8">
+            <div id="outcome-pass-container">
+                <!-- Loaded dynamically via js window.renderPassConfig() -->
+            </div>
+        </div>
+    </details>
+
+    <!-- Milestone Celebration Criteria Section -->
+    <details id="outcome-celebration-section"
+        class="mt-6 md:mt-8 bg-white dark:bg-slate-800 rounded-2xl md:rounded-[2.5rem] border border-slate-200/50 dark:border-slate-700/50 shadow-sm flex flex-col scroll-mt-24 md:scroll-mt-32 group overflow-hidden">
+        <summary
+            class="cursor-pointer p-5 md:p-8 outline-none select-none list-none flex items-center justify-between border-b border-slate-100 dark:border-slate-700/60 hover:bg-slate-50/50 dark:hover:bg-slate-800/80 transition-colors [&::-webkit-details-marker]:hidden">
+            <div class="flex items-center space-x-3">
+                <div
+                    class="p-2.5 bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-xl">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z">
+                        </path>
+                    </svg>
+                </div>
+                <div>
+                    <h3
+                        class="text-base md:text-lg font-black dark:text-white leading-tight flex items-center gap-2">
+                        <span>Milestone Celebration Criteria</span>
+                        <span
+                            class="text-[9px] px-2 py-0.5 font-black uppercase tracking-wider bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-300 rounded-md">Core
+                            Targets</span>
+                    </h3>
+                    <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-0.5">
+                        Click to configure core courses required for milestone celebration</p>
+                </div>
+            </div>
+            <div
+                class="p-2 rounded-xl bg-slate-100 dark:bg-slate-700/50 text-slate-400 group-open:rotate-180 transition-all duration-300 shrink-0 border border-slate-200/50 dark:border-slate-600/30">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                        d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </div>
+        </summary>
+        <div class="p-5 md:p-8">
+            <div id="outcome-celebration-container">
+                <!-- Loaded dynamically via js window.renderCelebrationConfig() -->
+            </div>
+        </div>
+    </details>
+</div>

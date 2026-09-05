@@ -1,0 +1,412 @@
+<!-- Top Hero Banner: Next Upcoming Exam Countdown -->
+<div id="exam-countdown-hero"
+    class="relative overflow-hidden bg-gradient-to-br from-slate-900 via-rose-950 to-slate-900 text-white rounded-2xl sm:rounded-3xl md:rounded-[2.5rem] p-4 sm:p-6 md:p-10 shadow-2xl border border-rose-500/20 mb-6 md:mb-10">
+    <!-- Background Decorative Glow -->
+    <div
+        class="absolute -top-24 -right-24 w-96 h-96 bg-rose-600/20 rounded-full blur-3xl pointer-events-none">
+    </div>
+    <div
+        class="absolute -bottom-24 -left-24 w-96 h-96 bg-amber-600/15 rounded-full blur-3xl pointer-events-none">
+    </div>
+
+    <div
+        class="relative z-10 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-6 md:gap-8">
+        <!-- Left Info Block -->
+        <div class="flex-1 space-y-3 sm:space-y-4 min-w-0">
+            <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+                <span
+                    class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-rose-500/20 text-rose-400 border border-rose-500/30 shrink-0">
+                    <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
+                    Live Countdown
+                </span>
+                <span id="exam-hero-subject-badge"
+                    class="px-2.5 sm:px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-white/10 text-slate-200 border border-white/10 truncate max-w-[180px] sm:max-w-xs shrink-0">
+                    --
+                </span>
+                <div
+                    class="flex items-center gap-1.5 bg-black/40 border border-white/15 px-2.5 sm:px-3 py-1 rounded-xl text-xs font-bold text-slate-200 max-w-full min-w-0">
+                    <label for="exam-hero-select-target"
+                        class="text-[10px] font-black uppercase text-rose-300 tracking-wider shrink-0">Pin:</label>
+                    <select id="exam-hero-select-target"
+                        onchange="window.onSelectCountdownTarget(this.value)"
+                        class="bg-transparent text-white font-bold text-xs outline-none cursor-pointer truncate min-w-0 max-w-[190px] sm:max-w-xs md:max-w-sm">
+                        <option value="auto" class="bg-slate-900 text-white">⚡ Auto (Nearest Upcoming
+                            Subject Exam)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div>
+                <h2 id="exam-hero-title"
+                    class="text-xl sm:text-2xl md:text-4xl font-black tracking-tight leading-tight text-white break-words">
+                    No Exam Scheduled
+                </h2>
+                <p id="exam-hero-details"
+                    class="text-xs sm:text-sm text-rose-200/80 font-medium mt-1 flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                    <svg class="w-4 h-4 text-rose-400 shrink-0" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span>Add an upcoming exam to activate the live countdown.</span>
+                </p>
+            </div>
+
+            <div id="exam-hero-meta"
+                class="flex flex-wrap items-center gap-2 sm:gap-4 text-xs font-bold text-slate-300 pt-1">
+                <div
+                    class="flex items-center gap-1.5 bg-white/5 border border-white/10 px-2.5 sm:px-3 py-1.5 rounded-xl">
+                    <svg class="w-4 h-4 text-amber-400 shrink-0" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z">
+                        </path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    <span id="exam-hero-venue">Venue: --</span>
+                </div>
+                <div
+                    class="flex items-center gap-1.5 bg-white/5 border border-white/10 px-2.5 sm:px-3 py-1.5 rounded-xl">
+                    <svg class="w-4 h-4 text-rose-400 shrink-0" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
+                        </path>
+                    </svg>
+                    <span id="exam-hero-datetime">Date: --</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Live Digital Countdown Timer -->
+        <div
+            class="w-full lg:w-auto shrink-0 bg-black/40 backdrop-blur-xl border border-white/15 p-3.5 sm:p-5 md:p-6 rounded-2xl sm:rounded-3xl shadow-2xl flex flex-col items-center">
+            <span
+                class="text-[9px] font-black uppercase tracking-widest text-rose-300/80 mb-2 sm:mb-3">Time
+                Remaining</span>
+            <div class="grid grid-cols-4 gap-1.5 sm:gap-2.5 md:gap-3 text-center w-full sm:w-auto">
+                <div
+                    class="bg-white/10 border border-white/15 p-2 sm:p-3 rounded-xl sm:rounded-2xl min-w-0 sm:min-w-[70px] md:min-w-[75px] flex-1 flex flex-col justify-center items-center">
+                    <div id="exam-cd-val-1"
+                        class="text-xl sm:text-2xl md:text-3xl font-black text-white tracking-wider tabular-nums leading-none sm:leading-tight">
+                        00</div>
+                    <div id="exam-cd-lbl-1"
+                        class="text-[8px] sm:text-[9px] font-black uppercase text-rose-300 mt-1 truncate">
+                        Days</div>
+                </div>
+                <div
+                    class="bg-white/10 border border-white/15 p-2 sm:p-3 rounded-xl sm:rounded-2xl min-w-0 sm:min-w-[70px] md:min-w-[75px] flex-1 flex flex-col justify-center items-center">
+                    <div id="exam-cd-val-2"
+                        class="text-xl sm:text-2xl md:text-3xl font-black text-white tracking-wider tabular-nums leading-none sm:leading-tight">
+                        00</div>
+                    <div id="exam-cd-lbl-2"
+                        class="text-[8px] sm:text-[9px] font-black uppercase text-rose-300 mt-1 truncate">
+                        Hours</div>
+                </div>
+                <div
+                    class="bg-white/10 border border-white/15 p-2 sm:p-3 rounded-xl sm:rounded-2xl min-w-0 sm:min-w-[70px] md:min-w-[75px] flex-1 flex flex-col justify-center items-center">
+                    <div id="exam-cd-val-3"
+                        class="text-xl sm:text-2xl md:text-3xl font-black text-white tracking-wider tabular-nums leading-none sm:leading-tight">
+                        00</div>
+                    <div id="exam-cd-lbl-3"
+                        class="text-[8px] sm:text-[9px] font-black uppercase text-rose-300 mt-1 truncate">
+                        Mins</div>
+                </div>
+                <div
+                    class="bg-white/10 border border-white/15 p-2 sm:p-3 rounded-xl sm:rounded-2xl min-w-0 sm:min-w-[70px] md:min-w-[75px] flex-1 flex flex-col justify-center items-center">
+                    <div id="exam-cd-val-4"
+                        class="text-xl sm:text-2xl md:text-3xl font-black text-rose-400 tracking-wider tabular-nums leading-none sm:leading-tight">
+                        00</div>
+                    <div id="exam-cd-lbl-4"
+                        class="text-[8px] sm:text-[9px] font-black uppercase text-rose-300 mt-1 truncate">
+                        Secs</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Routine Section -->
+<div
+    class="bg-white dark:bg-slate-800 p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl md:rounded-[2.5rem] border border-slate-200/50 dark:border-slate-700/50 shadow-sm flex flex-col">
+    <!-- Section Header -->
+    <div
+        class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5 md:mb-6 border-b border-slate-100 dark:border-slate-700/60 pb-4">
+        <div class="flex items-center space-x-3">
+            <div
+                class="p-2.5 bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 rounded-2xl border border-rose-100 dark:border-rose-800/50 shadow-sm shrink-0">
+                <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
+                    </path>
+                </svg>
+            </div>
+            <div>
+                <h3 class="text-base md:text-lg font-black dark:text-white leading-tight">Exam Routine &
+                    Timetable</h3>
+                <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-0.5">Manage
+                    schedules, venues, and study targets for upcoming tests</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <button onclick="window.openSessionModal()"
+                class="w-full sm:w-auto justify-center bg-rose-600 hover:bg-rose-700 text-white font-black text-xs uppercase tracking-widest px-4 py-2.5 rounded-xl transition-all shadow-md active:scale-95 flex items-center gap-2 min-h-[42px]">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                        d="M12 4v16m8-8H4"></path>
+                </svg>
+                <span>Add Session</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Search & Filter Controls -->
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-6">
+        <!-- Search Box -->
+        <div class="relative flex-1 max-w-full sm:max-w-md">
+            <svg class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+            <input id="exam-search-input" type="text" oninput="window.renderExamRoutine()"
+                placeholder="Search exam title, subject, program..."
+                class="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold text-slate-800 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-rose-500 outline-none transition-all min-h-[42px]">
+        </div>
+
+        <!-- Filter Tabs -->
+        <div
+            class="grid grid-cols-3 w-full sm:w-auto sm:flex items-center bg-slate-100 dark:bg-slate-700/60 p-1 rounded-xl gap-1 shrink-0">
+            <button onclick="window.setExamFilter('all')" id="btn-exam-filter-all"
+                class="justify-center py-2 px-2.5 sm:px-3 sm:py-1.5 rounded-lg text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-all min-h-[34px] flex items-center">All</button>
+            <button onclick="window.setExamFilter('upcoming')" id="btn-exam-filter-upcoming"
+                class="justify-center py-2 px-2.5 sm:px-3 sm:py-1.5 rounded-lg text-[10px] sm:text-[11px] font-black uppercase tracking-wider bg-white dark:bg-slate-800 text-slate-800 dark:text-white shadow-sm transition-all min-h-[34px] flex items-center">Upcoming</button>
+            <button onclick="window.setExamFilter('completed')" id="btn-exam-filter-completed"
+                class="justify-center py-2 px-2.5 sm:px-3 sm:py-1.5 rounded-lg text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-all min-h-[34px] flex items-center">Completed</button>
+        </div>
+    </div>
+
+    <!-- Exam Routine Session Blocks Container -->
+    <div id="exam-routine-container" class="flex flex-col gap-4 sm:gap-6 md:gap-8">
+        <!-- Dynamically populated via window.renderExamRoutine() -->
+    </div>
+</div>
+
+<!-- Modals -->
+<!-- Add / Edit Session Modal -->
+<div id="session-modal"
+    class="hidden fixed inset-0 z-[999999] bg-slate-900/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div
+        class="bg-white dark:bg-slate-900 border-t sm:border border-slate-200 dark:border-slate-800 rounded-t-3xl sm:rounded-3xl shadow-2xl w-full max-w-lg max-h-[92vh] sm:max-h-[88vh] overflow-hidden transform transition-all flex flex-col">
+        <!-- Header -->
+        <div
+            class="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/30 shrink-0">
+            <div class="flex items-center space-x-3 min-w-0">
+                <div
+                    class="p-2.5 bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 rounded-xl shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
+                        </path>
+                    </svg>
+                </div>
+                <div class="min-w-0">
+                    <h3 id="session-modal-title"
+                        class="text-sm md:text-base font-black text-slate-800 dark:text-white uppercase tracking-wider truncate">
+                        Add Session</h3>
+                    <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider truncate">Create
+                        a timeframe group for exams</p>
+                </div>
+            </div>
+            <button onclick="window.closeSessionModal()"
+                class="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all min-w-[36px] min-h-[36px] flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Form Body -->
+        <form onsubmit="window.saveSessionForm(event)"
+            class="p-4 sm:p-5 md:p-6 space-y-4 overflow-y-auto max-h-[calc(92vh-75px)] sm:max-h-[calc(88vh-75px)]">
+            <input type="hidden" id="session-id">
+
+            <div>
+                <label
+                    class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Select
+                    Program *</label>
+                <select id="session-program" required
+                    class="w-full min-h-[42px] px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 dark:text-white focus:ring-2 focus:ring-rose-500 outline-none">
+                    <!-- Populated dynamically -->
+                </select>
+            </div>
+
+            <div>
+                <label
+                    class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Session
+                    Name (Optional)</label>
+                <input type="text" id="session-name" placeholder="e.g. Midterm Exams, Quiz Week"
+                    class="w-full min-h-[42px] px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 dark:text-white focus:ring-2 focus:ring-rose-500 outline-none">
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                    <label
+                        class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Start
+                        Date (Optional)</label>
+                    <input type="date" id="session-start-date"
+                        class="w-full min-h-[42px] px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 dark:text-white focus:ring-2 focus:ring-rose-500 outline-none">
+                </div>
+                <div>
+                    <label
+                        class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">End
+                        Date (Optional)</label>
+                    <input type="date" id="session-end-date"
+                        class="w-full min-h-[42px] px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 dark:text-white focus:ring-2 focus:ring-rose-500 outline-none">
+                </div>
+            </div>
+
+            <div
+                class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2.5 sm:gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+                <button type="button" onclick="window.closeSessionModal()"
+                    class="w-full sm:w-auto px-4 py-2.5 text-xs font-bold text-slate-500 hover:text-slate-800 dark:hover:text-white rounded-xl bg-slate-100 sm:bg-transparent dark:bg-slate-800 sm:dark:bg-transparent min-h-[42px] flex items-center justify-center transition-all">Cancel</button>
+                <button type="submit"
+                    class="w-full sm:w-auto bg-rose-600 hover:bg-rose-700 text-white text-xs font-black uppercase tracking-wider px-5 py-2.5 rounded-xl shadow-md transition-all active:scale-95 min-h-[42px] flex items-center justify-center">Save
+                    Session</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Add / Edit Exam Modal -->
+<div id="exam-modal"
+    class="hidden fixed inset-0 z-[999999] bg-slate-900/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div
+        class="bg-white dark:bg-slate-900 border-t sm:border border-slate-200 dark:border-slate-800 rounded-t-3xl sm:rounded-3xl shadow-2xl w-full max-w-lg max-h-[92vh] sm:max-h-[88vh] overflow-hidden transform transition-all flex flex-col">
+        <!-- Header -->
+        <div
+            class="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/30 shrink-0">
+            <div class="flex items-center space-x-3 min-w-0">
+                <div
+                    class="p-2.5 bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 rounded-xl shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
+                        </path>
+                    </svg>
+                </div>
+                <div class="min-w-0">
+                    <h3 id="exam-modal-title"
+                        class="text-sm md:text-base font-black text-slate-800 dark:text-white uppercase tracking-wider truncate">
+                        Add Exam</h3>
+                    <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider truncate">
+                        Configure exam routine item</p>
+                </div>
+            </div>
+            <button onclick="window.closeExamModal()"
+                class="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all min-w-[36px] min-h-[36px] flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Form Body -->
+        <form onsubmit="window.saveExamForm(event)"
+            class="p-4 sm:p-5 md:p-6 space-y-4 overflow-y-auto max-h-[calc(92vh-75px)] sm:max-h-[calc(88vh-75px)]">
+            <input type="hidden" id="exam-id">
+            <input type="hidden" id="exam-session-id">
+
+            <div id="exam-session-info-display"
+                class="p-3 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs font-semibold text-slate-800 dark:text-white mb-2 hidden">
+                <!-- Loaded dynamically -->
+            </div>
+
+            <input type="hidden" id="exam-mode" value="program">
+
+            <!-- Mode Switcher: Program Wise vs Non-Program Wise -->
+            <div class="flex flex-col gap-1">
+                <label
+                    class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Exam
+                    Type / Mode *</label>
+                <div
+                    class="grid grid-cols-2 gap-2 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-2xl border border-slate-200/60 dark:border-slate-700/60">
+                    <button type="button" id="btn-exam-mode-program" onclick="window.setExamMode('program')"
+                        class="py-2 px-3 rounded-xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 bg-rose-600 text-white shadow-sm min-h-[38px]">
+                        🎓 Program Wise
+                    </button>
+                    <button type="button" id="btn-exam-mode-non-program"
+                        onclick="window.setExamMode('non-program')"
+                        class="py-2 px-3 rounded-xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 text-slate-600 dark:text-slate-300 hover:bg-white/50 dark:hover:bg-slate-700/50 min-h-[38px]">
+                        ⚙️ Non-Program Wise
+                    </button>
+                </div>
+            </div>
+
+            <!-- Program-Wise Container -->
+            <div id="exam-program-wise-fields" class="space-y-4">
+                <div>
+                    <label
+                        class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Select
+                        Program *</label>
+                    <select id="exam-program-select" onchange="window.onExamProgramChange()"
+                        class="w-full min-h-[42px] px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 dark:text-white focus:ring-2 focus:ring-rose-500 outline-none">
+                        <option value="">-- Select Program --</option>
+                    </select>
+                </div>
+                <div>
+                    <label
+                        class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Select
+                        Subject *</label>
+                    <select id="exam-subject-select"
+                        class="w-full min-h-[42px] px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 dark:text-white focus:ring-2 focus:ring-rose-500 outline-none">
+                        <option value="">-- Select Program First --</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Non-Program-Wise Container -->
+            <div id="exam-non-program-fields" class="hidden space-y-4">
+                <div>
+                    <label
+                        class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Custom
+                        Setting Name *</label>
+                    <input type="text" id="exam-custom-setting"
+                        placeholder="e.g. Custom Setting Name, Personal Test, Cert Exam"
+                        class="w-full min-h-[42px] px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 dark:text-white focus:ring-2 focus:ring-rose-500 outline-none">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                    <label
+                        class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Date
+                        *</label>
+                    <input type="date" id="exam-date" required
+                        class="w-full min-h-[42px] px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 dark:text-white focus:ring-2 focus:ring-rose-500 outline-none">
+                </div>
+                <div>
+                    <label
+                        class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Time
+                        *</label>
+                    <input type="time" id="exam-time" required
+                        class="w-full min-h-[42px] px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 dark:text-white focus:ring-2 focus:ring-rose-500 outline-none">
+                </div>
+            </div>
+
+            <div
+                class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2.5 sm:gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+                <button type="button" onclick="window.closeExamModal()"
+                    class="w-full sm:w-auto px-4 py-2.5 text-xs font-bold text-slate-500 hover:text-slate-800 dark:hover:text-white rounded-xl bg-slate-100 sm:bg-transparent dark:bg-slate-800 sm:dark:bg-transparent min-h-[42px] flex items-center justify-center transition-all">Cancel</button>
+                <button type="submit"
+                    class="w-full sm:w-auto bg-rose-600 hover:bg-rose-700 text-white text-xs font-black uppercase tracking-wider px-5 py-2.5 rounded-xl shadow-md transition-all active:scale-95 min-h-[42px] flex items-center justify-center">Save
+                    Exam Routine</button>
+            </div>
+        </form>
+    </div>
+</div>
