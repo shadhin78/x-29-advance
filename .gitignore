@@ -1,13 +1,27 @@
 # Dependencies
 node_modules/
 
-# Environment variables (local overrides only)
-# NOTE: .env is intentionally tracked because the Vercel deployment
-# uses it as a static fallback for Firebase config via fetch('/.env').
-# Only local override files are ignored.
+# Environment variables
+.env
 .env.local
+.env.*.local
 .env.production
 .env.development
+
+# Firebase Service Account Credentials & Local Backups
+firebase-service-account.json
+service-account*.json
+*.log
+backup-log.txt
+verification-log.txt
+restore-log.txt
+X-29-Backups/
+X-29-advance-backups/
+
+# Build & Deployment Outputs
+.next/
+out/
+.vercel/
 
 # IDE
 .vscode/
@@ -19,16 +33,4 @@ Thumbs.db
 
 # Agents
 .agents/
-
-# Firebase Service Account Credentials & Local Backups
-firebase-service-account.json
-*.log
-backup-log.txt
-verification-log.txt
-restore-log.txt
-X-29-Backups/
-X-29-advance-backups/
-
-
-
 
