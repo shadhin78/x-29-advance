@@ -329,9 +329,18 @@ function stopExamCountdownInterval() {
     global.stopExamCountdownInterval = stopExamCountdownInterval;
     global.updateExamCountdown = updateExamCountdown;
     global.updateHeaderExamCountdown = updateHeaderExamCountdown;
+    global.calculateExamTimeRemaining = calculateExamTimeRemaining;
+    global.formatExamCountdownString = formatExamCountdownString;
 
     if (typeof module !== 'undefined' && module.exports) {
-        module.exports = { startExamCountdownInterval, stopExamCountdownInterval, updateExamCountdown, updateHeaderExamCountdown };
+        module.exports = {
+            startExamCountdownInterval,
+            stopExamCountdownInterval,
+            updateExamCountdown,
+            updateHeaderExamCountdown,
+            calculateExamTimeRemaining,
+            formatExamCountdownString
+        };
     }
 
     startExamCountdownInterval(1000);
