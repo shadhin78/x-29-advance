@@ -1,38 +1,149 @@
 /**
- * X-29 Utilities Module
- * Established in window.Utils namespace for compatibility.
+ * X-29 Utilities Module (js/utils.js)
+ * Synchronously loaded core utilities namespace for X-29 Advance.
+ * Attaches directly to window.Utils and legacy global bindings.
  */
 
-window.Utils = {
+(function (global) {
+    'use strict';
+
     /**
-     * Returns the active Date for Daily Actions based on standard 12:00 AM midnight reset.
-     * The daily actions cycle cleanly rolls over to the new calendar day at 12:00 AM.
+     * DOM Safe Manipulation Helpers
      */
-    getDailyActionDate: function(d = new Date()) {
-        return new Date(d.getTime());
-    },
+    function safeSetText(idOrEl, text) {
+        if (!idOrEl) return;
+        const el = (typeof idOrEl === 'string') ? document.getElementById(idOrEl) : idOrEl;
+        if (el && text !== undefined && text !== null) {
+            el.textContent = String(text);
+        }
+    }
+
+    function safeSetHtml(idOrEl, html) {
+        if (!idOrEl) return;
+        const el = (typeof idOrEl === 'string') ? document.getElementById(idOrEl) : idOrEl;
+        if (el && html !== undefined && html !== null) {
+            el.innerHTML = String(html);
+        }
+    }
+
+    function safeSetClass(idOrEl, addClasses = [], removeClasses = []) {
+        if (!idOrEl) return;
+        const el = (typeof idOrEl === 'string') ? document.getElementById(idOrEl) : idOrEl;
+        if (!el) return;
+        const toAdd = Array.isArray(addClasses) ? addClasses : [addClasses];
+        const toRemove = Array.isArray(removeClasses) ? removeClasses : [removeClasses];
+        toRemove.forEach(cls => { if (cls) el.classList.remove(cls); });
+        toAdd.forEach(cls => { if (cls) el.classList.add(cls); });
+    }
+
+    /**
+     * Unique ID Generator
+     */
+    function generateId(prefix = 'id') {
+        return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+    }
+
+    /**
+     * HTML escaping
+     */
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    /**
+     * Sanitization helper for deep objects
+     */
+    function sanitizeAllData(data) {
+        if (typeof data === 'string') {
+            return escapeHtml(data);
+        }
+        if (Array.isArray(data)) {
+            return data.map(item => sanitizeAllData(item));
+        }
+        if (data !== null && typeof data === 'object') {
+            const sanitized = {};
+            for (const key of Object.keys(data)) {
+                sanitized[key] = sanitizeAllData(data[key]);
+            }
+            return sanitized;
+        }
+        return data;
+    }
+
+    /**
+     * Safe LocalStorage wrapper with namespace isolation ('x29_adv_')
+     */
+    const safeStorage = {
+        PREFIX: 'x29_adv_',
+        fallbackStore: {},
+        _k: function (key) {
+            return String(key).startsWith(this.PREFIX) ? key : this.PREFIX + key;
+        },
+        getItem: function (key) {
+            const namespacedKey = this._k(key);
+            try {
+                return localStorage.getItem(namespacedKey);
+            } catch (e) {
+                console.warn(`localStorage.getItem failed for key "${namespacedKey}":`, e);
+                return this.fallbackStore[namespacedKey] || null;
+            }
+        },
+        setItem: function (key, value) {
+            const namespacedKey = this._k(key);
+            try {
+                localStorage.setItem(namespacedKey, value);
+            } catch (e) {
+                console.warn(`localStorage.setItem failed for key "${namespacedKey}":`, e);
+                this.fallbackStore[namespacedKey] = String(value);
+            }
+        },
+        removeItem: function (key) {
+            const namespacedKey = this._k(key);
+            try {
+                localStorage.removeItem(namespacedKey);
+            } catch (e) {
+                console.warn(`localStorage.removeItem failed for key "${namespacedKey}":`, e);
+                delete this.fallbackStore[namespacedKey];
+            }
+        },
+        clearNamespace: function () {
+            try {
+                const keysToRemove = [];
+                for (let i = 0; i < localStorage.length; i++) {
+                    const k = localStorage.key(i);
+                    if (k && k.startsWith(this.PREFIX)) {
+                        keysToRemove.push(k);
+                    }
+                }
+                keysToRemove.forEach(k => localStorage.removeItem(k));
+            } catch (e) {}
+            this.fallbackStore = {};
+        }
+    };
 
     /**
      * Converts a 24-hour time string (HH:MM) to total minutes from midnight.
      */
-    toMinutes: function(t) {
+    function toMinutes(t) {
         if (!t) return 0;
         const p = t.split(':').map(Number);
         return (p[0] || 0) * 60 + (p[1] || 0);
-    },
+    }
 
-    /**
-     * Converts a 24-hour time string (HH:MM) to total minutes from midnight.
-     * Alias for toMinutes.
-     */
-    timeToMinutes: function(t) {
-        return window.Utils.toMinutes(t);
-    },
+    function timeToMinutes(t) {
+        return toMinutes(t);
+    }
 
     /**
      * Formats a 24-hour time string (HH:MM) to 12-hour display format with AM/PM.
      */
-    formatTime12h: function(timeStr) {
+    function formatTime12h(timeStr) {
         if (!timeStr) return '';
         const parts = timeStr.split(':').map(Number);
         let hrs = parts[0] || 0;
@@ -41,130 +152,21 @@ window.Utils = {
         hrs = hrs % 12;
         if (hrs === 0) hrs = 12;
         return `${hrs}:${mins.toString().padStart(2, '0')} ${ampm}`;
-    },
+    }
 
     /**
-     * Extracts the trailing numeric value from a string.
+     * Extracts trailing numeric value from string.
      */
-    extractNum: function(chStr) {
+    function extractNum(chStr) {
         if (chStr === 'Rev') return 9999;
-        const match = chStr.match(/(\d+)(?!.*\d)/);
-        return match ? parseInt(match[0]) : 999;
-    },
+        const match = String(chStr || '').match(/(\d+)(?!.*\d)/);
+        return match ? parseInt(match[0], 10) : 999;
+    }
 
     /**
-     * Parses the start date of a weekly target date range string.
+     * Safe date parser for string, timestamp, Firestore Timestamp, or Date.
      */
-    parseStart: function(wkStr) {
-        if (!wkStr) return new Date(0);
-        const parts = wkStr.split(' - ');
-        return parts[0] ? (window.Utils && typeof window.Utils.parseDateSafe === 'function' ? window.Utils.parseDateSafe(parts[0]) : new Date(parts[0])) : new Date(0);
-    },
-
-    /**
-     * Parses the end date of a weekly target date range string.
-     */
-    parseEnd: function(wkStr) {
-        if (!wkStr) return new Date(0);
-        const parts = wkStr.split(' - ');
-        return parts[1] ? (window.Utils && typeof window.Utils.parseDateSafe === 'function' ? window.Utils.parseDateSafe(parts[1]) : new Date(parts[1])) : new Date(0);
-    },
-
-    /**
-     * Checks if a date falls strictly within a week range key.
-     */
-    isDateInWeekRange: function(date, wkStr) {
-        if (!date || !wkStr) return false;
-        const parts = wkStr.split(' - ');
-        if (parts.length < 2) return false;
-        const parseFn = window.Utils && typeof window.Utils.parseDateSafe === 'function' ? window.Utils.parseDateSafe : (d => new Date(d));
-        const dObj = (date instanceof Date) ? date : parseFn(date);
-        const start = parseFn(parts[0]);
-        const end = parseFn(parts[1]);
-        if (isNaN(dObj.getTime()) || isNaN(start.getTime()) || isNaN(end.getTime())) return false;
-        const dTime = new Date(dObj.getFullYear(), dObj.getMonth(), dObj.getDate()).getTime();
-        const startTime = new Date(start.getFullYear(), start.getMonth(), start.getDate()).getTime();
-        const endTime = new Date(end.getFullYear(), end.getMonth(), end.getDate()).getTime();
-        return dTime >= startTime && dTime <= endTime;
-    },
-
-    /**
-     * Formats elapsed days into readable months and days.
-     */
-    formatDaysPassed: function(daysPassed) {
-        if (daysPassed > 30) {
-            const months = Math.floor(daysPassed / 30);
-            const days = daysPassed % 30;
-            const monthStr = months === 1 ? "1 Month" : `${months} Months`;
-            if (days > 0) {
-                const dayStr = days === 1 ? "1 Day" : `${days} Days`;
-                return `${monthStr}, ${dayStr}`;
-            }
-            return monthStr;
-        }
-        return daysPassed === 1 ? "1 Day" : `${daysPassed} Days`;
-    },
-
-    /**
-     * Formats Date object into MMM DD format.
-     */
-    formatDate: function(dateObj) {
-        if (!dateObj) return '';
-        const d = (dateObj instanceof Date) ? dateObj : window.Utils.parseDateSafe(dateObj);
-        if (!d || isNaN(d.getTime())) return '';
-        return `${d.toLocaleString('en-US', { month: 'short' })} ${d.getDate()}`;
-    },
-
-    /**
-     * Formats Date into DD-MM-YY format for Mobile.
-     */
-    formatDateMobile: function(d) {
-        if (!d) return '';
-        const dateObj = window.Utils.parseDateSafe(d);
-        if (isNaN(dateObj.getTime())) return '';
-        const day = String(dateObj.getDate()).padStart(2, '0');
-        const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-        const year = String(dateObj.getFullYear()).slice(-2);
-        return `${day}-${month}-${year}`;
-    },
-
-    /**
-     * Formats Date into DD month YYYY format for PC.
-     */
-    formatDatePC: function(d) {
-        if (!d) return '';
-        const dateObj = window.Utils.parseDateSafe(d);
-        if (isNaN(dateObj.getTime())) return '';
-        return dateObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
-    },
-
-    /**
-     * Returns responsive HTML span string for mobile (DD-MM-YY) and PC (DD month YYYY).
-     */
-    formatDateResponsive: function(d) {
-        if (!d) return '';
-        const mobile = window.Utils.formatDateMobile(d);
-        const pc = window.Utils.formatDatePC(d);
-        if (!mobile && !pc) return '';
-        return `<span class="inline md:hidden">${mobile}</span><span class="hidden md:inline">${pc}</span>`;
-    },
-
-    /**
-     * Returns responsive HTML span string for date ranges (start -> end) for mobile and PC.
-     */
-    formatDateRangeResponsive: function(start, end, sep = ' &rarr; ') {
-        if (!start || !end) return '';
-        const mobileStart = window.Utils.formatDateMobile(start);
-        const mobileEnd = window.Utils.formatDateMobile(end);
-        const pcStart = window.Utils.formatDatePC(start);
-        const pcEnd = window.Utils.formatDatePC(end);
-        return `<span class="inline md:hidden">${mobileStart}${sep}${mobileEnd}</span><span class="hidden md:inline">${pcStart}${sep}${pcEnd}</span>`;
-    },
-
-    /**
-     * Safely parses any date string or object representation into a Date object.
-     */
-    parseDateSafe: function(dateStr) {
+    function parseDateSafe(dateStr) {
         if (!dateStr) return new Date();
         if (dateStr instanceof Date) return new Date(dateStr.getTime());
         if (typeof dateStr === 'object') {
@@ -201,7 +203,6 @@ window.Utils = {
                     }
                 }
             }
-            // Parse Month Name strings like 'Aug 26' or 'August 26, 2026'
             const monthMap = { jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5, jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11 };
             const mMatch = trimmed.match(/^([A-Za-z]{3,})\s+(\d{1,2})(?:[,\s]+(\d{4}))?$/);
             if (mMatch) {
@@ -212,7 +213,6 @@ window.Utils = {
                     return new Date(yr, mon, day);
                 }
             }
-            // Parse Day Month strings like '28 Aug' or '28 Aug 2026' or '28 August 2026'
             const dMatch = trimmed.match(/^(\d{1,2})\s+([A-Za-z]{3,})(?:[,\s]+(\d{4}))?$/);
             if (dMatch) {
                 const day = parseInt(dMatch[1], 10);
@@ -226,12 +226,94 @@ window.Utils = {
         let parsed = new Date(dateStr);
         if (!isNaN(parsed.getTime())) return parsed;
         return new Date(NaN);
-    },
+    }
 
-    /**
-     * Maps letter grades to numeric CGPA values.
-     */
-    mapGradeToNumeric: function(grade, evalType = 'cgpa') {
+    function getDailyActionDate(d = new Date()) {
+        return new Date(d.getTime());
+    }
+
+    function parseStart(wkStr) {
+        if (!wkStr) return new Date(0);
+        const parts = wkStr.split(' - ');
+        return parts[0] ? parseDateSafe(parts[0]) : new Date(0);
+    }
+
+    function parseEnd(wkStr) {
+        if (!wkStr) return new Date(0);
+        const parts = wkStr.split(' - ');
+        return parts[1] ? parseDateSafe(parts[1]) : new Date(0);
+    }
+
+    function isDateInWeekRange(date, wkStr) {
+        if (!date || !wkStr) return false;
+        const parts = wkStr.split(' - ');
+        if (parts.length < 2) return false;
+        const dObj = (date instanceof Date) ? date : parseDateSafe(date);
+        const start = parseDateSafe(parts[0]);
+        const end = parseDateSafe(parts[1]);
+        if (isNaN(dObj.getTime()) || isNaN(start.getTime()) || isNaN(end.getTime())) return false;
+        const dTime = new Date(dObj.getFullYear(), dObj.getMonth(), dObj.getDate()).getTime();
+        const startTime = new Date(start.getFullYear(), start.getMonth(), start.getDate()).getTime();
+        const endTime = new Date(end.getFullYear(), end.getMonth(), end.getDate()).getTime();
+        return dTime >= startTime && dTime <= endTime;
+    }
+
+    function formatDaysPassed(daysPassed) {
+        if (daysPassed > 30) {
+            const months = Math.floor(daysPassed / 30);
+            const days = daysPassed % 30;
+            const monthStr = months === 1 ? "1 Month" : `${months} Months`;
+            if (days > 0) {
+                const dayStr = days === 1 ? "1 Day" : `${days} Days`;
+                return `${monthStr}, ${dayStr}`;
+            }
+            return monthStr;
+        }
+        return daysPassed === 1 ? "1 Day" : `${daysPassed} Days`;
+    }
+
+    function formatDate(dateObj) {
+        if (!dateObj) return '';
+        const d = (dateObj instanceof Date) ? dateObj : parseDateSafe(dateObj);
+        if (!d || isNaN(d.getTime())) return '';
+        return `${d.toLocaleString('en-US', { month: 'short' })} ${d.getDate()}`;
+    }
+
+    function formatDateMobile(d) {
+        if (!d) return '';
+        const dateObj = parseDateSafe(d);
+        if (isNaN(dateObj.getTime())) return '';
+        const day = String(dateObj.getDate()).padStart(2, '0');
+        const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+        const year = String(dateObj.getFullYear()).slice(-2);
+        return `${day}-${month}-${year}`;
+    }
+
+    function formatDatePC(d) {
+        if (!d) return '';
+        const dateObj = parseDateSafe(d);
+        if (isNaN(dateObj.getTime())) return '';
+        return dateObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
+    }
+
+    function formatDateResponsive(d) {
+        if (!d) return '';
+        const mobile = formatDateMobile(d);
+        const pc = formatDatePC(d);
+        if (!mobile && !pc) return '';
+        return `<span class="inline md:hidden">${mobile}</span><span class="hidden md:inline">${pc}</span>`;
+    }
+
+    function formatDateRangeResponsive(start, end, sep = ' &rarr; ') {
+        if (!start || !end) return '';
+        const mobileStart = formatDateMobile(start);
+        const mobileEnd = formatDateMobile(end);
+        const pcStart = formatDatePC(start);
+        const pcEnd = formatDatePC(end);
+        return `<span class="inline md:hidden">${mobileStart}${sep}${mobileEnd}</span><span class="hidden md:inline">${pcStart}${sep}${pcEnd}</span>`;
+    }
+
+    function mapGradeToNumeric(grade, evalType = 'cgpa') {
         if (!grade) return 0.0;
         const g = grade.toUpperCase().trim();
         if (evalType === 'grade') {
@@ -259,12 +341,9 @@ window.Utils = {
                 default: return 0.0;
             }
         }
-    },
+    }
 
-    /**
-     * Maps numeric CGPA to letter grades.
-     */
-    mapCgpaToGrade: function(cgpa, evalType = 'cgpa') {
+    function mapCgpaToGrade(cgpa, evalType = 'cgpa') {
         const v = parseFloat(cgpa);
         if (isNaN(v)) return '';
         if (evalType === 'grade') {
@@ -286,94 +365,24 @@ window.Utils = {
             if (v >= 2.0) return 'D';
             return 'F';
         }
-    },
+    }
 
-    /**
-     * Formats GPA numbers to exactly 2 decimal points string.
-     */
-    formatCgpaMin2Dec: function(val) {
+    function formatCgpaMin2Dec(val) {
         let parsed = parseFloat(val);
         if (isNaN(parsed)) return '';
         return parsed.toFixed(2);
-    },
+    }
 
-    /**
-     * Validates and formats CGPA inputs within 0.00 - 4.00 constraints.
-     */
-    validateAndFormatCgpa: function(valStr) {
+    function validateAndFormatCgpa(valStr) {
         if (!valStr || valStr.trim() === '') return '';
         let val = parseFloat(valStr);
         if (isNaN(val)) return '';
         if (val < 0) val = 0.00;
         if (val > 4.0) val = 4.00;
-        return window.Utils.formatCgpaMin2Dec(val);
-    },
+        return formatCgpaMin2Dec(val);
+    }
 
-    /**
-     * Safe wrapper for LocalStorage with dedicated namespace isolation ('x29_adv_')
-     * to prevent cross-contamination with the legacy site under shared origins (localhost:3000).
-     */
-    storage: {
-        PREFIX: 'x29_adv_',
-        fallbackStore: {},
-        _k: function(key) {
-            return String(key).startsWith(this.PREFIX) ? key : this.PREFIX + key;
-        },
-        getItem: function(key) {
-            const namespacedKey = this._k(key);
-            try {
-                return localStorage.getItem(namespacedKey);
-            } catch (e) {
-                console.warn(`localStorage.getItem failed for key "${namespacedKey}":`, e);
-                return this.fallbackStore[namespacedKey] || null;
-            }
-        },
-        setItem: function(key, value) {
-            const namespacedKey = this._k(key);
-            try {
-                localStorage.setItem(namespacedKey, value);
-            } catch (e) {
-                console.warn(`localStorage.setItem failed for key "${namespacedKey}":`, e);
-                this.fallbackStore[namespacedKey] = String(value);
-            }
-        },
-        removeItem: function(key) {
-            const namespacedKey = this._k(key);
-            try {
-                localStorage.removeItem(namespacedKey);
-            } catch (e) {
-                console.warn(`localStorage.removeItem failed for key "${namespacedKey}":`, e);
-                delete this.fallbackStore[namespacedKey];
-            }
-        },
-        clearNamespace: function() {
-            try {
-                const keysToRemove = [];
-                for (let i = 0; i < localStorage.length; i++) {
-                    const k = localStorage.key(i);
-                    if (k && k.startsWith(this.PREFIX)) {
-                        keysToRemove.push(k);
-                    }
-                }
-                keysToRemove.forEach(k => localStorage.removeItem(k));
-            } catch (e) {}
-            this.fallbackStore = {};
-        }
-    },
-    escapeHtml: function(str) {
-        if (!str) return '';
-        return String(str)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#039;');
-    },
-
-    /**
-     * Flexibly matches two chapter identifiers (e.g., "Ch. 1", "1", "Chapter 1", "Ch. 11: Assurance", "Ch. 11 ★").
-     */
-    isChapterMatch: function(ch1, ch2) {
+    function isChapterMatch(ch1, ch2) {
         if (ch1 === ch2) return true;
         if (!ch1 || !ch2) return false;
         const s1 = String(ch1).replace(/[★⭐*]/g, '').trim();
@@ -384,7 +393,6 @@ window.Utils = {
         const clean2 = s2.replace(/^(ch\.|chapter)\s*/i, '').trim();
         if (clean1.toLowerCase() === clean2.toLowerCase()) return true;
 
-        // Split on colon if present (e.g. "Ch. 11: Assurance" -> "Ch. 11")
         const prefix1 = s1.split(':')[0].trim();
         const prefix2 = s2.split(':')[0].trim();
         if (prefix1.toLowerCase() === prefix2.toLowerCase()) return true;
@@ -393,36 +401,74 @@ window.Utils = {
         const cleanPrefix2 = prefix2.replace(/^(ch\.|chapter)\s*/i, '').trim();
         if (cleanPrefix1.toLowerCase() === cleanPrefix2.toLowerCase()) return true;
 
-        if (typeof window.Utils.extractNum === 'function') {
-            const n1 = window.Utils.extractNum(s1);
-            const n2 = window.Utils.extractNum(s2);
-            if (n1 !== null && n2 !== null && n1 !== 999 && n2 !== 999 && n1 === n2) return true;
-        }
+        const n1 = extractNum(s1);
+        const n2 = extractNum(s2);
+        if (n1 !== null && n2 !== null && n1 !== 999 && n2 !== 999 && n1 === n2) return true;
         return false;
     }
-};
 
-// Global legacy compatibility bindings
-window.toMinutes = window.Utils.toMinutes;
-window.timeToMinutes = window.Utils.timeToMinutes;
-window.formatTime12h = window.Utils.formatTime12h;
-window.extractNum = window.Utils.extractNum;
-window.isChapterMatch = window.Utils.isChapterMatch;
-window.parseStart = window.Utils.parseStart;
-window.parseEnd = window.Utils.parseEnd;
-window.isDateInWeekRange = window.Utils.isDateInWeekRange;
-window.formatDaysPassed = window.Utils.formatDaysPassed;
-window.formatDate = window.Utils.formatDate;
-window.formatDateMobile = window.Utils.formatDateMobile;
-window.formatDatePC = window.Utils.formatDatePC;
-window.formatDateResponsive = window.Utils.formatDateResponsive;
-window.formatDateRangeResponsive = window.Utils.formatDateRangeResponsive;
-window.parseDateSafe = window.Utils.parseDateSafe;
-window.mapGradeToNumeric = window.Utils.mapGradeToNumeric;
-window.mapCgpaToGrade = window.Utils.mapCgpaToGrade;
-window.formatCgpaMin2Dec = window.Utils.formatCgpaMin2Dec;
-window.validateAndFormatCgpa = window.Utils.validateAndFormatCgpa;
-window.safeStorage = window.Utils.storage;
-window.escapeHtml = window.Utils.escapeHtml;
+    // Unified Utils Namespace Object
+    const Utils = {
+        getDailyActionDate,
+        toMinutes,
+        timeToMinutes,
+        formatTime12h,
+        extractNum,
+        parseStart,
+        parseEnd,
+        isDateInWeekRange,
+        formatDaysPassed,
+        formatDate,
+        formatDateMobile,
+        formatDatePC,
+        formatDateResponsive,
+        formatDateRangeResponsive,
+        parseDateSafe,
+        mapGradeToNumeric,
+        mapCgpaToGrade,
+        formatCgpaMin2Dec,
+        validateAndFormatCgpa,
+        storage: safeStorage,
+        escapeHtml,
+        sanitizeAllData,
+        isChapterMatch,
+        generateId,
+        safeSetText,
+        safeSetHtml,
+        safeSetClass
+    };
 
+    // Global Bindings for synchronous availability
+    global.Utils = Utils;
+    global.safeStorage = safeStorage;
+    global.safeSetText = safeSetText;
+    global.safeSetHtml = safeSetHtml;
+    global.safeSetClass = safeSetClass;
+    global.generateId = generateId;
+    global.escapeHtml = escapeHtml;
+    global.sanitizeAllData = sanitizeAllData;
+    global.toMinutes = toMinutes;
+    global.timeToMinutes = timeToMinutes;
+    global.formatTime12h = formatTime12h;
+    global.extractNum = extractNum;
+    global.parseDateSafe = parseDateSafe;
+    global.getDailyActionDate = getDailyActionDate;
+    global.parseStart = parseStart;
+    global.parseEnd = parseEnd;
+    global.isDateInWeekRange = isDateInWeekRange;
+    global.formatDaysPassed = formatDaysPassed;
+    global.formatDate = formatDate;
+    global.formatDateMobile = formatDateMobile;
+    global.formatDatePC = formatDatePC;
+    global.formatDateResponsive = formatDateResponsive;
+    global.formatDateRangeResponsive = formatDateRangeResponsive;
+    global.mapGradeToNumeric = mapGradeToNumeric;
+    global.mapCgpaToGrade = mapCgpaToGrade;
+    global.formatCgpaMin2Dec = formatCgpaMin2Dec;
+    global.validateAndFormatCgpa = validateAndFormatCgpa;
+    global.isChapterMatch = isChapterMatch;
 
+    if (typeof module !== 'undefined' && module.exports) {
+        module.exports = Utils;
+    }
+})(typeof window !== 'undefined' ? window : globalThis);
