@@ -1,10 +1,7 @@
 /**
  * X-29 Module: core/scheduleSlot.js
- * Active schedule routine & live block calculator
- *
- * Phase 2 Architectural Skeleton (Placeholder)
- * Logic will be extracted in subsequent steps.
+ * Active schedule routine & live block calculator.
+ * Re-exports canonical implementation from js/features/schedule/scheduleSlot.js.
  */
 
-// Placeholder module export
-export {};
+export * from '../features/schedule/scheduleSlot.js';

@@ -6,7 +6,7 @@
 /**
  * Fires full-screen confetti animation with burst and raining flower particles.
  */
-export function fireConfetti() {
+function fireConfetti() {
     const canvas = document.getElementById('confetti-canvas');
     if (!canvas) return;
     const ctx = canvas.getContext('2d');

@@ -1,5 +1,12 @@
 /**
  * X-29 Module: features/exam/countdown.js
+ * Exam countdown ticker and header widget.
+ */
+(function (global) {
+    'use strict';
+
+/**
+ * X-29 Module: features/exam/countdown.js
  * Exam countdown calculations, string formatting & live header/dashboard timer updates.
  *
  * Extracted from monolithic js/script.js (Lines 20326-20589)
@@ -15,7 +22,7 @@ let _countdownIntervalId = null;
  * @param {Date} toDate - Target exam date
  * @returns {Object} Countdown breakdown and status
  */
-export function calculateExamTimeRemaining(fromDate, toDate) {
+function calculateExamTimeRemaining(fromDate, toDate) {
     if (!fromDate || !toDate) {
         return {
             isPast: true,
@@ -116,7 +123,7 @@ export function calculateExamTimeRemaining(fromDate, toDate) {
  * @param {Object} rem - Output from calculateExamTimeRemaining
  * @returns {string} Formatted countdown string
  */
-export function formatExamCountdownString(rem) {
+function formatExamCountdownString(rem) {
     if (!rem || rem.isPast) return 'Ended';
     if (rem.tier === 'years') {
         // More than 1 year: Year Year Month Month Day day Hr hr
@@ -137,7 +144,7 @@ export function formatExamCountdownString(rem) {
  * @param {string} timeStr - Time string in HH:MM format
  * @returns {number} Epoch timestamp in milliseconds, or NaN
  */
-export function getExamTimestamp(dateStr, timeStr) {
+function getExamTimestamp(dateStr, timeStr) {
     if (!dateStr) return NaN;
     const parts = dateStr.split('-');
     if (parts.length !== 3) return NaN;
@@ -158,7 +165,7 @@ export function getExamTimestamp(dateStr, timeStr) {
  * Updates desktop and mobile header live exam countdown components
  * and any upcoming exam target badges across dashboard cards.
  */
-export function updateHeaderExamCountdown() {
+function updateHeaderExamCountdown() {
     const hdrSubject = document.getElementById('hdr-exam-cd-subject');
     const hdrTimer = document.getElementById('hdr-exam-cd-timer');
     const hdrSubjectMobile = document.getElementById('hdr-exam-cd-subject-mobile');
@@ -284,7 +291,7 @@ export function updateHeaderExamCountdown() {
 /**
  * Global heartbeat: updates header countdown and ExamRoutinePage hero if mounted.
  */
-export function updateExamCountdown() {
+function updateExamCountdown() {
     updateHeaderExamCountdown();
     if (typeof window !== 'undefined' && window.ExamRoutinePage && window.ExamRoutinePage.isMounted && typeof window.ExamRoutinePage.updateHeroCountdown === 'function') {
         window.ExamRoutinePage.updateHeroCountdown();
@@ -296,7 +303,7 @@ export function updateExamCountdown() {
  *
  * @param {number} [intervalMs=1000]
  */
-export function startExamCountdownInterval(intervalMs = 1000) {
+function startExamCountdownInterval(intervalMs = 1000) {
     if (_countdownIntervalId) clearInterval(_countdownIntervalId);
     _countdownIntervalId = setInterval(() => {
         updateExamCountdown();
@@ -308,7 +315,7 @@ export function startExamCountdownInterval(intervalMs = 1000) {
 /**
  * Stops the live countdown ticker.
  */
-export function stopExamCountdownInterval() {
+function stopExamCountdownInterval() {
     if (_countdownIntervalId) {
         clearInterval(_countdownIntervalId);
         _countdownIntervalId = null;
@@ -316,14 +323,16 @@ export function stopExamCountdownInterval() {
 }
 
 // Window attachments for backward compatibility with classic scripts and HTML handlers
-if (typeof window !== 'undefined') {
-    window.calculateExamTimeRemaining = calculateExamTimeRemaining;
-    window.formatExamCountdownString = formatExamCountdownString;
-    window.updateHeaderExamCountdown = updateHeaderExamCountdown;
-    window.updateExamCountdown = updateExamCountdown;
-    window.startExamCountdownInterval = startExamCountdownInterval;
-    window.stopExamCountdownInterval = stopExamCountdownInterval;
 
-    // Start live timer
+    // Global attachments
+    global.startExamCountdownInterval = startExamCountdownInterval;
+    global.stopExamCountdownInterval = stopExamCountdownInterval;
+    global.updateExamCountdown = updateExamCountdown;
+    global.updateHeaderExamCountdown = updateHeaderExamCountdown;
+
+    if (typeof module !== 'undefined' && module.exports) {
+        module.exports = { startExamCountdownInterval, stopExamCountdownInterval, updateExamCountdown, updateHeaderExamCountdown };
+    }
+
     startExamCountdownInterval(1000);
-}
+})(typeof window !== 'undefined' ? window : globalThis);

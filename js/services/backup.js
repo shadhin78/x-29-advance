@@ -19,7 +19,7 @@ export async function restoreLocalBackup() {
  * 
  * @param {Event} event - Input change event containing file selection
  */
-export function importJSONBackup(event) {
+function importJSONBackup(event) {
     const file = event.target && event.target.files && event.target.files[0];
     if (!file) return;
 
@@ -52,7 +52,7 @@ export function importJSONBackup(event) {
 /**
  * Exports complete current workspace state as an indented JSON download file.
  */
-export function exportJSONBackup() {
+function exportJSONBackup() {
     try {
         const appState = (typeof window !== 'undefined' && window.AppState) ? window.AppState : {};
         const currentPayload = {

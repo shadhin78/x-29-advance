@@ -6,7 +6,7 @@
 /**
  * Plays a pleasant two-tone completion chime (D5 -> A5) via Web Audio API.
  */
-export function playCompletionChime() {
+function playCompletionChime() {
     try {
         const AudioContextClass = window.AudioContext || window.webkitAudioContext;
         if (!AudioContextClass) return;

@@ -9,7 +9,7 @@
  * @param {string} msg - Message to display
  * @param {'success'|'error'|'info'|'warning'} [type='success'] - Notification style type
  */
-export function showToast(msg, type = 'success') {
+function showToast(msg, type = 'success') {
     const t = document.getElementById('toast-message');
     if (!t) return;
     t.textContent = msg;

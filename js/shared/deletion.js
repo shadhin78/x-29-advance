@@ -8,14 +8,14 @@ let _pendingDeleteAction = null;
 /**
  * Returns the currently pending deletion callback action.
  */
-export function getPendingDeleteAction() {
+function getPendingDeleteAction() {
     return _pendingDeleteAction;
 }
 
 /**
  * Sets the currently pending deletion callback action.
  */
-export function setPendingDeleteAction(fn) {
+function setPendingDeleteAction(fn) {
     _pendingDeleteAction = fn;
     if (typeof window !== 'undefined') {
         window.pendingDeleteAction = fn;
@@ -29,7 +29,7 @@ export function setPendingDeleteAction(fn) {
  * @param {string} message - Warning message or confirmation question
  * @param {Function} actionCallback - Callback to execute if user confirms
  */
-export function openConfirmModal(title, message, actionCallback) {
+function openConfirmModal(title, message, actionCallback) {
     const titleEl = document.getElementById('cm-title');
     const msgEl = document.getElementById('cm-message');
     if (titleEl) titleEl.textContent = title;
@@ -58,7 +58,7 @@ export function openConfirmModal(title, message, actionCallback) {
 /**
  * Closes the confirmation modal and resets pending action.
  */
-export function closeConfirmModal() {
+function closeConfirmModal() {
     const modal = document.getElementById('confirm-modal');
     const backdrop = document.getElementById('cm-backdrop');
     const content = document.getElementById('cm-content');
@@ -79,7 +79,7 @@ export function closeConfirmModal() {
 /**
  * Executes the stored pending deletion callback and closes the modal.
  */
-export function executeConfirmedDelete() {
+function executeConfirmedDelete() {
     const callback = getPendingDeleteAction() || (typeof window !== 'undefined' ? window.pendingDeleteAction : null);
     if (typeof callback === 'function') {
         callback();
