@@ -764,6 +764,18 @@
 
     function resetToCleanSlate(confirmFirst = true) {
         const doWipe = () => {
+            if (typeof window !== 'undefined') {
+                window.tracks = [];
+                window.syllabusStructure = {};
+                window.customPrograms = {};
+                window.customActions = [];
+                window.paceGoals = [];
+                window.passedItems = { programs: [], subjects: [] };
+                window.revisionData = { active: [], progress: {} };
+                window.subjectTimeLinks = {};
+                window.successResults = [];
+                window.subjectFocusTargets = {};
+            }
             if (typeof AppState !== 'undefined') {
                 AppState.tracks = [];
                 AppState.syllabusStructure = {};

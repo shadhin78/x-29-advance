@@ -1,12 +1,12 @@
 /**
- * Master Config Page Module (pages/Master Config/Master Config.js)
- * Single Source of Truth for Master Configuration Page lifecycle and container routing.
- *
- * Core logic has been modularized into feature modules:
- * - Dynamic Tracks: js/features/config/tracksConfig.js
- * - Priority Ordering: js/features/config/priorityConfig.js
- * - Master Taxonomy & Clean Slate: js/features/config/masterConfig.js
- */
+* Master Config Page Module (pages/Master Config/Master Config.js)
+* Single Source of Truth for Master Configuration Page lifecycle and container routing.
+*
+* Core logic has been modularized into feature modules:
+* - Dynamic Tracks: js/features/config/tracksConfig.js
+* - Priority Ordering: js/features/config/priorityConfig.js
+* - Master Taxonomy & Clean Slate: js/features/config/masterConfig.js
+*/
 
 (function () {
     'use strict';

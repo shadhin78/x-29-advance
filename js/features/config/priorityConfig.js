@@ -63,6 +63,70 @@
     }
 
     /**
+     * Normalizes priority values for Tracks, Programs, Subjects, and Actions
+     * ensuring consecutive 1..N priorities with valid orders.
+     */
+    function normalizePriorities() {
+        // 1. Tracks
+        if (Array.isArray(window.tracks)) {
+            const priorities = window.tracks.map(t => t.priority);
+            const hasDuplicates = new Set(priorities).size !== priorities.length;
+            const hasInvalid = priorities.some(p => typeof p !== 'number' || p < 1 || p > window.tracks.length);
+            if (hasDuplicates || hasInvalid) {
+                window.tracks.forEach((t, idx) => {
+                    t.priority = idx + 1;
+                    t.order = idx;
+                });
+            }
+        }
+
+        // 2. Programs
+        const flatProgs = [];
+        (window.tracks || []).forEach(trackObj => {
+            if (window.customPrograms && window.customPrograms[trackObj.id]) {
+                window.customPrograms[trackObj.id].forEach(p => {
+                    flatProgs.push(p);
+                });
+            }
+        });
+        const progPriorities = flatProgs.map(p => p.priority);
+        const progsHasDuplicates = new Set(progPriorities).size !== progPriorities.length;
+        const progsHasInvalid = progPriorities.some(p => typeof p !== 'number' || p < 1 || p > flatProgs.length);
+        if (progsHasDuplicates || progsHasInvalid) {
+            flatProgs.sort((a, b) => (a.priority ?? 999) - (b.priority ?? 999) || (a.order ?? 999) - (b.order ?? 999));
+            flatProgs.forEach((p, idx) => {
+                p.priority = idx + 1;
+                p.order = idx;
+            });
+        }
+
+        // 3. Subjects
+        const flatSubs = typeof window.getAllSubjects === 'function' ? window.getAllSubjects() : [];
+        const subPriorities = flatSubs.map(s => s.priority);
+        const subsHasDuplicates = new Set(subPriorities).size !== subPriorities.length;
+        const subsHasInvalid = subPriorities.some(p => typeof p !== 'number' || p < 1 || p > flatSubs.length);
+        if (subsHasDuplicates || subsHasInvalid) {
+            flatSubs.forEach((s, idx) => {
+                s.priority = idx + 1;
+                s.order = idx;
+            });
+        }
+
+        // 4. Actions
+        if (Array.isArray(window.customActions)) {
+            const actionPriorities = window.customActions.map(a => a.priority);
+            const actionsHasDuplicates = new Set(actionPriorities).size !== actionPriorities.length;
+            const actionsHasInvalid = actionPriorities.some(p => typeof p !== 'number' || p < 1 || p > window.customActions.length);
+            if (actionsHasDuplicates || actionsHasInvalid) {
+                window.customActions.forEach((a, idx) => {
+                    a.priority = idx + 1;
+                    a.order = idx;
+                });
+            }
+        }
+    }
+
+    /**
      * Reads all current priority select inputs from the DOM and commits them to active state.
      */
     function syncPriorityInputsFromDOM() {
@@ -300,6 +364,17 @@
     }
 
     /**
+     * Unified priority mover helper.
+     */
+    function movePriorityItem(type, parent, index, direction) {
+        const dir = (direction === 'up' || direction === -1) ? -1 : 1;
+        if (type === 'track') return moveTrack(index, dir);
+        if (type === 'program') return moveProgramGlobal(index, dir);
+        if (type === 'subject') return moveSubjectGlobal(index, dir);
+        if (type === 'action') return moveAction(index, dir);
+    }
+
+    /**
      * Handles direct change on a priority dropdown select element.
      */
     function onPriorityDropdownChange(category, itemId, newValue) {
@@ -430,7 +505,7 @@
             actions: customActions
         });
 
-        if (currentDataString === window.lastPriorityRenderData) {
+        if (currentDataString === window.lastPriorityRenderData && container.innerHTML.trim() !== '') {
             return;
         }
         window.lastPriorityRenderData = currentDataString;
@@ -692,11 +767,13 @@
 
     // Attach to global window
     global.sortAllCustomData = sortAllCustomData;
+    global.normalizePriorities = normalizePriorities;
     global.syncPriorityInputsFromDOM = syncPriorityInputsFromDOM;
     global.moveTrack = moveTrack;
     global.moveProgramGlobal = moveProgramGlobal;
     global.moveSubjectGlobal = moveSubjectGlobal;
     global.moveAction = moveAction;
+    global.movePriorityItem = movePriorityItem;
     global.onPriorityDropdownChange = onPriorityDropdownChange;
     global.renderPriorityConfig = renderPriorityConfig;
     global.savePriorities = savePriorities;
@@ -705,11 +782,13 @@
     if (typeof module !== 'undefined' && module.exports) {
         module.exports = {
             sortAllCustomData,
+            normalizePriorities,
             syncPriorityInputsFromDOM,
             moveTrack,
             moveProgramGlobal,
             moveSubjectGlobal,
             moveAction,
+            movePriorityItem,
             onPriorityDropdownChange,
             renderPriorityConfig,
             savePriorities

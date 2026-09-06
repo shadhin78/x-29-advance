@@ -23,7 +23,8 @@
             'esm-track',
             'add-act-track',
             'edam-action-track',
-            'adt-todo-track'
+            'adt-todo-track',
+            'schedule-input-track'
         ];
 
         const tracksList = Array.isArray(window.tracks) ? window.tracks : [];
@@ -33,7 +34,7 @@
             if (!select) return;
 
             const currentVal = select.value;
-            if (id === 'add-act-track' || id === 'edam-action-track' || id === 'adt-todo-track') {
+            if (id === 'add-act-track' || id === 'edam-action-track' || id === 'adt-todo-track' || id === 'schedule-input-track') {
                 select.innerHTML = '<option value="">-- No Track (Optional) --</option>' +
                     tracksList.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
             } else {

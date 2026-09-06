@@ -421,126 +421,18 @@ window.ensureConfigDefaults = function () {
     }
 };
 
-window.normalizePriorities = function () {
-    // 1. Tracks
-    if (Array.isArray(window.tracks)) {
-        const priorities = window.tracks.map(t => t.priority);
-        const hasDuplicates = new Set(priorities).size !== priorities.length;
-        const hasInvalid = priorities.some(p => typeof p !== 'number' || p < 1 || p > window.tracks.length);
-        if (hasDuplicates || hasInvalid) {
-            window.tracks.forEach((t, idx) => {
-                t.priority = idx + 1;
-                t.order = idx;
-            });
-        }
-    }
-
-    // 2. Programs
-    const flatProgs = [];
-    window.tracks.forEach(trackObj => {
-        if (window.customPrograms[trackObj.id]) {
-            window.customPrograms[trackObj.id].forEach(p => {
-                flatProgs.push(p);
-            });
-        }
-    });
-    const progPriorities = flatProgs.map(p => p.priority);
-    const progsHasDuplicates = new Set(progPriorities).size !== progPriorities.length;
-    const progsHasInvalid = progPriorities.some(p => typeof p !== 'number' || p < 1 || p > flatProgs.length);
-    if (progsHasDuplicates || progsHasInvalid) {
-        flatProgs.sort((a, b) => (a.priority ?? 999) - (b.priority ?? 999) || (a.order ?? 999) - (b.order ?? 999));
-        flatProgs.forEach((p, idx) => {
-            p.priority = idx + 1;
-            p.order = idx;
-        });
-    }
-
-    // 3. Subjects
-    const flatSubs = window.getAllSubjects();
-    const subPriorities = flatSubs.map(s => s.priority);
-    const subsHasDuplicates = new Set(subPriorities).size !== subPriorities.length;
-    const subsHasInvalid = subPriorities.some(p => typeof p !== 'number' || p < 1 || p > flatSubs.length);
-    if (subsHasDuplicates || subsHasInvalid) {
-        flatSubs.forEach((s, idx) => {
-            s.priority = idx + 1;
-            s.order = idx;
-        });
-    }
-
-    // 4. Actions
-    if (Array.isArray(window.customActions)) {
-        const actionPriorities = window.customActions.map(a => a.priority);
-        const actionsHasDuplicates = new Set(actionPriorities).size !== actionPriorities.length;
-        const actionsHasInvalid = actionPriorities.some(p => typeof p !== 'number' || p < 1 || p > window.customActions.length);
-        if (actionsHasDuplicates || actionsHasInvalid) {
-            window.customActions.forEach((a, idx) => {
-                a.priority = idx + 1;
-                a.order = idx;
-            });
-        }
-    }
-};
-
-window.populateTrackDropdowns = function () {
-    const trackDropdowns = ['add-ch-track', 'add-sub-track', 'add-prog-track', 'manage-track', 'esm-track', 'add-act-track', 'edam-action-track', 'adt-todo-track'];
-    trackDropdowns.forEach(id => {
-        const select = document.getElementById(id);
-        if (!select) return;
-        const currentVal = select.value;
-        if (id === 'add-act-track' || id === 'edam-action-track' || id === 'adt-todo-track') {
-            select.innerHTML = '<option value="">-- No Track (Optional) --</option>' + window.tracks.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
-        } else {
-            select.innerHTML = window.tracks.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
-        }
-        if (currentVal && (window.tracks.some(t => t.id === currentVal) || currentVal === '')) {
-            select.value = currentVal;
-        }
-    });
-};
-
-window.sortAllCustomData = function () {
-    const tracks = window.tracks ? window.tracks.map(t => t.id) : [];
-    // 1. Sort customPrograms
-    tracks.forEach(track => {
-        if (Array.isArray(window.customPrograms[track])) {
-            window.customPrograms[track].sort((a, b) => {
-                const pA = a.priority !== undefined ? a.priority : 3;
-                const pB = b.priority !== undefined ? b.priority : 3;
-                if (pA !== pB) return pA - pB;
-                const oA = a.order !== undefined ? a.order : 999;
-                const oB = b.order !== undefined ? b.order : 999;
-                return oA - oB;
-            });
-        }
-    });
-
-    // 2. Sort syllabusStructure track subjects
-    tracks.forEach(track => {
-        if (Array.isArray(syllabusStructure[track])) {
-            syllabusStructure[track].sort((a, b) => {
-                const pA_subj = a.priority !== undefined ? a.priority : 3;
-                const pB_subj = b.priority !== undefined ? b.priority : 3;
-                if (pA_subj !== pB_subj) return pA_subj - pB_subj;
-
-                const oA_subj = a.order !== undefined ? a.order : 999;
-                const oB_subj = b.order !== undefined ? b.order : 999;
-                return oA_subj - oB_subj;
-            });
-        }
-    });
-
-    // 3. Sort AppState.customActions
-    if (Array.isArray(window.customActions)) {
-        window.customActions.sort((a, b) => {
-            const pA = a.priority !== undefined ? a.priority : 3;
-            const pB = b.priority !== undefined ? b.priority : 3;
-            if (pA !== pB) return pA - pB;
-            const oA = a.order !== undefined ? a.order : 999;
-            const oB = b.order !== undefined ? b.order : 999;
-            return oA - oB;
-        });
-    }
-};
+// Dynamic Tracks & Priority Configuration Systems
+// (normalizePriorities, populateTrackDropdowns, sortAllCustomData)
+// Extracted to js/features/config/tracksConfig.js and js/features/config/priorityConfig.js
+if (typeof window.normalizePriorities !== 'function') {
+    window.normalizePriorities = function () {};
+}
+if (typeof window.populateTrackDropdowns !== 'function') {
+    window.populateTrackDropdowns = function () {};
+}
+if (typeof window.sortAllCustomData !== 'function') {
+    window.sortAllCustomData = function () {};
+}
 
 // Deprecated
 // Currently unused
