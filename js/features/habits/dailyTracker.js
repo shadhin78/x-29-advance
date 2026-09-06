@@ -464,7 +464,8 @@
         // 7. Debounced background UI & charts refresh
         if (window._gridToggleDebounce) clearTimeout(window._gridToggleDebounce);
         window._gridToggleDebounce = setTimeout(() => {
-            requestAnimationFrame(() => {
+            const raf = (typeof requestAnimationFrame === 'function') ? requestAnimationFrame : ((cb) => setTimeout(cb, 0));
+            raf(() => {
                 if (typeof window.renderSpectraCommitmentsChart === 'function') window.renderSpectraCommitmentsChart();
                 const dbModal = document.getElementById('daily-actions-db-modal');
                 if (dbModal && !dbModal.classList.contains('hidden') && typeof window.openDailyActionsDBModal === 'function') {
@@ -708,7 +709,8 @@
             // 4. Schedule debounced full UI & chart updates for 60 FPS performance during fast clicks
             if (window._gridToggleDebounce) clearTimeout(window._gridToggleDebounce);
             window._gridToggleDebounce = setTimeout(() => {
-                requestAnimationFrame(() => {
+                const raf = (typeof requestAnimationFrame === 'function') ? requestAnimationFrame : ((cb) => setTimeout(cb, 0));
+                raf(() => {
                     if (typeof renderTrendCharts === 'function') renderTrendCharts();
                     if (typeof window.renderSpectraCommitmentsChart === 'function') window.renderSpectraCommitmentsChart();
                     const modal = document.getElementById('analytics-modal');
