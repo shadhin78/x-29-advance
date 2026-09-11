@@ -6614,19 +6614,25 @@ window.deleteTask = function () {
 // Outcome program toggles, pass/freeze configuration, and milestone celebration criteria
 // have been modularized to pages/Outcome/Outcome.js
 window.renderOutcomeProgramToggles = function () {
-    if (window.OutcomePage && typeof window.OutcomePage.renderOutcomeProgramToggles === 'function') {
+    if (window.OutcomeResults && typeof window.OutcomeResults.renderOutcomeProgramToggles === 'function') {
+        window.OutcomeResults.renderOutcomeProgramToggles();
+    } else if (window.OutcomePage && typeof window.OutcomePage.renderOutcomeProgramToggles === 'function') {
         window.OutcomePage.renderOutcomeProgramToggles();
     }
 };
 
 window.renderPassConfig = function (forceRebuild = false) {
-    if (window.OutcomePage && typeof window.OutcomePage.renderPassConfig === 'function') {
+    if (window.OutcomePassConfig && typeof window.OutcomePassConfig.renderPassConfig === 'function') {
+        window.OutcomePassConfig.renderPassConfig(forceRebuild);
+    } else if (window.OutcomePage && typeof window.OutcomePage.renderPassConfig === 'function') {
         window.OutcomePage.renderPassConfig(forceRebuild);
     }
 };
 
 window.renderCelebrationConfig = function () {
-    if (window.OutcomePage && typeof window.OutcomePage.renderCelebrationConfig === 'function') {
+    if (window.OutcomeCelebration && typeof window.OutcomeCelebration.renderCelebrationConfig === 'function') {
+        window.OutcomeCelebration.renderCelebrationConfig();
+    } else if (window.OutcomePage && typeof window.OutcomePage.renderCelebrationConfig === 'function') {
         window.OutcomePage.renderCelebrationConfig();
     }
 };
@@ -14224,7 +14230,9 @@ window.updateDtdbTargetSize = function (dateKey, idx, size) {
 
 // Outcome pass status toggle (togglePassStatus) has been modularized to pages/Outcome/Outcome.js
 window.togglePassStatus = function (type, name, isChecked) {
-    if (window.OutcomePage && typeof window.OutcomePage.togglePassStatus === 'function') {
+    if (window.OutcomePassConfig && typeof window.OutcomePassConfig.togglePassStatus === 'function') {
+        window.OutcomePassConfig.togglePassStatus(type, name, isChecked);
+    } else if (window.OutcomePage && typeof window.OutcomePage.togglePassStatus === 'function') {
         window.OutcomePage.togglePassStatus(type, name, isChecked);
     }
 };

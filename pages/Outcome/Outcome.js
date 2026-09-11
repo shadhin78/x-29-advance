@@ -22,16 +22,27 @@
         mount: function () {
             this.isMounted = true;
 
-            if (typeof window.renderOutcomeProgramToggles === 'function') {
+            if (window.OutcomeResults && typeof window.OutcomeResults.renderOutcomeProgramToggles === 'function') {
+                window.OutcomeResults.renderOutcomeProgramToggles();
+            } else if (typeof window.renderOutcomeProgramToggles === 'function') {
                 window.renderOutcomeProgramToggles();
             }
-            if (typeof window.renderResults === 'function') {
+
+            if (window.OutcomeResults && typeof window.OutcomeResults.renderResults === 'function') {
+                window.OutcomeResults.renderResults();
+            } else if (typeof window.renderResults === 'function') {
                 window.renderResults();
             }
-            if (typeof window.renderPassConfig === 'function') {
+
+            if (window.OutcomePassConfig && typeof window.OutcomePassConfig.renderPassConfig === 'function') {
+                window.OutcomePassConfig.renderPassConfig();
+            } else if (typeof window.renderPassConfig === 'function') {
                 window.renderPassConfig();
             }
-            if (typeof window.renderCelebrationConfig === 'function') {
+
+            if (window.OutcomeCelebration && typeof window.OutcomeCelebration.renderCelebrationConfig === 'function') {
+                window.OutcomeCelebration.renderCelebrationConfig();
+            } else if (typeof window.renderCelebrationConfig === 'function') {
                 window.renderCelebrationConfig();
             }
 
@@ -70,50 +81,60 @@
         },
 
         openResultModal: function (id = null, editProgramName = null) {
-            if (typeof window.openResultModal === 'function') {
+            if (window.OutcomeResults && typeof window.OutcomeResults.openResultModal === 'function') {
+                return window.OutcomeResults.openResultModal(id, editProgramName);
+            } else if (typeof window.openResultModal === 'function') {
                 window.openResultModal(id, editProgramName);
             }
         },
 
         renderResults: function () {
-            if (typeof window.renderResults === 'function') {
+            if (window.OutcomeResults && typeof window.OutcomeResults.renderResults === 'function') {
+                window.OutcomeResults.renderResults();
+            } else if (typeof window.renderResults === 'function') {
                 window.renderResults();
             }
         },
 
         toggleOutcomeDateSort: function () {
-            if (typeof window.toggleOutcomeDateSort === 'function') {
+            if (window.OutcomeResults && typeof window.OutcomeResults.toggleOutcomeDateSort === 'function') {
+                return window.OutcomeResults.toggleOutcomeDateSort();
+            } else if (typeof window.toggleOutcomeDateSort === 'function') {
                 window.toggleOutcomeDateSort();
             }
         },
 
         deleteResult: function (id) {
-            if (typeof window.deleteResult === 'function') {
+            if (window.OutcomeResults && typeof window.OutcomeResults.deleteResult === 'function') {
+                return window.OutcomeResults.deleteResult(id);
+            } else if (typeof window.deleteResult === 'function') {
                 window.deleteResult(id);
             }
         },
 
         deleteProgramGroup: function (programName) {
-            if (typeof window.deleteProgramGroup === 'function') {
+            if (window.OutcomeResults && typeof window.OutcomeResults.deleteProgramGroup === 'function') {
+                return window.OutcomeResults.deleteProgramGroup(programName);
+            } else if (typeof window.deleteProgramGroup === 'function') {
                 window.deleteProgramGroup(programName);
             }
         },
 
         renderPassConfig: function (forceRebuild = false) {
-            if (typeof window.renderPassConfig === 'function') {
-                window.renderPassConfig(forceRebuild);
+            if (window.OutcomePassConfig && typeof window.OutcomePassConfig.renderPassConfig === 'function') {
+                window.OutcomePassConfig.renderPassConfig(forceRebuild);
             }
         },
 
         renderCelebrationConfig: function () {
-            if (typeof window.renderCelebrationConfig === 'function') {
-                window.renderCelebrationConfig();
+            if (window.OutcomeCelebration && typeof window.OutcomeCelebration.renderCelebrationConfig === 'function') {
+                window.OutcomeCelebration.renderCelebrationConfig();
             }
         },
 
         renderOutcomeProgramToggles: function () {
-            if (typeof window.renderOutcomeProgramToggles === 'function') {
-                window.renderOutcomeProgramToggles();
+            if (window.OutcomeResults && typeof window.OutcomeResults.renderOutcomeProgramToggles === 'function') {
+                window.OutcomeResults.renderOutcomeProgramToggles();
             }
         }
     };

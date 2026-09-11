@@ -186,7 +186,7 @@
                     html += `
                         <label data-csm-name="${pName.toLowerCase().replace(/"/g, '&quot;')}" class="csm-program-item flex items-center justify-between p-2 rounded-xl hover:bg-white dark:hover:bg-slate-800 border border-transparent hover:border-amber-200 dark:hover:border-amber-800/50 cursor-pointer active:scale-[0.99] transition-all">
                             <div class="flex items-center space-x-2.5 min-w-0 flex-1">
-                                <input type="checkbox" data-modal-celeb-prog="${pName.replace(/"/g, '&quot;')}" ${isChecked} onchange="window.updateModalSelectedCount()" class="modal-celeb-prog-cb form-checkbox h-4 w-4 text-amber-500 rounded border-slate-300 focus:ring-amber-500 cursor-pointer">
+                                <input type="checkbox" data-modal-celeb-type="program" data-modal-celeb-prog="${pName.replace(/"/g, '&quot;')}" ${isChecked} onchange="window.onModalToggleProgram('${safePName}', this.checked)" class="modal-celeb-prog-cb form-checkbox h-4 w-4 text-amber-500 rounded border-slate-300 focus:ring-amber-500 cursor-pointer">
                                 <span class="text-xs font-bold text-slate-700 dark:text-slate-200 truncate">${pName}</span>
                             </div>
                             <span class="text-[8px] font-black uppercase px-1.5 py-0.5 rounded ${isPassed ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400' : 'bg-slate-200/60 dark:bg-slate-800 text-slate-400'}">${isPassed ? 'Passed' : 'Pending'}</span>
@@ -230,11 +230,13 @@
                             const isSubChecked = Boolean(isProgCeleb || (global.celebrationTargets.subjects && global.celebrationTargets.subjects.includes(s.subject)));
                             const isPassed = Boolean(global.passedItems && ((global.passedItems.subjects && global.passedItems.subjects.includes(s.subject)) || (global.passedItems.programs && global.passedItems.programs.includes(progName))));
                             let displaySub = s.subject.replace(s.program + ' - ', '').replace(s.program + ' ', '');
+                            const safeSub = s.subject.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                            const safeProgName = progName.replace(/'/g, "\\'").replace(/"/g, '&quot;');
 
                             html += `
                                 <label data-csm-subname="${s.subject.toLowerCase().replace(/"/g, '&quot;')}" class="csm-sub-item flex items-center justify-between p-1.5 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-900/50 border border-transparent hover:border-amber-200 dark:hover:border-amber-800/40 cursor-pointer active:scale-[0.99] transition-all">
                                     <div class="flex items-center space-x-2 min-w-0 flex-1">
-                                        <input type="checkbox" data-modal-celeb-subject="${s.subject.replace(/"/g, '&quot;')}" data-modal-celeb-parent-prog="${progName.replace(/"/g, '&quot;')}" ${isSubChecked ? 'checked' : ''} onchange="window.updateModalSelectedCount()" class="modal-celeb-sub-cb form-checkbox h-3.5 w-3.5 text-amber-500 rounded border-slate-300 focus:ring-amber-500 cursor-pointer">
+                                        <input type="checkbox" data-modal-celeb-type="subject" data-modal-celeb-subject="${s.subject.replace(/"/g, '&quot;')}" data-modal-celeb-parent-prog="${progName.replace(/"/g, '&quot;')}" ${isSubChecked ? 'checked' : ''} onchange="window.onModalToggleSubject('${safeSub}', '${safeProgName}', this.checked)" class="modal-celeb-sub-cb form-checkbox h-3.5 w-3.5 text-amber-500 rounded border-slate-300 focus:ring-amber-500 cursor-pointer">
                                         <span class="text-[11px] font-bold text-slate-700 dark:text-slate-200 truncate">${displaySub}</span>
                                     </div>
                                     <span class="text-[7px] font-black uppercase px-1 py-0.5 rounded ${isPassed ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'}">${isPassed ? 'Passed' : 'Pending'}</span>
@@ -654,10 +656,47 @@
         }, 500);
     }
 
+    /**
+     * Toggles all subjects under a program when program checkbox is clicked in celebration modal.
+     */
+    function onModalToggleProgram(progName, isChecked) {
+        const modal = document.getElementById('celebration-setup-modal');
+        if (!modal) return;
+
+        const escapeVal = (val) => (typeof CSS !== 'undefined' && CSS.escape) ? CSS.escape(val) : val.replace(/["\\]/g, '\\$&');
+        const subInputs = modal.querySelectorAll(`input.modal-celeb-sub-cb[data-modal-celeb-parent-prog="${escapeVal(progName)}"]`);
+        subInputs.forEach(input => {
+            input.checked = isChecked;
+        });
+
+        updateModalSelectedCount();
+    }
+
+    /**
+     * Updates parent program checkbox when individual subject checkbox is clicked in celebration modal.
+     */
+    function onModalToggleSubject(subName, progName, isChecked) {
+        const modal = document.getElementById('celebration-setup-modal');
+        if (!modal) return;
+
+        const escapeVal = (val) => (typeof CSS !== 'undefined' && CSS.escape) ? CSS.escape(val) : val.replace(/["\\]/g, '\\$&');
+        const pInput = modal.querySelector(`input.modal-celeb-prog-cb[data-modal-celeb-prog="${escapeVal(progName)}"]`);
+        const siblingSubInputs = modal.querySelectorAll(`input.modal-celeb-sub-cb[data-modal-celeb-parent-prog="${escapeVal(progName)}"]`);
+
+        if (pInput && siblingSubInputs.length > 0) {
+            const allChecked = Array.from(siblingSubInputs).every(si => si.checked);
+            pInput.checked = allChecked;
+        }
+
+        updateModalSelectedCount();
+    }
+
     // Attach to global scope
     const OutcomeCelebration = {
         renderCelebrationConfig,
         openCelebrationSetupModal,
+        onModalToggleProgram,
+        onModalToggleSubject,
         selectCelebrationModalTargets,
         filterCelebrationSetupItems,
         updateModalSelectedCount,
@@ -673,6 +712,8 @@
     global.OutcomeCelebration = OutcomeCelebration;
     global.renderCelebrationConfig = renderCelebrationConfig;
     global.openCelebrationSetupModal = openCelebrationSetupModal;
+    global.onModalToggleProgram = onModalToggleProgram;
+    global.onModalToggleSubject = onModalToggleSubject;
     global.selectCelebrationModalTargets = selectCelebrationModalTargets;
     global.filterCelebrationSetupItems = filterCelebrationSetupItems;
     global.updateModalSelectedCount = updateModalSelectedCount;

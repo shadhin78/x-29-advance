@@ -207,8 +207,8 @@
         const processedSubjects = [];
 
         const allSubs = typeof global.getAllSubjects === 'function' ? global.getAllSubjects() : [];
-        const formatCgpa = (typeof global.Utils !== 'undefined' && typeof global.Utils.formatCgpaMin2Dec === 'function')
-            ? global.Utils.formatCgpaMin2Dec
+        const formatCgpa = (typeof global.Utils !== 'undefined' && typeof global.formatCgpa === 'function')
+            ? global.formatCgpa
             : (val => Number(val).toFixed(2));
         const mapCgpaToGrade = (typeof global.Utils !== 'undefined' && typeof global.Utils.mapCgpaToGrade === 'function')
             ? global.Utils.mapCgpaToGrade
@@ -355,8 +355,8 @@
         const mapGradeToNum = (typeof global.Utils !== 'undefined' && typeof global.Utils.mapGradeToNumeric === 'function')
             ? global.Utils.mapGradeToNumeric
             : (() => 0);
-        const formatCgpa = (typeof global.Utils !== 'undefined' && typeof global.Utils.formatCgpaMin2Dec === 'function')
-            ? global.Utils.formatCgpaMin2Dec
+        const formatCgpa = (typeof global.Utils !== 'undefined' && typeof global.formatCgpa === 'function')
+            ? global.formatCgpa
             : (v => Number(v).toFixed(2));
 
         const c = mapGradeToNum(gradeVal, evalType);
@@ -382,8 +382,8 @@
         let targetCgpa = '';
         let targetGrade = '';
 
-        const formatCgpa = (typeof global.Utils !== 'undefined' && typeof global.Utils.formatCgpaMin2Dec === 'function')
-            ? global.Utils.formatCgpaMin2Dec
+        const formatCgpa = (typeof global.Utils !== 'undefined' && typeof global.formatCgpa === 'function')
+            ? global.formatCgpa
             : (v => Number(v).toFixed(2));
         const mapCgpaToGrade = (typeof global.Utils !== 'undefined' && typeof global.Utils.mapCgpaToGrade === 'function')
             ? global.Utils.mapCgpaToGrade
@@ -436,8 +436,8 @@
         const estCgpaEl = document.getElementById('res-overall-est-cgpa');
         const estGradeEl = document.getElementById('res-overall-est-grade');
 
-        const formatCgpa = (typeof global.Utils !== 'undefined' && typeof global.Utils.formatCgpaMin2Dec === 'function')
-            ? global.Utils.formatCgpaMin2Dec
+        const formatCgpa = (typeof global.Utils !== 'undefined' && typeof global.formatCgpa === 'function')
+            ? global.formatCgpa
             : (v => Number(v).toFixed(2));
         const mapCgpaToGrade = (typeof global.Utils !== 'undefined' && typeof global.Utils.mapCgpaToGrade === 'function')
             ? global.Utils.mapCgpaToGrade
@@ -1305,6 +1305,27 @@
      * Main results view renderer.
      */
     function renderResults() {
+        const AppStateRef = typeof global.AppState !== 'undefined' ? global.AppState : (typeof window !== 'undefined' ? window.AppState : {});
+        const syllabusStructure = global.syllabusStructure || (AppStateRef && AppStateRef.syllabusStructure) || {};
+        const tracksList = global.tracks || (AppStateRef && AppStateRef.tracks) || [];
+        const customPrograms = global.customPrograms || (AppStateRef && AppStateRef.customPrograms) || {};
+        const Utils = (typeof global.Utils !== 'undefined') ? global.Utils : (typeof window !== 'undefined' && window.Utils ? window.Utils : {
+            parseDateSafe: (d) => new Date(d),
+            formatCgpaMin2Dec: (v) => parseFloat(v || 0).toFixed(2),
+            mapCgpaToGrade: () => 'F',
+            mapGradeToNumeric: () => 0.0
+        });
+        const Chart = typeof global.Chart !== 'undefined' ? global.Chart : (typeof window !== 'undefined' ? window.Chart : null);
+        const formatCgpa = (typeof global.formatCgpa === 'function')
+            ? global.formatCgpa
+            : (typeof window !== 'undefined' && typeof window.formatCgpa === 'function')
+                ? window.formatCgpa
+                : (Utils && typeof Utils.formatCgpaMin2Dec === 'function')
+                    ? (v) => Utils.formatCgpaMin2Dec(v)
+                    : (v) => {
+                        const num = parseFloat(v);
+                        return isNaN(num) ? '0.00' : num.toFixed(2);
+                    };
         if (typeof global.renderDashboardOutcomeCard === 'function') {
             global.renderDashboardOutcomeCard();
         }
@@ -1315,14 +1336,21 @@
         const sortOrder = global.outcomeDateSortOrder || 'desc';
         const isAsc = sortOrder === 'asc';
 
+        // Update sort button and badge in UI
         const sortBtnText = document.getElementById('outcome-date-sort-text');
         const sortBtnIcon = document.getElementById('outcome-date-sort-icon');
         const countBadge = document.getElementById('outcome-results-count-badge');
 
-        if (sortBtnText) sortBtnText.textContent = isAsc ? 'Date: Oldest First' : 'Date: Newest First';
-        if (sortBtnIcon) sortBtnIcon.style.transform = isAsc ? 'rotate(180deg)' : 'rotate(0deg)';
+        if (sortBtnText) {
+            sortBtnText.textContent = isAsc ? 'Date: Oldest First' : 'Date: Newest First';
+        }
+        if (sortBtnIcon) {
+            sortBtnIcon.style.transform = isAsc ? 'rotate(180deg)' : 'rotate(0deg)';
+        }
 
-        const activeResults = getProcessedResults();
+        const getResultsFn = typeof global.getProcessedResults === 'function' ? global.getProcessedResults : () => (global.successResults || []);
+        const activeResults = getResultsFn();
+
         if (!activeResults || activeResults.length === 0) {
             container.innerHTML = '<div class="col-span-full py-8 flex flex-col items-center justify-center border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl"><span class="text-3xl mb-3 grayscale opacity-50">🏆</span><p class="text-slate-400 text-[10px] md:text-xs font-black uppercase tracking-widest text-center">No results logged yet. Add your first achievement!</p></div>';
             if (trendContainer) trendContainer.classList.add('hidden');
@@ -1332,9 +1360,6 @@
 
         const programGroups = {};
         const achievements = [];
-        const parseDate = (typeof global.Utils !== 'undefined' && typeof global.Utils.parseDateSafe === 'function')
-            ? global.Utils.parseDateSafe
-            : (d => new Date(d));
 
         activeResults.forEach(res => {
             if (res.type === 'cgpa') {
@@ -1348,7 +1373,7 @@
                         date: res.date
                     };
                 }
-                if (parseDate(res.date) > parseDate(programGroups[progName].date)) {
+                if (Utils.parseDateSafe(res.date) > Utils.parseDateSafe(programGroups[progName].date)) {
                     programGroups[progName].date = res.date;
                 }
                 if (!res.subject) {
@@ -1365,86 +1390,518 @@
             ...Object.values(programGroups),
             ...achievements
         ].sort((a, b) => {
-            const timeA = parseDate(a.date).getTime();
-            const timeB = parseDate(b.date).getTime();
+            const timeA = Utils.parseDateSafe(a.date).getTime();
+            const timeB = Utils.parseDateSafe(b.date).getTime();
             return isAsc ? (timeA - timeB) : (timeB - timeA);
         });
 
-        if (countBadge) countBadge.textContent = mergedList.length;
+        if (countBadge) {
+            countBadge.textContent = mergedList.length;
+        }
 
         let html = '';
         mergedList.forEach(item => {
-            const dateStr = parseDate(item.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+            const dateStr = Utils.parseDateSafe(item.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 
             if (item.type === 'program_group') {
                 const progName = item.title;
-                if (global.programVisibility && global.programVisibility[progName] === false) {
-                    return; // Filtered out
-                }
                 const subjects = item.subjects.sort((a, b) => a.subject.localeCompare(b.subject));
-                const overall = item.overall;
-                const evalType = (overall && overall.evaluationType) || (subjects.length > 0 && subjects[0].evaluationType) || 'cgpa';
-                const isGradeMode = evalType === 'grade';
 
-                const displayVal = isGradeMode ? (overall?.grade || '—') : (overall?.value || '—');
-                const badgeLabel = isGradeMode ? 'Grade' : 'CGPA';
-                const color = typeof global.getProgramColor === 'function' ? global.getProgramColor(progName) : '#eab308';
+                // Estimate overall from subjects
+                let estCgpa = null;
+                let estGrade = null;
+                const evalType = (item.overall && item.overall.evaluationType) || (subjects.length > 0 && subjects[0].evaluationType) || 'cgpa';
+                const isGrade = evalType === 'grade';
+                const subjectsWithScores = subjects.filter(s => s.value && !isNaN(parseFloat(s.value)));
+                if (subjectsWithScores.length > 0) {
+                    const sum = subjectsWithScores.reduce((acc, s) => acc + parseFloat(s.value), 0);
+                    const avg = sum / subjectsWithScores.length;
+                    estCgpa = formatCgpa(avg);
+                    estGrade = Utils.mapCgpaToGrade(avg, evalType);
+                }
 
-                html += `
-                    <div class="bg-white dark:bg-slate-800 p-5 rounded-[1.25rem] border border-slate-200 dark:border-slate-700 shadow-sm relative group hover:shadow-lg transition-all flex flex-col justify-between">
-                        <div class="flex items-center justify-between mb-3">
-                            <div class="flex items-center gap-2">
-                                <span class="w-2.5 h-2.5 rounded-full" style="background-color: ${color}"></span>
-                                <h4 class="text-sm md:text-base font-black text-slate-800 dark:text-slate-100">${progName}</h4>
-                            </div>
-                            <div class="flex items-center gap-1">
-                                <button onclick="window.showProgramAnalytics('${progName.replace(/'/g, "\\'")}')" class="text-slate-300 hover:text-amber-500 bg-white dark:bg-slate-800 rounded-lg p-1 shadow-sm border border-slate-100 dark:border-slate-700 active:scale-95 transition-all" title="View Trend Analytics"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1-1H5a1 1 0 01-1-1V4z"></path></svg></button>
-                                <button onclick="window.openResultModal(null, '${progName.replace(/'/g, "\\'")}')" class="text-slate-300 hover:text-blue-500 bg-white dark:bg-slate-800 rounded-lg p-1 shadow-sm border border-slate-100 dark:border-slate-700 active:scale-95 transition-all" title="Edit Program Card"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg></button>
-                                <button onclick="window.deleteProgramGroup('${progName.replace(/'/g, "\\'")}')" class="text-slate-300 hover:text-red-500 bg-white dark:bg-slate-800 rounded-lg p-1 shadow-sm border border-slate-100 dark:border-slate-700 active:scale-95 transition-all" title="Delete Program Card"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg></button>
-                            </div>
-                        </div>
+                // Dynamically calculate and fill overall if empty/missing
+                let currentOverall = item.overall;
+                if (!currentOverall) {
+                    currentOverall = {
+                        id: 'dynamic_overall_' + progName,
+                        type: 'cgpa',
+                        evaluationType: (subjects.length > 0 && subjects[0].evaluationType) || 'cgpa',
+                        title: progName,
+                        subject: '',
+                        value: estCgpa || '',
+                        grade: estGrade || '',
+                        targetGrade: '',
+                        targetCGPA: '',
+                        date: item.date,
+                        isEstimated: true
+                    };
+                } else {
+                    const isGradeType = currentOverall.evaluationType === 'grade';
+                    if (isGradeType && !currentOverall.grade && estGrade) {
+                        currentOverall.grade = estGrade;
+                        currentOverall.value = estCgpa || '';
+                        currentOverall.isEstimated = true;
+                    } else if (!isGradeType && !currentOverall.value && estCgpa) {
+                        currentOverall.value = estCgpa;
+                        currentOverall.grade = estGrade || '';
+                        currentOverall.isEstimated = true;
+                    }
+                }
 
-                        <div class="mb-4 flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-700/60">
-                            <div>
-                                <span class="text-[9px] font-black uppercase tracking-widest text-slate-400 block">${badgeLabel} Overall</span>
-                                <span class="text-lg md:text-xl font-black text-slate-800 dark:text-slate-100">${displayVal}</span>
-                            </div>
-                            <span class="text-[9px] font-bold text-slate-400">${dateStr}</span>
-                        </div>
+                // Check if inputted overall result matches estimated result
+                let matchStatusHtml = '';
+                if (currentOverall && !currentOverall.isEstimated && estCgpa) {
+                    const isGrade = currentOverall.evaluationType === 'grade';
+                    let isMatch = false;
+                    if (isGrade) {
+                        isMatch = (currentOverall.grade || '').trim().toUpperCase() === (estGrade || '').trim().toUpperCase();
+                    } else {
+                        isMatch = formatCgpa(currentOverall.value || 0) === formatCgpa(estCgpa);
+                    }
 
-                        <div class="space-y-1.5 max-h-48 overflow-y-auto pr-1">
-                            ${subjects.map(s => `
-                                <div class="flex justify-between items-center text-xs py-1 border-b border-slate-100 dark:border-slate-800 last:border-0">
-                                    <span class="font-bold text-slate-600 dark:text-slate-300 truncate max-w-[65%]">${s.subject}</span>
-                                    <span class="font-black text-slate-800 dark:text-slate-200">${isGradeMode ? (s.grade || '—') : (s.value || '—')}</span>
+                    if (isMatch) {
+                        matchStatusHtml = `
+                                <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-500 text-white text-[10px] font-black shrink-0 shadow-sm shadow-emerald-500/20" title="Matches subject-wise estimate (CGPA: ${estCgpa}, Grade: ${estGrade})">✓</span>`;
+                    } else {
+                        matchStatusHtml = `
+                                <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-rose-500 text-white text-[9px] font-black shrink-0 shadow-sm shadow-rose-500/20" title="Differs from subject-wise estimate (CGPA: ${estCgpa}, Grade: ${estGrade})">✗</span>`;
+                    }
+                }
+
+                // Check if Goal is Met
+                const mainTarget = typeof global.getProgramMainTarget === 'function' ? global.getProgramMainTarget(progName) : { targetCGPA: '', targetGrade: '' };
+                const targetCGPA = (currentOverall && currentOverall.targetCGPA) || mainTarget.targetCGPA;
+                const targetGrade = (currentOverall && currentOverall.targetGrade) || mainTarget.targetGrade;
+                const hasTgt = targetCGPA && targetCGPA !== 'none' && targetCGPA !== '';
+
+                const trackId = tracksList.find(t => customPrograms[t.id] && customPrograms[t.id].some(p => (p.name || p) === progName))?.id;
+                const progSubsList = trackId ? (syllabusStructure[trackId] || []).filter(s => s.program === progName) : [];
+
+                let allSubjectsAttempted = (progSubsList.length > 0);
+                progSubsList.forEach(s => {
+                    const subRes = subjects.find(r => r.subject === s.subject);
+                    let attempted = false;
+                    if (subRes) {
+                        const evalType = subRes.evaluationType || 'cgpa';
+                        if (evalType === 'grade') {
+                            if (subRes.grade && subRes.grade.trim() !== '' && subRes.grade.trim().toUpperCase() !== 'F') {
+                                attempted = true;
+                            }
+                        } else {
+                            const val = parseFloat(subRes.value);
+                            if (subRes.value && !isNaN(val) && val > 0) {
+                                attempted = true;
+                            }
+                        }
+                    }
+                    if (!attempted) {
+                        allSubjectsAttempted = false;
+                    }
+                });
+
+                let goalMetLabel = '';
+                if (hasTgt) {
+                    let isGoalMet = false;
+                    if (allSubjectsAttempted) {
+                        if (evalType === 'grade') {
+                            const currentGradeVal = Utils.mapGradeToNumeric(currentOverall.grade, 'grade');
+                            const targetGradeVal = Utils.mapGradeToNumeric(targetGrade, 'grade');
+                            isGoalMet = currentGradeVal >= targetGradeVal;
+                        } else {
+                            const currentCgpaVal = parseFloat(currentOverall.value) || 0;
+                            const targetCgpaVal = parseFloat(targetCGPA) || 0;
+                            isGoalMet = currentCgpaVal >= targetCgpaVal;
+                        }
+                    }
+
+                    if (isGoalMet) {
+                        goalMetLabel = ` <span class="text-xs font-black text-emerald-500 ml-1.5 whitespace-nowrap uppercase tracking-wider">[Goal Met]</span>`;
+                    } else {
+                        goalMetLabel = ` <span class="text-xs font-black text-rose-500 ml-1.5 whitespace-nowrap uppercase tracking-wider">[Not Met]</span>`;
+                    }
+                }
+
+                // Check compression
+                const isProgramVisible = !global.programVisibility || global.programVisibility[progName] !== false;
+                if (!isProgramVisible) {
+                    const dispScore = currentOverall.evaluationType === 'grade'
+                        ? (currentOverall.grade || '—')
+                        : (formatCgpa(currentOverall.value) || '—');
+                    html += `
+                            <div class="bg-slate-50 dark:bg-slate-900/30 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm relative group hover:shadow-md hover:-translate-y-0.5 transition-all flex items-center justify-between opacity-60">
+                                <div class="flex items-center space-x-2.5 min-w-0">
+                                    <div class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${typeof global.getProgramColor === 'function' ? global.getProgramColor(progName) : '#eab308'}"></div>
+                                    <h4 class="text-xs font-black text-slate-650 dark:text-slate-400 truncate">${progName} <span class="text-[9px] font-bold text-slate-400 uppercase">- Program Card (Compressed)</span>${goalMetLabel}</h4>
                                 </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-            } else {
-                // Generic achievement
+                                <div class="flex items-center space-x-2 shrink-0">
+                                    <span class="text-[10px] font-black text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700">${dispScore}</span>
+                                    <button onclick="window.toggleOutcomeProgram('${progName.replace(/'/g, "\\'")}')" class="p-1 text-slate-400 hover:text-slate-650 dark:hover:text-slate-200 rounded transition-colors" title="Spread Program Everywhere">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>`;
+                    return;
+                }
+
                 html += `
-                    <div class="bg-white dark:bg-slate-800 p-5 rounded-[1.25rem] border border-slate-200 dark:border-slate-700 shadow-sm relative group hover:shadow-lg transition-all flex flex-col justify-between">
-                        <div class="flex items-center justify-between mb-3">
-                            <span class="text-[9px] font-black uppercase px-2 py-0.5 rounded bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border border-amber-200/50">Achievement</span>
-                            <div class="flex items-center gap-1">
+                        <div class="bg-white dark:bg-slate-800 p-5 rounded-[1.25rem] border border-slate-200 dark:border-slate-700 shadow-sm relative group hover:shadow-md hover:-translate-y-1 transition-all flex flex-col justify-between">
+                            <div class="absolute top-3.5 right-3.5 flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button onclick="window.showProgramAnalytics('${progName.replace(/'/g, "\\'")}')" class="text-slate-300 hover:text-cyan-500 bg-white dark:bg-slate-800 rounded-lg p-1 shadow-sm border border-slate-100 dark:border-slate-700 active:scale-95 transition-all" title="View Progression Trend"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg></button>
+                                <button onclick="window.openResultModal(null, '${progName}')" class="text-slate-300 hover:text-blue-500 bg-white dark:bg-slate-800 rounded-lg p-1 shadow-sm border border-slate-100 dark:border-slate-700 active:scale-95 transition-all" title="Edit Program Card"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg></button>
+                                <button onclick="window.deleteProgramGroup('${progName}')" class="text-slate-300 hover:text-red-500 bg-white dark:bg-slate-800 rounded-lg p-1 shadow-sm border border-slate-100 dark:border-slate-700 active:scale-95 transition-all" title="Delete Program Card"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                            </div>
+                            <div>
+                                <div class="flex items-center space-x-1.5 mb-2.5">
+                                    <span class="text-[8px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded border border-blue-100 dark:border-blue-800/50">Program Card</span>
+                                    <span class="text-[8px] font-bold text-slate-400 ml-auto mr-8">${dateStr}</span>
+                                </div>
+                                <h4 class="font-black text-base text-slate-800 dark:text-slate-100 leading-tight mb-3 pr-12 flex items-center flex-wrap">${progName}${goalMetLabel}</h4>
+                                <!-- Overall Program Score Banner -->
+                                ${(() => {
+                        if (!currentOverall || (!currentOverall.value && !currentOverall.grade)) return '';
+
+                        const hasTgt = currentOverall.targetCGPA && currentOverall.targetCGPA !== 'none';
+                        const tgtCgpaDisp = hasTgt ? formatCgpa(currentOverall.targetCGPA) : 'None';
+                        const tgtGradeDisp = hasTgt ? (currentOverall.targetGrade || Utils.mapCgpaToGrade(currentOverall.targetCGPA, currentOverall.evaluationType) || '—') : 'None';
+
+                        const isOverallFailed = currentOverall.evaluationType === 'grade'
+                            ? (currentOverall.grade && ['C', 'D', 'E', 'F'].includes(currentOverall.grade.trim().toUpperCase()))
+                            : (currentOverall.value && parseFloat(currentOverall.value) < 2.0);
+
+                        const statusText = isOverallFailed ? 'FAIL' : 'PASS';
+                        const scoreColorClass = isOverallFailed ? 'text-red-500 dark:text-red-400' : 'text-emerald-500 dark:text-emerald-400';
+                        const statusBadgeColor = isOverallFailed
+                            ? 'bg-red-50 text-red-600 border-red-200 dark:bg-red-950/30 dark:text-red-400 dark:border-red-800'
+                            : 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800';
+
+                        const indicatorText = currentOverall.isEstimated ? 'Estimated' : 'Manual';
+                        const indicatorBadgeColor = currentOverall.isEstimated
+                            ? 'bg-slate-50 text-slate-500 border-slate-200 dark:bg-slate-900/20 dark:text-slate-400 dark:border-slate-800'
+                            : 'bg-indigo-50 text-indigo-600 border-indigo-200 dark:bg-indigo-950/30 dark:text-indigo-400 dark:border-indigo-800';
+
+                        const systemText = currentOverall.evaluationType === 'grade' ? 'Grade-Based' : 'CGPA-Based';
+                        const systemBadgeColor = 'bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-800';
+
+                        return `
+                                    <div class="mb-4 bg-slate-50/50 dark:bg-slate-900/40 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800 flex flex-col gap-2.5">
+                                        <div class="flex flex-wrap items-center gap-1.5 border-b border-slate-100 dark:border-slate-800 pb-1.5">
+                                            <span class="text-[8px] font-black uppercase tracking-widest px-1.5 py-0.25 rounded border ${systemBadgeColor}">${systemText}</span>
+                                            <span class="text-[8px] font-black uppercase tracking-widest px-1.5 py-0.25 rounded border ${indicatorBadgeColor}">${indicatorText}</span>
+                                            <span class="text-[8px] font-black uppercase tracking-widest px-1.5 py-0.25 rounded border ${statusBadgeColor} ml-auto">${statusText}</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <div class="flex flex-col">
+                                                <span class="text-[9px] font-black uppercase tracking-widest text-slate-400">Target</span>
+                                                <span class="text-[11px] font-bold text-slate-700 dark:text-slate-300 mt-0.5">${tgtGradeDisp} (${tgtCgpaDisp})</span>
+                                            </div>
+                                            <div class="text-right flex items-center gap-2">
+                                                <div class="flex flex-col items-end">
+                                                    ${currentOverall.evaluationType === 'grade'
+                                ? `
+                                                        <span class="text-sm font-black ${scoreColorClass}">Grade: ${currentOverall.grade || 'N/A'}</span>
+                                                        <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 mt-0.5">CGPA: ${formatCgpa(currentOverall.value) || 'N/A'}</span>
+                                                        `
+                                : `
+                                                        <span class="text-sm font-black ${scoreColorClass}">CGPA: ${formatCgpa(currentOverall.value) || 'N/A'}</span>
+                                                        <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 mt-0.5">Grade: ${currentOverall.grade || 'N/A'}</span>
+                                                        `
+                            }
+                                                </div>
+                                                ${matchStatusHtml}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    `;
+                    })()}
+                                
+                                <!-- Subject Listing -->
+                                ${subjects.length > 0 ? `
+                                <div class="flex flex-col gap-1.5 border-t border-slate-100 dark:border-slate-700/60 pt-3">
+                                    <span class="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">Subject Grades</span>
+                                    <div class="flex flex-col gap-2 max-h-[160px] overflow-y-auto pr-1 custom-scrollbar">
+                                        ${(() => {
+                            const mainTarget = typeof global.getProgramMainTarget === 'function' ? global.getProgramMainTarget(progName) : { targetCGPA: '', targetGrade: '' };
+                            return subjects.map(s => {
+                                const subTargetCgpa = s.targetCGPA || mainTarget.targetCGPA;
+                                const subTargetGrade = s.targetGrade || mainTarget.targetGrade;
+                                const hasSubTgt = subTargetCgpa && subTargetCgpa !== 'none';
+                                const targetDisp = hasSubTgt ? (s.evaluationType === 'grade' ? `${subTargetGrade} (${formatCgpa(subTargetCgpa)})` : `${formatCgpa(subTargetCgpa)} (${subTargetGrade})`) : 'None';
+
+                                const isSubFailed = s.evaluationType === 'grade'
+                                    ? (s.grade && ['C', 'D', 'E', 'F'].includes(s.grade.trim().toUpperCase()))
+                                    : (s.value && parseFloat(s.value) < 2.0);
+                                const subScoreColor = isSubFailed ? 'text-red-500 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400';
+
+                                const subStatusBadge = isSubFailed
+                                    ? `<span class="inline-block text-[8px] font-black px-1.5 py-0.25 bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 rounded border border-red-200 dark:border-red-800/50 scale-90 origin-right">FAIL</span>`
+                                    : `<span class="inline-block text-[8px] font-black px-1.5 py-0.25 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 rounded border border-emerald-200 dark:border-emerald-800/50 scale-90 origin-right">PASS</span>`;
+
+                                return `
+                                                <div class="flex justify-between items-center text-xs py-1 border-b border-slate-50 dark:border-slate-800/40 last:border-0">
+                                                    <div class="flex flex-col truncate mr-2">
+                                                        <span class="font-bold text-slate-600 dark:text-slate-300 truncate">${s.subject}</span>
+                                                        <span class="text-[9px] font-bold text-slate-400">Target: ${targetDisp}</span>
+                                                    </div>
+                                                    <div class="text-right shrink-0 flex items-center gap-2">
+                                                        <div class="flex flex-col items-end">
+                                                            <span class="font-black ${subScoreColor}">
+                                                                ${s.evaluationType === 'grade' ? (s.grade || 'N/A') : (formatCgpa(s.value) || 'N/A')}
+                                                            </span>
+                                                            ${s.evaluationType === 'grade' ? `<span class="text-[10px] font-bold text-slate-400 block -mt-0.5">(CGPA: ${formatCgpa(s.value)})</span>` : (s.grade ? `<span class="text-[10px] font-bold text-slate-400 block -mt-0.5">(${s.grade})</span>` : '')}
+                                                        </div>
+                                                        ${subStatusBadge}
+                                                    </div>
+                                                </div>
+                                                `;
+                            }).join('');
+                        })()}
+                                    </div>
+                                </div>
+                                ` : ''}
+                            </div>
+                        </div>`;
+
+            } else {
+                html += `
+                        <div class="bg-white dark:bg-slate-800 p-4 md:p-5 rounded-[1.25rem] border border-slate-200 dark:border-slate-700 shadow-sm relative group hover:shadow-md hover:-translate-y-1 transition-all flex flex-col justify-between">
+                            <div class="absolute top-3.5 right-3.5 flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <button onclick="window.openResultModal('${item.id}')" class="text-slate-300 hover:text-blue-500 bg-white dark:bg-slate-800 rounded-lg p-1 shadow-sm border border-slate-100 dark:border-slate-700 active:scale-95 transition-all"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg></button>
                                 <button onclick="window.deleteResult('${item.id}')" class="text-slate-300 hover:text-red-500 bg-white dark:bg-slate-800 rounded-lg p-1 shadow-sm border border-slate-100 dark:border-slate-700 active:scale-95 transition-all"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg></button>
                             </div>
-                        </div>
-                        <h4 class="text-sm font-black text-slate-800 dark:text-slate-100 mb-2">${item.title}</h4>
-                        <div class="flex items-end justify-between">
-                            <span class="text-base font-black text-amber-600 dark:text-amber-400">${item.value} ${item.grade ? `(${item.grade})` : ''}</span>
-                            <span class="text-[9px] font-bold text-slate-400">${dateStr}</span>
-                        </div>
-                    </div>
-                `;
+                            <div>
+                                <div class="flex items-center space-x-1.5 mb-2">
+                                    <span class="text-[8px] font-black uppercase tracking-widest text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/30 px-2 py-0.5 rounded border border-yellow-100 dark:border-yellow-800/50">Achievement</span>
+                                    <span class="text-[8px] font-bold text-slate-400 ml-auto mr-8">${dateStr}</span>
+                                </div>
+                                <h4 class="font-black text-sm md:text-base text-slate-800 dark:text-slate-100 leading-tight mb-2 pr-12">${item.title}</h4>
+                            </div>
+                            <div class="mt-2 bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-700/50 flex flex-col justify-center items-center h-full min-h-[60px]">
+                                <span class="text-xl md:text-2xl font-black text-yellow-600 dark:text-yellow-400 break-words text-center w-full leading-none">${item.value || 'N/A'}</span>
+                                ${item.grade ? `<span class="text-[9px] font-black uppercase tracking-widest text-slate-400 mt-1">Grade: ${item.grade}</span>` : ''}
+                            </div>
+                        </div>`;
+            }
+        });
+        container.innerHTML = html;
+
+        // Populate trend filter dynamically
+        const uniquePrograms = [];
+        activeResults.forEach(r => {
+            if (r.type === 'cgpa' && r.title && !uniquePrograms.includes(r.title)) {
+                uniquePrograms.push(r.title);
             }
         });
 
-        container.innerHTML = html;
-    }
+        const filterSelect = document.getElementById('trend-program-filter');
+        if (filterSelect) {
+            const currentFilterVal = filterSelect.value || 'ALL';
+            let filterHtml = '<option value="ALL">All Programs</option>';
+            uniquePrograms.forEach(prog => {
+                filterHtml += `<option value="${prog}" ${currentFilterVal === prog ? 'selected' : ''}>${prog}</option>`;
+            });
+            filterSelect.innerHTML = filterHtml;
+        }
+
+        const selectedProgFilter = filterSelect ? filterSelect.value : 'ALL';
+
+        // Filter CGPAs for the Progression Trend Chart (Overall Program CGPAs only, no subject CGPAs)
+        let cgpaResults = activeResults
+            .filter(r => r.type === 'cgpa' && !r.subject)
+            .sort((a, b) => {
+                const timeA = Utils.parseDateSafe(a.date).getTime();
+                const timeB = Utils.parseDateSafe(b.date).getTime();
+                return isAsc ? (timeA - timeB) : (timeB - timeA);
+            });
+
+        if (selectedProgFilter !== 'ALL') {
+            cgpaResults = cgpaResults.filter(r => r.title === selectedProgFilter);
+        }
+
+        // Calculate & render stats indicators
+        let latestProgramCgpa = '0.00';
+        let overallTargetCgpaVal = '0.00';
+        const programResults = activeResults
+            .filter(r => r.type === 'cgpa' && !r.subject)
+            .filter(r => selectedProgFilter === 'ALL' || r.title === selectedProgFilter)
+            .sort((a, b) => Utils.parseDateSafe(b.date) - Utils.parseDateSafe(a.date));
+        if (programResults.length > 0) {
+            latestProgramCgpa = (parseFloat(programResults[0].value) || 0).toFixed(2);
+            overallTargetCgpaVal = (parseFloat(programResults[0].targetCGPA) || 0).toFixed(2);
+        }
+
+        // Render interactive results legend
+        const rLeg = document.getElementById('results-legend');
+        if (rLeg) {
+            const getResultsLegend = (idxKey, color, label, val) => {
+                const active = global.trendDatasetVisibility[idxKey];
+                return `<div onclick="window.toggleTrendDataset('${idxKey}')" class="cursor-pointer flex items-center space-x-1.5 md:space-x-2 px-2.5 md:px-3 py-1.5 md:px-3.5 md:py-2 bg-slate-900 rounded-lg md:rounded-xl border border-slate-700 hover:bg-slate-800 active:scale-95 transition-all ${active ? 'opacity-100 scale-100 shadow-md' : 'opacity-40 grayscale scale-95 line-through'}"><div class="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full shrink-0" style="background-color: ${color}; box-shadow: 0 0 8px ${color}"></div><span class="text-[8px] md:text-[10px] font-black text-white uppercase tracking-widest whitespace-nowrap">${label}: ${val}</span></div>`;
+            };
+            rLeg.innerHTML =
+                getResultsLegend('actual', '#06b6d4', 'Actual CGPA', latestProgramCgpa) +
+                getResultsLegend('target', '#f59e0b', 'Target CGPA', overallTargetCgpaVal);
+        }
+
+        // Calculate and render track average results
+        const trackAveragesContainer = document.getElementById('track-averages-container');
+        if (trackAveragesContainer) {
+            let trackHtml = '';
+            const trackColors = ['#6366f1', '#8b5cf6', '#10b981', '#f59e0b', '#f43f5e', '#06b6d4', '#a855f7', '#f97316'];
+
+            tracksList.forEach((t, idx) => {
+                const tc = trackColors[idx % trackColors.length];
+                const trackProgs = customPrograms[t.id] || [];
+                const N = trackProgs.length;
+
+                let sumCgpa = 0.00;
+                trackProgs.forEach(pObj => {
+                    const pName = pObj.name || pObj;
+                    const progOveralls = activeResults.filter(r => r.type === 'cgpa' && !r.subject && r.title === pName);
+                    if (progOveralls.length > 0) {
+                        progOveralls.sort((a, b) => Utils.parseDateSafe(b.date) - Utils.parseDateSafe(a.date));
+                        sumCgpa += parseFloat(progOveralls[0].value) || 0.00;
+                    }
+                });
+
+                const avgCgpa = N > 0 ? sumCgpa / N : 0.00;
+                const avgCgpaStr = avgCgpa.toFixed(2);
+                const avgGrade = Utils.mapCgpaToGrade(avgCgpa, 'cgpa') || 'F';
+                const gradeColor = avgGrade === 'F' ? 'text-rose-400' : 'text-emerald-400';
+
+                trackHtml += `
+                        <div class="flex items-center space-x-1.5 md:space-x-2 px-2.5 md:px-3 py-1.5 md:px-3.5 md:py-2 bg-slate-900/60 dark:bg-slate-900/90 rounded-lg md:rounded-xl border border-slate-700/60 dark:border-slate-700/80 shadow-sm select-none">
+                            <div class="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full shrink-0 shadow-md" style="background-color: ${tc}; box-shadow: 0 0 8px ${tc}"></div>
+                            <span class="text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-wider whitespace-nowrap">${t.name || t.id} Avg:</span>
+                            <span class="text-[9px] md:text-[11px] font-black text-white whitespace-nowrap">${avgCgpaStr} <span class="${gradeColor}">(${avgGrade})</span></span>
+                        </div>`;
+            });
+
+            trackAveragesContainer.innerHTML = trackHtml;
+        }
+
+        // Trend Chart Rendering
+        if (cgpaResults.length > 0 && trendContainer) {
+            trendContainer.classList.remove('hidden');
+            const ctx = document.getElementById('resultsTrendChart');
+            if (ctx) {
+                const labels = cgpaResults.map(r => {
+                    const d = Utils.parseDateSafe(r.date);
+                    const dateStr = d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+                    return `${r.title} (${dateStr})`;
+                });
+                const actualData = cgpaResults.map(r => parseFloat(r.value) || null);
+                const targetData = cgpaResults.map(r => parseFloat(r.targetCGPA) || null);
+
+                const allNumericValues = [];
+                cgpaResults.forEach(r => {
+                    const act = parseFloat(r.value);
+                    const tgt = parseFloat(r.targetCGPA);
+                    if (!isNaN(act)) allNumericValues.push(act);
+                    if (!isNaN(tgt)) allNumericValues.push(tgt);
+                });
+                const yMin = 0;
+                const maxVal = allNumericValues.length > 0 ? Math.max(...allNumericValues) : 4.0;
+                const yMax = maxVal > 4.0 ? 5.0 : 4.0;
+
+                if (global.resultsTrendChartInstance) global.resultsTrendChartInstance.destroy();
+
+                const canvasCtx = ctx.getContext('2d');
+
+                Chart.defaults.color = '#94a3b8';
+                Chart.defaults.font.family = 'Inter, ui-sans-serif, system-ui';
+                global.resultsTrendChartInstance = new Chart(canvasCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Actual CGPA',
+                                data: actualData,
+                                backgroundColor: '#06b6d4',
+                                borderColor: '#06b6d4',
+                                borderWidth: 0,
+                                borderRadius: 6,
+                                borderSkipped: false,
+                                hidden: !global.trendDatasetVisibility.actual
+                            },
+                            {
+                                label: 'Target CGPA',
+                                data: targetData,
+                                backgroundColor: '#f59e0b',
+                                borderColor: '#f59e0b',
+                                borderWidth: 0,
+                                borderRadius: 6,
+                                borderSkipped: false,
+                                hidden: !global.trendDatasetVisibility.target
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                                titleColor: '#fff',
+                                bodyColor: '#cbd5e1',
+                                borderColor: 'rgba(255,255,255,0.1)',
+                                borderWidth: 1,
+                                padding: 12,
+                                cornerRadius: 8,
+                                usePointStyle: true,
+                                boxPadding: 6,
+                                callbacks: {
+                                    title: (tooltipItems) => {
+                                        const item = cgpaResults[tooltipItems[0].dataIndex];
+                                        return `${item.title} (Overall Program)`;
+                                    },
+                                    label: (tooltipItem) => {
+                                        const item = cgpaResults[tooltipItem.dataIndex];
+                                        const isGrade = item.evaluationType === 'grade';
+                                        const actVal = item.value ? formatCgpa(item.value) : 'N/A';
+                                        const tgtVal = item.targetCGPA ? formatCgpa(item.targetCGPA) : 'N/A';
+                                        if (tooltipItem.datasetIndex === 0) {
+                                            const labelPrefix = isGrade ? 'Actual Grade: ' + (item.grade || 'N/A') : 'Actual CGPA: ' + actVal;
+                                            const labelSuffix = isGrade ? ` (Numeric: ${actVal})` : (item.grade ? ` [Grade: ${item.grade}]` : '');
+                                            return ` ${labelPrefix}${labelSuffix}`;
+                                        } else {
+                                            const labelPrefix = isGrade ? 'Target Grade: ' + (item.targetGrade || 'N/A') : 'Target CGPA: ' + tgtVal;
+                                            const labelSuffix = isGrade ? ` (Numeric: ${tgtVal})` : '';
+                                            return ` ${labelPrefix}${labelSuffix}`;
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                min: yMin,
+                                max: yMax,
+                                ticks: { font: { size: 9, weight: 'bold' } },
+                                grid: { color: 'rgba(148, 163, 184, 0.1)', drawBorder: false }
+                            },
+                            x: {
+                                ticks: { font: { size: 9, weight: 'bold' } },
+                                grid: { display: false, drawBorder: false }
+                            }
+                        }
+                    }
+                });
+            }
+        } else if (trendContainer) {
+            trendContainer.classList.add('hidden');
+        }
+    };
+
+    /* ==========================================================================
+       Result Modal: Open, Edit, Toggle, Save, and Delete Handlers
+       ========================================================================== */
+
 
     // Attach to global scope
     const OutcomeResults = {
