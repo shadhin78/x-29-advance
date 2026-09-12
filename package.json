@@ -7,7 +7,8 @@
     "dev": "node js/dev-server.js",
     "test:rules": "mocha tests/firestore-rules.test.js",
     "test:config": "node tests/config-tracks.test.js",
-    "test:pace-outcome": "node tests/pace-outcome.test.js"
+    "test:pace-outcome": "node tests/pace-outcome.test.js",
+    "test:analytics": "node tests/analytics-visualization.test.js"
   },
   "dependencies": {
     "firebase": "^12.17.1",
