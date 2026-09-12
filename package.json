@@ -9,7 +9,9 @@
     "test:config": "node tests/config-tracks.test.js",
     "test:pace-outcome": "node tests/pace-outcome.test.js",
     "test:analytics": "node tests/analytics-visualization.test.js",
-    "test:targets": "node tests/daily-targets.test.js"
+    "test:targets": "node tests/daily-targets.test.js",
+    "test:weekly": "node tests/weekly-targets.test.js",
+    "test:monthly": "node tests/monthly-targets.test.js"
   },
   "dependencies": {
     "firebase": "^12.17.1",

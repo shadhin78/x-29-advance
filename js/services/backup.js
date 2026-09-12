@@ -6,7 +6,7 @@
 /**
  * Prompts the user regarding local server backup availability.
  */
-export async function restoreLocalBackup() {
+async function restoreLocalBackup() {
     if (typeof window.showToast === 'function') {
         window.showToast("No local backup file stored on server. Use 'Import JSON' to restore from a local file.", "info");
     } else {
