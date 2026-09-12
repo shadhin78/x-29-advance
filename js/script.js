@@ -10150,24 +10150,10 @@ window.updateWeeklyTargetColorSync = function () {
     }
 };
 
+// Modularized: Daily Target color sync logic is in js/features/targets/dailyTargets.js
 window.updateDailyTargetColorSync = function () {
-    const subSelect = document.getElementById('dt-select-sub');
-    const chSelect = document.getElementById('dt-select-ch');
-    const dot = document.getElementById('dt-sub-color-dot');
-    if (!subSelect) return;
-    const subject = subSelect.value;
-    if (subject && subject !== "No Subjects") {
-        const color = window.getSubjectColor ? window.getSubjectColor(subject) : '#3b82f6';
-        if (dot) {
-            dot.style.backgroundColor = color;
-            dot.classList.remove('hidden');
-        }
-        subSelect.style.borderColor = color;
-        if (chSelect) chSelect.style.borderColor = color;
-    } else {
-        if (dot) dot.classList.add('hidden');
-        subSelect.style.borderColor = '';
-        if (chSelect) chSelect.style.borderColor = '';
+    if (window.DailyTargets && typeof window.DailyTargets.updateDailyTargetColorSync === 'function') {
+        return window.DailyTargets.updateDailyTargetColorSync();
     }
 };
 
@@ -10734,266 +10720,42 @@ window.renderWeeklyTargets = function () {
 };
 
 // --- Daily Targets Logic ---
+// Modularized: Daily Targets Management is in js/features/targets/dailyTargets.js
 window.updateDailyTargetSubjectDropdown = function () {
-    const progSelectEl = document.getElementById('dt-select-prog');
-    const progName = progSelectEl ? progSelectEl.value : '';
-    const subSelect = document.getElementById('dt-select-sub');
-    if (!subSelect) return;
-    subSelect.innerHTML = '';
-
-    const trackId = window.tracks.find(t => window.customPrograms[t.id] && window.customPrograms[t.id].some(p => (p.name || p) === progName))?.id;
-    if (!trackId) {
-        subSelect.innerHTML = '<option value="">No Subjects</option>';
-        window.updateDailyTargetChapterDropdown();
-        return;
+    if (window.DailyTargets && typeof window.DailyTargets.updateDailyTargetSubjectDropdown === 'function') {
+        return window.DailyTargets.updateDailyTargetSubjectDropdown();
     }
-
-    const subs = (syllabusStructure[trackId] || []).filter(s => s.program === progName);
-    if (subs.length === 0) {
-        subSelect.innerHTML = '<option value="">No Subjects</option>';
-    } else {
-        const passedItems = window.passedItems || (window.AppState && window.AppState.passedItems) || { programs: [], subjects: [] };
-        subs.forEach(s => {
-            const isPassed = Boolean(
-                (Array.isArray(passedItems.subjects) && passedItems.subjects.includes(s.subject)) ||
-                (Array.isArray(passedItems.programs) && passedItems.programs.includes(s.program || progName))
-            );
-            const label = isPassed ? `🏆 ${s.subject} (Passed)` : s.subject;
-            subSelect.innerHTML += `<option value="${s.subject}">${label}</option>`;
-        });
-    }
-    window.updateDailyTargetChapterDropdown();
-    window.updateDailyTargetColorSync();
 };
 
 window.updateDailyTargetChapterDropdown = function () {
-    const progSelectEl = document.getElementById('dt-select-prog');
-    const progName = progSelectEl ? progSelectEl.value : '';
-    const subSelectEl = document.getElementById('dt-select-sub');
-    const subject = subSelectEl ? subSelectEl.value : '';
-    const chSelect = document.getElementById('dt-select-ch');
-    if (!chSelect) return;
-    chSelect.innerHTML = '';
-
-    const trackId = window.tracks.find(t => window.customPrograms[t.id] && window.customPrograms[t.id].some(p => (p.name || p) === progName))?.id;
-    if (!trackId || !subject) {
-        chSelect.innerHTML = '<option value="">No Chapters</option>';
-        window.handleDailyTargetChapterChange();
-        window.updateDailyTargetColorSync();
-        return;
+    if (window.DailyTargets && typeof window.DailyTargets.updateDailyTargetChapterDropdown === 'function') {
+        return window.DailyTargets.updateDailyTargetChapterDropdown();
     }
-
-    const chapters = window.getChaptersForSubject(trackId, subject);
-    if (chapters.length === 0) {
-        chSelect.innerHTML = '<option value="">No Chapters</option>';
-    } else {
-        chapters.forEach(ch => {
-            chSelect.innerHTML += `<option value="${ch}">${ch}</option>`;
-        });
-    }
-    window.handleDailyTargetChapterChange();
-    window.updateDailyTargetColorSync();
 };
 
 window.handleDailyTargetChapterChange = function () {
-    const progSelectEl = document.getElementById('dt-select-prog');
-    const progName = progSelectEl ? progSelectEl.value : '';
-    const subSelectEl = document.getElementById('dt-select-sub');
-    const subject = subSelectEl ? subSelectEl.value : '';
-    const chSelect = document.getElementById('dt-select-ch');
-    const chapter = chSelect ? chSelect.value : '';
-
-    if (!progName || !subject || !chapter) return;
-
-    const trackId = window.tracks.find(t => window.customPrograms[t.id] && window.customPrograms[t.id].some(p => (p.name || p) === progName))?.id;
-    if (!trackId) return;
-
-    const currentRange = window.getWeeklyTargetRange(window.currentDailyTargetsDate || new Date());
-    const currentWeekKey = window.formatDateRangeKey(currentRange.start, currentRange.end);
-    const wtList = (window.weeklyTargetsDatabase && window.weeklyTargetsDatabase[currentWeekKey]) || [];
-    const matchingWt = wtList.find(t => t.track === trackId && t.subject === subject && t.chapter === chapter);
-
-    const sizeInput = document.getElementById('dt-input-size');
-    const totalSizeInput = document.getElementById('dt-input-total-size');
-
-    if (matchingWt && matchingWt.totalChapterSize !== undefined && matchingWt.totalChapterSize !== null) {
-        if (totalSizeInput) {
-            totalSizeInput.value = matchingWt.totalChapterSize;
-            totalSizeInput.disabled = true;
-            totalSizeInput.classList.add('bg-slate-100', 'dark:bg-slate-800/80', 'cursor-not-allowed', 'opacity-70');
-        }
-        if (sizeInput) {
-            const allocatedSize = window.getAllocatedSizeForWeeklyTarget(matchingWt, currentWeekKey);
-            const remainingSize = Math.max(0, matchingWt.totalChapterSize - allocatedSize);
-            sizeInput.value = remainingSize;
-        }
-    } else {
-        if (totalSizeInput) {
-            totalSizeInput.value = '';
-            totalSizeInput.disabled = false;
-            totalSizeInput.classList.remove('bg-slate-100', 'dark:bg-slate-800/80', 'cursor-not-allowed', 'opacity-70');
-        }
-        if (sizeInput) {
-            sizeInput.value = '';
-        }
+    if (window.DailyTargets && typeof window.DailyTargets.handleDailyTargetChapterChange === 'function') {
+        return window.DailyTargets.handleDailyTargetChapterChange();
     }
 };
 
 window.handleSelectFromWeeklyTargetChange = function () {
-    const selectEl = document.getElementById('dt-select-from-wt');
-    if (!selectEl || !selectEl.value) return;
-
-    const [trackId, progName, subject, chapter] = selectEl.value.split('|');
-
-    // Select program
-    const progSelect = document.getElementById('dt-select-prog');
-    if (progSelect) {
-        progSelect.value = progName;
-        window.updateDailyTargetSubjectDropdown();
+    if (window.DailyTargets && typeof window.DailyTargets.handleSelectFromWeeklyTargetChange === 'function') {
+        return window.DailyTargets.handleSelectFromWeeklyTargetChange();
     }
-
-    // Select subject
-    const subSelect = document.getElementById('dt-select-sub');
-    if (subSelect) {
-        subSelect.value = subject;
-        window.updateDailyTargetChapterDropdown();
-    }
-
-    // Select chapter
-    const chSelect = document.getElementById('dt-select-ch');
-    if (chSelect) {
-        chSelect.value = chapter;
-    }
-
-    window.handleDailyTargetChapterChange();
-    window.updateDailyTargetColorSync();
 };
 
 window.addDailyTarget = function () {
-    if (!window.currentDailyTargetsDate) window.currentDailyTargetsDate = new Date();
-    const targetDateKey = Utils.formatDate(window.currentDailyTargetsDate);
-
-    const progSelectEl = document.getElementById('dt-select-prog');
-    const subSelectEl = document.getElementById('dt-select-sub');
-    const chSelectEl = document.getElementById('dt-select-ch');
-    const sizeEl = document.getElementById('dt-input-size');
-    const totalSizeEl = document.getElementById('dt-input-total-size');
-
-    const progName = progSelectEl ? progSelectEl.value : '';
-    const subject = subSelectEl ? subSelectEl.value : '';
-    const chapter = chSelectEl ? chSelectEl.value : '';
-    const dailySize = sizeEl && sizeEl.value ? parseInt(sizeEl.value, 10) : null;
-    const newTotalSize = totalSizeEl && totalSizeEl.value ? parseInt(totalSizeEl.value, 10) : null;
-
-    if (!progName || !subject || !chapter) {
-        return showToast("Please select a Program, Subject, and Chapter.", "error");
+    if (window.DailyTargets && typeof window.DailyTargets.addDailyTarget === 'function') {
+        return window.DailyTargets.addDailyTarget();
     }
-
-    const trackId = window.tracks.find(t => window.customPrograms[t.id] && window.customPrograms[t.id].some(p => (p.name || p) === progName))?.id;
-    if (!trackId) return;
-
-    if (!window.dailyTargetsDatabase) window.dailyTargetsDatabase = {};
-    if (!window.dailyTargetsDatabase[targetDateKey]) window.dailyTargetsDatabase[targetDateKey] = [];
-
-    // Sync baseline completion status
-    let isCompletedBefore = false;
-    let completedAtBefore = null;
-
-    const currentRange = window.getWeeklyTargetRange(window.currentDailyTargetsDate);
-    const currentWeekKey = window.formatDateRangeKey(currentRange.start, currentRange.end);
-    const wtList = window.weeklyTargetsDatabase[currentWeekKey] || [];
-    const matchingWt = wtList.find(t => t.track === trackId && t.subject === subject && t.chapter === chapter);
-    if (matchingWt) {
-        isCompletedBefore = matchingWt.completed || false;
-        completedAtBefore = matchingWt.completedAt || null;
-    } else {
-        const foundTask = window.findTaskChapter(trackId, subject, chapter);
-        if (foundTask) {
-            isCompletedBefore = foundTask.subTask.completed || false;
-            completedAtBefore = foundTask.subTask.completedAt || null;
-        }
-    }
-
-    // Check if already exists in daily targets database for selected date
-    if (!matchingWt || !matchingWt.totalChapterSize) {
-        const exists = window.dailyTargetsDatabase[targetDateKey].some(t => !t.isDeleted && t.track === trackId && t.subject === subject && t.chapter === chapter);
-        if (exists) {
-            return showToast("This target is already in your daily target list.", "error");
-        }
-    } else {
-        // If it is size-based, we allow adding multiple daily targets.
-        // But let's check if the weekly target is already fully allocated.
-        const allocatedSize = window.getAllocatedSizeForWeeklyTarget(matchingWt, currentWeekKey);
-        const remainingSize = Math.max(0, matchingWt.totalChapterSize - allocatedSize);
-        if (remainingSize <= 0) {
-            return showToast("This chapter is already fully allocated across daily targets.", "error");
-        }
-        if (dailySize !== null && dailySize > remainingSize) {
-            return showToast(`Daily target size (${dailySize} p) exceeds the remaining unallocated size (${remainingSize} p).`, "error");
-        }
-    }
-
-    // Auto-create / sync with Weekly Target
-    if (!window.weeklyTargetsDatabase) window.weeklyTargetsDatabase = {};
-    if (!window.weeklyTargetsDatabase[currentWeekKey]) window.weeklyTargetsDatabase[currentWeekKey] = [];
-
-    let matchingWtObj = matchingWt;
-    if (matchingWtObj) {
-        if (newTotalSize !== null) {
-            matchingWtObj.totalChapterSize = newTotalSize;
-        }
-    } else if (newTotalSize !== null) {
-        matchingWtObj = {
-            track: trackId,
-            program: progName,
-            subject: subject,
-            chapter: chapter,
-            completed: isCompletedBefore,
-            completedAt: completedAtBefore,
-            dayName: null,
-            scope: 'Whole Chapter',
-            totalChapterSize: newTotalSize
-        };
-        window.weeklyTargetsDatabase[currentWeekKey].push(matchingWtObj);
-    }
-
-    const existingDeleted = window.dailyTargetsDatabase[targetDateKey].find(t => t.isDeleted && t.track === trackId && t.subject === subject && t.chapter === chapter);
-    if (existingDeleted) {
-        delete existingDeleted.isDeleted;
-        existingDeleted.completed = isCompletedBefore;
-        existingDeleted.completedAt = completedAtBefore;
-        existingDeleted.totalChapterSize = dailySize;
-        existingDeleted.scope = 'Whole Chapter';
-        existingDeleted.updatedAt = Date.now();
-        if (!existingDeleted.id) existingDeleted.id = `dt_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    } else {
-        window.dailyTargetsDatabase[targetDateKey].push({
-            id: `dt_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-            track: trackId,
-            program: progName,
-            subject: subject,
-            chapter: chapter,
-            completed: isCompletedBefore,
-            completedAt: completedAtBefore,
-            totalChapterSize: dailySize,
-            scope: 'Whole Chapter',
-            updatedAt: Date.now()
-        });
-    }
-
-    if (sizeEl) sizeEl.value = '';
-    if (totalSizeEl) totalSizeEl.value = '';
-
-    window.markLocalMutation('add_daily_target');
-
-    FirebaseService.saveToCloud();
-    renderUI();
-    closeModal('add-daily-target-modal');
-    showToast("Daily target chapter added!", "success");
 };
 
 window.openAddDailyTargetModal = function () {
-    showToast("Weekly and Daily targets are set and managed from Add Monthly Target page.", "info");
+    if (window.DailyTargets && typeof window.DailyTargets.openAddDailyTargetModal === 'function') {
+        return window.DailyTargets.openAddDailyTargetModal();
+    }
+    showToast('Weekly and Daily targets are set and managed from Add Monthly Target page.', 'info');
     window.switchPage('monthly-target-setup');
 };
 
@@ -11118,589 +10880,64 @@ window.saveWeeklyTarget = function (idx, weekKey = null) {
     showToast("Weekly target updated!", "success");
 };
 
+// Modularized: Daily Targets CRUD, completion sync & navigation are in js/features/targets/dailyTargets.js
 window.openEditDailyTargetModal = function (idx, dateKey = null) {
-    if (!dateKey) {
-        if (!window.currentDailyTargetsDate) window.currentDailyTargetsDate = new Date();
-        dateKey = Utils.formatDate(window.currentDailyTargetsDate);
-    }
-    if (!window.dailyTargetsDatabase || !window.dailyTargetsDatabase[dateKey] || !window.dailyTargetsDatabase[dateKey][idx]) {
-        window.switchPage('monthly-target-setup');
-        return;
-    }
-
-    const target = window.dailyTargetsDatabase[dateKey][idx];
-    if (target.isTodo) {
-        if (typeof window.openEditDailyActionModal === 'function') {
-            window.openEditDailyActionModal(idx);
-        }
-        return;
-    }
-
-    let foundMonth = null;
-    let foundIdx = -1;
-    const matchFn = window.isChapterMatch || (window.Utils && window.Utils.isChapterMatch);
-    if (window.monthlyTargetsDatabase) {
-        for (const mKey of Object.keys(window.monthlyTargetsDatabase)) {
-            const mList = window.monthlyTargetsDatabase[mKey] || [];
-            const idxInM = mList.findIndex(mt => {
-                if (target.monthlyTargetId && mt.id === target.monthlyTargetId) return true;
-                const subMatch = String(mt.subject || '').trim().toLowerCase() === String(target.subject || '').trim().toLowerCase();
-                if (!subMatch) return false;
-                if (target.track && mt.track && target.track !== mt.track) return false;
-                const mtIsSubject = mt.targetType === 'subject' || mt.chapter === 'Whole Subject' || mt.chapter === 'All Chapters';
-                const isSubject = target.targetType === 'subject' || target.chapter === 'Whole Subject' || target.chapter === 'All Chapters';
-                return isSubject ? mtIsSubject : (!mtIsSubject && (matchFn ? matchFn(mt.chapter, target.chapter) : String(mt.chapter).trim().toLowerCase() === String(target.chapter).trim().toLowerCase()));
-            });
-            if (idxInM !== -1) {
-                foundMonth = mKey;
-                foundIdx = idxInM;
-                break;
-            }
-        }
-    }
-    if (foundMonth && foundIdx !== -1) {
-        showToast("Opening Monthly Target Setup to edit this target...", "info");
-        window.openEditMonthlyTargetPage(foundIdx, foundMonth);
-    } else {
-        showToast("Weekly and Daily targets are set and managed from Add Monthly Target page.", "info");
-        window.switchPage('monthly-target-setup');
+    if (window.DailyTargets && typeof window.DailyTargets.openEditDailyTargetModal === 'function') {
+        return window.DailyTargets.openEditDailyTargetModal(idx, dateKey);
     }
 };
 
 window.openEditDailyTargetModalFromDtdb = function (dateKey, idx) {
-    closeModal('daily-targets-db-modal');
-    setTimeout(() => {
-        window.openEditDailyTargetModal(idx, dateKey);
-    }, 350);
+    if (window.DailyTargets && typeof window.DailyTargets.openEditDailyTargetModalFromDtdb === 'function') {
+        return window.DailyTargets.openEditDailyTargetModalFromDtdb(dateKey, idx);
+    }
 };
 
 window.saveDailyTarget = function (idx, dateKey = null) {
-    if (!dateKey) {
-        if (!window.currentDailyTargetsDate) window.currentDailyTargetsDate = new Date();
-        dateKey = Utils.formatDate(window.currentDailyTargetsDate);
+    if (window.DailyTargets && typeof window.DailyTargets.saveDailyTarget === 'function') {
+        return window.DailyTargets.saveDailyTarget(idx, dateKey);
     }
-    if (!window.dailyTargetsDatabase || !window.dailyTargetsDatabase[dateKey] || !window.dailyTargetsDatabase[dateKey][idx]) return;
-
-    const target = window.dailyTargetsDatabase[dateKey][idx];
-    const isTodoTab = document.getElementById('adt-tab-btn-todo').classList.contains('bg-blue-600');
-
-    if (isTodoTab) {
-        const titleInput = document.getElementById('adt-todo-title');
-        const trackSelect = document.getElementById('adt-todo-track');
-        const title = titleInput ? titleInput.value.trim() : '';
-        const trackVal = trackSelect ? trackSelect.value : '';
-
-        if (!title) {
-            return showToast("Please enter a task title.", "error");
-        }
-
-        target.isTodo = true;
-        target.title = title;
-        target.track = trackVal || null;
-    } else {
-        const progSelectEl = document.getElementById('dt-select-prog');
-        const subSelectEl = document.getElementById('dt-select-sub');
-        const chSelectEl = document.getElementById('dt-select-ch');
-        const sizeEl = document.getElementById('dt-input-size');
-
-        const progName = progSelectEl ? progSelectEl.value : '';
-        const subject = subSelectEl ? subSelectEl.value : '';
-        const chapter = chSelectEl ? chSelectEl.value : '';
-        const dailySize = sizeEl && sizeEl.value ? parseInt(sizeEl.value, 10) : null;
-
-        if (!progName || !subject || !chapter) {
-            return showToast("Please select a Program, Subject, and Chapter.", "error");
-        }
-
-        const trackId = window.tracks.find(t => window.customPrograms[t.id] && window.customPrograms[t.id].some(p => (p.name || p) === progName))?.id;
-        if (!trackId) return;
-
-        const exists = window.dailyTargetsDatabase[dateKey].some((t, i) => i !== idx && !t.isDeleted && t.track === trackId && t.subject === subject && t.chapter === chapter);
-        if (exists) {
-            return showToast("This target is already in your daily target list.", "error");
-        }
-
-        target.isTodo = false;
-        target.track = trackId;
-        target.program = progName;
-        target.subject = subject;
-        target.chapter = chapter;
-        target.totalChapterSize = dailySize;
-    }
-
-    FirebaseService.saveToCloud();
-    renderUI();
-    closeModal('add-daily-target-modal');
-    showToast("Daily target updated!", "success");
 };
 
 window.autoSyncWeeklyToDailyTargets = function () {
-    if (!window.weeklyTargetsDatabase) return;
-    if (!window.dailyTargetsDatabase) window.dailyTargetsDatabase = {};
-
-    let updated = false;
-
-    // Scan all weeks in weeklyTargetsDatabase (past, present, and future weeks)
-    const weekKeys = Object.keys(window.weeklyTargetsDatabase);
-
-    weekKeys.forEach(weekKey => {
-        const weeklyTargets = window.weeklyTargetsDatabase[weekKey] || [];
-        if (weeklyTargets.length === 0) return;
-
-        const weekDates = weekKey ? weekKey.split(' - ') : [];
-        const startDate = Utils.parseDateSafe ? Utils.parseDateSafe(weekDates[0]) : (Utils.parseStart ? Utils.parseStart(weekKey) : new Date());
-        const endDate = (weekDates.length === 2 && Utils.parseDateSafe) ? Utils.parseDateSafe(weekDates[1]) : new Date(startDate.getTime() + 6 * 24 * 60 * 60 * 1000);
-        if (!startDate || isNaN(startDate.getTime())) return;
-
-        let cur = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
-        const endDay = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
-
-        while (cur <= endDay) {
-            const d = new Date(cur);
-            const dayOfWeekName = d.toLocaleDateString('en-US', { weekday: 'long' });
-            const dateKey = Utils.formatDate(d);
-
-            const dayTargets = weeklyTargets.filter(t => t.dayName && t.dayName.toLowerCase() === dayOfWeekName.toLowerCase());
-
-            if (dayTargets.length > 0) {
-                if (!window.dailyTargetsDatabase[dateKey]) {
-                    window.dailyTargetsDatabase[dateKey] = [];
-                }
-
-                dayTargets.forEach(wt => {
-                    const existingTarget = window.dailyTargetsDatabase[dateKey].find(dt =>
-                        dt.track === wt.track &&
-                        dt.subject === wt.subject &&
-                        dt.chapter === wt.chapter
-                    );
-
-                    if (!existingTarget) {
-                        const foundTask = window.findTaskChapter(wt.track, wt.subject, wt.chapter);
-                        const isCompleted = wt.completed || (foundTask ? foundTask.subTask.completed : false);
-                        const completedAt = wt.completedAt || (foundTask ? foundTask.subTask.completedAt : null);
-
-                        window.dailyTargetsDatabase[dateKey].push({
-                            track: wt.track,
-                            program: wt.program,
-                            subject: wt.subject,
-                            chapter: wt.chapter,
-                            completed: isCompleted,
-                            completedAt: completedAt,
-                            totalChapterSize: wt.totalChapterSize,
-                            scope: wt.scope || 'Whole Chapter',
-                            isAutoSynced: true
-                        });
-                        updated = true;
-                    } else if (existingTarget.isDeleted) {
-                        delete existingTarget.isDeleted;
-                        const foundTask = window.findTaskChapter(wt.track, wt.subject, wt.chapter);
-                        existingTarget.completed = wt.completed || (foundTask ? foundTask.subTask.completed : false);
-                        existingTarget.completedAt = wt.completedAt || (foundTask ? foundTask.subTask.completedAt : null);
-                        existingTarget.totalChapterSize = wt.totalChapterSize;
-                        existingTarget.scope = wt.scope || 'Whole Chapter';
-                        existingTarget.isAutoSynced = true;
-                        updated = true;
-                    }
-                });
-            }
-            cur.setDate(cur.getDate() + 1);
-        }
-    });
-
-    if (updated) {
-        FirebaseService.saveToCloud();
+    if (window.DailyTargets && typeof window.DailyTargets.autoSyncWeeklyToDailyTargets === 'function') {
+        return window.DailyTargets.autoSyncWeeklyToDailyTargets();
     }
 };
 
 window.switchAdtTab = function (tab) {
-    const btnTodo = document.getElementById('adt-tab-btn-todo');
-    const btnStudy = document.getElementById('adt-tab-btn-study');
-    const viewTodo = document.getElementById('adt-view-todo');
-    const viewStudy = document.getElementById('adt-view-study');
-
-    if (!btnTodo || !btnStudy || !viewTodo || !viewStudy) return;
-
-    if (tab === 'todo') {
-        btnTodo.className = "flex-1 py-2 text-[10px] font-black uppercase tracking-wider rounded-lg transition-all bg-blue-600 text-white shadow";
-        btnStudy.className = "flex-1 py-2 text-[10px] font-black uppercase tracking-wider rounded-lg transition-all text-slate-500 dark:text-slate-400";
-        viewTodo.classList.remove('hidden');
-        viewStudy.classList.add('hidden');
-    } else {
-        btnStudy.className = "flex-1 py-2 text-[10px] font-black uppercase tracking-wider rounded-lg transition-all bg-blue-600 text-white shadow";
-        btnTodo.className = "flex-1 py-2 text-[10px] font-black uppercase tracking-wider rounded-lg transition-all text-slate-500 dark:text-slate-400";
-        viewStudy.classList.remove('hidden');
-        viewTodo.classList.add('hidden');
+    if (window.DailyTargets && typeof window.DailyTargets.switchAdtTab === 'function') {
+        return window.DailyTargets.switchAdtTab(tab);
     }
 };
 
 window.addCustomTodoTarget = function () {
-    const titleInput = document.getElementById('adt-todo-title');
-    const trackInput = document.getElementById('adt-todo-track');
-    const title = titleInput ? titleInput.value.trim() : '';
-    const track = trackInput ? trackInput.value : '';
-
-    if (!title) return showToast("Please enter a task title.", "error");
-
-    if (!window.currentDailyTargetsDate) window.currentDailyTargetsDate = new Date();
-    const targetDateKey = Utils.formatDate(window.currentDailyTargetsDate);
-
-    if (!window.dailyTargetsDatabase) window.dailyTargetsDatabase = {};
-    if (!window.dailyTargetsDatabase[targetDateKey]) window.dailyTargetsDatabase[targetDateKey] = [];
-
-    window.dailyTargetsDatabase[targetDateKey].push({
-        id: `dt_todo_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        isTodo: true,
-        title: title,
-        track: track || null,
-        completed: false,
-        completedAt: null,
-        updatedAt: Date.now()
-    });
-
-    if (titleInput) titleInput.value = '';
-    if (trackInput) trackInput.value = '';
-
-    window.markLocalMutation('add_custom_todo_target');
-
-    FirebaseService.saveToCloud();
-    renderUI();
-    closeModal('add-daily-target-modal');
-    showToast("Custom to-do task added!", "success");
+    if (window.DailyTargets && typeof window.DailyTargets.addCustomTodoTarget === 'function') {
+        return window.DailyTargets.addCustomTodoTarget();
+    }
 };
 
 window.deleteDailyTarget = function (idx, targetId = null) {
-    if (!window.currentDailyTargetsDate) window.currentDailyTargetsDate = new Date();
-    const selectedDateKey = Utils.formatDate(window.currentDailyTargetsDate);
-
-    let target = null;
-    let actualDateKey = selectedDateKey;
-    let actualIdx = idx;
-
-    if (window.dailyTargetsDatabase && window.dailyTargetsDatabase[selectedDateKey] && window.dailyTargetsDatabase[selectedDateKey][idx]) {
-        target = window.dailyTargetsDatabase[selectedDateKey][idx];
-    } else if (targetId && window.dailyTargetsDatabase) {
-        for (const dk of Object.keys(window.dailyTargetsDatabase)) {
-            const foundIdx = (window.dailyTargetsDatabase[dk] || []).findIndex(t => t && (t.id === targetId || t._id === targetId));
-            if (foundIdx !== -1) {
-                target = window.dailyTargetsDatabase[dk][foundIdx];
-                actualDateKey = dk;
-                actualIdx = foundIdx;
-                break;
-            }
-        }
-    }
-
-    if (!target) {
-        showToast("Opening Monthly Target Setup...", "info");
-        window.switchPage('monthly-target-setup');
-        return;
-    }
-
-    if (target.isTodo) {
-        target.isDeleted = true;
-        const tid = target.id || targetId || window.generateItemId(target, `dailyTargetsDatabase_${actualDateKey}`);
-        if (tid) {
-            window.recordItemDeletion(tid);
-            if (target.id) window.recordItemDeletion(target.id);
-        }
-        window.markLocalMutation(`delete_daily_target`);
-        if (window.dailyTargetsDatabase[actualDateKey]) {
-            window.dailyTargetsDatabase[actualDateKey].splice(actualIdx, 1);
-        }
-        renderUI();
-        showToast("To-Do task removed.", "success");
-        FirebaseService.saveToCloud(true);
-        return;
-    }
-
-    let foundMonth = null;
-    let foundIdx = -1;
-    const matchFn = window.isChapterMatch || (window.Utils && window.Utils.isChapterMatch);
-    if (window.monthlyTargetsDatabase) {
-        for (const mKey of Object.keys(window.monthlyTargetsDatabase)) {
-            const mList = window.monthlyTargetsDatabase[mKey] || [];
-            const idxInM = mList.findIndex(mt => {
-                if (target.monthlyTargetId && mt.id === target.monthlyTargetId) return true;
-                const subMatch = String(mt.subject || '').trim().toLowerCase() === String(target.subject || '').trim().toLowerCase();
-                if (!subMatch) return false;
-                if (target.track && mt.track && target.track !== mt.track) return false;
-                const mtIsSubject = mt.targetType === 'subject' || mt.chapter === 'Whole Subject' || mt.chapter === 'All Chapters';
-                const isSubject = target.targetType === 'subject' || target.chapter === 'Whole Subject' || target.chapter === 'All Chapters';
-                return isSubject ? mtIsSubject : (!mtIsSubject && (matchFn ? matchFn(mt.chapter, target.chapter) : String(mt.chapter).trim().toLowerCase() === String(target.chapter).trim().toLowerCase()));
-            });
-            if (idxInM !== -1) {
-                foundMonth = mKey;
-                foundIdx = idxInM;
-                break;
-            }
-        }
-    }
-
-    if (foundMonth && foundIdx !== -1) {
-        showToast("Opening Monthly Target Setup to edit/delete this target...", "info");
-        window.openEditMonthlyTargetPage(foundIdx, foundMonth);
-    } else {
-        // Orphaned daily target - directly purge
-        if (actualDateKey && window.dailyTargetsDatabase && window.dailyTargetsDatabase[actualDateKey]) {
-            target.isDeleted = true;
-            const tid = target.id || targetId || window.generateItemId(target, `dailyTargetsDatabase_${actualDateKey}`);
-            if (tid) {
-                window.recordItemDeletion(tid);
-                if (target.id) window.recordItemDeletion(target.id);
-            }
-            window.markLocalMutation(`delete_daily_target`);
-            window.dailyTargetsDatabase[actualDateKey].splice(actualIdx, 1);
-            if (typeof window.recalculateTotals === 'function') window.recalculateTotals();
-            FirebaseService.saveToCloud(true);
-            renderUI();
-            showToast("Orphaned daily target removed.", "success");
-        } else {
-            showToast("Weekly and Daily targets are set and managed from Add Monthly Target page.", "info");
-            window.switchPage('monthly-target-setup');
-        }
+    if (window.DailyTargets && typeof window.DailyTargets.deleteDailyTarget === 'function') {
+        return window.DailyTargets.deleteDailyTarget(idx, targetId);
     }
 };
 
 window.toggleDailyTargetCompletion = function (idx, isCompleted) {
-    if (!window.currentDailyTargetsDate) window.currentDailyTargetsDate = new Date();
-    const selectedDateKey = Utils.formatDate(window.currentDailyTargetsDate);
-
-    if (!window.dailyTargetsDatabase || !window.dailyTargetsDatabase[selectedDateKey] || !window.dailyTargetsDatabase[selectedDateKey][idx]) return;
-
-    const target = window.dailyTargetsDatabase[selectedDateKey][idx];
-    target.completed = isCompleted;
-    target.completedAt = isCompleted ? new Date().toISOString() : null;
-
-    if (target.isTodo) {
-        renderUI();
-        showToast("To-Do task updated!", "success");
-        FirebaseService.saveToCloud(false);
-        return;
+    if (window.DailyTargets && typeof window.DailyTargets.toggleDailyTargetCompletion === 'function') {
+        return window.DailyTargets.toggleDailyTargetCompletion(idx, isCompleted);
     }
-
-    // Sync with Weekly Target (if exists)
-    const currentRange = window.getWeeklyTargetRange(window.currentDailyTargetsDate);
-    const currentWeekKey = window.formatDateRangeKey(currentRange.start, currentRange.end);
-    let wtCompleted = isCompleted;
-    let wtCompletedAt = target.completedAt;
-    let hasWtSize = false;
-
-    if (window.weeklyTargetsDatabase && window.weeklyTargetsDatabase[currentWeekKey]) {
-        const matchingWt = window.weeklyTargetsDatabase[currentWeekKey].find(t => t.track === target.track && t.subject === target.subject && t.chapter === target.chapter);
-        if (matchingWt) {
-            if (matchingWt.totalChapterSize) {
-                hasWtSize = true;
-                const progress = window.getWeeklyTargetProgress(matchingWt, currentWeekKey);
-                matchingWt.completed = (progress.percent >= 100);
-                matchingWt.completedAt = matchingWt.completed ? new Date().toISOString() : null;
-                wtCompleted = matchingWt.completed;
-                wtCompletedAt = matchingWt.completedAt;
-            } else {
-                matchingWt.completed = isCompleted;
-                matchingWt.completedAt = target.completedAt;
-            }
-        }
-    }
-
-    // Sync with daily study task (with size-based awareness)
-    if (hasWtSize) {
-        window.syncTaskChapterCompletion(target.track, target.subject, target.chapter, wtCompleted, wtCompletedAt);
-    } else {
-        window.syncTaskChapterCompletion(target.track, target.subject, target.chapter, isCompleted, target.completedAt);
-    }
-    recalculateTotals();
-
-    renderUI();
-    showToast("Daily target completion state synchronized!", "success");
-    FirebaseService.saveToCloud(false);
 };
 
 window.navigateDay = function (mode) {
-    if (!window.currentDailyTargetsDate) window.currentDailyTargetsDate = new Date();
-
-    if (mode === 'past') {
-        window.currentDailyTargetsDate.setDate(window.currentDailyTargetsDate.getDate() - 1);
-    } else if (mode === 'future') {
-        window.currentDailyTargetsDate.setDate(window.currentDailyTargetsDate.getDate() + 1);
-    } else {
-        window.currentDailyTargetsDate = new Date();
+    if (window.DailyTargets && typeof window.DailyTargets.navigateDay === 'function') {
+        return window.DailyTargets.navigateDay(mode);
     }
-
-    window.renderDailyTargets();
 };
 
 window.renderDailyTargets = function () {
-    const listContainer = document.getElementById('daily-targets-list');
-    const wtDropdown = document.getElementById('dt-select-from-wt');
-    const progDropdown = document.getElementById('dt-select-prog');
-    if (!listContainer) return;
-
-    if (typeof window.cleanOrphanedWeeklyAndDailyTargets === 'function') {
-        window.cleanOrphanedWeeklyAndDailyTargets();
-    }
-
-    if (!window.currentDailyTargetsDate) window.currentDailyTargetsDate = new Date();
-    const targetDateKey = Utils.formatDate(window.currentDailyTargetsDate);
-
-    const dateDisplay = document.getElementById('dt-selected-date');
-    if (dateDisplay) {
-        const weekday = window.currentDailyTargetsDate.toLocaleDateString('en-GB', { weekday: 'long' });
-        dateDisplay.textContent = `[ ${weekday}, ${targetDateKey} ]`;
-    }
-
-    // Update Day Navigation Buttons active states
-    const todayDate = new Date();
-    todayDate.setHours(0, 0, 0, 0);
-
-    const selectedTargetDate = new Date(window.currentDailyTargetsDate);
-    selectedTargetDate.setHours(0, 0, 0, 0);
-
-    const diffTime = selectedTargetDate.getTime() - todayDate.getTime();
-
-    const dtBtnPast = document.getElementById('dt-btn-past');
-    const dtBtnPresent = document.getElementById('dt-btn-present');
-    const dtBtnFuture = document.getElementById('dt-btn-future');
-
-    const dtActiveClass = "bg-blue-600 text-white shadow";
-    const dtInactiveClass = "text-slate-650 dark:text-slate-355 hover:bg-slate-200 dark:hover:bg-slate-600/50";
-
-    if (dtBtnPast && dtBtnPresent && dtBtnFuture) {
-        dtBtnPast.className = `px-2.5 py-1.5 text-[9px] font-black rounded-lg transition-all ${diffTime < 0 ? dtActiveClass : dtInactiveClass}`;
-        dtBtnPresent.className = `px-2.5 py-1.5 text-[9px] font-black rounded-lg transition-all ${diffTime === 0 ? dtActiveClass : dtInactiveClass}`;
-        dtBtnFuture.className = `px-2.5 py-1.5 text-[9px] font-black rounded-lg transition-all ${diffTime > 0 ? dtActiveClass : dtInactiveClass}`;
-    }
-
-    // Populate Weekly Targets dropdown for this date's week
-    if (wtDropdown) {
-        const prevVal = wtDropdown.value;
-        wtDropdown.innerHTML = '<option value="">-- Choose a Weekly Target --</option>';
-
-        const targetDate = window.currentDailyTargetsDate || new Date();
-        let wtList = [];
-        if (window.weeklyTargetsDatabase) {
-            const canonicalKey = window.getCanonicalWeeklyRangeKey ? window.getCanonicalWeeklyRangeKey(targetDate) : null;
-            if (canonicalKey && window.weeklyTargetsDatabase[canonicalKey]) {
-                wtList = window.weeklyTargetsDatabase[canonicalKey];
-            } else {
-                const range = window.getWeeklyTargetRange(targetDate);
-                const weekKey = window.formatDateRangeKey(range.start, range.end);
-                wtList = window.weeklyTargetsDatabase[weekKey] || [];
-            }
-        }
-
-        const passedItems = window.passedItems || (window.AppState && window.AppState.passedItems) || { programs: [], subjects: [] };
-        wtList.forEach(wt => {
-            let displaySub = wt.subject.replace(wt.program + ' - ', '').replace(wt.program + ' ', '');
-            const isPassed = Boolean(
-                (Array.isArray(passedItems.subjects) && passedItems.subjects.includes(wt.subject)) ||
-                (Array.isArray(passedItems.programs) && passedItems.programs.includes(wt.program))
-            );
-            const passedTag = isPassed ? ' 🏆 (Passed)' : '';
-            wtDropdown.innerHTML += `<option value="${wt.track}|${wt.program}|${wt.subject}|${wt.chapter}">${wt.chapter}: ${displaySub} (${wt.program})${passedTag}</option>`;
-        });
-        wtDropdown.value = prevVal;
-    }
-
-    // Populate programs if empty
-    if (progDropdown && progDropdown.options.length === 0) {
-        const activeProgs = [];
-        window.tracks.forEach(track => {
-            if (window.customPrograms[track.id]) {
-                window.customPrograms[track.id].forEach(p => {
-                    activeProgs.push(p.name || p);
-                });
-            }
-        });
-        progDropdown.innerHTML = '';
-        activeProgs.forEach(p => {
-            progDropdown.innerHTML += `<option value="${p}">${p}</option>`;
-        });
-        if (activeProgs.length > 0) {
-            window.updateDailyTargetSubjectDropdown();
-        }
-    }
-
-    listContainer.innerHTML = '';
-    if (!window.dailyTargetsDatabase) window.dailyTargetsDatabase = {};
-    const targetsList = window.dailyTargetsDatabase[targetDateKey] || [];
-
-    let renderedCount = 0;
-    targetsList.forEach((target, idx) => {
-        if (target.isDeleted) return;
-        renderedCount++;
-        const isTodo = target.isTodo === true;
-        const isCompleted = isTodo ? (target.completed || false) : (target.completed || (window.findTaskChapter(target.track, target.subject, target.chapter)?.subTask.completed ?? false));
-
-        let subjectColor = '#3b82f6';
-        if (!isTodo) {
-            subjectColor = window.getSubjectColor ? window.getSubjectColor(target.subject) : '#3b82f6';
-        }
-        const isDarkMode = document.documentElement.classList.contains('dark');
-
-        const statusColor = isCompleted
-            ? 'bg-emerald-50/20 dark:bg-emerald-950/20'
-            : 'bg-slate-50/50 dark:bg-slate-900/30';
-
-        const cardBorderColorClass = isCompleted ? '' : 'border-slate-200 dark:border-slate-700';
-        const cardStyle = `border-color: ${isCompleted ? subjectColor : (isDarkMode ? '#334155' : '#e2e8f0')};`;
-
-        let displayTitle = '';
-        let displaySubtitle = '';
-        if (isTodo) {
-            displayTitle = target.title;
-            const trackName = target.track ? (window.tracks.find(t => t.id === target.track)?.name || '') : '';
-            displaySubtitle = trackName ? `Custom Task • ${trackName}` : 'Custom Task';
-        } else {
-            let displaySub = target.subject.replace(target.program + ' - ', '').replace(target.program + ' ', '');
-            displayTitle = `${target.chapter}: ${displaySub}`;
-            displaySubtitle = target.program;
-        }
-
-        const itemHtml = `
-                <div class="flex items-center justify-between p-3 rounded-2xl border ${statusColor} ${cardBorderColorClass} transition-all duration-300" style="${cardStyle}">
-                    <div class="flex items-center space-x-3 min-w-0">
-                        <input type="checkbox" 
-                            onchange="window.toggleDailyTargetCompletion(${idx}, this.checked)" 
-                            class="form-checkbox h-4.5 w-4.5 text-emerald-500 dark:text-emerald-500 rounded border-slate-350 focus:ring-emerald-500 transition-all cursor-pointer" 
-                            ${isCompleted ? 'checked' : ''}>
-                        <div class="min-w-0">
-                            <span class="block text-xs font-black text-slate-800 dark:text-slate-100 truncate ${isCompleted ? 'line-through opacity-60' : ''}">
-                                ${displayTitle}
-                                ${target.totalChapterSize ? `<span class="text-[9px] text-blue-500 font-bold ml-1">(${target.totalChapterSize} p)</span>` : ''}
-                                ${(target.isStarTarget || (target.portionLabel && target.portionLabel.includes('⭐'))) ? `<span class="inline-block px-1.5 py-0.5 rounded-[4px] text-[7.5px] font-black uppercase tracking-wider bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300 border border-amber-300 dark:border-amber-700/60 ml-1" title="Extra/Repeat Target">⭐ Extra</span>` : ''}
-                                ${target.scope && target.scope !== 'Whole Chapter' && target.scope !== 'Whole' ? `<span class="inline-block px-1 py-0.5 rounded-[3px] text-[7px] font-black uppercase tracking-widest bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-800/50 ml-1">${target.scope}</span>` : ''}
-                            </span>
-                            <div class="flex items-center space-x-1.5 flex-wrap mt-0.5">
-                                <span class="block text-[8px] font-black uppercase text-slate-400 tracking-wider">${displaySubtitle}</span>
-                                ${(target.monthlyTargetId || target.source === 'monthly') ? `
-                                    <span class="inline-block px-1 py-0.5 rounded-[3px] text-[7px] font-black uppercase tracking-widest bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800/50" title="Created from Monthly Target Setup">
-                                        Monthly
-                                    </span>
-                                ` : ''}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="flex items-center space-x-1 shrink-0">
-                        <button onclick="window.openEditDailyTargetModal(${idx}, '${targetDateKey}')" class="p-1.5 hover:bg-blue-50 dark:hover:bg-blue-950/30 text-slate-300 hover:text-blue-550 dark:hover:text-blue-400 rounded-lg transition-all active:scale-90 shadow-sm" title="Edit in Monthly Target Setup">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
-                            </svg>
-                        </button>
-                        <button onclick="window.deleteDailyTarget(${idx}, '${target.id || ''}')" class="p-1.5 hover:bg-red-50 dark:hover:bg-red-950/30 text-slate-300 hover:text-red-500 rounded-lg transition-all active:scale-90 shadow-sm" title="Edit / Delete in Monthly Target Setup">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
-                        </button>
-                    </div>
-                </div>`;
-        listContainer.innerHTML += itemHtml;
-    });
-
-    if (renderedCount === 0) {
-        listContainer.innerHTML = `
-                <div class="col-span-full py-8 text-center text-[10px] uppercase font-black tracking-widest text-slate-400 bg-slate-50 dark:bg-slate-900/30 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700">
-                    No daily targets set for this day.
-                </div>`;
+    if (window.DailyTargets && typeof window.DailyTargets.renderDailyTargets === 'function') {
+        return window.DailyTargets.renderDailyTargets();
     }
 };
 
@@ -12292,291 +11529,40 @@ window.renderWtdbMonthView = function () {
 };
 
 // --- Daily Targets Database Modal Controls & Logic ---
+// Modularized: DTDB controls & table renderer are in js/features/targets/dailyTargets.js
 window.openDailyTargetsDatabase = function () {
-    window.openModal('daily-targets-db-modal');
-    window.populateDtdbFilters();
-    window.renderDtdbList();
+    if (window.DailyTargets && typeof window.DailyTargets.openDailyTargetsDatabase === 'function') {
+        return window.DailyTargets.openDailyTargetsDatabase();
+    }
 };
 
 window.populateDtdbFilters = function () {
-    const dateFilter = document.getElementById('dtdb-filter-date');
-    const progFilter = document.getElementById('dtdb-filter-prog');
-    const subFilter = document.getElementById('dtdb-filter-sub');
-
-    if (!dateFilter || !progFilter || !subFilter) return;
-
-    if (!window.dailyTargetsDatabase) window.dailyTargetsDatabase = {};
-    const allDates = Object.keys(window.dailyTargetsDatabase).sort((a, b) => new Date(b) - new Date(a));
-
-    const prevDateVal = dateFilter.value;
-    dateFilter.innerHTML = '<option value="all">All Dates</option>';
-    allDates.forEach(dt => {
-        dateFilter.innerHTML += `<option value="${dt}">${dt}</option>`;
-    });
-    dateFilter.value = prevDateVal || 'all';
-
-    const activeProgs = [];
-    window.tracks.forEach(track => {
-        if (window.customPrograms[track.id]) {
-            window.customPrograms[track.id].forEach(p => {
-                activeProgs.push(p.name || p);
-            });
-        }
-    });
-
-    const prevProgVal = progFilter.value;
-    progFilter.innerHTML = '<option value="all">All Programs</option>';
-    activeProgs.forEach(p => {
-        progFilter.innerHTML += `<option value="${p}">${p}</option>`;
-    });
-    progFilter.value = prevProgVal || 'all';
-
-    const prevSubVal = subFilter.value;
-    subFilter.innerHTML = '<option value="all">All Subjects</option>';
-    window.getAllSubjects().forEach(s => {
-        subFilter.innerHTML += `<option value="${s.subject}">${s.subject}</option>`;
-    });
-    subFilter.value = prevSubVal || 'all';
+    if (window.DailyTargets && typeof window.DailyTargets.populateDtdbFilters === 'function') {
+        return window.DailyTargets.populateDtdbFilters();
+    }
 };
 
 window.renderDtdbList = function () {
-    const tbody = document.getElementById('dtdb-targets-tbody');
-    if (!tbody) return;
-
-    if (typeof window.cleanOrphanedWeeklyAndDailyTargets === 'function') {
-        window.cleanOrphanedWeeklyAndDailyTargets();
-    }
-
-    const dFilter = document.getElementById('dtdb-filter-date').value;
-    const pFilter = document.getElementById('dtdb-filter-prog').value;
-    const sFilter = document.getElementById('dtdb-filter-sub').value;
-    const statFilter = document.getElementById('dtdb-filter-status').value;
-
-    tbody.innerHTML = '';
-    let matchedCount = 0;
-
-    if (!window.dailyTargetsDatabase) window.dailyTargetsDatabase = {};
-
-    const sortedDates = Object.keys(window.dailyTargetsDatabase).sort((a, b) => new Date(b) - new Date(a));
-
-    sortedDates.forEach(dateKey => {
-        if (dFilter !== 'all' && dateKey !== dFilter) return;
-
-        const list = window.dailyTargetsDatabase[dateKey] || [];
-        list.forEach((target, idx) => {
-            if (target.isDeleted) return;
-            if (pFilter !== 'all' && target.program !== pFilter) return;
-            if (sFilter !== 'all' && target.subject !== sFilter) return;
-
-            const isTodo = target.isTodo || false;
-            const isCompleted = isTodo ? (target.completed || false) : (target.completed || (window.findTaskChapter(target.track, target.subject, target.chapter)?.subTask.completed ?? false));
-
-            if (statFilter === 'completed' && !isCompleted) return;
-            if (statFilter === 'non-completed' && isCompleted) return;
-
-            matchedCount++;
-
-            let displaySub = target.subject ? target.subject.replace(target.program + ' - ', '').replace(target.program + ' ', '') : '';
-            let chapterVal = target.chapter || '';
-            let sizeVal = (target.totalChapterSize !== undefined && target.totalChapterSize !== null) ? target.totalChapterSize : '';
-            let displayTitle = isTodo ? target.title : `${chapterVal}: ${displaySub}`;
-
-            const row = `
-                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors">
-                        <td class="py-3 px-4 text-center">
-                            <input type="checkbox" onchange="window.toggleDtdbTargetCompletion('${dateKey}', ${idx}, this.checked)" class="form-checkbox h-4 w-4 text-emerald-500 rounded cursor-pointer" ${isCompleted ? 'checked' : ''}>
-                        </td>
-                        <td class="py-3 px-4 font-bold text-slate-500 dark:text-slate-400 text-[10px]">${dateKey}</td>
-                        <td class="py-3 px-4 uppercase text-[10px] text-slate-400">${target.program || 'Custom'}</td>
-                        <td class="py-3 px-4 truncate max-w-[150px]" title="${isTodo ? 'To-Do Task' : target.subject}">${isTodo ? 'Custom Task' : displaySub}</td>
-                        <td class="py-3 px-4 text-blue-600 dark:text-blue-400 font-bold max-w-[150px] truncate" title="${displayTitle}">${displayTitle}${target.scope && target.scope !== 'Whole Chapter' && target.scope !== 'Whole' ? ` <span class="inline-block px-1 py-0.5 rounded-[3px] text-[7px] font-black uppercase tracking-widest bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-800/50 ml-1">${target.scope}</span>` : ''}</td>
-                        <td class="py-3 px-4 text-center">
-                            ${isTodo ? '<span class="text-slate-400 font-normal">-</span>' : `
-                            <input type="number" value="${sizeVal}" min="0" placeholder="-" 
-                                onchange="window.updateDtdbTargetSize('${dateKey}', ${idx}, this.value)" 
-                                class="w-16 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded p-1 text-xs font-bold text-center focus:ring-1 focus:ring-blue-500 outline-none">
-                            `}
-                        </td>
-                        <td class="py-3 px-4 text-center">
-                            <div class="flex items-center justify-center space-x-1">
-                                <button onclick="window.openEditDailyTargetModalFromDtdb('${dateKey}', ${idx})" class="p-1 hover:bg-blue-50 dark:hover:bg-blue-950/30 text-blue-500 rounded transition-all active:scale-90 shadow-sm" title="Edit in Monthly Target Setup">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
-                                    </svg>
-                                </button>
-                                <button onclick="window.deleteDtdbTarget('${dateKey}', ${idx})" class="p-1 hover:bg-red-50 dark:hover:bg-red-950/30 text-red-500 rounded transition-all active:scale-90 shadow-sm" title="Delete Target">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path>
-                                    </svg>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>`;
-            tbody.innerHTML += row;
-        });
-    });
-
-    if (matchedCount === 0) {
-        tbody.innerHTML = `
-                <tr>
-                    <td colspan="7" class="py-8 text-center text-[10px] uppercase font-black tracking-widest text-slate-400 bg-slate-50 dark:bg-slate-900/30">
-                        No daily targets found.
-                    </td>
-                </tr>`;
+    if (window.DailyTargets && typeof window.DailyTargets.renderDtdbList === 'function') {
+        return window.DailyTargets.renderDtdbList();
     }
 };
 
 window.toggleDtdbTargetCompletion = function (dateKey, idx, isCompleted) {
-    if (!window.dailyTargetsDatabase || !window.dailyTargetsDatabase[dateKey] || !window.dailyTargetsDatabase[dateKey][idx]) return;
-
-    const target = window.dailyTargetsDatabase[dateKey][idx];
-    target.completed = isCompleted;
-    target.completedAt = isCompleted ? new Date().toISOString() : null;
-
-    if (target.isTodo) {
-        FirebaseService.saveToCloud();
-        renderUI();
-        window.renderDtdbList();
-        showToast("To-Do task updated!", "success");
-        return;
+    if (window.DailyTargets && typeof window.DailyTargets.toggleDtdbTargetCompletion === 'function') {
+        return window.DailyTargets.toggleDtdbTargetCompletion(dateKey, idx, isCompleted);
     }
-
-    // Sync with Weekly Target (if exists)
-    const currentRange = window.getWeeklyTargetRange(window.parseDailyTargetDateKey(dateKey));
-    const currentWeekKey = window.formatDateRangeKey(currentRange.start, currentRange.end);
-    let wtCompleted = isCompleted;
-    let wtCompletedAt = target.completedAt;
-    let hasWtSize = false;
-
-    if (window.weeklyTargetsDatabase && window.weeklyTargetsDatabase[currentWeekKey]) {
-        const matchingWt = window.weeklyTargetsDatabase[currentWeekKey].find(t => t.track === target.track && t.subject === target.subject && t.chapter === target.chapter);
-        if (matchingWt) {
-            if (matchingWt.totalChapterSize) {
-                hasWtSize = true;
-                const progress = window.getWeeklyTargetProgress(matchingWt, currentWeekKey);
-                matchingWt.completed = (progress.percent >= 100);
-                matchingWt.completedAt = matchingWt.completed ? new Date().toISOString() : null;
-                wtCompleted = matchingWt.completed;
-                wtCompletedAt = matchingWt.completedAt;
-            } else {
-                matchingWt.completed = isCompleted;
-                matchingWt.completedAt = target.completedAt;
-            }
-        }
-    }
-
-    // Sync with daily study task (with size-based awareness)
-    const found = window.findTaskChapter(target.track, target.subject, target.chapter);
-    if (found) {
-        if (hasWtSize) {
-            found.subTask.completed = wtCompleted;
-            found.subTask.completedAt = wtCompletedAt;
-        } else {
-            found.subTask.completed = isCompleted;
-            found.subTask.completedAt = target.completedAt;
-        }
-        recalculateTotals();
-    }
-
-    FirebaseService.saveToCloud();
-    renderUI();
-    window.renderDtdbList();
-    showToast("Daily target completion state synchronized!", "success");
 };
 
 window.deleteDtdbTarget = function (dateKey, idx) {
-    if (window.dailyTargetsDatabase && window.dailyTargetsDatabase[dateKey] && window.dailyTargetsDatabase[dateKey][idx]) {
-        const target = window.dailyTargetsDatabase[dateKey][idx];
-        if (target.isTodo) {
-            target.isDeleted = true;
-            const tid = target.id || window.generateItemId(target, `dailyTargetsDatabase_${dateKey}`);
-            if (tid) {
-                window.recordItemDeletion(tid);
-                if (target.id) window.recordItemDeletion(target.id);
-            }
-            window.markLocalMutation('delete_dtdb_target');
-            window.dailyTargetsDatabase[dateKey].splice(idx, 1);
-            FirebaseService.saveToCloud(true);
-            renderUI();
-            window.renderDtdbList();
-            showToast("To-Do task removed.", "success");
-            return;
-        }
-
-        let foundMonth = null;
-        let foundIdx = -1;
-        const matchFn = window.isChapterMatch || (window.Utils && window.Utils.isChapterMatch);
-        if (window.monthlyTargetsDatabase) {
-            for (const mKey of Object.keys(window.monthlyTargetsDatabase)) {
-                const mList = window.monthlyTargetsDatabase[mKey] || [];
-                const idxInM = mList.findIndex(mt => {
-                    if (target.monthlyTargetId && mt.id === target.monthlyTargetId) return true;
-                    const subMatch = String(mt.subject || '').trim().toLowerCase() === String(target.subject || '').trim().toLowerCase();
-                    if (!subMatch) return false;
-                    if (target.track && mt.track && target.track !== mt.track) return false;
-                    const mtIsSubject = mt.targetType === 'subject' || mt.chapter === 'Whole Subject' || mt.chapter === 'All Chapters';
-                    const isSubject = target.targetType === 'subject' || target.chapter === 'Whole Subject' || target.chapter === 'All Chapters';
-                    return isSubject ? mtIsSubject : (!mtIsSubject && (matchFn ? matchFn(mt.chapter, target.chapter) : String(mt.chapter).trim().toLowerCase() === String(target.chapter).trim().toLowerCase()));
-                });
-                if (idxInM !== -1) {
-                    foundMonth = mKey;
-                    foundIdx = idxInM;
-                    break;
-                }
-            }
-        }
-        if (foundMonth && foundIdx !== -1) {
-            closeModal('daily-targets-db-modal');
-            showToast("Opening Monthly Target Setup to edit/delete this target...", "info");
-            window.openEditMonthlyTargetPage(foundIdx, foundMonth);
-        } else {
-            // Orphaned daily target - directly purge
-            target.isDeleted = true;
-            const tid = target.id || window.generateItemId(target, `dailyTargetsDatabase_${dateKey}`);
-            if (tid) {
-                window.recordItemDeletion(tid);
-                if (target.id) window.recordItemDeletion(target.id);
-            }
-            window.markLocalMutation('delete_dtdb_target');
-            window.dailyTargetsDatabase[dateKey].splice(idx, 1);
-            if (typeof window.recalculateTotals === 'function') window.recalculateTotals();
-            FirebaseService.saveToCloud(true);
-            renderUI();
-            window.renderDtdbList();
-            showToast("Orphaned daily target removed.", "success");
-        }
+    if (window.DailyTargets && typeof window.DailyTargets.deleteDtdbTarget === 'function') {
+        return window.DailyTargets.deleteDtdbTarget(dateKey, idx);
     }
 };
 
 window.updateDtdbTargetSize = function (dateKey, idx, size) {
-    if (window.dailyTargetsDatabase && window.dailyTargetsDatabase[dateKey] && window.dailyTargetsDatabase[dateKey][idx]) {
-        const target = window.dailyTargetsDatabase[dateKey][idx];
-        const numericSize = size ? parseFloat(size) : null;
-        target.totalChapterSize = numericSize;
-
-        // Sync with Weekly Target & Daily Study Task
-        const currentRange = window.getWeeklyTargetRange(window.parseDailyTargetDateKey(dateKey));
-        const currentWeekKey = window.formatDateRangeKey(currentRange.start, currentRange.end);
-        if (window.weeklyTargetsDatabase && window.weeklyTargetsDatabase[currentWeekKey]) {
-            const matchingWt = window.weeklyTargetsDatabase[currentWeekKey].find(t => t.track === target.track && t.subject === target.subject && t.chapter === target.chapter);
-            if (matchingWt && matchingWt.totalChapterSize) {
-                const progress = window.getWeeklyTargetProgress(matchingWt, currentWeekKey);
-                matchingWt.completed = (progress.percent >= 100);
-                matchingWt.completedAt = matchingWt.completed ? new Date().toISOString() : null;
-
-                const found = window.findTaskChapter(target.track, target.subject, target.chapter);
-                if (found) {
-                    found.subTask.completed = matchingWt.completed;
-                    found.subTask.completedAt = matchingWt.completedAt;
-                    recalculateTotals();
-                }
-            }
-        }
-
-        FirebaseService.saveToCloud();
-        renderUI();
-        window.renderDtdbList();
-        showToast("Target size updated!", "success");
+    if (window.DailyTargets && typeof window.DailyTargets.updateDtdbTargetSize === 'function') {
+        return window.DailyTargets.updateDtdbTargetSize(dateKey, idx, size);
     }
 };
 
