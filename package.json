@@ -5,13 +5,15 @@
   "main": "js/dev-server.js",
   "scripts": {
     "dev": "node js/dev-server.js",
+    "test": "node tests/config-tracks.test.js && node tests/pace-outcome.test.js && node tests/analytics-visualization.test.js && node tests/daily-targets.test.js && node tests/weekly-targets.test.js && node tests/monthly-targets.test.js && node tests/tasks-metrics-dashboard.test.js",
     "test:rules": "mocha tests/firestore-rules.test.js",
     "test:config": "node tests/config-tracks.test.js",
     "test:pace-outcome": "node tests/pace-outcome.test.js",
     "test:analytics": "node tests/analytics-visualization.test.js",
     "test:targets": "node tests/daily-targets.test.js",
     "test:weekly": "node tests/weekly-targets.test.js",
-    "test:monthly": "node tests/monthly-targets.test.js"
+    "test:monthly": "node tests/monthly-targets.test.js",
+    "test:tasks-metrics-dashboard": "node tests/tasks-metrics-dashboard.test.js"
   },
   "dependencies": {
     "firebase": "^12.17.1",

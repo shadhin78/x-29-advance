@@ -1,182 +1,219 @@
-# Phase 2 / Batch 6: Extract Analytics and Read-Only Visualization Systems
+# Phase 2 / Batch 10: Extract Tasks, Metrics, and Dashboard Core
 
 ## Overview
-Extract and modularize Analytics and Read-Only Visualization Systems from monolithic sources (`pages/Analytics/Analytics.js`, `shared/services/timerService.js`, `js/script.js`) into cohesive, reusable feature modules under `js/features/analytics/`:
-1. **`spectra.js`**: Spectra Analytics, Spectra Circle Charts, Spectra Commitment Matrix, Pace & Trend charts coordination, AnalyticsPage lifecycle.
-2. **`heatmap.js`**: Spectra Focus Heatmap, Timeframe range controls (30, 90, 180, 365 days), Focus Heatmap Day Drill-down, Side Note panel, and Day Detail modal.
-3. **`history.js`**: Global Timeline History (Timeline Entry, Subject Folder, and Trend Chart tabs), Timeline Search filter, and Timeline Editing modal (`edit-timeline-entry-modal`).
-4. **`chapterMap.js`**: Global Chapter Interactive SVG Map (`generateGlobalChaptersSVG`), segmented progress rings, Global Chapters modal (`global-chapters-modal`), Subject Trend circle (`renderSubjectTrendCircle`), and interactive tooltips.
+This is the **final and highest-coupling batch of Phase 2**. We will extract and modularize:
+1. **Subjects & Chapter Task Execution** (`taskEngine.js`)
+2. **Task Toggle Engine** (`taskEngine.js`)
+3. **Task Edit Modal** (`taskEngine.js`)
+4. **Subject Daily Time Goals & Subject Management** (`subjectGoals.js`)
+5. **KPI Metrics Calculation Engine** (`metrics.js`)
+6. **Dashboard Overview & KPI Cards** (`dashboard.js`)
+7. **Dashboard Daily/Weekly/Monthly Summaries & Cards** (`dashboard.js`)
+8. **Dashboard Orchestrator & UI Lifecycle** (`dashboard.js` and `pages/Dashboard/Dashboard.js`)
 
-All modules will strictly **READ** application state (`AppState`, `window.tracks`, `window.paceGoals`, `window.customActions`, `window.passedItems`, `window.revisionData`), prevent duplicate state, avoid modifying Firebase models, ensure Chart.js canvas safety (prevent duplicate instances, destroy/reuse correctly), and prevent listener accumulation.
+All modules will be designed with reentrancy protection against the known circular chains:
+- `handleTaskToggle() -> updateMetrics() -> renderTaskList() -> handleTaskToggle()`
+- `renderUI() -> updateMetrics() -> renderPaceGoals() -> updateMetrics()`
 
 ---
 
 ## User Review Required
 
 > [!IMPORTANT]
-> - All extracted features will be exposed globally on `window` and as CommonJS modules (`module.exports`) to guarantee 100% backward compatibility with existing inline HTML handlers (`onclick`, `onmouseenter`, `onchange`), router transitions (`AnalyticsPage.mount()`, `AnalyticsPage.destroy()`), and automated tests.
-> - `pages/Analytics/Analytics.js` will be refactored into a slim page coordinator delegating directly to the extracted modules, mirroring the successful pattern in `pages/Pace Management/Pace Management.js` and `pages/Outcome/Outcome.js`.
-> - `index.html` will load `chapterMap.js`, `history.js`, `heatmap.js`, and `spectra.js` directly in `<head>` so that Dashboard, Focus Timer, and Subjects pages have immediate access to heatmap and chapter maps without requiring a prior page visit.
-> - Chart.js instances (`globalHistoryChartInstance`, `mainChartPrograms`, `monthlyChartActions`, `yearlyChartActions`, `spectraPaceTrendChartInstance`, `globalPaceTrendChartInstance`) will be cleanly destroyed or updated in-place to eliminate any possibility of "Canvas is already in use" errors during route transitions.
+> - **Zero Logic Alterations**: Task completion semantics, revision mode behavior, streak calculations, pace estimations, Firestore sync triggers, and UI designs will be strictly preserved byte-for-byte.
+> - **Universal Global & CommonJS Export**: All extracted modules will attach to `window` (for inline HTML event handlers, onclicks, and cross-module calls) and support CommonJS (`module.exports`) for automated Node.js test suites.
+> - **Circular Dependency Safety**: Reentrancy guards (`isUpdatingMetrics`, `isRenderingUI`) will guarantee that downstream invocations cannot cause infinite loops or stack overflows.
+> - **Script Loading Order in `index.html`**:
+>   1. `js/features/tasks/taskEngine.js`
+>   2. `js/features/tasks/subjectGoals.js`
+>   3. `js/core/metrics.js`
+>   4. `js/features/dashboard/dashboard.js`
+>   (followed by existing Targets modules, `js/script.js`, schedule, and exam modules)
+> - **Slim Coordinator Pattern for Dashboard**: `pages/Dashboard/Dashboard.js` will be transformed into a slim page coordinator delegating directly to `js/features/dashboard/dashboard.js`, perfectly matching `pages/Analytics/Analytics.js`, `pages/Outcome/Outcome.js`, and `pages/Pace Management/Pace Management.js`.
 
 ---
 
 ## Proposed Changes
 
-### 1. Chapter Interactive SVG Map Feature Module
+### Component 1: Tasks Feature Area (`js/features/tasks/`)
 
-#### [NEW] [chapterMap.js](file:///d:/X-29-ADVANCE/X-29-advance-code/js/features/analytics/chapterMap.js)
-Extract SVG segmented chapter rings, modals, and tooltips:
-- `generateGlobalChaptersSVG(isSpectra, spectraFilter, isSubjectModal)`: Computes chapter completion statistics and generates polar segmented arc SVG rings (1-ring subject modal mode and 1-5 ring dynamic multi-ring mode).
-- `openGlobalChaptersModal()`: Opens `#global-chapters-modal` and renders the full syllabus SVG map with color legend and quick metrics.
-- Tooltip managers:
-  - `showChapterTooltip(event, subject, chapterNum, status)` / `hideChapterTooltip()` (for Global Chapters modal `#gcm-tooltip`).
-  - `showSubjectChapterTooltip(event, subject, chapterNum, status)` / `hideSubjectChapterTooltip()` (for Subject modal `#stm-tooltip`).
-  - `showSpectraChapterTooltip(event, subject, chapterNum, status)` / `hideSpectraChapterTooltip()` (for Analytics page `#spectra-gcm-tooltip`).
-- `renderSubjectTrendCircle()`: Renders subject-specific circular chapter progress inside `#subject-trend-circle-container`.
+#### [NEW] [taskEngine.js](file:///d:/X-29-ADVANCE/X-29-advance-code/js/features/tasks/taskEngine.js)
+Extract core task scheduling, execution, toggling, editing, and list rendering:
+- **Study Plan & Slot Execution Engine**:
+  - `generateStudyPlan()`: Generates initial task array with holidays and study slots across tracks.
+  - `ensureAvailableSlots(slotsNeeded, track, startIndex)`: Automatically allocates revision slots when needed.
+  - `reorderSubjectChapters(prog, subj)`: Re-indexes uncompleted chapters numerically.
+  - `rebuildTaskDates(shouldSave)`: Recalculates task dates sequentially from `AppState.PLAN_START_DATE`.
+- **Chapter & Subject Status Helpers**:
+  - `isSubjectPassed(track, subject, progName)`
+  - `isChapterCompleted(track, subject, chapter)`
+  - `isChapterSkipped(track, subject, chapter)`
+  - `findTaskChapter(track, subject, chapter)`
+  - `syncTaskChapterCompletion(track, subject, chapter, isCompleted, completedAt)`
+  - `getChaptersForSubject(track, subject)`
+  - `getChapterStatus(subName, chNum, trackId)`
+  - `getSubjectSkippedCount(subName, trackId)`
+  - `isSubjectCompleted(track, subject)`
+- **Task Toggle Engine**:
+  - `handleTaskToggle(e)`:
+    - Optimistic card styling update (`single-task-...`), accent bar color, line-through on title/desc.
+    - Optimistic subject progress bar update (`group-text-...`, `group-pct-...`, `group-bar-...`).
+    - Optimistic subject time goal analytics card update (`tg-req-...`, `tg-act-...`, `tg-est-...`, etc.).
+    - Cascades completion across all identical chapter instances in `AppState.tasks`.
+    - Bi-directional sync to `monthlyTargetsDatabase`, `weeklyTargetsDatabase`, and `dailyTargetsDatabase`.
+    - Cloud save via `FirebaseService.saveToCloud()` and calls `updateMetrics()`.
+    - Debounces `renderTrendCharts`.
+- **Task Edit Modal**:
+  - `openEditModal(taskId, type, subTaskId)`: Pre-fills subject, chapter number, title, and skip button. Handles unscheduled slot allocations (`unsched-...`).
+  - `toggleSkipTask()`: Toggles skipped state, resets completion, and purges skipped records from targets databases with tombstone recording (`recordItemDeletion`).
+  - `saveTaskEdit()`: Updates subject, chapter, and title, reordering chapters as needed.
+  - `requestDeleteTask()`: Triggers confirmation modal.
+  - `deleteTask()`: Clears task slot back to Revision and shifts subsequent uncompleted chapters upward.
+- **Task List & Revision Rendering**:
+  - `renderTaskList()`: Groups study tasks by subject, filters by `AppState.currentFilter`, and renders task card grid.
+  - `generateSingleTaskHtml(dayObj, taskObj, type)`: Produces HTML for single study cards with size-based target indicators.
+  - `generateRevisionTaskHtml(sub, chNum, isCompleted)`: Produces HTML for revision practice cards.
+  - `setFilter(val)`: Updates active filter and refreshes navigation and tasks.
+  - `openRevisionModal()`, `renderRevisionModalContent()`, `toggleRevisionMode(sub)`, `toggleRevisionChapter(sub, chNum, isChecked)`.
 
----
-
-### 2. Focus Heatmap Feature Module
-
-#### [NEW] [heatmap.js](file:///d:/X-29-ADVANCE/X-29-advance-code/js/features/analytics/heatmap.js)
-Extract Focus Heatmap and Day Drill-down from `shared/services/timerService.js`:
-- Range Controls:
-  - `spectraHeatmapRange` (default 365).
-  - `setSpectraHeatmapRangeUI(days)` & `setSpectraHeatmapRange(days)` (updates active button states for 30, 90, 180, 365 days and re-renders).
-- Heatmap Rendering:
-  - `renderSpectraFocusHeatmap()`: Reads `AppState.timerLogs` and `AppState.activeTimerState`, computes daily seconds, determines color tier (0h red, 0-2h low, 2-4h moderate, 4-6h target met, 6-8h gold pulse, 8h+ diamond shimmer), calculates streak, and renders both `#spectra-focus-heatmap-grid` and `#dashboard-focus-heatmap-grid`.
-  - `renderHeatmap()`: Renders `#yearly-daily-grid` with action completion percentages.
-- Heatmap Tooltip:
-  - `showSpectraHeatmapTooltip(e, el)`: Shows `#spectra-focus-heatmap-tooltip` with formatted date, duration, and tier badge.
-  - `moveSpectraHeatmapTooltip(e)` & `hideSpectraHeatmapTooltip()`.
-- Day Drill-down & Side Note Panel:
-  - `showSpectraHeatmapDayDetail(dateKey, openModal)`: Highlights selected box, updates `#spectra-heatmap-side-note` (day, date, badge, focus time, target %, subject breakdown), updates `#dash-hm-selected-detail`, and populates `#spectra-heatmap-day-modal`.
-  - `closeSpectraHeatmapDayModal()`.
-
----
-
-### 3. Global Timeline History Feature Module
-
-#### [NEW] [history.js](file:///d:/X-29-ADVANCE/X-29-advance-code/js/features/analytics/history.js)
-Extract Global History and Timeline Editing modal from `js/script.js`:
-- `openGlobalHistoryModal()`: Opens `#global-history-modal` and renders content.
-- `renderGlobalHistoryContent(searchFilter)`:
-  - Aggregates completed study chapters from `AppState.tasks` and revisions from `window.revisionData.progress`.
-  - Supports search keyword filtering (by subject, chapter name, or type).
-  - Renders Timeline tab (`#ghm-view-timeline`), Subject Folder tab (`#ghm-view-subject`), and Trend Chart tab (`#ghm-view-trend`).
-  - Manages `window.globalHistoryChartInstance`: ensures previous instance is properly destroyed before constructing new Chart, preventing canvas reuse errors.
-- `switchGhmTab(tab)`: Manages active tab state (`currentGhmTab`) and scroll position restoration.
-- `filterGlobalHistory(query)`: Instant live search filter across historical timeline records.
-- Timeline Editing Modal:
-  - `openEditTimelineEntryModal(type, encSubject, encItem, ts, track, chNum)`: Populates `#edit-timeline-entry-modal` datetime input (`#etem-datetime`) and subtitle (`#etem-subtitle`).
-  - `saveTimelineEntryDate()`: Parses selected date/time, updates `AppState.tasks` or `window.revisionData.progress`, triggers cloud save (`FirebaseService.saveToCloud`), refreshes UI, and closes modal.
-
----
-
-### 4. Spectra Analytics Feature Module
-
-#### [NEW] [spectra.js](file:///d:/X-29-ADVANCE/X-29-advance-code/js/features/analytics/spectra.js)
-Extract Spectra Analytics, Commitment Matrix, Circle Chart controls, and Pace visualization coordination:
-- Syllabus Chapters Filter Dropdown:
-  - `selectedSpectraFilters` (tracks, programs, subjects, global).
-  - `populateSpectraFilterDropdown()`, `updateSpectraFilterDropdownLabel()`, `onSpectraFilterChange(val)`.
-  - Prevents accumulating duplicate document click listeners.
-- Spectra Circle Chart:
-  - `renderSpectraCircleChart()`: Delegates to `generateGlobalChaptersSVG`, updates title, description, and completion counters (`#spectra-legend-complete`, `#spectra-legend-incomplete`, `#spectra-legend-skipped`).
-- 7 Officer Commitments Habit Radar (Commitment Matrix):
-  - `getCommitmentLabels()`, `saveCommitmentLabelsData()`, `getCommitmentStorageKey()`, `getCommitmentMonthData()`, `saveCommitmentMonthData()`.
-  - Polar SVG Grid generation: `renderSpectraCommitmentsChart()`.
-  - Month navigation: `prevCommitmentMonth()`, `nextCommitmentMonth()`, `resetCommitmentMonth()`.
-  - Cell toggle: `toggleCommitmentCell(dayNum, habitIndex)` with cloud save and cross-tab sync (`X29SyncChannel`).
-  - Commitment labels modal: `openCommitmentsModal()`, `closeCommitmentsModal()`, `resetCommitmentLabelsDefault()`, `saveCommitmentLabels()`.
-  - Tooltips: `showCommitmentTooltip()`, `hideCommitmentTooltip()`.
-- Trend Charts & Pace Visualizations Coordination:
-  - `renderTrendCharts()`: Computes program completion and daily actions datasets, updates `#mainChartPrograms`, `#monthlyActionsChart`, `#yearlyActionsChart`, updates Analytics summary cards (`analytics-avg-completion`, `analytics-total-actions`, `analytics-active-streak`, `analytics-days-remaining`), and calls pace trend chart updates.
-  - `renderPaceCharts()`: Safely invokes `renderSpectraPaceTrendChart()` and `renderGlobalPaceTrendChart()` from `PaceManager`.
-  - Dataset toggles: `toggleDataset(chartKey, dsKey)`, `toggleSubDataset(k)`, `toggleRevSubDataset(k)`, `updateLegends()`, `updateRevisionLegends()`.
-  - Trend time filter: `setTrendFilter(f)`.
-- AnalyticsPage Lifecycle Object:
-  - `init()`, `mount()`, `render()`, `resizeCharts()`, `destroy()`.
-  - `destroy()` cleans up tooltips, dropdowns, and destroys or detaches Chart.js instances so navigating away and back is completely clean.
+#### [NEW] [subjectGoals.js](file:///d:/X-29-ADVANCE/X-29-advance-code/js/features/tasks/subjectGoals.js)
+Extract Subject Daily Time Goals, Subject Editing, and Subject Progress Visualizations:
+- **Subject Daily Time Goals**:
+  - `openSubjectTimeModal(subjectName)`: Populates pace goals and custom date inputs.
+  - `saveSubjectTimeGoal()`: Saves time links into `window.subjectTimeLinks[sub]`.
+  - `clearSubjectTimeGoal()`: Resets time link with tombstone tracking.
+- **Subject Editing & Deletion**:
+  - `openSubjectEditModal(subName)`: Opens modal with track, program, and subject name inputs.
+  - `updateEsmProgramDropdown()`: Cascades programs when track changes.
+  - `saveSubjectEditModal()`: Validates uniqueness, handles cross-track migration, and cascades renames across colors, pace goals, passed items, revision data, and time links.
+  - `requestDeleteSubjectFromModal()` & `executeDeleteSubjectFromModal(targetName)`: Confirms and purges subject from syllabus, tasks (converted to Revision), pace goals, passed items, revision data, and time links.
+- **Subject Progress & Navigation Visualizations**:
+  - `renderSubjectNavigation()`: Program and subject filter pill buttons with active highlights.
+  - `renderSubjectProgress(subjectStats)`: Detailed subject progress bars with track summaries and program groupings.
+  - `renderCategoryProgress(subjectStats)`: Radial circular progress cards for each program.
+  - `renderTrackProgress(subjectStats)`: Radial circular progress cards for each track.
+  - `openProgramCompletionsModal(track, programName)`: Modal detailing subject completion percentages for a program or track.
 
 ---
 
-### 5. Page Controller & Script Updates
+### Component 2: Core Metrics (`js/core/`)
 
-#### [MODIFY] [pages/Analytics/Analytics.js](file:///d:/X-29-ADVANCE/X-29-advance-code/pages/Analytics/Analytics.js)
-Refactor into a slim page coordinator delegating to `js/features/analytics/spectra.js`, `heatmap.js`, and `chapterMap.js`.
+#### [NEW] [metrics.js](file:///d:/X-29-ADVANCE/X-29-advance-code/js/core/metrics.js)
+Extract KPI Metrics Calculation Engine:
+- **Calculation Engine (`updateMetrics`)**:
+  - Reentrancy protection guard.
+  - Calculates `subjectStats` for each subject (active chapters, assigned tasks, completed tasks, effective chapters accounting for pass freeze, earliest completed date, actual pace).
+  - Caches `window.lastSubjectStats`.
+  - Computes global completion: `percentage`, `scopeCompleted`, `scopeTotalChapters`, updating DOM elements (`progress-title`, `progress-text`, `progress-detail`, `progress-bar`, `db-progress-text`, etc.).
+  - Computes pace statistics: `window.latestPaceData`, `globalReqPace`, `globalCurPace`, days elapsed, days needed, days remaining, projected finish date, status labels, and contextual comments.
+  - Updates progress doughnut Chart.js instances (`progressChart`, `dbProgressChart`) safely.
+  - Orchestrates downstream updates: `renderSubjectProgress`, `renderSubjectNavigation`, `renderCategoryProgress`, `renderTrackProgress`, `renderPaceGoals`, `renderGlobalPaceTrendChart`.
+- **Ancillary Metrics & Calculators**:
+  - `recalculateTotals()`: Calculates `totalStaticChapters` from `syllabusStructure`.
+  - `updateGlobalDates()`: Updates `AppState.PLAN_START_DATE` and `AppState.PLAN_END_DATE`.
+  - `updateSuccessScore()`: Computes passed subject %, triggers milestone celebration modal (`showCongratsModal`), and updates live pass celebration status.
+  - `updateCountdown()`: Calculates final deadline countdown and days elapsed.
+  - `calculateIndependentEstFinish()`, `calculatePaceGoalStats(goal, subjectStats)`, `getTargetedSubjectsForGoal(goal)`.
 
-#### [MODIFY] [shared/services/timerService.js](file:///d:/X-29-ADVANCE/X-29-advance-code/shared/services/timerService.js)
-Delegate heatmap functions (`renderSpectraFocusHeatmap`, `setSpectraHeatmapRangeUI`, etc.) to `HeatmapAnalytics` in `heatmap.js`.
+---
 
-#### [MODIFY] [js/script.js](file:///d:/X-29-ADVANCE/X-29-advance-code/js/script.js)
-Provide backward-compatible delegation stubs for `generateGlobalChaptersSVG`, `openGlobalChaptersModal`, `showChapterTooltip`, `hideChapterTooltip`, `renderGlobalHistoryContent`, `openGlobalHistoryModal`, `openEditTimelineEntryModal`, `saveTimelineEntryDate`, `renderTrendCharts`, `renderHeatmap`, and remove duplicated monolithic blocks.
+### Component 3: Dashboard Core (`js/features/dashboard/` & `pages/Dashboard/`)
+
+#### [NEW] [dashboard.js](file:///d:/X-29-ADVANCE/X-29-advance-code/js/features/dashboard/dashboard.js)
+Extract Dashboard Overview, KPI Cards, Summaries, and Master UI Orchestrator:
+- **Dashboard Overview & Header**:
+  - Sets top tags, main titles, sub titles, and document titles.
+  - Validates `AppState.currentFilter` against available programs/subjects.
+  - Focus today button: `setupFocusTodayButton()`.
+  - Trends start date controls: `updateTrendsStartDate(newDateStr)`.
+  - Trends settings modal: `openTrendsSettingsModal()`, `selectActivePaceGoal(goalId)`, `saveTrendsSettings()`, `togglePaceSwitch(type, rawId)`.
+- **Dashboard KPI Cards & Trend Bar**:
+  - `updateTrendsBar()`: Renders active pace goal stats (start date, days passed, days remaining, req/act pace, est finish).
+- **Dashboard Summaries & Checklists**:
+  - `renderDashboardDailyChecklist()`: Today's targets and overdue targets with direct completion toggling.
+  - `renderDashboardWeeklyChecklist()`: Active week's targets with range and progress bar.
+  - `renderDashboardMonthlyChecklist()`: Active month's targets with month title and progress bar.
+  - `renderDashboardOutcomeCard()`: Overall CGPA, letter grade, passed subjects count, credit score, and outcome analytics button.
+  - `renderDashboardUpcomingExamCard()`: Nearest scheduled exam routine card with countdown.
+  - `renderDashboardPassedSubjectsCard()`: Passed subjects summary with badges.
+- **Master UI Orchestrator**:
+  - `renderUI()`:
+    - Master boot & refresh orchestrator with reentrancy protection.
+    - Hides loader, displays dashboard content, syncs header.
+    - Updates dates, countdowns, exam tickers, success scores, subject navigation, task list, metrics.
+    - Defer renders: charts, trend bar, daily tracker, habit radar, trend charts, outcome results, dashboard checklists and cards, targets, schedule, and exam pages.
+    - Synchronizes forms, manage UI, priority config, and timer services.
+  - `DashboardPage` lifecycle (`init()`, `mount()`, `render()`, `destroy()`).
+
+#### [MODIFY] [pages/Dashboard/Dashboard.js](file:///d:/X-29-ADVANCE/X-29-advance-code/pages/Dashboard/Dashboard.js)
+Refactor `pages/Dashboard/Dashboard.js` to become a slim coordinator delegating to `js/features/dashboard/dashboard.js`.
+
+---
+
+### Component 4: Integration & Script Cleanup
 
 #### [MODIFY] [index.html](file:///d:/X-29-ADVANCE/X-29-advance-code/index.html)
-Add script tags in `<head>`:
+Add script tags in `<head>` in proper dependency order:
 ```html
-<script src="js/features/analytics/chapterMap.js?v=1.0.19"></script>
-<script src="js/features/analytics/heatmap.js?v=1.0.19"></script>
-<script src="js/features/analytics/history.js?v=1.0.19"></script>
-<script src="js/features/analytics/spectra.js?v=1.0.19"></script>
+<script src="js/features/tasks/taskEngine.js?v=1.0.22"></script>
+<script src="js/features/tasks/subjectGoals.js?v=1.0.22"></script>
+<script src="js/core/metrics.js?v=1.0.22"></script>
+<script src="js/features/dashboard/dashboard.js?v=1.0.22"></script>
 ```
-Add search input into `#global-history-modal` to enable quick timeline searching.
 
----
+#### [MODIFY] [js/script.js](file:///d:/X-29-ADVANCE/X-29-advance-code/js/script.js)
+- Maintain backward-compatible delegation stubs for all extracted functions.
+- Remove monolithic implementations of task execution, task toggling, task modals, subject goals, metrics, and dashboard rendering.
+- Keep application utilities, core state definition, login auth, account settings, modal helpers, and service worker / PWA handlers intact.
 
-### 6. Automated Unit Tests
-
-#### [NEW] [tests/analytics-visualization.test.js](file:///d:/X-29-ADVANCE/X-29-advance-code/tests/analytics-visualization.test.js)
-Comprehensive Node.js test suite validating:
-1. **Chapter SVG Map**:
-   - SVG polar ring generation with global, track, program, and subject filters.
-   - 1-ring vs multi-ring calculation and completion counts.
-   - Modal and tooltip handlers.
-2. **Commitment Matrix**:
-   - Polar coordinate and arc calculations.
-   - Month data retrieval, streak computation, cell toggle for past days vs today.
-   - Commitment labels modal and default reset.
-3. **Focus Heatmap**:
-   - Focus seconds aggregation from logs and running timer.
-   - 30, 90, 180, 365 day range generation and tier badge assignment.
-   - Day detail drill-down (side note update and modal population).
-4. **Global Timeline History**:
-   - Study task and revision event extraction and chronological sorting.
-   - Search filter matching against subjects, chapters, and types.
-   - Date and time editing with timestamp sync.
-5. **Spectra Analytics & Pace Visualizations**:
-   - Filter dropdown cascading selection.
-   - Summary cards calculation.
-   - Trend charts datasets generation and `renderPaceCharts` coordination.
-6. **Chart.js Instance Safety & Router Lifecycle**:
-   - Verification that destroying/re-mounting does not leak instances or cause canvas collisions.
+#### [NEW] [tests/tasks-metrics-dashboard.test.js](file:///d:/X-29-ADVANCE/X-29-advance-code/tests/tasks-metrics-dashboard.test.js)
+Comprehensive Node.js test suite covering:
+1. **Task Execution**: `generateStudyPlan`, `ensureAvailableSlots`, `reorderSubjectChapters`, `rebuildTaskDates`, `findTaskChapter`, `syncTaskChapterCompletion`, `getChaptersForSubject`, `getChapterStatus`, `getSubjectSkippedCount`.
+2. **Task Toggle Engine**: `handleTaskToggle` optimistic card update, cross-task sync, targets database sync (`monthlyTargetsDatabase`, `weeklyTargetsDatabase`, `dailyTargetsDatabase`).
+3. **Task Edit Modal**: `openEditModal`, `toggleSkipTask` (purge targets + tombstone), `saveTaskEdit`, `deleteTask` (shift up).
+4. **Subject Goals & Progress**: `saveSubjectTimeGoal`, `clearSubjectTimeGoal`, `saveSubjectEditModal`, `executeDeleteSubjectFromModal`, `renderSubjectProgress`, `renderCategoryProgress`, `renderTrackProgress`.
+5. **KPI Metrics Engine**: `updateMetrics` calculation of `subjectStats`, global completion %, pace data (`curPace`, `reqPace`, `daysNeeded`, `projectedDate`), `recalculateTotals`, `updateSuccessScore`, `updateCountdown`.
+6. **Dashboard Overview & KPI Cards**: `updateTrendsBar`, `setupFocusTodayButton`, `openTrendsSettingsModal`.
+7. **Dashboard Summaries & Checklists**: `renderDashboardDailyChecklist`, `renderDashboardWeeklyChecklist`, `renderDashboardMonthlyChecklist`, `renderDashboardOutcomeCard`, `renderDashboardUpcomingExamCard`, `renderDashboardPassedSubjectsCard`.
+8. **Dashboard Orchestrator**: `renderUI` and `DashboardPage` lifecycle.
 
 #### [MODIFY] [package.json](file:///d:/X-29-ADVANCE/X-29-advance-code/package.json)
-Add `"test:analytics": "node tests/analytics-visualization.test.js"` script.
+Add `"test:tasks-metrics-dashboard": "node tests/tasks-metrics-dashboard.test.js"`.
 
 ---
 
 ## Verification Plan
 
 ### Automated Tests
-- `npm run test:config` (Batch 4 verification)
-- `npm run test:pace-outcome` (Batch 5 verification)
-- `npm run test:analytics` (Batch 6 verification)
+1. Run newly created test suite:
+   ```powershell
+   npm run test:tasks-metrics-dashboard
+   ```
+2. Run all existing test suites to ensure 0 regressions across Phase 2:
+   ```powershell
+   npm run test:config
+   npm run test:pace-outcome
+   npm run test:analytics
+   npm run test:targets
+   npm run test:weekly
+   npm run test:monthly
+   ```
 
 ### Manual & Browser Verification
-- Load `http://localhost:3000/` and navigate to:
-  - **Analytics Page**:
-    - Verify Circle charts render with filters (Global, Track, Program, Subject).
-    - Verify Commitment Matrix renders, cells toggle, and month navigation works.
-    - Verify Focus Heatmap renders with 30/90/180/365 range selectors.
-    - Hover on heatmap boxes to test tooltips; click box to test Side Note panel and Day Detail modal.
-    - Verify Trend Charts and Pacing Trend charts (X Bar and Global Scope) render cleanly.
-  - **History Database Modal**:
-    - Open modal from Subjects page / global trigger.
-    - Test Timeline Entry, Subject Folder, and Trend Chart tabs.
-    - Test Timeline search filter.
-    - Click edit icon on an entry, update date/time, and verify save.
-  - **Navigation**:
-    - Navigate away from Analytics to Dashboard / Pace / Outcome and back to Analytics.
-    - Verify zero console errors, no duplicate Chart instances, and no blank canvases.
+- Load `http://localhost:3000/` and test:
+  - **Dashboard Overview**: KPI cards, Top header tags, Trend bar, Progress doughnut chart.
+  - **Dashboard Checklists**: Daily, Weekly, and Monthly target checklists, toggle completion.
+  - **Dashboard Cards**: Outcome summary card, upcoming exam card, passed subjects card.
+  - **Task List**: Filter by program / subject, complete task, uncomplete task, edit task modal, skip chapter, delete task.
+  - **Subject Management**: Subject Daily Time Goals modal, subject edit modal, subject progress bars, track progress, category progress.
+  - **Router & Navigation**: Navigate across Dashboard, Analytics, Focus Timer, Daily Schedule, Targets, Exam Routine, Outcome, Pace, Master Config.
+  - **Console & Network**: Verify zero JavaScript runtime errors, clean Chart.js instances, and proper Firebase listeners.
+
+### Final Git Commit
+Once verified, stage all changes and create the final Phase 2 commit:
+```powershell
+git add .
+git commit -m "refactor: complete X-29 feature modularization"
+git status
+git log --oneline --decorate -20
+```
