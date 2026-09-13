@@ -116,6 +116,14 @@
                     </div>`;
                 gridContainer.innerHTML += cardHtml;
             });
+
+            if (typeof renderDailyLogs === 'function') {
+                renderDailyLogs();
+            } else if (typeof global.renderDailyLogs === 'function') {
+                global.renderDailyLogs();
+            } else if (typeof window !== 'undefined' && typeof window.renderDailyLogs === 'function') {
+                window.renderDailyLogs();
+            }
         }
 
         // Render compact version for Dashboard (Max 4 items per row, auto-fit rows)

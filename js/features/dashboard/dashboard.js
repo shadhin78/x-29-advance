@@ -1481,7 +1481,6 @@
                 if (typeof window.renderSchedulePage === 'function') window.renderSchedulePage();
                 if (typeof window.renderExamPage === 'function') window.renderExamPage();
                 if (typeof window.updateActiveScheduleSlot === 'function') window.updateActiveScheduleSlot();
-                if (typeof window.renderDailyTracker === 'function') window.renderDailyTracker();
             }, 20);
 
             // Dynamic Form & Manage UI Syncs
