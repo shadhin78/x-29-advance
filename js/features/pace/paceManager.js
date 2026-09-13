@@ -773,18 +773,123 @@
      */
     function openGoalDetailsModal(goalId) {
         const goalsList = global.paceGoals || (typeof window !== 'undefined' && window.paceGoals) || [];
-        const goal = goalsList.find(g => g.id === goalId);
+        const goal = (goalId ? goalsList.find(g => g.id === goalId) : null) || (goalsList.length > 0 ? goalsList[0] : null);
         if (!goal) return;
 
         if (!global.lastSubjectStats && typeof global.updateMetrics === 'function') {
             global.updateMetrics();
         }
         const subjectStats = global.lastSubjectStats || {};
-        const stats = typeof global.calculatePaceGoalStats === 'function'
-            ? global.calculatePaceGoalStats(goal, subjectStats)
-            : null;
+        let stats = null;
+        try {
+            stats = typeof global.calculatePaceGoalStats === 'function'
+                ? global.calculatePaceGoalStats(goal, subjectStats)
+                : null;
+        } catch (err) {
+            console.warn('calculatePaceGoalStats failed in openGoalDetailsModal:', err);
+        }
         if (!stats) return;
 
+        const {
+            total, completed, remaining, percentage,
+            startDate, targetDate, reqPaceVal, curPaceVal
+        } = stats;
+
+        let scopeHtml = '';
+        if (goal.type === 'global') {
+            const isManual = goal.subjects || goal.secondaryPaces;
+            if (isManual) {
+                let detailText = `Manually mapped ${goal.subjects ? goal.subjects.length : 0} explicit Subjects and ${goal.secondaryPaces ? goal.secondaryPaces.length : 0} Secondary Paces.`;
+                scopeHtml = `<div class="text-[10px] md:text-xs font-bold text-slate-500 dark:text-slate-400 mb-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 p-3 rounded-xl shadow-sm">${detailText}</div>`;
+            } else {
+                scopeHtml = `<div class="text-[10px] md:text-xs font-bold text-slate-500 dark:text-slate-400 mb-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 p-3 rounded-xl shadow-sm">Aggregates mapped subjects intersecting with the Global Timeline bounds.</div>`;
+            }
+        } else if (goal.type === 'bundle') {
+            if (goal.subjects && goal.subjects.length > 0) {
+                scopeHtml = `<div class="text-[10px] md:text-xs font-bold text-slate-500 dark:text-slate-400 mb-3 bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-800 p-3 rounded-xl shadow-sm">Custom explicit selection of ${goal.subjects.length} subjects.</div>`;
+            } else if (goal.programs && goal.programs.length > 0) {
+                let pList = goal.programs.join(', ');
+                scopeHtml = `<div class="text-[10px] md:text-xs font-bold text-slate-500 dark:text-slate-400 mb-3 bg-violet-50 dark:bg-violet-900/20 border border-violet-100 dark:border-violet-800 p-3 rounded-xl shadow-sm">Programs Scoped: <span class="text-violet-600 dark:text-violet-400">${pList}</span></div>`;
+            }
+        } else if (goal.type === 'program') {
+            scopeHtml = `<div class="text-[10px] md:text-xs font-bold text-slate-500 dark:text-slate-400 mb-3 bg-violet-50 dark:bg-violet-900/20 border border-violet-100 dark:border-violet-800 p-3 rounded-xl shadow-sm">Program Scoped: <span class="text-violet-600 dark:text-violet-400">${goal.target}</span></div>`;
+        }
+
+        const AppStateRef = typeof global.AppState !== 'undefined' ? global.AppState : (typeof window !== 'undefined' ? window.AppState : {});
+        const passedItems = global.passedItems || (AppStateRef && AppStateRef.passedItems) || { programs: [], subjects: [] };
+
+        const targetedSubjects = stats.targetedSubjects || (typeof global.getTargetedSubjectsForGoal === 'function' ? global.getTargetedSubjectsForGoal(goal) : new Set());
+        const targetedSet = targetedSubjects instanceof Set ? targetedSubjects : new Set(targetedSubjects || []);
+
+        let subjectsListHtml = '<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 md:gap-3">';
+        const allSubs = typeof global.getAllSubjects === 'function' ? global.getAllSubjects() : [];
+
+        targetedSet.forEach(sub => {
+            const sObj = allSubs.find(s => s && s.subject === sub);
+            const subStat = (subjectStats && subjectStats[sub]) || { totalChapters: sObj ? (sObj.chapters || 0) : 0, effectiveChapters: 0 };
+            const sChTotal = subStat.totalChapters || (sObj ? sObj.chapters : 0) || 0;
+            const sChDone = Math.round(subStat.effectiveChapters || 0);
+            const sPct = sChTotal > 0 ? Math.round((sChDone / sChTotal) * 100) : 0;
+            const color = typeof global.getSubjectColor === 'function' ? global.getSubjectColor(sub) : '#10b981';
+            const progName = sObj ? sObj.program : '';
+            const displaySub = sub.replace(progName + ' - ', '').replace(progName + ' ', '');
+
+            subjectsListHtml += `
+                <div class="p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 flex flex-col gap-1.5 shadow-sm hover:border-emerald-300 dark:hover:border-emerald-700 transition-all">
+                    <div class="flex justify-between items-start mb-0.5">
+                        <div class="flex flex-col pr-2 min-w-0">
+                            <span class="text-[8px] font-black uppercase tracking-widest text-slate-400 mb-0.5 truncate">${progName || 'General'}</span>
+                            <span class="text-[10px] md:text-xs font-bold text-slate-700 dark:text-slate-300 leading-tight truncate" title="${sub}">
+                                <div class="inline-block w-1.5 h-1.5 rounded-full mr-1.5 mb-[1px]" style="background-color: ${color}"></div>${displaySub}
+                            </span>
+                        </div>
+                        <span class="text-[9px] md:text-[10px] font-black text-slate-500 shrink-0 bg-white dark:bg-slate-800 px-1.5 py-0.5 rounded shadow-sm border border-slate-100 dark:border-slate-700">${sChDone} / ${sChTotal}</span>
+                    </div>
+                    <div class="w-full bg-slate-200 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden mt-auto">
+                        <div class="h-full rounded-full transition-all duration-700 shadow-sm" style="width: ${sPct}%; background-color: ${color}"></div>
+                    </div>
+                </div>`;
+        });
+        subjectsListHtml += '</div>';
+
+        if (targetedSet.size === 0) {
+            subjectsListHtml = '<div class="p-6 text-center border border-dashed border-slate-200 dark:border-slate-700 rounded-2xl"><p class="text-xs font-bold text-slate-400">No subjects currently mapped or active in this scope.</p></div>';
+        }
+
+        // Set values on elements
+        const titleEl = document.getElementById('gdm-title');
+        if (titleEl) titleEl.textContent = goal.target || 'Target Breakdown';
+        if (typeof global.safeSetText === 'function') global.safeSetText('gdm-title', goal.target || 'Target Breakdown');
+
+        const startStr = startDate ? (startDate instanceof Date ? startDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' }) : String(startDate)) : '';
+        const endStr = targetDate ? (targetDate instanceof Date ? targetDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' }) : String(targetDate)) : '';
+        const timelineText = (startStr && endStr) ? `Timeline: ${startStr} - ${endStr}` : 'Timeline Dates';
+
+        const datesEl = document.getElementById('gdm-dates');
+        if (datesEl) datesEl.textContent = timelineText;
+        if (typeof global.safeSetText === 'function') global.safeSetText('gdm-dates', timelineText);
+
+        const reqValText = (typeof reqPaceVal === 'number') ? reqPaceVal.toFixed(2) : (stats.reqPace || '--');
+        const statReqEl = document.getElementById('gdm-stat-req');
+        if (statReqEl) statReqEl.textContent = reqValText;
+        if (typeof global.safeSetText === 'function') global.safeSetText('gdm-stat-req', reqValText);
+
+        const curValText = (typeof curPaceVal === 'number') ? curPaceVal.toFixed(2) : (stats.curPace || '--');
+        const statCurEl = document.getElementById('gdm-stat-cur');
+        if (statCurEl) statCurEl.textContent = curValText;
+        if (typeof global.safeSetText === 'function') global.safeSetText('gdm-stat-cur', curValText);
+
+        const remValText = (typeof remaining === 'number') ? remaining.toFixed(1) : (stats.remaining || '--');
+        const statRemEl = document.getElementById('gdm-stat-rem');
+        if (statRemEl) statRemEl.textContent = remValText;
+        if (typeof global.safeSetText === 'function') global.safeSetText('gdm-stat-rem', remValText);
+
+        const scopeListEl = document.getElementById('gdm-scope-list');
+        if (scopeListEl) {
+            scopeListEl.innerHTML = scopeHtml + subjectsListHtml;
+        }
+
+        // Legacy and automated test environment fallback elements
         const targetEl = document.getElementById('gdm-target');
         const totalChEl = document.getElementById('gdm-total-ch');
         const doneChEl = document.getElementById('gdm-done-ch');
@@ -795,10 +900,6 @@
         const curPaceEl = document.getElementById('gdm-cur-pace');
         const reqPaceEl = document.getElementById('gdm-req-pace');
         const estFinishEl = document.getElementById('gdm-est-finish');
-
-        const formatDate = (typeof global.Utils !== 'undefined' && typeof global.Utils.formatDateResponsive === 'function')
-            ? global.Utils.formatDateResponsive
-            : (d => d ? new Date(d).toLocaleDateString('en-GB') : '');
 
         if (targetEl) targetEl.textContent = goal.target;
         if (totalChEl) totalChEl.textContent = stats.total;
@@ -811,18 +912,10 @@
         if (reqPaceEl) reqPaceEl.textContent = `${stats.reqPace} ch/day`;
         if (estFinishEl) estFinishEl.innerHTML = stats.finishDisplay;
 
-        // Populate targeted subjects breakdown table
         const tbody = document.getElementById('gdm-subjects-tbody');
         if (tbody) {
             let trs = '';
-            const targetedSubjects = typeof global.getTargetedSubjectsForGoal === 'function'
-                ? global.getTargetedSubjectsForGoal(goal)
-                : new Set();
-
-            const AppStateRef = typeof global.AppState !== 'undefined' ? global.AppState : (typeof window !== 'undefined' ? window.AppState : {});
-            const passedItems = global.passedItems || (AppStateRef && AppStateRef.passedItems) || { programs: [], subjects: [] };
-
-            targetedSubjects.forEach(sub => {
+            targetedSet.forEach(sub => {
                 const subStat = subjectStats[sub] || {};
                 const tot = subStat.totalChapters || 0;
                 const done = Math.round(subStat.effectiveChapters || 0);

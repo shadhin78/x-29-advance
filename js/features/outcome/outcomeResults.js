@@ -125,8 +125,9 @@
      */
     function getProgramMainTarget(progName) {
         let targetCGPA = '';
-        const customPrograms = global.customPrograms || (typeof window !== 'undefined' ? window.customPrograms : {}) || {};
-        const successResults = global.successResults || (typeof window !== 'undefined' ? window.successResults : []) || [];
+        const AppStateRef = (typeof global.AppState !== 'undefined' && global.AppState) || (typeof window !== 'undefined' && window.AppState) || {};
+        const customPrograms = global.customPrograms || (AppStateRef && AppStateRef.customPrograms) || (typeof window !== 'undefined' ? window.customPrograms : {}) || {};
+        const successResults = global.successResults || (AppStateRef && AppStateRef.successResults) || (typeof window !== 'undefined' ? window.successResults : []) || [];
         const parseDate = (typeof global.Utils !== 'undefined' && typeof global.Utils.parseDateSafe === 'function')
             ? global.Utils.parseDateSafe
             : (d => new Date(d));
@@ -179,7 +180,8 @@
      * @returns {Array<Object>} Processed result items
      */
     function getProcessedResults() {
-        const rawResults = global.successResults || (typeof window !== 'undefined' ? window.successResults : []) || [];
+        const AppStateRef = (typeof global.AppState !== 'undefined' && global.AppState) || (typeof window !== 'undefined' && window.AppState) || {};
+        const rawResults = global.successResults || (AppStateRef && AppStateRef.successResults) || (typeof window !== 'undefined' ? window.successResults : []) || [];
         if (!Array.isArray(rawResults)) return [];
 
         const groups = {};

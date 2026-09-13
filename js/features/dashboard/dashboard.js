@@ -726,106 +726,587 @@
     }
 
     function renderDashboardOutcomeCard() {
-        const cgpaEl = safeGetEl('db-outcome-cgpa');
-        const gradeEl = safeGetEl('db-outcome-grade');
-        const passedEl = safeGetEl('db-outcome-passed');
-        const creditEl = safeGetEl('db-outcome-credit');
-        if (!cgpaEl && !gradeEl && !passedEl) return;
+        const cardEl = safeGetEl('dashboard-outcome-section');
+        const overallBadgeEl = safeGetEl('db-outcome-overall-badge');
+        const listEl = safeGetEl('db-outcome-program-list');
 
-        let totalCredit = 0;
-        let totalScore = 0;
-        let passedCount = 0;
-
-        const results = (typeof window.getProcessedResults === 'function')
+        const AppStateRef = (typeof window !== 'undefined' && window.AppState) || (typeof global !== 'undefined' && global.AppState) || {};
+        let activeResults = (typeof window.getProcessedResults === 'function')
             ? window.getProcessedResults()
             : (window.OutcomeResults && typeof window.OutcomeResults.getProcessedResults === 'function'
                 ? window.OutcomeResults.getProcessedResults()
                 : []);
+        if ((!activeResults || activeResults.length === 0) && AppStateRef && AppStateRef.successResults && AppStateRef.successResults.length > 0) {
+            if (typeof window !== 'undefined') window.successResults = AppStateRef.successResults;
+            activeResults = (typeof window.getProcessedResults === 'function')
+                ? window.getProcessedResults()
+                : (window.OutcomeResults && typeof window.OutcomeResults.getProcessedResults === 'function'
+                    ? window.OutcomeResults.getProcessedResults()
+                    : AppStateRef.successResults);
+        }
 
-        if (Array.isArray(results)) {
-            results.forEach(r => {
-                if (r.cgpa !== undefined && r.cgpa !== null && !isNaN(parseFloat(r.cgpa))) {
-                    const c = parseFloat(r.credit) || 3;
-                    totalCredit += c;
-                    totalScore += parseFloat(r.cgpa) * c;
-                    if (parseFloat(r.cgpa) >= 2.0) passedCount++;
+        // Group only logged results by program name
+        const programGroups = {};
+        const achievements = [];
+
+        if (Array.isArray(activeResults)) {
+            activeResults.forEach(res => {
+                if (!res) return;
+                if (res.type === 'cgpa') {
+                    const progName = res.title || '';
+                    if (!progName) return;
+                    if (!programGroups[progName]) {
+                        programGroups[progName] = {
+                            name: progName,
+                            overall: null,
+                            subjects: [],
+                            date: res.date
+                        };
+                    }
+                    const parseDate = (typeof Utils !== 'undefined' && typeof Utils.parseDateSafe === 'function')
+                        ? Utils.parseDateSafe
+                        : (d => new Date(d));
+                    if (parseDate(res.date) > parseDate(programGroups[progName].date)) {
+                        programGroups[progName].date = res.date;
+                    }
+                    if (!res.subject) {
+                        programGroups[progName].overall = res;
+                    } else {
+                        programGroups[progName].subjects.push(res);
+                    }
+                } else {
+                    achievements.push(res);
                 }
             });
         }
 
-        const overallCgpa = totalCredit > 0 ? (totalScore / totalCredit).toFixed(2) : '--';
-        const grade = (overallCgpa !== '--' && typeof Utils !== 'undefined' && typeof Utils.mapCgpaToGrade === 'function')
-            ? Utils.mapCgpaToGrade(overallCgpa)
-            : '--';
+        const inputtedItems = [];
 
-        if (cgpaEl) cgpaEl.textContent = overallCgpa;
-        if (gradeEl) gradeEl.textContent = grade;
-        if (passedEl) passedEl.textContent = `${passedCount} Passed`;
-        if (creditEl) creditEl.textContent = `${totalCredit} Credits`;
+        // Filter and collect ONLY programs with actual user input / logged scores
+        Object.values(programGroups).forEach(group => {
+            const progName = group.name;
+            const overall = group.overall;
+            const subjects = group.subjects;
+
+            const hasOverallScore = Boolean(overall && ((overall.value && overall.value !== '') || (overall.grade && overall.grade !== '')));
+            const hasSubjectScores = subjects.some(s => (s.value && s.value !== '') || (s.grade && s.grade !== ''));
+
+            // If no scores inputted at all, exclude from card
+            if (!hasOverallScore && !hasSubjectScores) return;
+
+            const evalType = (overall && overall.evaluationType) || (subjects.length > 0 && subjects[0].evaluationType) || 'cgpa';
+            const isGradeMode = evalType === 'grade';
+
+            let actCgpa = overall?.value || '';
+            let actGrade = overall?.grade || '';
+
+            if (!actCgpa && !actGrade && subjects.length > 0) {
+                const subjectsWithScores = subjects.filter(s => s.value && !isNaN(parseFloat(s.value)));
+                if (subjectsWithScores.length > 0) {
+                    const sum = subjectsWithScores.reduce((acc, s) => acc + parseFloat(s.value), 0);
+                    const avg = sum / subjectsWithScores.length;
+                    actCgpa = (typeof Utils !== 'undefined' && typeof Utils.formatCgpaMin2Dec === 'function')
+                        ? Utils.formatCgpaMin2Dec(avg)
+                        : avg.toFixed(2);
+                    actGrade = (typeof Utils !== 'undefined' && typeof Utils.mapCgpaToGrade === 'function')
+                        ? Utils.mapCgpaToGrade(avg, evalType)
+                        : '';
+                }
+            }
+
+            if (!actGrade && actCgpa && !isNaN(parseFloat(actCgpa))) {
+                actGrade = (typeof Utils !== 'undefined' && typeof Utils.mapCgpaToGrade === 'function')
+                    ? Utils.mapCgpaToGrade(parseFloat(actCgpa), evalType)
+                    : '';
+            }
+            if (!actCgpa && actGrade) {
+                actCgpa = (typeof Utils !== 'undefined' && typeof Utils.mapGradeToNumeric === 'function' && typeof Utils.formatCgpaMin2Dec === 'function')
+                    ? Utils.formatCgpaMin2Dec(Utils.mapGradeToNumeric(actGrade, evalType))
+                    : '';
+            }
+
+            const mainTarget = typeof window.getProgramMainTarget === 'function'
+                ? window.getProgramMainTarget(progName)
+                : { targetCGPA: '', targetGrade: '' };
+            const targetCGPA = (overall && overall.targetCGPA) || mainTarget.targetCGPA || '';
+            const targetGrade = (overall && overall.targetGrade) || mainTarget.targetGrade || (targetCGPA && targetCGPA !== 'none' && typeof Utils !== 'undefined' && typeof Utils.mapCgpaToGrade === 'function' ? Utils.mapCgpaToGrade(targetCGPA, evalType) : '');
+
+            const hasTgt = targetCGPA && targetCGPA !== 'none' && targetCGPA !== '';
+
+            let isGoalMet = false;
+            if (hasTgt) {
+                if (isGradeMode && actGrade && targetGrade && targetGrade !== 'none' && typeof Utils !== 'undefined' && typeof Utils.mapGradeToNumeric === 'function') {
+                    isGoalMet = Utils.mapGradeToNumeric(actGrade, 'grade') >= Utils.mapGradeToNumeric(targetGrade, 'grade');
+                } else if (actCgpa && targetCGPA) {
+                    const actVal = parseFloat(actCgpa);
+                    const tgtVal = parseFloat(targetCGPA);
+                    if (!isNaN(actVal) && !isNaN(tgtVal)) {
+                        isGoalMet = actVal >= tgtVal;
+                    }
+                }
+            }
+
+            const color = typeof window.getProgramColor === 'function' ? window.getProgramColor(progName) : '#eab308';
+
+            inputtedItems.push({
+                type: 'program',
+                name: progName,
+                date: group.date,
+                hasTgt,
+                tgtCgpa: hasTgt ? (isNaN(parseFloat(targetCGPA)) ? targetCGPA : (typeof Utils !== 'undefined' && typeof Utils.formatCgpaMin2Dec === 'function' ? Utils.formatCgpaMin2Dec(targetCGPA) : targetCGPA)) : '—',
+                tgtGrade: hasTgt ? (targetGrade || '—') : '—',
+                actCgpa: actCgpa ? (isNaN(parseFloat(actCgpa)) ? actCgpa : (typeof Utils !== 'undefined' && typeof Utils.formatCgpaMin2Dec === 'function' ? Utils.formatCgpaMin2Dec(actCgpa) : actCgpa)) : '—',
+                actGrade: actGrade || '—',
+                isGradeMode,
+                isGoalMet,
+                color: color
+            });
+        });
+
+        // Also include non-CGPA achievements that were inputted
+        achievements.forEach(ach => {
+            if (!ach) return;
+            inputtedItems.push({
+                type: 'achievement',
+                name: ach.title || 'Achievement',
+                date: ach.date,
+                hasTgt: false,
+                tgtCgpa: '—',
+                tgtGrade: '—',
+                actCgpa: ach.value || '—',
+                actGrade: ach.grade || '—',
+                isGradeMode: false,
+                isGoalMet: false,
+                color: '#f59e0b'
+            });
+        });
+
+        // Sort by date according to the chosen/saved order
+        const sortOrder = window.outcomeDateSortOrder || (typeof safeStorage !== 'undefined' ? safeStorage.getItem('outcome_date_sort_order') : null) || 'desc';
+        const isAsc = sortOrder === 'asc';
+
+        inputtedItems.sort((a, b) => {
+            const parseDate = (typeof Utils !== 'undefined' && typeof Utils.parseDateSafe === 'function')
+                ? Utils.parseDateSafe
+                : (d => new Date(d));
+            const timeA = parseDate(a.date).getTime();
+            const timeB = parseDate(b.date).getTime();
+            return isAsc ? (timeA - timeB) : (timeB - timeA);
+        });
+
+        // Calculate overall stats for badge
+        let targetSum = 0;
+        let targetCount = 0;
+        let actualSum = 0;
+        let actualCount = 0;
+
+        inputtedItems.forEach(item => {
+            if (item.hasTgt && item.tgtCgpa !== '—') {
+                const val = parseFloat(item.tgtCgpa);
+                if (!isNaN(val) && val > 0) {
+                    targetSum += val;
+                    targetCount++;
+                }
+            }
+            if (item.actCgpa !== '—') {
+                const val = parseFloat(item.actCgpa);
+                if (!isNaN(val) && val > 0) {
+                    actualSum += val;
+                    actualCount++;
+                }
+            }
+        });
+
+        const avgTargetCgpa = targetCount > 0 ? (targetSum / targetCount) : null;
+        const avgActualCgpa = actualCount > 0 ? (actualSum / actualCount) : null;
+
+        // Overall Badge Status
+        if (overallBadgeEl) {
+            if (actualCount > 0 && targetCount > 0) {
+                if (avgActualCgpa >= avgTargetCgpa) {
+                    overallBadgeEl.className = 'text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg border bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/50 shadow-xs';
+                    overallBadgeEl.textContent = 'Goal Met';
+                } else {
+                    overallBadgeEl.className = 'text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg border bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-800/50 shadow-xs';
+                    overallBadgeEl.textContent = 'In Progress';
+                }
+            } else if (actualCount > 0) {
+                overallBadgeEl.className = 'text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg border bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800/50 shadow-xs';
+                overallBadgeEl.textContent = 'Logged';
+            } else {
+                overallBadgeEl.className = 'text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg border bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700';
+                overallBadgeEl.textContent = 'No Results';
+            }
+        }
+
+        // Render [ Name - Target - Actual ] List
+        if (listEl) {
+            if (inputtedItems.length === 0) {
+                listEl.innerHTML = `
+                    <div class="h-full flex flex-col items-center justify-center py-4 text-center select-none">
+                        <span class="text-2xl mb-1.5 opacity-50">🏆</span>
+                        <p class="text-xs font-black text-slate-600 dark:text-slate-300">No results logged yet</p>
+                        <p class="text-[9px] text-slate-400 mt-0.5 mb-2.5">Input your BBA, CA or program scores</p>
+                        <button onclick="window.openResultModal()" class="text-[9px] font-black uppercase tracking-wider px-3 py-1.5 bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl transition-all active:scale-95 shadow-xs flex items-center gap-1.5 cursor-pointer">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+                            <span>Add Result</span>
+                        </button>
+                    </div>`;
+            } else {
+                let html = '';
+                inputtedItems.forEach(item => {
+                    if (item.type === 'program') {
+                        const tgtDisplay = item.hasTgt
+                            ? (item.isGradeMode ? `${item.tgtGrade}` : `${item.tgtCgpa}`)
+                            : '—';
+                        const tgtSub = item.hasTgt
+                            ? (item.isGradeMode ? `CGPA ${item.tgtCgpa}` : (item.tgtGrade !== '—' ? `(${item.tgtGrade})` : ''))
+                            : 'No Target';
+
+                        const actDisplay = item.isGradeMode
+                            ? `${item.actGrade !== '—' ? item.actGrade : item.actCgpa}`
+                            : `${item.actCgpa !== '—' ? item.actCgpa : item.actGrade}`;
+                        const actSub = item.isGradeMode
+                            ? `CGPA ${item.actCgpa}`
+                            : (item.actGrade !== '—' ? `(${item.actGrade})` : '');
+
+                        const statusBadge = item.hasTgt
+                            ? (item.isGoalMet
+                                ? `<span class="text-[7px] font-black px-1.5 py-0.25 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 rounded border border-emerald-200 dark:border-emerald-800/50">MET</span>`
+                                : `<span class="text-[7px] font-black px-1.5 py-0.25 bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 rounded border border-rose-200 dark:border-rose-800/50">NOT MET</span>`)
+                            : `<span class="text-[7px] font-black px-1.5 py-0.25 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 rounded border border-blue-200 dark:border-blue-800/50">LOGGED</span>`;
+
+                        html += `
+                            <div class="p-2 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-800 transition-all flex items-center justify-between gap-2 shadow-2xs select-none">
+                                <!-- [ Name ] -->
+                                <div class="flex items-center space-x-2.5 min-w-0 flex-1">
+                                    <div class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${item.color}; box-shadow: 0 0 6px ${item.color}"></div>
+                                    <div class="min-w-0">
+                                        <span class="font-black text-xs text-slate-800 dark:text-slate-100 truncate block leading-tight">${item.name}</span>
+                                        <div class="flex items-center gap-1.5 mt-0.5">
+                                            <span class="text-[8px] font-extrabold uppercase text-slate-400">${item.isGradeMode ? 'Grade' : 'CGPA'}</span>
+                                            ${statusBadge}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- [ Target ] -->
+                                <div class="flex flex-col items-center px-2.5 py-1 rounded-xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200/50 dark:border-amber-800/40 shrink-0 min-w-[76px] text-center">
+                                    <span class="text-[8px] font-black uppercase tracking-wider text-amber-600 dark:text-amber-400 leading-none">Target</span>
+                                    <span class="text-xs font-black text-slate-800 dark:text-slate-200 leading-tight mt-0.5">${tgtDisplay}</span>
+                                    ${tgtSub ? `<span class="text-[7.5px] font-bold text-slate-400 dark:text-slate-500 leading-none mt-0.5 truncate max-w-[70px]">${tgtSub}</span>` : ''}
+                                </div>
+
+                                <!-- [ Actual ] -->
+                                <div class="flex flex-col items-center px-2.5 py-1 rounded-xl ${item.isGoalMet ? 'bg-emerald-50/70 dark:bg-emerald-950/30 border-emerald-200/50 dark:border-emerald-800/40' : 'bg-slate-100/80 dark:bg-slate-800/80 border-slate-200/50 dark:border-slate-700/50'} border shrink-0 min-w-[76px] text-center">
+                                    <span class="text-[8px] font-black uppercase tracking-wider ${item.isGoalMet ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'} leading-none">Actual</span>
+                                    <span class="text-xs font-black ${item.isGoalMet ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-900 dark:text-white'} leading-tight mt-0.5">${actDisplay}</span>
+                                    ${actSub ? `<span class="text-[7.5px] font-bold text-slate-400 dark:text-slate-500 leading-none mt-0.5 truncate max-w-[70px]">${actSub}</span>` : ''}
+                                </div>
+                            </div>`;
+                    } else {
+                        html += `
+                            <div class="p-2 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-800 transition-all flex items-center justify-between gap-2 shadow-2xs select-none">
+                                <!-- [ Name ] -->
+                                <div class="flex items-center space-x-2.5 min-w-0 flex-1">
+                                    <div class="w-2.5 h-2.5 rounded-full shrink-0 bg-yellow-500 shadow-[0_0_6px_rgba(234,179,8,0.6)]"></div>
+                                    <div class="min-w-0">
+                                        <span class="font-black text-xs text-slate-800 dark:text-slate-100 truncate block leading-tight">${item.name}</span>
+                                        <span class="text-[8px] font-extrabold uppercase text-slate-400">Achievement</span>
+                                    </div>
+                                </div>
+
+                                <!-- [ Target ] -->
+                                <div class="flex flex-col items-center px-2.5 py-1 rounded-xl bg-slate-100/60 dark:bg-slate-800/60 border border-slate-200/50 dark:border-slate-700/50 shrink-0 min-w-[76px] text-center">
+                                    <span class="text-[8px] font-black uppercase tracking-wider text-slate-400 leading-none">Target</span>
+                                    <span class="text-xs font-bold text-slate-400 leading-tight mt-0.5">—</span>
+                                </div>
+
+                                <!-- [ Actual ] -->
+                                <div class="flex flex-col items-center px-2.5 py-1 rounded-xl bg-yellow-50/70 dark:bg-yellow-950/30 border border-yellow-200/50 dark:border-yellow-800/40 shrink-0 min-w-[76px] text-center">
+                                    <span class="text-[8px] font-black uppercase tracking-wider text-yellow-600 dark:text-yellow-400 leading-none">Actual</span>
+                                    <span class="text-xs font-black text-yellow-600 dark:text-yellow-400 leading-tight mt-0.5">${item.actCgpa}</span>
+                                </div>
+                            </div>`;
+                    }
+                });
+                listEl.innerHTML = html;
+            }
+        }
+
+        // Test environment fallback elements
+        const cgpaEl = safeGetEl('db-outcome-cgpa');
+        const gradeEl = safeGetEl('db-outcome-grade');
+        const passedEl = safeGetEl('db-outcome-passed');
+        const creditEl = safeGetEl('db-outcome-credit');
+        const progressValEl = safeGetEl('db-outcome-progress-val');
+        if (progressValEl) progressValEl.textContent = avgActualCgpa ? avgActualCgpa.toFixed(2) : '--';
+        if (cgpaEl) cgpaEl.textContent = avgActualCgpa ? avgActualCgpa.toFixed(2) : '--';
+        if (gradeEl) gradeEl.textContent = (avgActualCgpa && typeof Utils !== 'undefined' && typeof Utils.mapCgpaToGrade === 'function') ? Utils.mapCgpaToGrade(avgActualCgpa) : '--';
+        if (passedEl) passedEl.textContent = `${inputtedItems.length} Logged`;
+        if (creditEl) creditEl.textContent = `-- Credits`;
     }
 
     function renderDashboardUpcomingExamCard() {
-        const titleEl = safeGetEl('db-upcoming-exam-title');
-        const subEl = safeGetEl('db-upcoming-exam-subtitle');
-        const dateEl = safeGetEl('db-upcoming-exam-date');
-        const timeEl = safeGetEl('db-upcoming-exam-time');
-        const countdownEl = safeGetEl('db-upcoming-exam-countdown');
-        if (!titleEl) return;
+        const cardEl = safeGetEl('dashboard-upcoming-exams-section');
+        const countBadgeEl = safeGetEl('db-upcoming-exams-count-badge');
+        const listEl = safeGetEl('db-upcoming-exams-list');
 
-        let nearestExam = null;
-        let minDiff = Infinity;
-        const now = new Date().getTime();
+        // Test environment fallback elements
+        const testTitleEl = safeGetEl('db-upcoming-exam-title');
+        const testSubEl = safeGetEl('db-upcoming-exam-subtitle');
+        const testDateEl = safeGetEl('db-upcoming-exam-date');
+        const testTimeEl = safeGetEl('db-upcoming-exam-time');
+        const testCountdownEl = safeGetEl('db-upcoming-exam-countdown');
 
-        if (Array.isArray(window.examRoutineData)) {
-            window.examRoutineData.forEach(exam => {
-                if (!exam.date) return;
-                const examDateTime = new Date(`${exam.date}T${exam.startTime || '09:00:00'}`).getTime();
-                const diff = examDateTime - now;
-                if (diff > 0 && diff < minDiff) {
-                    minDiff = diff;
-                    nearestExam = exam;
-                }
-            });
+        const exams = (window.AppState && window.AppState.examRoutine) ? window.AppState.examRoutine : (Array.isArray(window.examRoutineData) ? window.examRoutineData : []);
+        const sessions = (window.AppState && window.AppState.examSessions) ? window.AppState.examSessions : [];
+        const now = Date.now();
+
+        const getExamTimestamp = (dateStr, timeStr) => {
+            if (!dateStr) return NaN;
+            const parts = dateStr.split('-');
+            if (parts.length !== 3) return NaN;
+            const year = parseInt(parts[0], 10);
+            const month = parseInt(parts[1], 10) - 1;
+            const day = parseInt(parts[2], 10);
+            let hours = 0, minutes = 0;
+            if (timeStr) {
+                const timeParts = timeStr.split(':');
+                hours = parseInt(timeParts[0], 10) || 0;
+                minutes = parseInt(timeParts[1], 10) || 0;
+            }
+            return new Date(year, month, day, hours, minutes, 0, 0).getTime();
+        };
+
+        const upcomingExams = exams
+            .filter(e => e && (e.subject || e.title) && e.date && e.status !== 'completed')
+            .map(e => {
+                const timeMs = getExamTimestamp(e.date, e.time || e.startTime);
+                return { ...e, timeMs };
+            })
+            .filter(e => !isNaN(e.timeMs) && e.timeMs > (now - 7200000))
+            .sort((a, b) => a.timeMs - b.timeMs);
+
+        // Update count badge in header
+        if (countBadgeEl) {
+            if (upcomingExams.length > 0) {
+                countBadgeEl.className = 'text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg border bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-800/50 shadow-xs';
+                countBadgeEl.textContent = `${upcomingExams.length} Upcoming`;
+            } else {
+                countBadgeEl.className = 'text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg border bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700';
+                countBadgeEl.textContent = 'No Exams';
+            }
         }
 
-        if (nearestExam) {
-            titleEl.textContent = nearestExam.subject || nearestExam.title || 'Exam';
-            if (subEl) subEl.textContent = nearestExam.code || nearestExam.program || 'Upcoming';
-            if (dateEl) {
-                dateEl.textContent = (typeof Utils !== 'undefined' && typeof Utils.formatDateSafe === 'function')
-                    ? Utils.formatDateSafe(nearestExam.date)
-                    : nearestExam.date;
-            }
-            if (timeEl) timeEl.textContent = `${nearestExam.startTime || ''} - ${nearestExam.endTime || ''}`;
+        if (listEl) {
+            if (upcomingExams.length === 0) {
+                listEl.innerHTML = `
+                    <div class="h-full flex flex-col items-center justify-center py-4 text-center select-none">
+                        <span class="text-2xl mb-1.5 opacity-60">🎓</span>
+                        <p class="text-xs font-black text-slate-600 dark:text-slate-300">No upcoming exams</p>
+                        <p class="text-[9px] text-slate-400 mt-0.5 mb-2.5">Schedule subjects & exam routine</p>
+                        <button onclick="window.switchPage('exam')" class="text-[9px] font-black uppercase tracking-wider px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl transition-all active:scale-95 shadow-xs flex items-center gap-1.5 cursor-pointer">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+                            <span>Schedule Exam</span>
+                        </button>
+                    </div>`;
+            } else {
+                let html = '';
+                const nowDt = new Date(now);
 
-            const days = Math.floor(minDiff / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((minDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            if (countdownEl) {
-                if (days > 0) countdownEl.textContent = `${days}d ${hours}h left`;
-                else countdownEl.textContent = `${hours}h left`;
+                upcomingExams.forEach(ex => {
+                    const parentSession = sessions.find(s => s.id === ex.sessionId);
+                    const sessionTag = parentSession
+                        ? (parentSession.name ? `${parentSession.program} - ${parentSession.name}` : parentSession.program)
+                        : (ex.program && ex.program !== 'Non-Program' ? ex.program : 'Custom');
+
+                    const subjName = ex.subject || ex.title || 'General';
+                    const subjColor = typeof window.getSubjectColor === 'function' ? window.getSubjectColor(subjName) : '#f43f5e';
+                    const dtObj = new Date(ex.timeMs);
+                    const dtFormatted = dtObj.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+                    const timeFormatted = (ex.time || ex.startTime) ? dtObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+
+                    const rem = typeof window.calculateExamTimeRemaining === 'function'
+                        ? window.calculateExamTimeRemaining(nowDt, dtObj)
+                        : null;
+
+                    let countdownHtml = '';
+                    if (rem && rem.isPast && rem.diffMs > -7200000) {
+                        countdownHtml = `<span class="text-[8px] font-black uppercase px-2 py-0.5 rounded-md bg-rose-500 text-white animate-pulse shrink-0">● Live Today</span>`;
+                    } else if (rem && !rem.isPast) {
+                        const cdText = typeof window.formatExamCountdownString === 'function'
+                            ? window.formatExamCountdownString(rem)
+                            : `${rem.days}d ${rem.hours}h`;
+                        countdownHtml = `
+                            <span class="text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800/50 shrink-0 inline-flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping"></span>
+                                <span data-db-exam-target-time="${ex.timeMs}">${cdText}</span>
+                            </span>`;
+                    } else {
+                        countdownHtml = `<span class="text-[8px] font-black uppercase px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700/60 text-slate-500 shrink-0">Ended</span>`;
+                    }
+
+                    const displayName = ex.title && ex.title.toLowerCase() !== subjName.toLowerCase()
+                        ? `${subjName} <span class="font-normal text-slate-400 dark:text-slate-500 text-[9px]">(${ex.title})</span>`
+                        : subjName;
+
+                    html += `
+                        <div class="p-2 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2 select-none shadow-2xs">
+                            <div class="flex items-center space-x-2.5 min-w-0 flex-1">
+                                <div class="w-2.5 h-2.5 rounded-full shrink-0 shadow-xs" style="background-color: ${subjColor}; box-shadow: 0 0 6px ${subjColor}"></div>
+                                <div class="min-w-0">
+                                    <div class="flex items-center gap-1.5 min-w-0">
+                                        <span class="text-[10px] sm:text-[11px] font-black text-slate-800 dark:text-slate-100 truncate">
+                                            ${displayName}
+                                        </span>
+                                    </div>
+                                    <div class="flex items-center gap-1.5 text-[8px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider mt-0.5 truncate">
+                                        <span class="text-rose-500/80 font-black truncate max-w-[90px] sm:max-w-[120px]">${sessionTag}</span>
+                                        <span>•</span>
+                                        <span class="truncate">${dtFormatted}${timeFormatted ? ' ' + timeFormatted : ''}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            ${countdownHtml}
+                        </div>`;
+                });
+
+                listEl.innerHTML = html;
             }
-        } else {
-            titleEl.textContent = 'No Upcoming Exams';
-            if (subEl) subEl.textContent = 'Schedule clear';
-            if (dateEl) dateEl.textContent = '--';
-            if (timeEl) timeEl.textContent = '--';
-            if (countdownEl) countdownEl.textContent = 'Relax';
+        }
+
+        // Test fallback elements update
+        if (testTitleEl) {
+            const nearest = upcomingExams[0];
+            if (nearest) {
+                testTitleEl.textContent = nearest.subject || nearest.title || 'Exam';
+                if (testSubEl) testSubEl.textContent = nearest.code || nearest.program || 'Upcoming';
+                if (testDateEl) testDateEl.textContent = nearest.date || '--';
+                if (testTimeEl) testTimeEl.textContent = nearest.time || nearest.startTime || '--';
+                if (testCountdownEl) testCountdownEl.textContent = 'Upcoming';
+            } else {
+                testTitleEl.textContent = 'No Upcoming Exams';
+                if (testSubEl) testSubEl.textContent = 'Schedule clear';
+                if (testDateEl) testDateEl.textContent = '--';
+                if (testTimeEl) testTimeEl.textContent = '--';
+                if (testCountdownEl) testCountdownEl.textContent = 'Relax';
+            }
         }
     }
 
     function renderDashboardPassedSubjectsCard() {
-        const container = safeGetEl('db-passed-subjects-container');
-        const countEl = safeGetEl('db-passed-subjects-count');
-        if (!container && !countEl) return;
+        const cardEl = safeGetEl('dashboard-passed-subjects-section');
+        const rateBadgeEl = safeGetEl('db-passed-subjects-rate-badge');
+        const countBadgeEl = safeGetEl('db-passed-subjects-count-badge');
+        const listEl = safeGetEl('db-passed-subjects-list');
 
+        // Test environment fallback elements
+        const testContainer = safeGetEl('db-passed-subjects-container');
+        const testCountEl = safeGetEl('db-passed-subjects-count');
+
+        const allSubjects = typeof window.getAllSubjects === 'function' ? window.getAllSubjects() : [];
+        const passedProgs = (window.passedItems && Array.isArray(window.passedItems.programs)) ? window.passedItems.programs : [];
         const passedSubs = (window.passedItems && Array.isArray(window.passedItems.subjects)) ? window.passedItems.subjects : [];
-        if (countEl) countEl.textContent = `${passedSubs.length}`;
 
-        if (container) {
-            if (passedSubs.length === 0) {
-                container.innerHTML = `<span class="text-slate-400 text-[10px] font-bold">No passed subjects recorded yet.</span>`;
+        // Filter all subjects that are marked as passed/frozen (via program or individual subject)
+        const passedSubjectList = allSubjects.filter(s => {
+            if (!s || !s.subject) return false;
+            const isProgPassed = passedProgs.includes(s.program);
+            const isSubPassed = passedSubs.includes(s.subject);
+            return isProgPassed || isSubPassed;
+        });
+
+        const totalCount = allSubjects.length;
+        const successPct = totalCount > 0 ? Math.round((passedSubjectList.length / totalCount) * 100) : 0;
+
+        // Update success rate badge in header
+        if (rateBadgeEl) {
+            if (passedSubjectList.length > 0) {
+                rateBadgeEl.className = 'text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg border bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/50 shadow-xs';
+                rateBadgeEl.textContent = `${successPct}%`;
+                rateBadgeEl.title = `Success Rate: ${successPct}% (${passedSubjectList.length} of ${totalCount} subjects passed)`;
             } else {
-                container.innerHTML = passedSubs.map(s => {
+                rateBadgeEl.className = 'text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg border bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700';
+                rateBadgeEl.textContent = '0%';
+                rateBadgeEl.title = 'Success Rate: 0%';
+            }
+        }
+
+        // Update count badge in header
+        if (countBadgeEl) {
+            if (passedSubjectList.length > 0) {
+                countBadgeEl.className = 'text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg border bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/50 shadow-xs';
+                countBadgeEl.textContent = `${passedSubjectList.length} Passed`;
+                countBadgeEl.title = `${passedSubjectList.length} of ${totalCount} subjects passed`;
+            } else {
+                countBadgeEl.className = 'text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg border bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700';
+                countBadgeEl.textContent = '0 Passed';
+                countBadgeEl.title = '0 subjects passed';
+            }
+        }
+
+        if (listEl) {
+            if (passedSubjectList.length === 0) {
+                listEl.innerHTML = `
+                    <div class="col-span-2 h-full flex flex-col items-center justify-center py-4 text-center select-none">
+                        <span class="text-2xl mb-1.5 opacity-60">🛡️</span>
+                        <p class="text-xs font-black text-slate-600 dark:text-slate-300">No passed subjects yet</p>
+                        <p class="text-[9px] text-slate-400 mt-0.5 mb-2.5">Configure pass & freeze criteria in Outcome</p>
+                        <button onclick="window.switchPage('outcome')" class="text-[9px] font-black uppercase tracking-wider px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl transition-all active:scale-95 shadow-xs flex items-center gap-1.5 cursor-pointer">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                            <span>Manage Pass / Freeze</span>
+                        </button>
+                    </div>`;
+            } else {
+                let html = '';
+                passedSubjectList.forEach(s => {
+                    const subjColor = typeof window.getSubjectColor === 'function' ? window.getSubjectColor(s.subject || 'General') : '#10b981';
+                    const chaptersCount = s.chapters || 0;
+
+                    let displaySub = s.subject;
+                    if (s.program && displaySub.startsWith(s.program + ' - ')) {
+                        displaySub = displaySub.replace(s.program + ' - ', '');
+                    } else if (s.program && displaySub.startsWith(s.program + ' ')) {
+                        displaySub = displaySub.replace(s.program + ' ', '');
+                    }
+
+                    html += `
+                        <div class="p-2 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2 select-none shadow-2xs">
+                            <div class="flex items-center space-x-2 min-w-0 flex-1">
+                                <div class="w-2.5 h-2.5 rounded-full shrink-0 shadow-xs" style="background-color: ${subjColor}; box-shadow: 0 0 6px ${subjColor}"></div>
+                                <div class="min-w-0">
+                                    <span class="text-[10px] sm:text-[11px] font-black text-slate-800 dark:text-slate-100 truncate block leading-tight" title="${s.subject}">
+                                        ${displaySub}
+                                    </span>
+                                    <div class="flex items-center gap-1 text-[7.5px] sm:text-[8px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider mt-0.5 truncate">
+                                        <span class="text-emerald-600 dark:text-emerald-400 font-black truncate max-w-[65px] sm:max-w-[85px]">${s.program || 'Custom'}</span>
+                                        <span>•</span>
+                                        <span class="truncate">${chaptersCount} Ch</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="shrink-0">
+                                <span class="text-[7.5px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50 inline-flex items-center gap-0.5" title="Passed & Frozen">
+                                    <svg class="w-2 h-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    <span>Pass</span>
+                                </span>
+                            </div>
+                        </div>`;
+                });
+                listEl.innerHTML = html;
+            }
+        }
+
+        // Test fallback elements update
+        if (testCountEl) testCountEl.textContent = `${passedSubs.length}`;
+        if (testContainer) {
+            if (passedSubs.length === 0) {
+                testContainer.innerHTML = `<span class="text-slate-400 text-[10px] font-bold">No passed subjects recorded yet.</span>`;
+            } else {
+                testContainer.innerHTML = passedSubs.map(s => {
                     return `<span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50">${s}</span>`;
                 }).join(' ');
             }
@@ -929,6 +1410,8 @@
                 if (typeof window.renderOutcomeProgramToggles === 'function') window.renderOutcomeProgramToggles();
                 if (typeof window.renderSchedulePage === 'function') window.renderSchedulePage();
                 if (typeof window.renderExamPage === 'function') window.renderExamPage();
+                if (typeof window.updateActiveScheduleSlot === 'function') window.updateActiveScheduleSlot();
+                if (typeof window.renderDailyTracker === 'function') window.renderDailyTracker();
             }, 20);
 
             // Dynamic Form & Manage UI Syncs

@@ -20,7 +20,7 @@
         let targetedSubjects = new Set();
         if (!goal) return targetedSubjects;
 
-        const AppStateRef = typeof global.AppState !== 'undefined' ? global.AppState : (typeof window !== 'undefined' ? window.AppState : {});
+        const AppStateRef = (typeof global.AppState !== 'undefined' && global.AppState) || (typeof window !== 'undefined' && window.AppState) || {};
         const parseDate = (typeof global.Utils !== 'undefined' && typeof global.Utils.parseDateSafe === 'function')
             ? global.Utils.parseDateSafe
             : (d => new Date(d));
@@ -56,14 +56,17 @@
                 }
             } else {
                 const goalsList = global.paceGoals || (typeof window !== 'undefined' && window.paceGoals) || [];
+                const globalStart = AppStateRef.globalStartDate ? new Date(AppStateRef.globalStartDate) : (AppStateRef.PLAN_START_DATE ? new Date(AppStateRef.PLAN_START_DATE) : null);
+                const globalEnd = AppStateRef.globalEndDate ? new Date(AppStateRef.globalEndDate) : (AppStateRef.PLAN_END_DATE ? new Date(AppStateRef.PLAN_END_DATE) : null);
+
                 goalsList.forEach(g => {
                     if (g.id === goal.id) return;
-                    if (!AppStateRef.globalStartDate || !AppStateRef.globalEndDate) return;
-                    const gStart = g.startDate ? parseDate(g.startDate) : new Date(AppStateRef.globalStartDate);
-                    const gEnd = g.deadline ? parseDate(g.deadline) : new Date(AppStateRef.globalEndDate);
+                    if (!globalStart || !globalEnd) return;
+                    const gStart = g.startDate ? parseDate(g.startDate) : new Date(globalStart);
+                    const gEnd = g.deadline ? parseDate(g.deadline) : new Date(globalEnd);
                     gStart.setHours(0, 0, 0, 0);
                     gEnd.setHours(23, 59, 59, 999);
-                    if (gEnd < AppStateRef.globalStartDate || gStart > AppStateRef.globalEndDate) return;
+                    if (gEnd < globalStart || gStart > globalEnd) return;
 
                     if (g.type === 'bundle') {
                         if (g.subjects && Array.isArray(g.subjects)) g.subjects.forEach(s => targetedSubjects.add(s));
@@ -81,6 +84,14 @@
                             if (g.target === s.program) targetedSubjects.add(s.subject);
                         });
                     }
+                });
+            }
+
+            // Fallback: If global goal targets 0 subjects, scope all syllabus subjects
+            if (targetedSubjects.size === 0) {
+                const allSubs = typeof global.getAllSubjects === 'function' ? global.getAllSubjects() : [];
+                allSubs.forEach(s => {
+                    if (s && s.subject) targetedSubjects.add(s.subject);
                 });
             }
         } else if (goal.type === 'bundle') {
