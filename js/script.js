@@ -2492,9 +2492,9 @@ window.deleteMonthlyTarget = function (idx, targetId = null) {
     }
 };
 
-window.toggleMonthlyTargetCompletion = function (idx, isCompleted) {
+window.toggleMonthlyTargetCompletion = function (idx, isCompleted, monthKey = null) {
     if (window.MonthlyTargets && typeof window.MonthlyTargets.toggleMonthlyTargetCompletion === 'function') {
-        return window.MonthlyTargets.toggleMonthlyTargetCompletion(idx, isCompleted);
+        return window.MonthlyTargets.toggleMonthlyTargetCompletion(idx, isCompleted, monthKey);
     }
 };
 
@@ -2920,9 +2920,9 @@ window.deleteDailyTarget = function (idx, targetId = null) {
     }
 };
 
-window.toggleDailyTargetCompletion = function (idx, isCompleted) {
+window.toggleDailyTargetCompletion = function (idx, isCompleted, dateKey = null) {
     if (window.DailyTargets && typeof window.DailyTargets.toggleDailyTargetCompletion === 'function') {
-        return window.DailyTargets.toggleDailyTargetCompletion(idx, isCompleted);
+        return window.DailyTargets.toggleDailyTargetCompletion(idx, isCompleted, dateKey);
     }
 };
 

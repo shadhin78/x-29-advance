@@ -1069,7 +1069,7 @@
 
     function toggleWeeklyTargetCompletion(idx, isCompleted, weekKey = null) {
         const weekSelectEl = document.getElementById('wt-select-week');
-        const selectedWeekKey = weekKey || (weekSelectEl ? weekSelectEl.value : null) || (function () {
+        let selectedWeekKey = weekKey || (weekSelectEl ? weekSelectEl.value : null) || (function () {
             if (global.currentWeeklyTargetsDate) {
                 const range = getWeeklyTargetRange(global.currentWeeklyTargetsDate);
                 return formatDateRangeKey(range.start, range.end);
@@ -1077,6 +1077,13 @@
             const range = getWeeklyTargetRange();
             return formatDateRangeKey(range.start, range.end);
         })();
+
+        if (selectedWeekKey && global.weeklyTargetsDatabase && !global.weeklyTargetsDatabase[selectedWeekKey]) {
+            const canonical = getCanonicalWeeklyRangeKey(selectedWeekKey);
+            if (canonical && global.weeklyTargetsDatabase[canonical]) {
+                selectedWeekKey = canonical;
+            }
+        }
 
         if (!selectedWeekKey || !global.weeklyTargetsDatabase || !global.weeklyTargetsDatabase[selectedWeekKey] || !global.weeklyTargetsDatabase[selectedWeekKey][idx]) return;
 

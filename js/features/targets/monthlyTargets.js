@@ -3361,18 +3361,82 @@ function deleteMonthlyTarget(idx, targetId = null) {
     }
 };
 
-function toggleMonthlyTargetCompletion(idx, isCompleted) {
-    const monthSelectEl = document.getElementById('mt-select-month');
-    if (!monthSelectEl) return;
-    const selectedMonthKey = monthSelectEl.value;
+function toggleMonthlyTargetCompletion(idx, isCompleted, monthKey = null) {
+    let selectedMonthKey = monthKey;
+    if (!selectedMonthKey) {
+        const monthSelectEl = document.getElementById('mt-select-month');
+        selectedMonthKey = monthSelectEl ? monthSelectEl.value : null;
+    }
+    if (!selectedMonthKey) {
+        const curDate = window.currentMonthlyTargetsDate ? new Date(window.currentMonthlyTargetsDate) : new Date();
+        const range = (typeof window.getMonthlyTargetRange === 'function') ? window.getMonthlyTargetRange(curDate) : null;
+        if (range && typeof window.formatMonthRangeKey === 'function') {
+            selectedMonthKey = window.formatMonthRangeKey(range.start, range.end);
+        }
+    }
+    if (!selectedMonthKey && window.monthlyTargetsDatabase) {
+        const keys = Object.keys(window.monthlyTargetsDatabase);
+        if (keys.length > 0) selectedMonthKey = keys[0];
+    }
 
-    if (!window.monthlyTargetsDatabase || !window.monthlyTargetsDatabase[selectedMonthKey] || !window.monthlyTargetsDatabase[selectedMonthKey][idx]) return;
+    if (!window.monthlyTargetsDatabase || !selectedMonthKey) return;
+
+    if (!window.monthlyTargetsDatabase[selectedMonthKey]) {
+        // Try finding matching month key by month and year
+        const allKeys = Object.keys(window.monthlyTargetsDatabase);
+        const parsedSelected = (typeof Utils !== 'undefined' && typeof Utils.parseStart === 'function') ? Utils.parseStart(selectedMonthKey) : new Date(selectedMonthKey);
+        if (!isNaN(parsedSelected.getTime())) {
+            const match = allKeys.find(k => {
+                const p = (typeof Utils !== 'undefined' && typeof Utils.parseStart === 'function') ? Utils.parseStart(k) : new Date(k);
+                return !isNaN(p.getTime()) && p.getFullYear() === parsedSelected.getFullYear() && p.getMonth() === parsedSelected.getMonth();
+            });
+            if (match) selectedMonthKey = match;
+        }
+    }
+
+    if (!window.monthlyTargetsDatabase[selectedMonthKey] || !window.monthlyTargetsDatabase[selectedMonthKey][idx]) return;
 
     const target = window.monthlyTargetsDatabase[selectedMonthKey][idx];
     target.completed = isCompleted;
     target.completedAt = isCompleted ? new Date().toISOString() : null;
 
-    if (target.targetType === 'subject' || target.chapter === 'Whole Subject' || target.chapter === 'All Chapters') {
+    const matchFn = window.isChapterMatch || (typeof Utils !== 'undefined' && Utils.isChapterMatch);
+    const isSubjectTarget = target.targetType === 'subject' || target.chapter === 'Whole Subject' || target.chapter === 'All Chapters';
+
+    // 1. Sync to weeklyTargetsDatabase
+    if (window.weeklyTargetsDatabase) {
+        Object.keys(window.weeklyTargetsDatabase).forEach(wKey => {
+            const wList = window.weeklyTargetsDatabase[wKey] || [];
+            wList.forEach(wt => {
+                if (!wt) return;
+                const matches = (target.id && wt.monthlyTargetId === target.id) ||
+                    (wt.track === target.track && wt.subject === target.subject && (isSubjectTarget || (matchFn ? matchFn(wt.chapter, target.chapter) : wt.chapter === target.chapter)));
+                if (matches) {
+                    wt.completed = isCompleted;
+                    wt.completedAt = target.completedAt;
+                }
+            });
+        });
+    }
+
+    // 2. Sync to dailyTargetsDatabase
+    if (window.dailyTargetsDatabase) {
+        Object.keys(window.dailyTargetsDatabase).forEach(dKey => {
+            const dList = window.dailyTargetsDatabase[dKey] || [];
+            dList.forEach(dt => {
+                if (!dt) return;
+                const matches = (target.id && dt.monthlyTargetId === target.id) ||
+                    (dt.track === target.track && dt.subject === target.subject && (isSubjectTarget || (matchFn ? matchFn(dt.chapter, target.chapter) : dt.chapter === target.chapter)));
+                if (matches) {
+                    dt.completed = isCompleted;
+                    dt.completedAt = target.completedAt;
+                }
+            });
+        });
+    }
+
+    // 3. Sync to AppState.tasks
+    if (isSubjectTarget) {
         const key = target.track + 'Tasks';
         if (Array.isArray(AppState.tasks)) {
             AppState.tasks.forEach(t => {
@@ -3386,14 +3450,16 @@ function toggleMonthlyTargetCompletion(idx, isCompleted) {
                 }
             });
         }
-    } else {
+    } else if (typeof window.syncTaskChapterCompletion === 'function') {
         window.syncTaskChapterCompletion(target.track, target.subject, target.chapter, isCompleted, target.completedAt);
     }
 
-    recalculateTotals();
-    renderUI();
-    showToast("Completion state synchronized!", "success");
-    FirebaseService.saveToCloud(false);
+    if (typeof recalculateTotals === 'function') recalculateTotals();
+    if (typeof renderUI === 'function') renderUI();
+    if (typeof showToast === 'function') showToast("Completion state synchronized!", "success");
+    if (window.FirebaseService && typeof window.FirebaseService.saveToCloud === 'function') {
+        window.FirebaseService.saveToCloud(false);
+    }
 };
 
 function navigateMonth(mode) {

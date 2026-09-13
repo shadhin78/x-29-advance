@@ -252,45 +252,75 @@
         const progressEl = safeGetEl('db-daily-checklist-progress');
         if (!listContainer) return;
 
+        const now = new Date();
+        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+
         const todayStr = (typeof Utils !== 'undefined' && typeof Utils.formatDate === 'function')
-            ? Utils.formatDate(new Date())
-            : new Date().toISOString().split('T')[0];
+            ? Utils.formatDate(now)
+            : now.toISOString().split('T')[0];
 
         if (!window.dailyTargetsDatabase) window.dailyTargetsDatabase = {};
+
+        const parseDk = (dk) => {
+            if (typeof window.parseDailyTargetDateKey === 'function') {
+                return window.parseDailyTargetDateKey(dk);
+            }
+            if (typeof Utils !== 'undefined' && typeof Utils.parseDateSafe === 'function') {
+                return Utils.parseDateSafe(dk);
+            }
+            return new Date(dk);
+        };
+
+        const isSameDayAsToday = (dk) => {
+            if (dk === todayStr) return true;
+            const d = parseDk(dk);
+            if (!d || isNaN(d.getTime())) return false;
+            return d.getFullYear() === now.getFullYear() &&
+                   d.getMonth() === now.getMonth() &&
+                   d.getDate() === now.getDate();
+        };
+
+        const allDateKeys = Object.keys(window.dailyTargetsDatabase);
+        const todayDateKeys = allDateKeys.filter(dk => isSameDayAsToday(dk));
+        if (todayDateKeys.length === 0 && window.dailyTargetsDatabase[todayStr]) {
+            todayDateKeys.push(todayStr);
+        }
 
         const dashboardItems = [];
 
         // 1. Current day targets
-        const currentTargets = window.dailyTargetsDatabase[todayStr] || [];
-        currentTargets.forEach((target, idx) => {
-            if (target.isDeleted) return;
-            const isTodo = target.isTodo === true;
-            if (!isTodo && typeof window.findTaskChapter === 'function') {
-                const foundTask = window.findTaskChapter(target.track, target.subject, target.chapter);
-                if (foundTask && foundTask.subTask.skipped) return;
-            }
-            const isCompleted = isTodo
-                ? (target.completed || false)
-                : (target.completed || (typeof window.findTaskChapter === 'function' && (window.findTaskChapter(target.track, target.subject, target.chapter)?.subTask.completed ?? false)));
-            dashboardItems.push({
-                target,
-                dateKey: todayStr,
-                idx,
-                isCompleted,
-                isToday: true
+        todayDateKeys.forEach(tDk => {
+            const currentTargets = window.dailyTargetsDatabase[tDk] || [];
+            currentTargets.forEach((target, idx) => {
+                if (target.isDeleted) return;
+                const isTodo = target.isTodo === true;
+                if (!isTodo && typeof window.findTaskChapter === 'function') {
+                    const foundTask = window.findTaskChapter(target.track, target.subject, target.chapter);
+                    if (foundTask && foundTask.subTask.skipped) return;
+                }
+                const isCompleted = isTodo
+                    ? (target.completed || false)
+                    : (target.completed || (typeof window.findTaskChapter === 'function' && (window.findTaskChapter(target.track, target.subject, target.chapter)?.subTask.completed ?? false)));
+                dashboardItems.push({
+                    target,
+                    dateKey: tDk,
+                    idx,
+                    isCompleted,
+                    isToday: true
+                });
             });
         });
 
         // 2. Previous days targets (uncompleted only)
-        const todayStart = new Date(new Date().setHours(0, 0, 0, 0));
-        const pastDateKeys = Object.keys(window.dailyTargetsDatabase).filter(dk => {
-            if (dk === todayStr) return false;
-            const d = window.parseDailyTargetDateKey ? window.parseDailyTargetDateKey(dk) : new Date(dk);
-            d.setHours(0, 0, 0, 0);
-            return d.getTime() < todayStart.getTime();
+        const pastDateKeys = allDateKeys.filter(dk => {
+            if (todayDateKeys.includes(dk)) return false;
+            const d = parseDk(dk);
+            if (!d || isNaN(d.getTime())) return false;
+            const dTime = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+            return dTime < todayStart;
         }).sort((a, b) => {
-            const timeA = (window.parseDailyTargetDateKey ? window.parseDailyTargetDateKey(a) : new Date(a)).getTime();
-            const timeB = (window.parseDailyTargetDateKey ? window.parseDailyTargetDateKey(b) : new Date(b)).getTime();
+            const timeA = parseDk(a).getTime();
+            const timeB = parseDk(b).getTime();
             return timeB - timeA;
         });
 
@@ -322,11 +352,12 @@
         const completedTargets = dashboardItems.filter(item => item.isCompleted).length;
         const pastPendingCount = dashboardItems.filter(item => !item.isToday).length;
 
+        const displayToday = todayDateKeys.length > 0 ? todayDateKeys[0] : todayStr;
         if (rangeEl) {
             if (pastPendingCount > 0) {
-                rangeEl.textContent = `Today: ${todayStr} (+${pastPendingCount} Pending)`;
+                rangeEl.textContent = `Today: ${displayToday} (+${pastPendingCount} Pending)`;
             } else {
-                rangeEl.textContent = `Today: ${todayStr}`;
+                rangeEl.textContent = `Today: ${displayToday}`;
             }
         }
 
@@ -415,7 +446,7 @@
         const pct = totalTargets > 0 ? Math.round((completedTargets / totalTargets) * 100) : 0;
         if (pctEl) pctEl.textContent = `${pct}%`;
         if (progressEl) {
-            progressEl.textContent = `${completedTargets}/${totalTargets} Done`;
+            progressEl.style.width = `${pct}%`;
         }
     }
 
@@ -448,20 +479,37 @@
 
         if (!window.weeklyTargetsDatabase) window.weeklyTargetsDatabase = {};
 
+        let activeWeekKey = currentWeekKey;
+        if (!window.weeklyTargetsDatabase[activeWeekKey]) {
+            const canonical = (typeof window.getCanonicalWeeklyRangeKey === 'function')
+                ? window.getCanonicalWeeklyRangeKey(currentWeekKey)
+                : null;
+            if (canonical && window.weeklyTargetsDatabase[canonical]) {
+                activeWeekKey = canonical;
+            } else {
+                const foundKey = Object.keys(window.weeklyTargetsDatabase).find(wk => {
+                    return (typeof Utils !== 'undefined' && typeof Utils.isDateInWeekRange === 'function')
+                        ? Utils.isDateInWeekRange(new Date(), wk)
+                        : false;
+                });
+                if (foundKey) activeWeekKey = foundKey;
+            }
+        }
+
         const dashboardItems = [];
 
         // 1. Current week targets
-        const currentTargets = window.weeklyTargetsDatabase[currentWeekKey] || [];
+        const currentTargets = window.weeklyTargetsDatabase[activeWeekKey] || [];
         currentTargets.forEach((target, idx) => {
             const foundTask = typeof window.findTaskChapter === 'function' ? window.findTaskChapter(target.track, target.subject, target.chapter) : null;
             if (foundTask && foundTask.subTask.skipped) return;
             const progress = typeof window.getWeeklyTargetProgress === 'function'
-                ? window.getWeeklyTargetProgress(target, currentWeekKey)
+                ? window.getWeeklyTargetProgress(target, activeWeekKey)
                 : { completed: 0, total: 0, percent: 0, isSizeBased: false };
             const isCompleted = target.completed || (foundTask ? foundTask.subTask.completed : false) || (target.totalChapterSize && progress.percent >= 100);
             dashboardItems.push({
                 target,
-                weekKey: currentWeekKey,
+                weekKey: activeWeekKey,
                 idx,
                 isCompleted,
                 progress,
@@ -471,7 +519,7 @@
 
         // 2. Previous weeks targets (uncompleted only)
         const pastWeekKeys = Object.keys(window.weeklyTargetsDatabase).filter(wk => {
-            if (wk === currentWeekKey) return false;
+            if (wk === activeWeekKey || wk === currentWeekKey) return false;
             const st = (typeof Utils !== 'undefined' && typeof Utils.parseStart === 'function') ? Utils.parseStart(wk).getTime() : 0;
             return st < currentStartTime;
         }).sort((a, b) => {
@@ -508,9 +556,9 @@
 
         if (rangeEl) {
             if (pastPendingCount > 0) {
-                rangeEl.textContent = `Week: ${currentWeekKey} (+${pastPendingCount} Pending)`;
+                rangeEl.textContent = `Week: ${activeWeekKey} (+${pastPendingCount} Pending)`;
             } else {
-                rangeEl.textContent = `Week: ${currentWeekKey}`;
+                rangeEl.textContent = `Week: ${activeWeekKey}`;
             }
         }
 
@@ -595,7 +643,7 @@
         const pct = totalTargets > 0 ? Math.round((completedTargets / totalTargets) * 100) : 0;
         if (pctEl) pctEl.textContent = `${pct}%`;
         if (progressEl) {
-            progressEl.textContent = `${completedTargets}/${totalTargets} Done`;
+            progressEl.style.width = `${pct}%`;
         }
     }
 
@@ -616,18 +664,40 @@
         if (!listContainer) return;
 
         const currentMonthDate = window.currentMonthlyTargetsDate ? new Date(window.currentMonthlyTargetsDate) : new Date();
-        const currentMonthKey = (typeof Utils !== 'undefined' && typeof Utils.formatYearMonthKey === 'function')
-            ? Utils.formatYearMonthKey(currentMonthDate)
-            : `${currentMonthDate.getFullYear()}-${String(currentMonthDate.getMonth() + 1).padStart(2, '0')}`;
+        const currentRange = (typeof window.getMonthlyTargetRange === 'function')
+            ? window.getMonthlyTargetRange(currentMonthDate)
+            : { start: new Date(currentMonthDate.getFullYear(), currentMonthDate.getMonth(), 1), end: new Date(currentMonthDate.getFullYear(), currentMonthDate.getMonth() + 1, 0) };
+
+        let activeMonthKey = (typeof window.formatMonthRangeKey === 'function')
+            ? window.formatMonthRangeKey(currentRange.start, currentRange.end)
+            : null;
 
         if (!window.monthlyTargetsDatabase) window.monthlyTargetsDatabase = {};
 
-        const targets = window.monthlyTargetsDatabase[currentMonthKey] || [];
+        if (!activeMonthKey || !window.monthlyTargetsDatabase[activeMonthKey]) {
+            const allMonthKeys = Object.keys(window.monthlyTargetsDatabase);
+            const curY = currentMonthDate.getFullYear();
+            const curM = currentMonthDate.getMonth();
+            const found = allMonthKeys.find(k => {
+                const parts = k.split(' - ');
+                const d = (typeof window.Utils !== 'undefined' && typeof window.Utils.parseDateSafe === 'function')
+                    ? window.Utils.parseDateSafe(parts[0])
+                    : new Date(parts[0]);
+                return !isNaN(d.getTime()) && d.getFullYear() === curY && d.getMonth() === curM;
+            });
+            if (found) {
+                activeMonthKey = found;
+            } else if (allMonthKeys.length > 0 && !activeMonthKey) {
+                activeMonthKey = allMonthKeys[0];
+            }
+        }
+
+        const targets = (activeMonthKey && window.monthlyTargetsDatabase[activeMonthKey]) ? window.monthlyTargetsDatabase[activeMonthKey] : [];
         const totalTargets = targets.length;
 
         let completedTargets = 0;
         targets.forEach(t => {
-            const prog = typeof window.getMonthlyTargetProgress === 'function' ? window.getMonthlyTargetProgress(t, currentMonthKey) : { completed: 0, total: 0, percent: 0 };
+            const prog = typeof window.getMonthlyTargetProgress === 'function' ? window.getMonthlyTargetProgress(t, activeMonthKey) : { completed: 0, total: 0, percent: 0 };
             if (t.completed || (t.totalChapterSize && prog.percent >= 100)) {
                 completedTargets++;
             }
@@ -652,7 +722,7 @@
 
         targets.forEach((target, idx) => {
             const progress = typeof window.getMonthlyTargetProgress === 'function'
-                ? window.getMonthlyTargetProgress(target, currentMonthKey)
+                ? window.getMonthlyTargetProgress(target, activeMonthKey)
                 : { completed: 0, total: 0, percent: 0 };
             const isCompleted = target.completed || (target.totalChapterSize && progress.percent >= 100);
 
@@ -677,7 +747,7 @@
             const targetScope = target.scope || (target.targetType === 'subject' ? 'Whole Subject' : 'Whole Chapter');
 
             const itemHtml = `
-                <button onclick="window.toggleDashboardMonthlyTargetCompletion(${idx}, ${!isCompleted})"
+                <button onclick="window.toggleDashboardMonthlyTargetCompletion(${idx}, ${!isCompleted}, '${activeMonthKey}')"
                         class="flex items-center justify-between p-2 md:p-2.5 rounded-xl border font-black transition-all duration-300 active:scale-95 text-left w-full gap-1.5 h-full ${buttonClass}"
                         style="${isCompleted ? activeStyle : bgStyle}">
                     <div class="flex items-center space-x-1.5 min-w-0 flex-1">
@@ -712,15 +782,15 @@
         const pct = totalTargets > 0 ? Math.round((completedTargets / totalTargets) * 100) : 0;
         if (pctEl) pctEl.textContent = `${pct}%`;
         if (progressEl) {
-            progressEl.textContent = `${completedTargets}/${totalTargets} Done`;
+            progressEl.style.width = `${pct}%`;
         }
     }
 
-    function toggleDashboardMonthlyTargetCompletion(idx, isCompleted) {
+    function toggleDashboardMonthlyTargetCompletion(idx, isCompleted, monthKey = null) {
         if (window.MonthlyTargets && typeof window.MonthlyTargets.toggleMonthlyTargetCompletion === 'function') {
-            window.MonthlyTargets.toggleMonthlyTargetCompletion(idx, isCompleted);
+            window.MonthlyTargets.toggleMonthlyTargetCompletion(idx, isCompleted, monthKey);
         } else if (typeof window.toggleMonthlyTargetCompletion === 'function') {
-            window.toggleMonthlyTargetCompletion(idx, isCompleted);
+            window.toggleMonthlyTargetCompletion(idx, isCompleted, monthKey);
         }
         renderDashboardMonthlyChecklist();
     }
