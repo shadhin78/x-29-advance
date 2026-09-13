@@ -909,70 +909,180 @@
         safeShowToast("Weekly target updated!", "success");
     }
 
-    function toggleWeeklyTargetCompletion(idx, isCompleted) {
-        const weekSelectEl = document.getElementById('wt-select-week');
-        const selectedWeekKey = weekSelectEl ? weekSelectEl.value : null;
+    function syncWeeklyTargetCompletionState(weekKey, target, isCompleted) {
+        if (!target) return;
 
-        if (!selectedWeekKey || !global.weeklyTargetsDatabase || !global.weeklyTargetsDatabase[selectedWeekKey] || !global.weeklyTargetsDatabase[selectedWeekKey][idx]) return;
-
-        const target = global.weeklyTargetsDatabase[selectedWeekKey][idx];
         target.completed = isCompleted;
-        target.completedAt = isCompleted ? new Date().toISOString() : null; // Sync date
+        target.completedAt = isCompleted ? (target.completedAt || new Date().toISOString()) : null;
         target.updatedAt = Date.now();
 
-        // Sync with Daily Targets across the selected week
-        const weekDates = selectedWeekKey ? selectedWeekKey.split(' - ') : [];
+        const matchFn = global.isChapterMatch || (global.Utils && global.Utils.isChapterMatch) || (typeof window !== 'undefined' && window.isChapterMatch);
+
+        function matchesTarget(other, checkTrack = true) {
+            if (!other) return false;
+            if (target.monthlyTargetId && other.monthlyTargetId && target.monthlyTargetId === other.monthlyTargetId) return true;
+            if (other.id && target.id && other.id === target.id) return true;
+            if (checkTrack && target.track && other.track && target.track !== other.track) return false;
+            const subMatch = String(other.subject || '').trim().toLowerCase() === String(target.subject || '').trim().toLowerCase();
+            if (!subMatch) return false;
+            const otherIsSubject = other.targetType === 'subject' || other.chapter === 'Whole Subject' || other.chapter === 'All Chapters';
+            const targetIsSubject = target.targetType === 'subject' || target.chapter === 'Whole Subject' || target.chapter === 'All Chapters';
+            return targetIsSubject ? otherIsSubject : (!otherIsSubject && (matchFn ? matchFn(other.chapter, target.chapter) : String(other.chapter).trim().toLowerCase() === String(target.chapter).trim().toLowerCase()));
+        }
+
+        // 1. Sync with Daily Targets across the week, today, and by target ID / chapter match
+        const weekDates = weekKey ? weekKey.split(' - ') : [];
         const utils = global.Utils || {};
-        const startDate = utils.parseDateSafe ? utils.parseDateSafe(weekDates[0]) : (utils.parseStart ? utils.parseStart(selectedWeekKey) : new Date());
+        const startDate = utils.parseDateSafe ? utils.parseDateSafe(weekDates[0]) : (utils.parseStart ? utils.parseStart(weekKey) : new Date());
         const endDate = (weekDates.length === 2 && utils.parseDateSafe) ? utils.parseDateSafe(weekDates[1]) : new Date(startDate.getTime() + 6 * 24 * 60 * 60 * 1000);
 
-        if (startDate && !isNaN(startDate.getTime()) && global.dailyTargetsDatabase) {
-            let cur = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
-            const endDay = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
-            while (cur <= endDay) {
-                const dateKey = safeFormatDate(cur);
-                const list = global.dailyTargetsDatabase[dateKey] || [];
-                list.forEach(matchingDt => {
-                    if (matchingDt.track === target.track && matchingDt.subject === target.subject && matchingDt.chapter === target.chapter) {
-                        matchingDt.completed = isCompleted;
-                        matchingDt.completedAt = target.completedAt;
+        const dDb = global.dailyTargetsDatabase || (typeof window !== 'undefined' ? window.dailyTargetsDatabase : null);
+        if (dDb) {
+            const todayD = new Date();
+            const todayMid = new Date(todayD.getFullYear(), todayD.getMonth(), todayD.getDate()).getTime();
+
+            Object.keys(dDb).forEach(dateKey => {
+                const list = dDb[dateKey] || [];
+                if (!Array.isArray(list) || list.length === 0) return;
+
+                let isInRange = false;
+                let isToday = false;
+
+                const parsedD = (typeof global.parseDailyTargetDateKey === 'function')
+                    ? global.parseDailyTargetDateKey(dateKey)
+                    : (utils.parseDateSafe ? utils.parseDateSafe(dateKey) : new Date(dateKey));
+
+                if (parsedD && !isNaN(parsedD.getTime())) {
+                    const dMid = new Date(parsedD.getFullYear(), parsedD.getMonth(), parsedD.getDate()).getTime();
+                    if (startDate && !isNaN(startDate.getTime()) && endDate && !isNaN(endDate.getTime())) {
+                        const sMid = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate()).getTime();
+                        const eMid = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate()).getTime();
+                        if (dMid >= sMid && dMid <= eMid) isInRange = true;
+                    }
+                    if (dMid === todayMid) isToday = true;
+                }
+
+                list.forEach(dt => {
+                    if (!dt) return;
+                    const isIdMatch = target.monthlyTargetId && dt.monthlyTargetId && target.monthlyTargetId === dt.monthlyTargetId;
+                    const isContentMatch = matchesTarget(dt, true);
+                    if (isIdMatch || (isInRange && isContentMatch) || (isToday && isContentMatch)) {
+                        dt.completed = isCompleted;
+                        dt.completedAt = target.completedAt;
+                        dt.updatedAt = Date.now();
                     }
                 });
-                cur.setDate(cur.getDate() + 1);
+            });
+
+            // Fallback for sequential formatted dates within range
+            if (startDate && !isNaN(startDate.getTime())) {
+                let cur = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+                const endDay = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
+                while (cur <= endDay) {
+                    const dateKey = safeFormatDate(cur);
+                    const list = dDb[dateKey] || [];
+                    list.forEach(matchingDt => {
+                        if (matchingDt && matchesTarget(matchingDt, true)) {
+                            matchingDt.completed = isCompleted;
+                            matchingDt.completedAt = target.completedAt;
+                            matchingDt.updatedAt = Date.now();
+                        }
+                    });
+                    cur.setDate(cur.getDate() + 1);
+                }
             }
         }
 
-        const todayKey = safeFormatDate(new Date());
-        if (global.dailyTargetsDatabase && global.dailyTargetsDatabase[todayKey]) {
-            const matchingDt = global.dailyTargetsDatabase[todayKey].find(t => t.track === target.track && t.subject === target.subject && t.chapter === target.chapter);
-            if (matchingDt) {
-                matchingDt.completed = isCompleted;
-                matchingDt.completedAt = target.completedAt;
-            }
-        }
-
-        // Also sync completion across any other weeks for this multi-week target
-        if (global.weeklyTargetsDatabase) {
-            Object.keys(global.weeklyTargetsDatabase).forEach(wKey => {
-                if (wKey === selectedWeekKey) return;
-                const list = global.weeklyTargetsDatabase[wKey] || [];
+        // 2. Also sync completion across any other weeks for this multi-week target
+        const wDb = global.weeklyTargetsDatabase || (typeof window !== 'undefined' ? window.weeklyTargetsDatabase : null);
+        if (wDb) {
+            Object.keys(wDb).forEach(wKey => {
+                if (wKey === weekKey) return;
+                const list = wDb[wKey] || [];
                 list.forEach(otherWt => {
-                    if (otherWt && otherWt.track === target.track && otherWt.subject === target.subject && otherWt.chapter === target.chapter) {
+                    if (otherWt && matchesTarget(otherWt, true)) {
                         otherWt.completed = isCompleted;
                         otherWt.completedAt = target.completedAt;
+                        otherWt.updatedAt = Date.now();
                     }
                 });
             });
         }
 
-        if (typeof global.syncTaskChapterCompletion === 'function') {
-            global.syncTaskChapterCompletion(target.track, target.subject, target.chapter, isCompleted, target.completedAt);
+        // 3. Sync with Monthly Targets database
+        const mDb = global.monthlyTargetsDatabase || (typeof window !== 'undefined' ? window.monthlyTargetsDatabase : null);
+        if (mDb) {
+            Object.keys(mDb).forEach(mKey => {
+                const mList = mDb[mKey] || [];
+                mList.forEach(mt => {
+                    if (mt && matchesTarget(mt, true)) {
+                        mt.completed = isCompleted;
+                        mt.completedAt = target.completedAt;
+                        mt.updatedAt = Date.now();
+                    }
+                });
+            });
         }
 
+        // 4. Sync with daily study tasks (AppState.tasks)
+        const syncFn = (typeof global.syncTaskChapterCompletion === 'function')
+            ? global.syncTaskChapterCompletion
+            : (typeof window !== 'undefined' && typeof window.syncTaskChapterCompletion === 'function' ? window.syncTaskChapterCompletion : null);
+        if (syncFn) {
+            syncFn(target.track, target.subject, target.chapter, isCompleted, target.completedAt);
+        }
+
+        const findFn = (typeof global.findTaskChapter === 'function')
+            ? global.findTaskChapter
+            : (typeof window !== 'undefined' && typeof window.findTaskChapter === 'function' ? window.findTaskChapter : null);
+        const found = findFn ? findFn(target.track, target.subject, target.chapter) : null;
+        if (found && found.subTask) {
+            found.subTask.completed = isCompleted;
+            found.subTask.completedAt = target.completedAt;
+        }
+
+        // 5. Recalculate totals and persist
         safeRecalculateTotals();
-        safeRenderUI();
-        safeShowToast("Chapter completion state synchronized!", "success");
         safeSaveToCloud(false);
+        safeRenderUI();
+
+        // 6. Refresh UI components across tabs and modals
+        if (typeof renderWeeklyTargets === 'function') {
+            try { renderWeeklyTargets(); } catch (e) {}
+        }
+        if (typeof renderWtdbList === 'function') {
+            try { renderWtdbList(); } catch (e) {}
+        }
+        const renderMonthlyFn = (typeof global.renderMonthlyTargets === 'function')
+            ? global.renderMonthlyTargets
+            : (typeof window !== 'undefined' && typeof window.renderMonthlyTargets === 'function' ? window.renderMonthlyTargets : null);
+        if (renderMonthlyFn) {
+            try { renderMonthlyFn(); } catch (e) {}
+        }
+        const renderDailyFn = (typeof global.renderDailyTargets === 'function')
+            ? global.renderDailyTargets
+            : (typeof window !== 'undefined' && typeof window.renderDailyTargets === 'function' ? window.renderDailyTargets : null);
+        if (renderDailyFn) {
+            try { renderDailyFn(); } catch (e) {}
+        }
+    }
+
+    function toggleWeeklyTargetCompletion(idx, isCompleted, weekKey = null) {
+        const weekSelectEl = document.getElementById('wt-select-week');
+        const selectedWeekKey = weekKey || (weekSelectEl ? weekSelectEl.value : null) || (function () {
+            if (global.currentWeeklyTargetsDate) {
+                const range = getWeeklyTargetRange(global.currentWeeklyTargetsDate);
+                return formatDateRangeKey(range.start, range.end);
+            }
+            const range = getWeeklyTargetRange();
+            return formatDateRangeKey(range.start, range.end);
+        })();
+
+        if (!selectedWeekKey || !global.weeklyTargetsDatabase || !global.weeklyTargetsDatabase[selectedWeekKey] || !global.weeklyTargetsDatabase[selectedWeekKey][idx]) return;
+
+        const target = global.weeklyTargetsDatabase[selectedWeekKey][idx];
+        syncWeeklyTargetCompletionState(selectedWeekKey, target, isCompleted);
+        safeShowToast("Chapter completion state synchronized!", "success");
     }
 
     function navigateWeek(mode) {
@@ -1617,20 +1727,7 @@
         if (!global.weeklyTargetsDatabase || !global.weeklyTargetsDatabase[weekKey] || !global.weeklyTargetsDatabase[weekKey][idx]) return;
 
         const target = global.weeklyTargetsDatabase[weekKey][idx];
-        target.completed = isCompleted;
-        target.completedAt = isCompleted ? new Date().toISOString() : null; // Sync date
-        target.updatedAt = Date.now();
-
-        const found = typeof global.findTaskChapter === 'function' ? global.findTaskChapter(target.track, target.subject, target.chapter) : null;
-        if (found && found.subTask) {
-            found.subTask.completed = isCompleted;
-            found.subTask.completedAt = target.completedAt;
-            safeRecalculateTotals();
-        }
-
-        safeSaveToCloud();
-        safeRenderUI();
-        renderWtdbList();
+        syncWeeklyTargetCompletionState(weekKey, target, isCompleted);
         safeShowToast("Target completion state updated!", "success");
     }
 

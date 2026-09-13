@@ -2786,9 +2786,9 @@ window.deleteWeeklyTarget = function (idx, targetId = null) {
     }
 };
 
-window.toggleWeeklyTargetCompletion = function (idx, isCompleted) {
+window.toggleWeeklyTargetCompletion = function (idx, isCompleted, weekKey = null) {
     if (window.WeeklyTargets && typeof window.WeeklyTargets.toggleWeeklyTargetCompletion === 'function') {
-        return window.WeeklyTargets.toggleWeeklyTargetCompletion(idx, isCompleted);
+        return window.WeeklyTargets.toggleWeeklyTargetCompletion(idx, isCompleted, weekKey);
     }
 };
 
