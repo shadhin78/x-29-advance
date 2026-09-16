@@ -104,7 +104,7 @@
                                 </div>
                             </div>
                             <div class="flex items-center space-x-1 shrink-0">
-                                <button onclick="openModal('analytics-modal', '${cfg.id}')" class="group flex items-center justify-center p-2 md:p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700/80 hover:bg-white dark:hover:bg-slate-800 active:scale-95 transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5 shrink-0" title="Analytics"><svg class="w-3.5 h-3.5 md:w-4 md:h-4 text-slate-400 group-hover:${cMap.iconColor} transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg></button>
+                                <button onclick="window.openModal('analytics-modal', '${cfg.id}')" class="group flex items-center justify-center p-2 md:p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700/80 hover:bg-white dark:hover:bg-slate-800 active:scale-95 transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5 shrink-0" title="Analytics"><svg class="w-3.5 h-3.5 md:w-4 md:h-4 text-slate-400 group-hover:${cMap.iconColor} transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg></button>
                                 <button onclick="window.openEditDailyActionModal('${cfg.id}')" class="group flex items-center justify-center p-2 md:p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700/80 hover:bg-white dark:hover:bg-slate-800 active:scale-95 transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5 shrink-0" title="Edit Action"><svg class="w-3.5 h-3.5 md:w-4 md:h-4 text-slate-400 group-hover:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg></button>
                             </div>
                         </div>
@@ -799,291 +799,308 @@
      * Streak counter, total completed, completion percentage,
      * range-selectable GitHub-style contribution heatmap, and quick check-ins grid.
      *
+    /**
+     * Opens Action Analytics modal for specified action ID.
+     *
      * @param {string} typeKey - Action ID
      */
+    function openAnalyticsModal(typeKey) {
+        if (typeof window.openModal === 'function') {
+            window.openModal('analytics-modal', typeKey);
+        } else if (typeof global.openModal === 'function') {
+            global.openModal('analytics-modal', typeKey);
+        }
+    }
+
     function populateAnalyticsModal(typeKey) {
         window.currentAnalyticsAction = typeKey;
-        const cfgAct = (window.customActions || []).find(a => a.id === typeKey);
-        if (!cfgAct) return;
-        const cMap = (AppState.twColors && AppState.twColors[cfgAct.color]) || (AppState.twColors && AppState.twColors['blue']) || { bgLt: 'bg-blue-50', text: 'text-blue-500', borderLt: 'border-blue-200', hex: '#3b82f6', btn: 'bg-blue-500' };
+        try {
+            const actionsList = (Array.isArray(window.customActions) && window.customActions.length > 0)
+                ? window.customActions
+                : ((typeof AppState !== 'undefined' && Array.isArray(AppState.customActions)) ? AppState.customActions : []);
+            const cfgAct = actionsList.find(a => a.id === typeKey) || { id: typeKey, title: typeKey || 'Action', color: 'blue' };
+            const cMap = (AppState.twColors && AppState.twColors[cfgAct.color]) || (AppState.twColors && AppState.twColors['blue']) || { bgLt: 'bg-blue-50', text: 'text-blue-500', borderLt: 'border-blue-200', hex: '#3b82f6', btn: 'bg-blue-500' };
 
-        if (typeof safeSetText === 'function') safeSetText('am-title', cfgAct.title + " Analytics");
-        if (typeof safeSetClass === 'function') {
-            safeSetClass('am-icon-box', `p-2 sm:p-3 md:p-4 rounded-lg sm:rounded-xl md:rounded-2xl shadow-inner shrink-0 ${cMap.bgLt} ${cMap.text}`);
+            if (typeof safeSetText === 'function') safeSetText('am-title', (cfgAct.title || typeKey) + " Analytics");
+            if (typeof safeSetClass === 'function') {
+                safeSetClass('am-icon-box', `p-2 sm:p-3 md:p-4 rounded-lg sm:rounded-xl md:rounded-2xl shadow-inner shrink-0 ${cMap.bgLt} ${cMap.text}`);
 
-            const statBoxes = ['am-stat-box-1', 'am-stat-box-2', 'am-stat-box-3'];
-            statBoxes.forEach(id => safeSetClass(id, `p-2.5 sm:p-4 md:p-6 rounded-lg sm:rounded-xl md:rounded-3xl border shadow-sm flex flex-col justify-center ${cMap.bgLt} ${cMap.borderLt}`));
+                const statBoxes = ['am-stat-box-1', 'am-stat-box-2', 'am-stat-box-3'];
+                statBoxes.forEach(id => safeSetClass(id, `p-2.5 sm:p-4 md:p-6 rounded-lg sm:rounded-xl md:rounded-3xl border shadow-sm flex flex-col justify-center ${cMap.bgLt} ${cMap.borderLt}`));
 
-            const statLabels = ['am-stat-label-1', 'am-stat-label-2', 'am-stat-label-3'];
-            statLabels.forEach(id => safeSetClass(id, `block text-[7px] sm:text-[9px] md:text-[10px] font-black uppercase tracking-widest mb-0.5 sm:mb-1 md:mb-1.5 leading-tight ${cMap.text}`));
-        }
-
-        const today = (typeof Utils !== 'undefined' && typeof Utils.getDailyActionDate === 'function')
-            ? Utils.getDailyActionDate()
-            : new Date();
-        today.setHours(0, 0, 0, 0);
-
-        let actStartDate = (cfgAct.startDate && typeof Utils !== 'undefined' && typeof Utils.parseDateSafe === 'function')
-            ? Utils.parseDateSafe(cfgAct.startDate)
-            : null;
-        if (actStartDate && isNaN(actStartDate.getTime())) actStartDate = null;
-        if (actStartDate) actStartDate.setHours(0, 0, 0, 0);
-
-        const minGridDate = new Date(today);
-        minGridDate.setDate(minGridDate.getDate() - 179);
-        minGridDate.setHours(0, 0, 0, 0);
-
-        let gridStartDate = minGridDate;
-        if (actStartDate && actStartDate > minGridDate) {
-            gridStartDate = actStartDate;
-        }
-
-        let statsStartDate = actStartDate || gridStartDate;
-
-        let total = 0;
-        let possibleDays = 0;
-        let streak = 0;
-        let streakActive = true;
-        let longestStreak = 0;
-        let tempStreak = 0;
-
-        // Calculate current streak and total backwards from today
-        const checkDate = new Date(today);
-        while (checkDate >= statsStartDate) {
-            possibleDays++;
-            const t = (typeof window.getTaskForDate === 'function') ? window.getTaskForDate(checkDate) : null;
-            const done = t ? Boolean(t[typeKey]) : false;
-            if (done) {
-                total++;
-                if (streakActive) streak++;
-            } else {
-                streakActive = false;
+                const statLabels = ['am-stat-label-1', 'am-stat-label-2', 'am-stat-label-3'];
+                statLabels.forEach(id => safeSetClass(id, `block text-[7px] sm:text-[9px] md:text-[10px] font-black uppercase tracking-widest mb-0.5 sm:mb-1 md:mb-1.5 leading-tight ${cMap.text}`));
             }
-            checkDate.setDate(checkDate.getDate() - 1);
-        }
 
-        // Calculate longest historical streak forward from statsStartDate
-        const streakIter = new Date(statsStartDate);
-        while (streakIter <= today) {
-            const t = (typeof window.getTaskForDate === 'function') ? window.getTaskForDate(streakIter) : null;
-            const done = t ? Boolean(t[typeKey]) : false;
-            if (done) {
-                tempStreak++;
-                if (tempStreak > longestStreak) longestStreak = tempStreak;
-            } else {
-                tempStreak = 0;
+            const today = (typeof Utils !== 'undefined' && typeof Utils.getDailyActionDate === 'function')
+                ? Utils.getDailyActionDate()
+                : new Date();
+            today.setHours(0, 0, 0, 0);
+
+            let actStartDate = (cfgAct.startDate && typeof Utils !== 'undefined' && typeof Utils.parseDateSafe === 'function')
+                ? Utils.parseDateSafe(cfgAct.startDate)
+                : null;
+            if (actStartDate && isNaN(actStartDate.getTime())) actStartDate = null;
+            if (actStartDate) actStartDate.setHours(0, 0, 0, 0);
+
+            const minGridDate = new Date(today);
+            minGridDate.setDate(minGridDate.getDate() - 179);
+            minGridDate.setHours(0, 0, 0, 0);
+
+            let gridStartDate = minGridDate;
+            if (actStartDate && actStartDate > minGridDate) {
+                gridStartDate = actStartDate;
             }
-            streakIter.setDate(streakIter.getDate() + 1);
-        }
 
-        if (typeof safeSetText === 'function') {
-            safeSetText('am-total', total);
-            safeSetText('am-streak', streak + ' Days');
-            const pct = possibleDays > 0 ? Math.round((total / possibleDays) * 100) : 0;
-            safeSetText('am-percent', pct + '%');
-        }
-        const valClass = `text-base sm:text-2xl md:text-5xl font-black drop-shadow-sm mt-0.5 sm:mt-1 ${cMap.text}`;
-        if (typeof safeSetClass === 'function') {
-            safeSetClass('am-total', valClass);
-            safeSetClass('am-streak', valClass);
-            safeSetClass('am-percent', valClass);
-        }
+            let statsStartDate = actStartDate || gridStartDate;
 
-        // CONTRIBUTION HEATMAP TREND
-        const heatmapGridEl = document.getElementById('am-heatmap-grid');
-        const pulseDot = document.getElementById('am-heatmap-pulse-dot');
-        if (pulseDot) {
-            pulseDot.style.backgroundColor = cMap.hex;
-        }
-        const legendActive = document.getElementById('am-legend-active');
-        if (legendActive) {
-            legendActive.style.backgroundColor = cMap.hex;
-            legendActive.style.boxShadow = `0 0 6px ${cMap.hex}66`;
-        }
+            let total = 0;
+            let possibleDays = 0;
+            let streak = 0;
+            let streakActive = true;
+            let longestStreak = 0;
+            let tempStreak = 0;
 
-        const rangeDays = window.actionAnalyticsHeatmapRange || 180;
-
-        // Update range selector pill styling
-        [90, 180, 365].forEach(r => {
-            const btn = document.getElementById(`am-range-${r}`);
-            if (btn) {
-                if (r === rangeDays) {
-                    btn.className = `px-2 sm:px-2.5 py-1 rounded-lg transition-all text-white shadow-sm font-black ${cMap.btn || 'bg-blue-500'}`;
+            // Calculate current streak and total backwards from today
+            const checkDate = new Date(today);
+            while (checkDate >= statsStartDate) {
+                possibleDays++;
+                const t = (typeof window.getTaskForDate === 'function') ? window.getTaskForDate(checkDate) : null;
+                const done = t ? Boolean(t[typeKey]) : false;
+                if (done) {
+                    total++;
+                    if (streakActive) streak++;
                 } else {
-                    btn.className = 'px-2 sm:px-2.5 py-1 rounded-lg transition-all text-slate-500 hover:text-slate-900 dark:hover:text-white font-bold';
+                    streakActive = false;
                 }
-            }
-        });
-
-        if (heatmapGridEl) {
-            const heatmapStartDate = new Date(today);
-            heatmapStartDate.setDate(heatmapStartDate.getDate() - (rangeDays - 1));
-            heatmapStartDate.setHours(0, 0, 0, 0);
-
-            // Align heatmap start date to Sunday (day 0) for consistent 7-row grid alignment
-            const startDayOfWeek = heatmapStartDate.getDay();
-            if (startDayOfWeek !== 0) {
-                heatmapStartDate.setDate(heatmapStartDate.getDate() - startDayOfWeek);
+                checkDate.setDate(checkDate.getDate() - 1);
             }
 
-            const weeks = [];
-            let currentWeek = [];
-            let curr = new Date(heatmapStartDate);
-
-            let totalHitsInRange = 0;
-            let totalDaysInRange = 0;
-
-            while (curr <= today || currentWeek.length > 0) {
-                const key = `${curr.getFullYear()}-${String(curr.getMonth() + 1).padStart(2, '0')}-${String(curr.getDate()).padStart(2, '0')}`;
-                const isFuture = curr > today;
-                const isToday = curr.getTime() === today.getTime();
-                const dStr = (typeof Utils !== 'undefined' && typeof Utils.formatDate === 'function') ? Utils.formatDate(curr) : '';
-
-                let done = false;
-                let taskIdOrDate = key;
-
-                if (!isFuture) {
-                    totalDaysInRange++;
-                    const t = (typeof window.getTaskForDate === 'function') ? window.getTaskForDate(curr) : null;
-                    done = t ? Boolean(t[typeKey]) : false;
-                    if (t) taskIdOrDate = t.id;
-                    if (done) totalHitsInRange++;
-                }
-
-                currentWeek.push({
-                    date: new Date(curr),
-                    dateKey: key,
-                    dStr: dStr,
-                    isoLocalDate: key,
-                    taskIdOrDate: taskIdOrDate,
-                    done: done,
-                    isFuture: isFuture,
-                    isToday: isToday,
-                    dayOfWeek: curr.getDay(),
-                    month: curr.getMonth(),
-                    dayOfMonth: curr.getDate()
-                });
-
-                if (currentWeek.length === 7) {
-                    weeks.push(currentWeek);
-                    currentWeek = [];
-                }
-
-                curr.setDate(curr.getDate() + 1);
-                if (isFuture && currentWeek.length === 0) break;
-            }
-
-            // Summary text update
-            const summaryEl = document.getElementById('am-heatmap-summary');
-            if (summaryEl) {
-                const rangePct = totalDaysInRange > 0 ? Math.round((totalHitsInRange / totalDaysInRange) * 100) : 0;
-                summaryEl.innerHTML = `
-                    <span><strong class="${cMap.text}">${totalHitsInRange}</strong> / ${totalDaysInRange} days completed (${rangePct}%)</span>
-                    <span class="opacity-40">•</span>
-                    <span>Best Streak: <strong class="${cMap.text}">${longestStreak}d 🔥</strong></span>
-                `;
-            }
-
-            // Render Month Labels Row
-            let monthLabelsHtml = `<div class="flex items-center text-[10px] font-extrabold text-slate-400 dark:text-slate-500 mb-1 pl-7 gap-1">`;
-            let prevMonth = -1;
-            weeks.forEach((wk) => {
-                const firstDayOfWeek = wk[0].date;
-                const month = firstDayOfWeek.getMonth();
-                if (month !== prevMonth) {
-                    const monthName = firstDayOfWeek.toLocaleDateString(undefined, { month: 'short' });
-                    monthLabelsHtml += `<span class="shrink-0 text-left text-[9px] font-black uppercase tracking-wider overflow-visible select-none" style="width: 15px;">${monthName}</span>`;
-                    prevMonth = month;
+            // Calculate longest historical streak forward from statsStartDate
+            const streakIter = new Date(statsStartDate);
+            while (streakIter <= today) {
+                const t = (typeof window.getTaskForDate === 'function') ? window.getTaskForDate(streakIter) : null;
+                const done = t ? Boolean(t[typeKey]) : false;
+                if (done) {
+                    tempStreak++;
+                    if (tempStreak > longestStreak) longestStreak = tempStreak;
                 } else {
-                    monthLabelsHtml += `<span class="shrink-0" style="width: 15px;"></span>`;
+                    tempStreak = 0;
+                }
+                streakIter.setDate(streakIter.getDate() + 1);
+            }
+
+            if (typeof safeSetText === 'function') {
+                safeSetText('am-total', total);
+                safeSetText('am-streak', streak + ' Days');
+                const pct = possibleDays > 0 ? Math.round((total / possibleDays) * 100) : 0;
+                safeSetText('am-percent', pct + '%');
+            }
+            const valClass = `text-base sm:text-2xl md:text-5xl font-black drop-shadow-sm mt-0.5 sm:mt-1 ${cMap.text}`;
+            if (typeof safeSetClass === 'function') {
+                safeSetClass('am-total', valClass);
+                safeSetClass('am-streak', valClass);
+                safeSetClass('am-percent', valClass);
+            }
+
+            // CONTRIBUTION HEATMAP TREND
+            const heatmapGridEl = document.getElementById('am-heatmap-grid');
+            const pulseDot = document.getElementById('am-heatmap-pulse-dot');
+            if (pulseDot) {
+                pulseDot.style.backgroundColor = cMap.hex;
+            }
+            const legendActive = document.getElementById('am-legend-active');
+            if (legendActive) {
+                legendActive.style.backgroundColor = cMap.hex;
+                legendActive.style.boxShadow = `0 0 6px ${cMap.hex}66`;
+            }
+
+            const rangeDays = window.actionAnalyticsHeatmapRange || 180;
+
+            // Update range selector pill styling
+            [90, 180, 365].forEach(r => {
+                const btn = document.getElementById(`am-range-${r}`);
+                if (btn) {
+                    if (r === rangeDays) {
+                        btn.className = `px-2 sm:px-2.5 py-1 rounded-lg transition-all text-white shadow-sm font-black ${cMap.btn || 'bg-blue-500'}`;
+                    } else {
+                        btn.className = 'px-2 sm:px-2.5 py-1 rounded-lg transition-all text-slate-500 hover:text-slate-900 dark:hover:text-white font-bold';
+                    }
                 }
             });
-            monthLabelsHtml += `</div>`;
 
-            // Render 7 Day Rows (Sunday to Saturday)
-            const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-            let gridRowsHtml = '';
+            if (heatmapGridEl) {
+                const heatmapStartDate = new Date(today);
+                heatmapStartDate.setDate(heatmapStartDate.getDate() - (rangeDays - 1));
+                heatmapStartDate.setHours(0, 0, 0, 0);
 
-            for (let d = 0; d < 7; d++) {
-                const dayLabel = (d === 1 || d === 3 || d === 5) ? dayNames[d] : '';
-                gridRowsHtml += `<div class="flex items-center gap-1 my-[1.5px]">`;
-                gridRowsHtml += `<span class="w-6 text-[9px] font-bold text-slate-400 dark:text-slate-500 shrink-0 text-right pr-1 select-none leading-none">${dayLabel}</span>`;
-                gridRowsHtml += `<div class="flex items-center gap-1">`;
+                // Align heatmap start date to Sunday (day 0) for consistent 7-row grid alignment
+                const startDayOfWeek = heatmapStartDate.getDay();
+                if (startDayOfWeek !== 0) {
+                    heatmapStartDate.setDate(heatmapStartDate.getDate() - startDayOfWeek);
+                }
 
+                const weeks = [];
+                let currentWeek = [];
+                let curr = new Date(heatmapStartDate);
+
+                let totalHitsInRange = 0;
+                let totalDaysInRange = 0;
+
+                while (curr <= today || currentWeek.length > 0) {
+                    const key = `${curr.getFullYear()}-${String(curr.getMonth() + 1).padStart(2, '0')}-${String(curr.getDate()).padStart(2, '0')}`;
+                    const isFuture = curr > today;
+                    const isToday = curr.getTime() === today.getTime();
+                    const dStr = (typeof Utils !== 'undefined' && typeof Utils.formatDate === 'function') ? Utils.formatDate(curr) : '';
+
+                    let done = false;
+                    let taskIdOrDate = key;
+
+                    if (!isFuture) {
+                        totalDaysInRange++;
+                        const t = (typeof window.getTaskForDate === 'function') ? window.getTaskForDate(curr) : null;
+                        done = t ? Boolean(t[typeKey]) : false;
+                        if (t) taskIdOrDate = t.id;
+                        if (done) totalHitsInRange++;
+                    }
+
+                    currentWeek.push({
+                        date: new Date(curr),
+                        dateKey: key,
+                        dStr: dStr,
+                        isoLocalDate: key,
+                        taskIdOrDate: taskIdOrDate,
+                        done: done,
+                        isFuture: isFuture,
+                        isToday: isToday,
+                        dayOfWeek: curr.getDay(),
+                        month: curr.getMonth(),
+                        dayOfMonth: curr.getDate()
+                    });
+
+                    if (currentWeek.length === 7) {
+                        weeks.push(currentWeek);
+                        currentWeek = [];
+                    }
+
+                    curr.setDate(curr.getDate() + 1);
+                    if (isFuture && currentWeek.length === 0) break;
+                }
+
+                // Summary text update
+                const summaryEl = document.getElementById('am-heatmap-summary');
+                if (summaryEl) {
+                    const rangePct = totalDaysInRange > 0 ? Math.round((totalHitsInRange / totalDaysInRange) * 100) : 0;
+                    summaryEl.innerHTML = `
+                        <span><strong class="${cMap.text}">${totalHitsInRange}</strong> / ${totalDaysInRange} days completed (${rangePct}%)</span>
+                        <span class="opacity-40">•</span>
+                        <span>Best Streak: <strong class="${cMap.text}">${longestStreak}d 🔥</strong></span>
+                    `;
+                }
+
+                // Render Month Labels Row
+                let monthLabelsHtml = `<div class="flex items-center text-[10px] font-extrabold text-slate-400 dark:text-slate-500 mb-1 pl-7 gap-1">`;
+                let prevMonth = -1;
                 weeks.forEach((wk) => {
-                    const dayObj = wk[d];
-                    if (!dayObj) {
-                        gridRowsHtml += `<div class="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-[15px] md:h-[15px] rounded-[3px] opacity-0 pointer-events-none shrink-0"></div>`;
-                        return;
-                    }
-
-                    if (dayObj.isFuture) {
-                        gridRowsHtml += `<div class="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-[15px] md:h-[15px] rounded-[3px] bg-slate-100/30 dark:bg-slate-800/20 border border-slate-200/20 dark:border-slate-800/20 opacity-25 shrink-0 pointer-events-none"></div>`;
-                        return;
-                    }
-
-                    const done = dayObj.done;
-                    let cellStyle = '';
-                    let cellClass = '';
-                    let innerIcon = '';
-
-                    if (done) {
-                        cellClass = `w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-[15px] md:h-[15px] cursor-pointer transition-all duration-150 hover:scale-125 hover:z-20 shrink-0 rounded-[3px] flex items-center justify-center shadow-sm`;
-                        cellStyle = `background-color: ${cMap.hex}; border: 1px solid ${cMap.hex}; box-shadow: 0 0 6px ${cMap.hex}55;`;
-                        innerIcon = `<svg class="w-2 h-2 sm:w-2.5 sm:h-2.5 text-white pointer-events-none drop-shadow-sm" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>`;
+                    const firstDayOfWeek = wk[0].date;
+                    const month = firstDayOfWeek.getMonth();
+                    if (month !== prevMonth) {
+                        const monthName = firstDayOfWeek.toLocaleDateString(undefined, { month: 'short' });
+                        monthLabelsHtml += `<span class="shrink-0 text-left text-[9px] font-black uppercase tracking-wider overflow-visible select-none" style="width: 15px;">${monthName}</span>`;
+                        prevMonth = month;
                     } else {
-                        cellClass = `w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-[15px] md:h-[15px] cursor-pointer transition-all duration-150 hover:scale-125 hover:z-20 shrink-0 rounded-[3px] bg-slate-200/80 dark:bg-slate-800/90 border border-slate-300/50 dark:border-slate-700/60 hover:border-slate-400 dark:hover:border-slate-500 flex items-center justify-center`;
-                        innerIcon = `<span class="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600/70 pointer-events-none"></span>`;
+                        monthLabelsHtml += `<span class="shrink-0" style="width: 15px;"></span>`;
                     }
-
-                    if (dayObj.isToday) {
-                        cellClass += ` ring-2 ring-blue-500 ring-offset-1 dark:ring-offset-slate-900`;
-                    }
-
-                    const formattedDate = dayObj.date.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
-                    const statusText = done ? 'Completed (YES)' : 'Missed (NO)';
-
-                    gridRowsHtml += `<button type="button" class="${cellClass}" style="${cellStyle}"
-                        title="${formattedDate}: ${statusText}"
-                        data-date="${formattedDate}"
-                        data-datekey="${dayObj.dateKey}"
-                        data-status="${statusText}"
-                        data-done="${done}"
-                        data-action="${cfgAct.title}"
-                        onclick="window.toggleModalDay('${dayObj.taskIdOrDate}', '${typeKey}', event)"
-                        onmouseenter="window.showActionHeatmapTooltip(event, this)"
-                        onmousemove="window.moveActionHeatmapTooltip(event)"
-                        onmouseleave="window.hideActionHeatmapTooltip()">${innerIcon}</button>`;
                 });
+                monthLabelsHtml += `</div>`;
 
-                gridRowsHtml += `</div></div>`;
+                // Render 7 Day Rows (Sunday to Saturday)
+                const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                let gridRowsHtml = '';
+
+                for (let d = 0; d < 7; d++) {
+                    const dayLabel = (d === 1 || d === 3 || d === 5) ? dayNames[d] : '';
+                    gridRowsHtml += `<div class="flex items-center gap-1 my-[1.5px]">`;
+                    gridRowsHtml += `<span class="w-6 text-[9px] font-bold text-slate-400 dark:text-slate-500 shrink-0 text-right pr-1 select-none leading-none">${dayLabel}</span>`;
+                    gridRowsHtml += `<div class="flex items-center gap-1">`;
+
+                    weeks.forEach((wk) => {
+                        const dayObj = wk[d];
+                        if (!dayObj) {
+                            gridRowsHtml += `<div class="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-[15px] md:h-[15px] rounded-[3px] opacity-0 pointer-events-none shrink-0"></div>`;
+                            return;
+                        }
+
+                        if (dayObj.isFuture) {
+                            gridRowsHtml += `<div class="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-[15px] md:h-[15px] rounded-[3px] bg-slate-100/30 dark:bg-slate-800/20 border border-slate-200/20 dark:border-slate-800/20 opacity-25 shrink-0 pointer-events-none"></div>`;
+                            return;
+                        }
+
+                        const done = dayObj.done;
+                        let cellStyle = '';
+                        let cellClass = '';
+                        let innerIcon = '';
+
+                        if (done) {
+                            cellClass = `w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-[15px] md:h-[15px] cursor-pointer transition-all duration-150 hover:scale-125 hover:z-20 shrink-0 rounded-[3px] flex items-center justify-center shadow-sm`;
+                            cellStyle = `background-color: ${cMap.hex}; border: 1px solid ${cMap.hex}; box-shadow: 0 0 6px ${cMap.hex}55;`;
+                            innerIcon = `<svg class="w-2 h-2 sm:w-2.5 sm:h-2.5 text-white pointer-events-none drop-shadow-sm" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>`;
+                        } else {
+                            cellClass = `w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-[15px] md:h-[15px] cursor-pointer transition-all duration-150 hover:scale-125 hover:z-20 shrink-0 rounded-[3px] bg-slate-200/80 dark:bg-slate-800/90 border border-slate-300/50 dark:border-slate-700/60 hover:border-slate-400 dark:hover:border-slate-500 flex items-center justify-center`;
+                            innerIcon = `<span class="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600/70 pointer-events-none"></span>`;
+                        }
+
+                        if (dayObj.isToday) {
+                            cellClass += ` ring-2 ring-blue-500 ring-offset-1 dark:ring-offset-slate-900`;
+                        }
+
+                        const formattedDate = dayObj.date.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+                        const statusText = done ? 'Completed (YES)' : 'Missed (NO)';
+
+                        gridRowsHtml += `<button type="button" class="${cellClass}" style="${cellStyle}"
+                            title="${formattedDate}: ${statusText}"
+                            data-date="${formattedDate}"
+                            data-datekey="${dayObj.dateKey}"
+                            data-status="${statusText}"
+                            data-done="${done}"
+                            data-action="${cfgAct.title}"
+                            onclick="window.toggleModalDay('${dayObj.taskIdOrDate}', '${typeKey}', event)"
+                            onmouseenter="window.showActionHeatmapTooltip(event, this)"
+                            onmousemove="window.moveActionHeatmapTooltip(event)"
+                            onmouseleave="window.hideActionHeatmapTooltip()">${innerIcon}</button>`;
+                    });
+
+                    gridRowsHtml += `</div></div>`;
+                }
+
+                heatmapGridEl.innerHTML = monthLabelsHtml + gridRowsHtml;
             }
 
-            heatmapGridEl.innerHTML = monthLabelsHtml + gridRowsHtml;
-        }
-
-        // Clean up masterLineChart instance if present
-        if (AppState.masterLineChart && typeof AppState.masterLineChart.destroy === 'function') {
-            AppState.masterLineChart.destroy();
-            AppState.masterLineChart = null;
-        }
-
-        // Render Quick Check-ins Grid
-        const grid = document.getElementById('am-grid');
-        if (grid) {
-            let gHtml = '';
-            const currDate = new Date(today);
-            while (currDate >= gridStartDate) {
-                const dStr = (typeof Utils !== 'undefined' && typeof Utils.formatDate === 'function') ? Utils.formatDate(currDate) : '';
-                const isoLocalDate = `${currDate.getFullYear()}-${String(currDate.getMonth() + 1).padStart(2, '0')}-${String(currDate.getDate()).padStart(2, '0')}`;
-                const t = (typeof window.getTaskForDate === 'function') ? window.getTaskForDate(currDate) : null;
-                const done = t ? Boolean(t[typeKey]) : false;
-                const taskIdOrDate = t ? t.id : isoLocalDate;
-                const btnClass = done ? 'bg-gradient-to-br from-green-400 to-emerald-500 text-white shadow-[0_2px_8px_rgba(34,197,94,0.4)] border-transparent' : 'bg-gradient-to-br from-red-400 to-red-500 text-white shadow-[0_2px_8px_rgba(239,68,68,0.4)] border-transparent';
-                gHtml += `<button onclick="toggleModalDay('${taskIdOrDate}', '${typeKey}', event)" title="${dStr}: ${done ? 'YES' : 'NO'}" class="flex flex-col items-center justify-center p-1 sm:p-1.5 md:p-2 rounded-lg sm:rounded-xl ${btnClass} transition-all duration-300 w-full aspect-square shrink-0 hover:scale-105 active:scale-90 focus:outline-none snap-start"><span class="text-[6px] sm:text-[7px] md:text-[9px] uppercase font-black opacity-90 mb-0.5">${dStr.split(' ')[0]}</span><span class="text-[9px] sm:text-[11px] md:text-sm font-black leading-none">${dStr.split(' ')[1]}</span></button>`;
-                currDate.setDate(currDate.getDate() - 1);
+            // Clean up masterLineChart instance if present
+            if (typeof AppState !== 'undefined' && AppState.masterLineChart && typeof AppState.masterLineChart.destroy === 'function') {
+                AppState.masterLineChart.destroy();
+                AppState.masterLineChart = null;
             }
-            grid.innerHTML = gHtml;
+
+            // Render Quick Check-ins Grid
+            const grid = document.getElementById('am-grid');
+            if (grid) {
+                let gHtml = '';
+                const currDate = new Date(today);
+                while (currDate >= gridStartDate) {
+                    const dStr = (typeof Utils !== 'undefined' && typeof Utils.formatDate === 'function') ? Utils.formatDate(currDate) : '';
+                    const isoLocalDate = `${currDate.getFullYear()}-${String(currDate.getMonth() + 1).padStart(2, '0')}-${String(currDate.getDate()).padStart(2, '0')}`;
+                    const t = (typeof window.getTaskForDate === 'function') ? window.getTaskForDate(currDate) : null;
+                    const done = t ? Boolean(t[typeKey]) : false;
+                    const taskIdOrDate = t ? t.id : isoLocalDate;
+                    const btnClass = done ? 'bg-gradient-to-br from-green-400 to-emerald-500 text-white shadow-[0_2px_8px_rgba(34,197,94,0.4)] border-transparent' : 'bg-gradient-to-br from-red-400 to-red-500 text-white shadow-[0_2px_8px_rgba(239,68,68,0.4)] border-transparent';
+                    gHtml += `<button onclick="toggleModalDay('${taskIdOrDate}', '${typeKey}', event)" title="${dStr}: ${done ? 'YES' : 'NO'}" class="flex flex-col items-center justify-center p-1 sm:p-1.5 md:p-2 rounded-lg sm:rounded-xl ${btnClass} transition-all duration-300 w-full aspect-square shrink-0 hover:scale-105 active:scale-90 focus:outline-none snap-start"><span class="text-[6px] sm:text-[7px] md:text-[9px] uppercase font-black opacity-90 mb-0.5">${dStr.split(' ')[0]}</span><span class="text-[9px] sm:text-[11px] md:text-sm font-black leading-none">${dStr.split(' ')[1]}</span></button>`;
+                    currDate.setDate(currDate.getDate() - 1);
+                }
+                grid.innerHTML = gHtml;
+            }
+        } catch (err) {
+            console.error('[populateAnalyticsModal] Error:', err);
         }
     }
 
@@ -1329,6 +1346,7 @@
     global.moveActionHeatmapTooltip = moveActionHeatmapTooltip;
     global.hideActionHeatmapTooltip = hideActionHeatmapTooltip;
     global.populateAnalyticsModal = populateAnalyticsModal;
+    global.openAnalyticsModal = openAnalyticsModal;
     global.appendNewAction = appendNewAction;
     global.openEditDailyActionModal = openEditDailyActionModal;
     global.saveDailyActionEditModal = saveDailyActionEditModal;
@@ -1342,6 +1360,7 @@
             setDailyState,
             toggleModalDay,
             populateAnalyticsModal,
+            openAnalyticsModal,
             appendNewAction,
             openEditDailyActionModal,
             saveDailyActionEditModal,

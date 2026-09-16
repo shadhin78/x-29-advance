@@ -1303,7 +1303,17 @@ window.deleteProgramGroup = function (programName) {
 
 
 window.openModal = function (modalId, typeKey = null) {
-    if (modalId === 'analytics-modal' && typeKey) populateAnalyticsModal(typeKey);
+    if (modalId === 'analytics-modal' && typeKey) {
+        try {
+            if (typeof window.populateAnalyticsModal === 'function') {
+                window.populateAnalyticsModal(typeKey);
+            } else if (typeof populateAnalyticsModal === 'function') {
+                populateAnalyticsModal(typeKey);
+            }
+        } catch (err) {
+            console.error('[openModal] Error populating analytics modal:', err);
+        }
+    }
     const backdrops = { 'celebration-setup-modal': 'csm-backdrop', 'edit-timeline-entry-modal': 'etem-backdrop', 'global-chapters-modal': 'gcm-backdrop', 'program-completions-modal': 'pcm-completions-backdrop', 'create-schedule-group-modal': 'csgm-backdrop', 'pace-candle-modal': 'pcm-backdrop', 'program-trend-modal': 'ptm-results-backdrop', 'analytics-modal': 'am-backdrop', 'yearly-actions-modal': 'ym-backdrop', 'subject-trend-modal': 'stm-backdrop', 'edit-task-modal': 'etm-backdrop', 'edit-pace-modal': 'epm-backdrop', 'edit-trends-pace-modal': 'etpm-backdrop', 'pace-trend-modal': 'ptm-backdrop', 'goal-details-modal': 'gdm-backdrop', 'revision-manage-modal': 'rmm-backdrop', 'revision-trend-modal': 'rvm-backdrop', 'global-history-modal': 'ghm-backdrop', 'subject-time-modal': 'stm-time-backdrop', 'daily-actions-db-modal': 'dadb-backdrop', 'daily-targets-db-modal': 'dtdb-backdrop', 'weekly-targets-db-modal': 'wtdb-backdrop', 'monthly-targets-db-modal': 'mtdb-backdrop', 'result-modal': 'resm-backdrop', 'edit-subject-modal': 'esm-backdrop', 'edit-track-modal': 'etm-track-backdrop', 'edit-daily-action-modal': 'edam-backdrop', 'custom-timer-modal': 'ctm-backdrop', 'account-settings-modal': 'asm-account-backdrop', 'add-schedule-modal': 'asm-schedule-backdrop', 'add-timer-session-modal': 'atsm-backdrop', 'edit-timer-session-modal': 'etsm-backdrop', 'timer-analytics-modal': 'tam-backdrop', 'add-daily-target-modal': 'adtm-backdrop', 'add-weekly-target-modal': 'wtm-backdrop' };
     const contents = { 'celebration-setup-modal': 'csm-content', 'edit-timeline-entry-modal': 'etem-content', 'global-chapters-modal': 'gcm-content', 'program-completions-modal': 'pcm-completions-content', 'create-schedule-group-modal': 'csgm-content', 'pace-candle-modal': 'pcm-content', 'program-trend-modal': 'ptm-results-content', 'analytics-modal': 'am-content', 'yearly-actions-modal': 'ym-content', 'subject-trend-modal': 'stm-content', 'edit-task-modal': 'etm-content', 'edit-pace-modal': 'epm-content', 'edit-trends-pace-modal': 'etpm-content', 'pace-trend-modal': 'ptm-content', 'goal-details-modal': 'gdm-content', 'revision-manage-modal': 'rmm-content', 'revision-trend-modal': 'rvm-content', 'global-history-modal': 'ghm-content', 'subject-time-modal': 'stm-time-content', 'daily-actions-db-modal': 'dadb-content', 'daily-targets-db-modal': 'dtdb-content', 'weekly-targets-db-modal': 'wtdb-content', 'monthly-targets-db-modal': 'mtdb-content', 'result-modal': 'resm-content', 'edit-subject-modal': 'esm-content', 'edit-track-modal': 'etm-track-content', 'edit-daily-action-modal': 'edam-content', 'custom-timer-modal': 'ctm-content', 'account-settings-modal': 'asm-account-content', 'add-schedule-modal': 'asm-schedule-content', 'add-timer-session-modal': 'atsm-content', 'edit-timer-session-modal': 'etsm-content', 'timer-analytics-modal': 'tam-content', 'add-daily-target-modal': 'adtm-content', 'add-weekly-target-modal': 'wtm-content' };
     const modal = document.getElementById(modalId);
@@ -3926,8 +3936,12 @@ if (typeof window.BroadcastChannel !== 'undefined') {
                 if (typeof window.renderSpectraCommitmentsChart === 'function') window.renderSpectraCommitmentsChart();
                 if (typeof renderTrendCharts === 'function') renderTrendCharts();
                 const modal = document.getElementById('analytics-modal');
-                if (modal && !modal.classList.contains('hidden') && typeof populateAnalyticsModal === 'function') {
-                    populateAnalyticsModal(window.currentAnalyticsAction || ev.data.actionId);
+                if (modal && !modal.classList.contains('hidden')) {
+                    if (typeof window.populateAnalyticsModal === 'function') {
+                        window.populateAnalyticsModal(window.currentAnalyticsAction || ev.data.actionId);
+                    } else if (typeof populateAnalyticsModal === 'function') {
+                        populateAnalyticsModal(window.currentAnalyticsAction || ev.data.actionId);
+                    }
                 }
                 const dbModal = document.getElementById('daily-actions-db-modal');
                 if (dbModal && !dbModal.classList.contains('hidden') && typeof window.openDailyActionsDBModal === 'function') {

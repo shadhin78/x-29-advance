@@ -30,10 +30,28 @@
         if (!idOrEl) return;
         const el = (typeof idOrEl === 'string') ? document.getElementById(idOrEl) : idOrEl;
         if (!el) return;
-        const toAdd = Array.isArray(addClasses) ? addClasses : [addClasses];
-        const toRemove = Array.isArray(removeClasses) ? removeClasses : [removeClasses];
-        toRemove.forEach(cls => { if (cls) el.classList.remove(cls); });
-        toAdd.forEach(cls => { if (cls) el.classList.add(cls); });
+
+        // If a single string is provided without removeClasses, set className directly (matching dom.js)
+        if (typeof addClasses === 'string' && (!removeClasses || (Array.isArray(removeClasses) && removeClasses.length === 0))) {
+            el.className = addClasses;
+            return;
+        }
+
+        const normalize = (val) => {
+            if (!val) return [];
+            if (Array.isArray(val)) {
+                return val.flatMap(c => (typeof c === 'string' ? c.trim().split(/\s+/) : [])).filter(Boolean);
+            }
+            if (typeof val === 'string') {
+                return val.trim().split(/\s+/).filter(Boolean);
+            }
+            return [];
+        };
+
+        const toRemove = normalize(removeClasses);
+        const toAdd = normalize(addClasses);
+        toRemove.forEach(cls => { try { if (cls) el.classList.remove(cls); } catch (e) {} });
+        toAdd.forEach(cls => { try { if (cls) el.classList.add(cls); } catch (e) {} });
     }
 
     /**
