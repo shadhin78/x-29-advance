@@ -262,8 +262,12 @@ window.FirebaseService = {
         }
     },
 
-    // 3. Authenticate with Email / Password
+    // 3. Authenticate with Email / Password (delegated to AuthService)
     login: async function(email, password) {
+        if (typeof window !== 'undefined' && window.AuthService && typeof window.AuthService.login === 'function') {
+            return window.AuthService.login(email, password);
+        }
+
         const cleanEmail = (email || '').trim().toLowerCase();
 
         if (window.location.protocol === 'file:') {
@@ -301,6 +305,9 @@ window.FirebaseService = {
     },
 
     _notifyAuthListeners: function(user) {
+        if (typeof window !== 'undefined' && window.AuthService && typeof window.AuthService._notifyAuthListeners === 'function') {
+            window.AuthService._notifyAuthListeners(user);
+        }
         if (this._authListeners && this._authListeners.length > 0) {
             this._authListeners.forEach(cb => {
                 try { cb(user); } catch(e) {}
@@ -317,9 +324,13 @@ window.FirebaseService = {
         return AppState.syncGeneration;
     },
 
-    // 4. Log out the current session (CRITICAL FIX #5 & #6)
+    // 4. Log out the current session (delegated to AuthService)
     logout: async function() {
         console.log("SYNC: LOGOUT_INITIATED");
+        if (typeof window !== 'undefined' && window.AuthService && typeof window.AuthService.logout === 'function') {
+            return window.AuthService.logout();
+        }
+
         this.stopSnapshotListener("logout");
         this.bumpSyncGeneration("logout");
 
@@ -375,8 +386,12 @@ window.FirebaseService = {
         }
     },
 
-    // 5. Expose current authenticated user reference
+    // 5. Expose current authenticated user reference (delegated to AuthService)
     getCurrentUser: function() {
+        if (typeof window !== 'undefined' && window.AuthService && typeof window.AuthService.getCurrentUser === 'function') {
+            return window.AuthService.getCurrentUser();
+        }
+
         if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {
             return firebase.auth().currentUser;
         }
@@ -395,8 +410,12 @@ window.FirebaseService = {
         return null;
     },
 
-    // 6. Auth State Changes Listener
+    // 6. Auth State Changes Listener (delegated to AuthService)
     onAuthStateChanged: function(callback) {
+        if (typeof window !== 'undefined' && window.AuthService && typeof window.AuthService.onAuthStateChanged === 'function') {
+            return window.AuthService.onAuthStateChanged(callback);
+        }
+
         if (!this._authListeners) this._authListeners = [];
         this._authListeners.push(callback);
 
@@ -1244,4 +1263,20 @@ window.addEventListener('storage', (e) => {
         }
     }
 });
+
+// Register persistence & snapshot teardown hook with AuthService
+if (typeof window !== 'undefined' && window.AuthService && typeof window.AuthService.registerLogoutHook === 'function') {
+    window.AuthService.registerLogoutHook(() => {
+        if (window.FirebaseService) {
+            window.FirebaseService.stopSnapshotListener("logout");
+            window.FirebaseService.bumpSyncGeneration("logout");
+            if (window.FirebaseService._saveDebounceTimer) {
+                clearTimeout(window.FirebaseService._saveDebounceTimer);
+                window.FirebaseService._saveDebounceTimer = null;
+                console.log("SYNC: SAVE_CANCELLED (logout hook)");
+            }
+            window.FirebaseService.cloudDocumentExists = null;
+        }
+    });
+}
 

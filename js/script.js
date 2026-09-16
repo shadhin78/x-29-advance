@@ -469,7 +469,8 @@ window.getSortedTrackSubjects = function (track) {
 // js/firebase.js (Firebase service delegation wrapper)
 
 window.handleLogout = function () {
-    FirebaseService.logout().then(() => {
+    const authProvider = (typeof window !== 'undefined' && window.AuthService) ? window.AuthService : FirebaseService;
+    authProvider.logout().then(() => {
         window.location.href = 'login.html';
     }).catch(err => {
         console.error("Logout error:", err);
@@ -681,9 +682,10 @@ window.submitAccountUpdate = function () {
         profileAvatarEl.textContent = newName.charAt(0).toUpperCase();
     }
 
-    if (typeof FirebaseService !== 'undefined') {
-        const fbUser = FirebaseService.getCurrentUser();
-        if (fbUser) {
+    const authProvider = (typeof window !== 'undefined' && window.AuthService) ? window.AuthService : (typeof FirebaseService !== 'undefined' ? FirebaseService : null);
+    if (authProvider) {
+        const fbUser = authProvider.getCurrentUser();
+        if (fbUser && typeof fbUser.updateProfile === 'function') {
             fbUser.updateProfile({
                 displayName: newName
             }).catch(err => console.warn("Firebase updateProfile failed:", err));
@@ -3740,7 +3742,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Route guard
-    FirebaseService.onAuthStateChanged(async (user) => {
+    const authProvider = (typeof window !== 'undefined' && window.AuthService) ? window.AuthService : FirebaseService;
+    authProvider.onAuthStateChanged(async (user) => {
         if (!user) {
             window.location.href = 'login.html';
             return;
@@ -3748,7 +3751,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const userEmail = (user.email || '').trim().toLowerCase();
         if (userEmail !== 'ris2k29@gmail.com') {
-            FirebaseService.logout().then(() => {
+            authProvider.logout().then(() => {
                 window.location.href = 'login.html?error=denied';
             });
             return;
@@ -3858,7 +3861,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Route guard checking if user is already logged in as admin
-    FirebaseService.onAuthStateChanged((user) => {
+    const authProvider = (typeof window !== 'undefined' && window.AuthService) ? window.AuthService : FirebaseService;
+    authProvider.onAuthStateChanged((user) => {
         if (user && (user.email || '').trim().toLowerCase() === 'ris2k29@gmail.com') {
             window.location.href = 'index.html';
         }
@@ -3876,11 +3880,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         spinner.classList.remove('hidden');
 
         try {
-            const userCredential = await FirebaseService.login(email, password);
+            const userCredential = await authProvider.login(email, password);
             const user = userCredential.user;
 
             if ((user.email || '').trim().toLowerCase() !== 'ris2k29@gmail.com') {
-                await FirebaseService.logout();
+                await authProvider.logout();
                 showError("Access denied. X-29 is private.");
                 btnSubmit.disabled = false;
                 spinner.classList.add('hidden');
