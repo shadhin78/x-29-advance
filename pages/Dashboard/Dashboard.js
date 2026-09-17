@@ -62,6 +62,19 @@
                     window.dbProgressChartInstance.update('none');
                 }
             }
+
+            this.initEventListeners();
+        },
+        initEventListeners: function () {
+            if (this._listenersInitialized) return;
+            this._listenersInitialized = true;
+            document.addEventListener('click', (e) => {
+                if (e.target.closest('#btn-open-trends-settings, [data-modal-open="edit-trends-pace-modal"]')) {
+                    if (typeof window.openTrendsSettingsModal === 'function') {
+                        window.openTrendsSettingsModal();
+                    }
+                }
+            });
         },
         destroy: function () {
             this.isMounted = false;

@@ -46,9 +46,40 @@
         }
     }
 
+    function initSidebarEventListeners() {
+        if (typeof document === 'undefined' || typeof document.addEventListener !== 'function') return;
+        if (global._sidebarListenersInitialized) return;
+        global._sidebarListenersInitialized = true;
+
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('#mobile-sidebar-toggle, [data-sidebar-toggle]')) {
+                toggleMobileSidebar();
+                return;
+            }
+            if (e.target.closest('#sidebar-backdrop, #sidebar-close-btn, [data-sidebar-close]')) {
+                closeMobileSidebar();
+                return;
+            }
+            // Auto close mobile drawer when selecting navigation item inside sidebar
+            const navItem = e.target.closest('#sidebar-container [data-switch-page], #sidebar-container nav button, #sidebar-container nav a');
+            if (navItem && typeof window !== 'undefined' && window.innerWidth < 768) {
+                closeMobileSidebar();
+            }
+        });
+    }
+
+    if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initSidebarEventListeners);
+        } else {
+            initSidebarEventListeners();
+        }
+    }
+
     const Sidebar = {
         toggleMobileSidebar,
-        closeMobileSidebar
+        closeMobileSidebar,
+        initSidebarEventListeners
     };
 
     global.Sidebar = Sidebar;

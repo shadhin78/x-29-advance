@@ -1822,8 +1822,45 @@
         openEditTrendsPaceModal,
         openTrendsSettingsModal,
         selectActivePaceGoal,
-        saveTrendsSettings
+        saveTrendsSettings,
+        initPaceEventListeners
     };
+
+    function initPaceEventListeners() {
+        if (typeof document === 'undefined' || typeof document.addEventListener !== 'function') return;
+        if (global._paceListenersInitialized) return;
+        global._paceListenersInitialized = true;
+
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('#btn-save-trends-settings, [data-trends-save]')) {
+                e.preventDefault();
+                saveTrendsSettings();
+            } else if (e.target.closest('#btn-save-pace-edit, [data-pace-save]')) {
+                e.preventDefault();
+                savePaceEdit();
+            } else if (e.target.closest('#btn-open-pace-trend-modal, [data-pace-trend-open]')) {
+                e.preventDefault();
+                openPaceTrendModal();
+            } else if (e.target.closest('#btn-add-pace-goal, [data-pace-add]')) {
+                e.preventDefault();
+                addPaceGoal();
+            }
+        });
+
+        document.addEventListener('change', (e) => {
+            if (e.target && e.target.id === 'add-pace-bundle-type') {
+                togglePaceBundleType();
+            }
+        });
+    }
+
+    if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initPaceEventListeners);
+        } else {
+            initPaceEventListeners();
+        }
+    }
 
     global.PaceManager = PaceManager;
     global.PaceManagementPage = PaceManagementPage;
@@ -1849,6 +1886,7 @@
     global.openTrendsSettingsModal = openTrendsSettingsModal;
     global.selectActivePaceGoal = selectActivePaceGoal;
     global.saveTrendsSettings = saveTrendsSettings;
+    global.initPaceEventListeners = initPaceEventListeners;
 
     if (typeof module !== 'undefined' && module.exports) {
         module.exports = PaceManager;

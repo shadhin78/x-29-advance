@@ -195,14 +195,15 @@
                         <div class="flex flex-wrap items-center gap-2 sm:gap-2.5 w-full lg:w-auto justify-between lg:justify-end">
                             <!-- Month Selector -->
                             <div class="flex items-center bg-slate-100 dark:bg-slate-900/70 p-0.5 rounded-xl border border-slate-200/60 dark:border-slate-800">
-                                <button onclick="window.prevCommitmentMonth()" type="button" title="Previous Month"
+                                <button data-commitment-prev type="button" title="Previous Month"
                                     class="p-1 rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white dark:hover:bg-slate-800 transition-all cursor-pointer">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
                                 </button>
                                 <span id="spectra-commitments-month-label" class="px-2.5 text-[11px] font-black text-slate-800 dark:text-slate-100 min-w-[95px] text-center uppercase tracking-wider">July 2026</span>
-                                <button onclick="window.nextCommitmentMonth()" type="button" title="Next Month"
+                                <button data-commitment-next type="button" title="Next Month"
                                     class="p-1 rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white dark:hover:bg-slate-800 transition-all cursor-pointer">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -260,62 +261,62 @@
                         <div class="flex flex-wrap sm:flex-nowrap items-center justify-center sm:justify-between gap-2 sm:gap-3 px-1 pb-3 border-b border-slate-200 dark:border-slate-700 shrink-0 w-full">
                             <!-- Timeframe Selector -->
                             <div class="flex shrink-0 bg-slate-100 dark:bg-slate-900/60 p-0.5 sm:p-1 rounded-xl border border-slate-200/40 dark:border-slate-800/40">
-                                <button onclick="window.setTimerAnalyticsRange(1)" id="spectra-tar-btn-1"
+                                <button data-timer-analytics-range="1" id="spectra-tar-btn-1"
                                     class="shrink-0 px-2 sm:px-2.5 py-1 text-[10px] sm:text-[11px] font-bold rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200">
                                     <span class="inline sm:hidden">1D</span><span class="hidden sm:inline">1 Day</span>
                                 </button>
-                                <button onclick="window.setTimerAnalyticsRange(7)" id="spectra-tar-btn-7"
+                                <button data-timer-analytics-range="7" id="spectra-tar-btn-7"
                                     class="shrink-0 px-2 sm:px-2.5 py-1 text-[10px] sm:text-[11px] font-bold rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200">
                                     <span class="inline sm:hidden">7D</span><span class="hidden sm:inline">7 Days</span>
                                 </button>
-                                <button onclick="window.setTimerAnalyticsRange(30)" id="spectra-tar-btn-30"
+                                <button data-timer-analytics-range="30" id="spectra-tar-btn-30"
                                     class="shrink-0 px-2 sm:px-2.5 py-1 text-[10px] sm:text-[11px] font-bold rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200">
                                     <span class="inline sm:hidden">30D</span><span class="hidden sm:inline">30 Days</span>
                                 </button>
-                                <button onclick="window.setTimerAnalyticsRange(180)" id="spectra-tar-btn-180"
+                                <button data-timer-analytics-range="180" id="spectra-tar-btn-180"
                                     class="shrink-0 px-2 sm:px-2.5 py-1 text-[10px] sm:text-[11px] font-bold rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200">
                                     <span class="inline sm:hidden">6M</span><span class="hidden sm:inline">6 Months</span>
                                 </button>
                             </div>
                             <!-- Day Stepper (< > for 1 Day filter) -->
                             <div id="spectra-day-stepper" class="flex shrink-0 items-center bg-slate-100 dark:bg-slate-900/60 p-0.5 sm:p-1 rounded-xl border border-slate-200/40 dark:border-slate-800/40 transition-all">
-                                <button onclick="window.navigateTimerAnalyticsDay(-1)" id="spectra-day-prev-btn" title="Previous Day (-1 Day)"
+                                <button data-timer-analytics-day="-1" id="spectra-day-prev-btn" title="Previous Day (-1 Day)"
                                     class="shrink-0 px-1.5 sm:px-2 py-1 text-[10px] sm:text-[11px] font-bold rounded-lg transition-all text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800 hover:text-indigo-600 dark:hover:text-indigo-400">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
                                 </button>
-                                <button onclick="window.resetTimerAnalyticsDayOffset()" id="spectra-day-label" title="Click to jump to Today"
+                                <button data-timer-analytics-day-reset id="spectra-day-label" title="Click to jump to Today"
                                     class="px-2 py-0.5 text-[10px] sm:text-[11px] font-bold text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 min-w-[65px] text-center select-none cursor-pointer transition-colors">Today</button>
-                                <button onclick="window.navigateTimerAnalyticsDay(1)" id="spectra-day-next-btn" title="Next Day (+1 Day)"
+                                <button data-timer-analytics-day="1" id="spectra-day-next-btn" title="Next Day (+1 Day)"
                                     class="shrink-0 px-1.5 sm:px-2 py-1 text-[10px] sm:text-[11px] font-bold rounded-lg transition-all text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800 hover:text-indigo-600 dark:hover:text-indigo-400">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
                                 </button>
                             </div>
                             <!-- Grouping Selector -->
                             <div class="flex shrink-0 bg-slate-100 dark:bg-slate-900/60 p-0.5 sm:p-1 rounded-xl border border-slate-200/40 dark:border-slate-800/40">
-                                <button onclick="window.setTimerAnalyticsGrouping('daily')" id="spectra-tag-btn-daily"
+                                <button data-timer-analytics-grouping="daily" id="spectra-tag-btn-daily"
                                     class="shrink-0 px-2 sm:px-2.5 py-1 text-[10px] sm:text-[11px] font-bold rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200">
                                     <span class="inline sm:hidden">Day</span><span class="hidden sm:inline">Daily</span>
                                 </button>
-                                <button onclick="window.setTimerAnalyticsGrouping('weekly')" id="spectra-tag-btn-weekly"
+                                <button data-timer-analytics-grouping="weekly" id="spectra-tag-btn-weekly"
                                     class="shrink-0 px-2 sm:px-2.5 py-1 text-[10px] sm:text-[11px] font-bold rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200">
                                     <span class="inline sm:hidden">Week</span><span class="hidden sm:inline">Weekly</span>
                                 </button>
-                                <button onclick="window.setTimerAnalyticsGrouping('monthly')" id="spectra-tag-btn-monthly"
+                                <button data-timer-analytics-grouping="monthly" id="spectra-tag-btn-monthly"
                                     class="shrink-0 px-2 sm:px-2.5 py-1 text-[10px] sm:text-[11px] font-bold rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200">
                                     <span class="inline sm:hidden">Month</span><span class="hidden sm:inline">Monthly</span>
                                 </button>
                             </div>
                             <!-- Chart Style Selector -->
                             <div class="flex shrink-0 bg-slate-100 dark:bg-slate-900/60 p-0.5 sm:p-1 rounded-xl border border-slate-200/40 dark:border-slate-800/40">
-                                <button onclick="window.setTimerAnalyticsChartStyle('combo')" id="spectra-tas-btn-combo"
+                                <button data-timer-analytics-style="combo" id="spectra-tas-btn-combo"
                                     class="shrink-0 px-2 sm:px-2.5 py-1 text-[10px] sm:text-[11px] font-bold rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200">
                                     <span class="inline sm:hidden">Combo</span><span class="hidden sm:inline">Combo</span>
                                 </button>
-                                <button onclick="window.setTimerAnalyticsChartStyle('bar')" id="spectra-tas-btn-bar"
+                                <button data-timer-analytics-style="bar" id="spectra-tas-btn-bar"
                                     class="shrink-0 px-2 sm:px-2.5 py-1 text-[10px] sm:text-[11px] font-bold rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200">
                                     <span class="inline sm:hidden">Bar</span><span class="hidden sm:inline">Bar</span>
                                 </button>
-                                <button onclick="window.setTimerAnalyticsChartStyle('line')" id="spectra-tas-btn-line"
+                                <button data-timer-analytics-style="line" id="spectra-tas-btn-line"
                                     class="shrink-0 px-2 sm:px-2.5 py-1 text-[10px] sm:text-[11px] font-bold rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200">
                                     <span class="inline sm:hidden">Line</span><span class="hidden sm:inline">Line/Area</span>
                                 </button>
@@ -336,8 +337,7 @@
                                 </div>
                                 <div class="shrink-0 w-20">
                                     <input type="number" id="spectra-timer-target-input" value="0" min="0" step="0.1"
-                                        onchange="window.updateDailyFocusHoursTarget(this.value)"
-                                        oninput="window.updateDailyFocusHoursTarget(this.value)"
+                                        data-daily-focus-target
                                         class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-2 text-center text-base md:text-lg font-black focus:ring-2 focus:ring-indigo-500 outline-none shadow-inner dark:text-white" />
                                 </div>
                             </div>
@@ -439,19 +439,19 @@
 
                         <!-- Timeframe selector for heatmap -->
                         <div class="flex items-center space-x-1 bg-slate-100 dark:bg-slate-900/60 p-1 rounded-xl border border-slate-200/40 dark:border-slate-800/40">
-                            <button onclick="window.setSpectraHeatmapRange(30)" id="spectra-hm-btn-30"
+                            <button data-heatmap-range="30" id="spectra-hm-btn-30"
                                 class="px-2.5 py-1 text-[10px] font-bold rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200">
                                 1 Month
                             </button>
-                            <button onclick="window.setSpectraHeatmapRange(90)" id="spectra-hm-btn-90"
+                            <button data-heatmap-range="90" id="spectra-hm-btn-90"
                                 class="px-2.5 py-1 text-[10px] font-bold rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200">
                                 3 Months
                             </button>
-                            <button onclick="window.setSpectraHeatmapRange(180)" id="spectra-hm-btn-180"
+                            <button data-heatmap-range="180" id="spectra-hm-btn-180"
                                 class="px-2.5 py-1 text-[10px] font-bold rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200">
                                 6 Months
                             </button>
-                            <button onclick="window.setSpectraHeatmapRange(365)" id="spectra-hm-btn-365"
+                            <button data-heatmap-range="365" id="spectra-hm-btn-365"
                                 class="px-2.5 py-1 text-[10px] font-bold rounded-lg transition-all bg-indigo-600 text-white shadow shadow-indigo-500/20">
                                 1 Year
                             </button>
@@ -591,13 +591,13 @@
                                 Range:</span>
                             <div
                                 class="flex bg-slate-100 dark:bg-slate-900/60 p-1 rounded-xl shadow-inner border border-slate-200/60 dark:border-slate-700/50">
-                                <button onclick="window.setTrendFilter('1Y')" id="tf-1Y"
+                                <button data-trend-filter="1Y" id="tf-1Y"
                                     class="px-3 md:px-4 py-1.5 text-[10px] md:text-xs font-black rounded-lg transition-all text-slate-500 hover:bg-slate-350 dark:text-slate-400 dark:hover:bg-slate-700">1Y</button>
-                                <button onclick="window.setTrendFilter('2Y')" id="tf-2Y"
+                                <button data-trend-filter="2Y" id="tf-2Y"
                                     class="px-3 md:px-4 py-1.5 text-[10px] md:text-xs font-black rounded-lg transition-all text-slate-500 hover:bg-slate-350 dark:text-slate-400 dark:hover:bg-slate-700">2Y</button>
-                                <button onclick="window.setTrendFilter('3Y')" id="tf-3Y"
+                                <button data-trend-filter="3Y" id="tf-3Y"
                                     class="px-3 md:px-4 py-1.5 text-[10px] md:text-xs font-black rounded-lg transition-all text-slate-500 hover:bg-slate-350 dark:text-slate-400 dark:hover:bg-slate-700">3Y</button>
-                                <button onclick="window.setTrendFilter('ALL')" id="tf-ALL"
+                                <button data-trend-filter="ALL" id="tf-ALL"
                                     class="px-3 md:px-4 py-1.5 text-[10px] md:text-xs font-black rounded-lg transition-all bg-blue-600 text-white shadow">Life
                                     Time</button>
                             </div>
@@ -616,7 +616,7 @@
                                     <p class="text-[9px] text-slate-400 dark:text-slate-500 font-semibold">Cumulative
                                         progress percentages over time</p>
                                 </div>
-                                <button onclick="openSubjectTrendModal()"
+                                <button id="btn-open-subject-trend" data-subject-trend-open
                                     class="text-[8px] sm:text-[9px] md:text-[10px] font-black text-white bg-indigo-600 hover:bg-indigo-700 px-3 py-2 rounded-xl shadow-sm hover:scale-105 active:scale-95 transition-all">Subject
                                     View</button>
                             </div>
@@ -639,7 +639,7 @@
                                     <p class="text-[9px] text-slate-400 dark:text-slate-500 font-semibold">Daily habits
                                         tracking and success rate</p>
                                 </div>
-                                <button onclick="openYearlyActionsModal()"
+                                <button id="btn-open-yearly-actions" data-yearly-actions-open
                                     class="text-[8px] sm:text-[9px] md:text-[10px] font-black text-white bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded-xl shadow-sm hover:scale-105 active:scale-95 transition-all">Year
                                     View</button>
                             </div>

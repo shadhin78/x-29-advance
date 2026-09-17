@@ -1264,6 +1264,34 @@
                 }
             });
         }
+
+        const modalContainer = typeof document !== 'undefined' ? (document.body || document) : null;
+        if (modalContainer && typeof modalContainer.addEventListener === 'function' && !modalContainer._taskModalsBound) {
+            modalContainer._taskModalsBound = true;
+            modalContainer.addEventListener('click', (e) => {
+                if (e.target.closest('#etm-delete-btn, [data-task-delete]')) {
+                    e.preventDefault();
+                    requestDeleteTask();
+                } else if (e.target.closest('#etm-skip-btn, [data-task-skip]')) {
+                    e.preventDefault();
+                    toggleSkipTask();
+                } else if (e.target.closest('#etm-save-btn, [data-task-save]')) {
+                    e.preventDefault();
+                    saveTaskEdit();
+                } else if (e.target.closest('#etem-save-btn, [data-timeline-save]')) {
+                    e.preventDefault();
+                    if (typeof window !== 'undefined' && typeof window.saveTimelineEntryDate === 'function') {
+                        window.saveTimelineEntryDate();
+                    }
+                } else if (e.target.closest('#stm-clear-btn, [data-time-clear]')) {
+                    e.preventDefault();
+                    clearSubjectTimeGoal();
+                } else if (e.target.closest('#stm-save-btn, [data-time-save]')) {
+                    e.preventDefault();
+                    saveSubjectTimeGoal();
+                }
+            });
+        }
     }
 
     function renderTaskList() {
@@ -1698,6 +1726,13 @@
     window.renderRevisionModalContent = renderRevisionModalContent;
     window.toggleRevisionMode = toggleRevisionMode;
     window.toggleRevisionChapter = toggleRevisionChapter;
+    if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initTaskEventListeners);
+        } else {
+            initTaskEventListeners();
+        }
+    }
 
     if (typeof module !== 'undefined' && module.exports) {
         module.exports = TaskEngine;

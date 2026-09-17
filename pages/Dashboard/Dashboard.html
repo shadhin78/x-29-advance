@@ -24,7 +24,7 @@
                                 </div>
                             </div>
                             <div class="flex items-center space-x-1.5 shrink-0">
-                                <button onclick="window.switchPage('paces-management')"
+                                <button data-switch-page="paces-management"
                                     class="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/50 rounded-xl transition-all active:scale-95 shrink-0 cursor-pointer"
                                     title="Go to Pace Management" aria-label="Go to Pace Management">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -126,7 +126,7 @@
                                     class="text-[9px] font-black text-fuchsia-600 dark:text-fuchsia-400 bg-fuchsia-50/80 dark:bg-fuchsia-950/50 px-2 py-0.5 rounded-lg border border-fuchsia-500/20 shadow-sm flex items-center gap-1">
                                     <!-- Dynamic date & duration detail -->
                                 </div>
-                                <button onclick="window.switchPage('spectra-analytics')"
+                                <button data-switch-page="spectra-analytics"
                                     class="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/50 rounded-xl transition-all active:scale-95 shrink-0 cursor-pointer"
                                     title="Go to Analytics Heatmap" aria-label="Go to Analytics Heatmap">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -172,7 +172,7 @@
                             <div class="flex items-center space-x-1.5 shrink-0">
                                 <span id="db-monthly-checklist-pct"
                                     class="text-xs font-black text-indigo-600 dark:text-indigo-400">0%</span>
-                                <button onclick="window.switchPage('daily-actions', 'monthly-targets-section')"
+                                <button data-switch-page="daily-actions" data-nav-section="monthly-targets-section"
                                     class="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/50 rounded-xl transition-all active:scale-95 shrink-0 cursor-pointer"
                                     title="Go to Monthly Targets" aria-label="Go to Monthly Targets">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -222,7 +222,7 @@
                                 </div>
                             </div>
                             <div class="flex items-center space-x-1.5 shrink-0">
-                                <button onclick="window.switchPage('subjects')"
+                                <button data-switch-page="subjects"
                                     class="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/50 rounded-xl transition-all active:scale-95 shrink-0 cursor-pointer"
                                     title="Go to Subjects" aria-label="Go to Subjects">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -243,7 +243,7 @@
                                         class="block text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-1 truncate">0
                                         / 0 Chapters Completed</span>
                                 </div>
-                                <button onclick="window.switchPage('subjects')"
+                                <button data-switch-page="subjects"
                                     class="relative shrink-0 flex items-center justify-center bg-slate-50 dark:bg-slate-900/30 p-1 rounded-full border border-slate-100 dark:border-slate-800/80 hover:scale-105 active:scale-95 transition-all focus:outline-none cursor-pointer group shadow-sm w-14 h-14"
                                     title="Go to Subjects Page">
                                     <canvas id="dbProgressChart"
@@ -259,7 +259,7 @@
                                 </div>
                             </div>
 
-                            <button onclick="window.switchPage('subjects')"
+                            <button data-switch-page="subjects"
                                 class="mt-2.5 w-full py-2 bg-slate-50 dark:bg-slate-900/40 border border-slate-200/60 dark:border-slate-700/80 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900/60 active:scale-95 transition-all shadow-sm">
                                 View Subject Details
                             </button>
@@ -294,7 +294,7 @@
                                     class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg border bg-yellow-50 dark:bg-yellow-950/40 text-yellow-600 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800/50">
                                     --
                                 </span>
-                                <button onclick="window.switchPage('outcome')"
+                                <button data-switch-page="outcome"
                                     class="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/50 rounded-xl transition-all active:scale-95 shrink-0"
                                     title="Go to Outcome Page">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -349,7 +349,7 @@
                             <div class="flex items-center space-x-1.5 shrink-0">
                                 <span id="db-daily-checklist-pct"
                                     class="text-xs font-black text-blue-600 dark:text-blue-400">0%</span>
-                                <button onclick="window.switchPage('daily-actions', 'daily-targets-setup-section')"
+                                <button data-switch-page="daily-actions" data-nav-section="daily-targets-setup-section"
                                     class="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/50 rounded-xl transition-all active:scale-95 shrink-0 cursor-pointer"
                                     title="Go to Daily Targets" aria-label="Go to Daily Targets">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -403,7 +403,7 @@
                             <div class="flex items-center space-x-1.5 shrink-0">
                                 <span id="db-weekly-checklist-pct"
                                     class="text-xs font-black text-emerald-600 dark:text-emerald-400">0%</span>
-                                <button onclick="window.switchPage('daily-actions', 'weekly-targets-section')"
+                                <button data-switch-page="daily-actions" data-nav-section="weekly-targets-section"
                                     class="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/50 rounded-xl transition-all active:scale-95 shrink-0 cursor-pointer"
                                     title="Go to Weekly Targets" aria-label="Go to Weekly Targets">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -451,7 +451,7 @@
                                     <div id="dashboard-daily-actions-progress"
                                         class="h-full rounded-full bg-blue-500 transition-all duration-500 w-0"></div>
                                 </div>
-                                <button onclick="window.switchPage('daily-actions', 'daily-actions-tracker')"
+                                <button data-switch-page="daily-actions" data-nav-section="daily-actions-tracker"
                                     class="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/50 rounded-xl transition-all active:scale-95 shrink-0 cursor-pointer"
                                     title="Go to Daily Actions" aria-label="Go to Daily Actions">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -496,7 +496,7 @@
                                     class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg border bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-800/50 shadow-xs">
                                     --
                                 </span>
-                                <button onclick="window.switchPage('exam')"
+                                <button data-switch-page="exam"
                                     class="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/50 rounded-xl transition-all active:scale-95 shrink-0 cursor-pointer"
                                     title="Go to Exam Routine Page" aria-label="Go to Exam Routine Page">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -547,7 +547,7 @@
                                     class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg border bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/50 shadow-xs">
                                     --
                                 </span>
-                                <button onclick="window.switchPage('outcome')"
+                                <button data-switch-page="outcome"
                                     class="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/50 rounded-xl transition-all active:scale-95 shrink-0 cursor-pointer"
                                     title="Manage in Outcome Page" aria-label="Manage in Outcome Page">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -703,7 +703,7 @@
                     </div>
 
                     <!-- Edit Settings Button -->
-                    <button onclick="window.openTrendsSettingsModal()"
+                    <button id="btn-open-trends-settings" data-modal-open="edit-trends-pace-modal"
                         class="relative z-10 flex items-center space-x-2 px-4 py-2.5 bg-white/40 dark:bg-slate-900/40 hover:bg-white/60 dark:hover:bg-slate-900/60 border border-white/60 dark:border-slate-800/80 rounded-2xl text-[10px] font-black uppercase tracking-wider text-slate-700 dark:text-slate-200 active:scale-95 transition-all shadow-sm backdrop-blur-sm">
                         <svg class="w-4 h-4 text-slate-500 dark:text-slate-300" fill="none" stroke="currentColor"
                             viewBox="0 0 24 24">

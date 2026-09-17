@@ -115,7 +115,7 @@
             <!-- Left Side: Toggle button and Title/Subtitle -->
             <div class="flex items-center gap-3 min-w-0 flex-1">
                 <!-- Three Dot Menu Button on the Left -->
-                <button id="mobile-sidebar-toggle" onclick="window.toggleMobileSidebar()"
+                <button id="mobile-sidebar-toggle" data-sidebar-toggle
                     class="p-2.5 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 bg-slate-50 dark:bg-slate-800 rounded-xl transition-all active:scale-90 shadow-sm shrink-0">
                     <svg class="w-5 h-5 text-slate-600 dark:text-slate-300" fill="none" stroke="currentColor"
                         viewBox="0 0 24 24" stroke-width="2.5">
@@ -125,7 +125,7 @@
                     </svg>
                 </button>
                 <div class="flex flex-col min-w-0">
-                    <div id="header-exam-countdown-compact-mobile" onclick="window.switchPage('exam')"
+                    <div id="header-exam-countdown-compact-mobile" data-switch-page="exam"
                         class="flex items-center cursor-pointer active:scale-95 transition-all">
                         <div
                             class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-rose-500/10 dark:bg-rose-950/40 border border-rose-500/20 dark:border-rose-500/30 text-[10px] font-bold">
@@ -147,7 +147,7 @@
         </div>
 
         <!-- Sidebar Backdrop -->
-        <div id="sidebar-backdrop" onclick="window.closeMobileSidebar()"
+        <div id="sidebar-backdrop" data-sidebar-close
             class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 md:hidden opacity-0 pointer-events-none transition-opacity duration-300">
         </div>
 
@@ -177,7 +177,7 @@
                         </div>
 
                         <!-- Close button for mobile -->
-                        <button onclick="window.closeMobileSidebar()"
+                        <button id="sidebar-close-btn" data-sidebar-close
                             class="md:hidden p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 bg-slate-100 dark:bg-slate-800 rounded-xl transition-all active:scale-95 shrink-0">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
@@ -200,7 +200,7 @@
                     <!-- Navigation List -->
                     <nav class="flex flex-col gap-2.5 mt-8 border-t border-slate-100 dark:border-slate-800/60 pt-6">
                         <button id="btn-nav-dashboard"
-                            onclick="window.switchPage('dashboard'); window.closeMobileSidebar()"
+                            data-switch-page="dashboard"
                             class="w-full text-left border-2 px-4 py-3 rounded-2xl font-black text-xs transition-all duration-300 hover:translate-x-1.5 hover:shadow-md active:scale-98 flex items-center gap-3">
                             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
@@ -210,7 +210,7 @@
                             Dashboard
                         </button>
                         <button id="btn-nav-spectra-analytics"
-                            onclick="window.switchPage('spectra-analytics'); window.closeMobileSidebar()"
+                            data-switch-page="spectra-analytics"
                             class="w-full text-left border-2 px-4 py-3 rounded-2xl font-black text-xs transition-all duration-300 hover:translate-x-1.5 hover:shadow-md active:scale-98 flex items-center gap-3">
                             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
@@ -219,7 +219,7 @@
                             </svg>
                             Analytics
                         </button>
-                        <button id="btn-nav-timer" onclick="window.switchPage('timer'); window.closeMobileSidebar()"
+                        <button id="btn-nav-timer" data-switch-page="timer"
                             class="w-full text-left border-2 px-4 py-3 rounded-2xl font-black text-xs transition-all duration-300 hover:translate-x-1.5 hover:shadow-md active:scale-98 flex items-center gap-3">
                             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
@@ -228,7 +228,7 @@
                             Focus
                         </button>
                         <button id="btn-nav-daily-actions"
-                            onclick="window.switchPage('daily-actions'); window.closeMobileSidebar()"
+                            data-switch-page="daily-actions"
                             class="w-full text-left border-2 px-4 py-3 rounded-2xl font-black text-xs transition-all duration-300 hover:translate-x-1.5 hover:shadow-md active:scale-98 flex items-center gap-3">
                             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
@@ -237,7 +237,7 @@
                             Daily Actions
                         </button>
                         <button id="btn-nav-schedule"
-                            onclick="window.switchPage('schedule'); window.closeMobileSidebar()"
+                            data-switch-page="schedule"
                             class="w-full text-left border-2 px-4 py-3 rounded-2xl font-black text-xs transition-all duration-300 hover:translate-x-1.5 hover:shadow-md active:scale-98 flex items-center gap-3">
                             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
@@ -248,7 +248,7 @@
                         </button>
 
                         <button id="btn-nav-subjects"
-                            onclick="window.switchPage('subjects'); window.closeMobileSidebar()"
+                            data-switch-page="subjects"
                             class="w-full text-left border-2 px-4 py-3 rounded-2xl font-black text-xs transition-all duration-300 hover:translate-x-1.5 hover:shadow-md active:scale-98 flex items-center gap-3">
                             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
@@ -258,7 +258,7 @@
                             Subjects
                         </button>
                         <button id="btn-nav-paces-management"
-                            onclick="window.switchPage('paces-management'); window.closeMobileSidebar()"
+                            data-switch-page="paces-management"
                             class="w-full text-left border-2 px-4 py-3 rounded-2xl font-black text-xs transition-all duration-300 hover:translate-x-1.5 hover:shadow-md active:scale-98 flex items-center gap-3">
                             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
@@ -267,7 +267,7 @@
                             Pace Management
                         </button>
                         <button id="btn-nav-master-config"
-                            onclick="window.switchPage('master-config'); window.closeMobileSidebar()"
+                            data-switch-page="master-config"
                             class="w-full text-left border-2 px-4 py-3 rounded-2xl font-black text-xs transition-all duration-300 hover:translate-x-1.5 hover:shadow-md active:scale-98 flex items-center gap-3">
                             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
@@ -278,7 +278,7 @@
                             </svg>
                             Master Config
                         </button>
-                        <button id="btn-nav-outcome" onclick="window.switchPage('outcome'); window.closeMobileSidebar()"
+                        <button id="btn-nav-outcome" data-switch-page="outcome"
                             class="w-full text-left border-2 px-4 py-3 rounded-2xl font-black text-xs transition-all duration-300 hover:translate-x-1.5 hover:shadow-md active:scale-98 flex items-center gap-3">
                             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
@@ -287,7 +287,7 @@
                             </svg>
                             Outcome
                         </button>
-                        <button id="btn-nav-exam" onclick="window.switchPage('exam'); window.closeMobileSidebar()"
+                        <button id="btn-nav-exam" data-switch-page="exam"
                             class="w-full text-left border-2 px-4 py-3 rounded-2xl font-black text-xs transition-all duration-300 hover:translate-x-1.5 hover:shadow-md active:scale-98 flex items-center gap-3">
                             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
@@ -315,7 +315,7 @@
 
                     <!-- Profile Card -->
                     <div class="border-t border-slate-100 dark:border-slate-800 pt-4 space-y-3">
-                        <div onclick="window.openAccountSettingsModal()"
+                        <div id="profile-card-btn" data-account-settings-trigger
                             class="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-2xl cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors group">
                             <div id="profile-avatar"
                                 class="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center font-bold text-white uppercase text-sm shrink-0 shadow-sm">
@@ -331,7 +331,7 @@
 
 
                         <!-- Logout Button -->
-                        <button id="btn-logout" onclick="window.handleLogout()"
+                        <button id="btn-logout" data-logout-btn
                             class="w-full bg-slate-50 dark:bg-slate-800/50 hover:bg-rose-50 dark:hover:bg-rose-950/20 hover:text-rose-600 border border-slate-200 dark:border-slate-800 px-4 py-3 rounded-2xl font-black text-xs text-rose-500 transition-all active:scale-95 flex items-center justify-center gap-1.5 shadow-sm">
                             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                                 xmlns="http://www.w3.org/2000/svg">
@@ -499,16 +499,16 @@
                     <div
                         class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center mt-auto pt-4 border-t border-slate-100 dark:border-slate-700 gap-4">
                         <div class="flex flex-col sm:flex-row gap-2">
-                            <button onclick="window.requestDeleteTask()"
+                            <button id="etm-delete-btn" data-task-delete
                                 class="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 font-black text-[10px] uppercase tracking-widest py-2.5 px-4 rounded-lg transition-colors flex items-center justify-center space-x-1.5 active:scale-95 w-full sm:w-auto">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
                                     </path>
                                 </svg>
                                 <span>Clear Slot</span>
                             </button>
-                            <button id="etm-skip-btn" onclick="window.toggleSkipTask()"
+                            <button id="etm-skip-btn" data-task-skip
                                 class="text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-900/20 font-black text-[10px] uppercase tracking-widest py-2.5 px-4 rounded-lg transition-colors flex items-center justify-center space-x-1.5 active:scale-95 w-full sm:w-auto">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
@@ -519,9 +519,9 @@
                             </button>
                         </div>
                         <div class="flex gap-2 justify-end">
-                            <button onclick="closeModal('edit-task-modal')"
+                            <button data-close-modal="edit-task-modal"
                                 class="text-slate-500 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 font-black text-[10px] uppercase tracking-widest py-2.5 px-4 rounded-lg transition-colors active:scale-95 flex-1 sm:flex-none">Cancel</button>
-                            <button onclick="window.saveTaskEdit()"
+                            <button id="etm-save-btn" data-task-save
                                 class="bg-blue-600 hover:bg-blue-700 text-white font-black text-[10px] uppercase tracking-widest py-2.5 px-6 rounded-lg transition-colors shadow-md active:scale-95 flex-1 sm:flex-none">Save</button>
                         </div>
                     </div>
@@ -578,9 +578,9 @@
                     <div
                         class="flex justify-end items-center mt-auto pt-4 border-t border-slate-100 dark:border-slate-700 shrink-0">
                         <div class="flex gap-2">
-                            <button onclick="closeModal('edit-trends-pace-modal')"
+                            <button data-close-modal="edit-trends-pace-modal"
                                 class="text-slate-500 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 font-black text-[10px] uppercase tracking-widest py-2.5 px-4 rounded-lg transition-colors active:scale-95">Cancel</button>
-                            <button onclick="window.saveTrendsSettings()"
+                            <button id="btn-save-trends-settings" data-trends-save
                                 class="bg-indigo-600 hover:bg-indigo-700 text-white font-black text-[10px] uppercase tracking-widest py-2.5 px-6 rounded-lg transition-colors shadow-md active:scale-95">Save
                                 Settings</button>
                         </div>
@@ -655,9 +655,9 @@
 
                     <div
                         class="flex justify-end items-center mt-auto pt-4 border-t border-slate-100 dark:border-slate-700 gap-2 shrink-0">
-                        <button onclick="closeModal('edit-pace-modal')"
+                        <button data-close-modal="edit-pace-modal"
                             class="text-slate-500 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 font-black text-[10px] uppercase tracking-widest py-2.5 px-4 rounded-lg transition-colors active:scale-95">Cancel</button>
-                        <button onclick="window.savePaceEdit()"
+                        <button id="btn-save-pace-edit" data-pace-save
                             class="bg-orange-500 hover:bg-orange-600 text-white font-black text-[10px] uppercase tracking-widest py-2.5 px-6 rounded-lg transition-colors shadow-md active:scale-95">Save
                             Changes</button>
                     </div>
@@ -1764,9 +1764,9 @@
                 </div>
 
                 <div class="flex justify-end space-x-3 mt-6 pt-4 border-t border-slate-100 dark:border-slate-700">
-                    <button onclick="closeModal('edit-timeline-entry-modal')"
+                    <button data-close-modal="edit-timeline-entry-modal"
                         class="px-5 py-2.5 rounded-xl font-bold text-xs text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">Cancel</button>
-                    <button onclick="window.saveTimelineEntryDate()"
+                    <button id="etem-save-btn" data-timeline-save
                         class="px-5 py-2.5 rounded-xl font-black text-xs text-white bg-blue-600 hover:bg-blue-700 active:scale-95 transition-all shadow-md">Save
                         Changes</button>
                 </div>
@@ -1778,7 +1778,7 @@
             class="fixed inset-0 z-[80] hidden flex items-center justify-center p-4 sm:p-6 transition-all duration-300">
             <div id="stm-time-backdrop"
                 class="fixed inset-0 bg-slate-900/80 backdrop-blur-xl opacity-0 transition-opacity duration-300"
-                onclick="closeModal('subject-time-modal')"></div>
+                data-close-modal="subject-time-modal"></div>
             <div id="stm-time-content"
                 class="relative bg-white dark:bg-slate-800 p-6 md:p-8 rounded-3xl shadow-2xl w-full max-w-sm border border-slate-200/50 dark:border-slate-700/50 transform scale-95 opacity-0 translate-y-4 transition-all duration-300 mx-4 z-10 flex flex-col">
                 <div
@@ -1789,7 +1789,7 @@
                             custom
                             deadline</p>
                     </div>
-                    <button onclick="closeModal('subject-time-modal')"
+                    <button data-close-modal="subject-time-modal"
                         class="p-2 bg-slate-100 dark:bg-slate-700 rounded-xl hover:rotate-90 transition-transform active:scale-95"><svg
                             class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
@@ -1828,10 +1828,10 @@
 
                 <div
                     class="flex justify-between items-center mt-auto pt-4 border-t border-slate-100 dark:border-slate-700 gap-2">
-                    <button onclick="window.clearSubjectTimeGoal()"
+                    <button id="stm-clear-btn" data-time-clear
                         class="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 font-black text-[10px] uppercase tracking-widest py-2 px-3 rounded-lg transition-colors active:scale-95">Reset
                         to Default</button>
-                    <button onclick="window.saveSubjectTimeGoal()"
+                    <button id="stm-save-btn" data-time-save
                         class="bg-blue-600 hover:bg-blue-700 text-white font-black text-[10px] uppercase tracking-widest py-2.5 px-6 rounded-lg transition-colors shadow-md active:scale-95">Save
                         Goal</button>
                 </div>
@@ -1843,7 +1843,7 @@
             class="fixed inset-0 z-[80] hidden flex items-center justify-center p-4 sm:p-6 transition-all duration-300">
             <div id="resm-backdrop"
                 class="fixed inset-0 bg-slate-900/80 backdrop-blur-xl opacity-0 transition-opacity duration-300"
-                onclick="closeModal('result-modal')"></div>
+                data-close-modal="result-modal"></div>
             <div id="resm-content"
                 class="relative bg-white dark:bg-slate-800 p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-md md:max-w-xl border border-slate-200/50 dark:border-slate-700/50 transform scale-95 opacity-0 translate-y-4 transition-all duration-300 mx-3 sm:mx-4 z-10 flex flex-col max-h-[90vh] transition-all duration-300">
                 <div
@@ -1863,7 +1863,7 @@
                                 achievement</p>
                         </div>
                     </div>
-                    <button onclick="closeModal('result-modal')"
+                    <button data-close-modal="result-modal"
                         class="p-2 bg-slate-100 dark:bg-slate-700 rounded-xl hover:rotate-90 transition-transform active:scale-95"><svg
                             class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
@@ -1876,7 +1876,7 @@
                     <div class="flex flex-col gap-1.5">
                         <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Result
                             Type</label>
-                        <select id="res-type" onchange="window.toggleResultType()"
+                        <select id="res-type"
                             class="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2.5 sm:p-3 text-sm font-bold w-full text-slate-700 dark:text-slate-300 focus:ring-2 focus:ring-yellow-500 outline-none">
                             <option value="cgpa">Program CGPA</option>
                             <option value="achievement">General Achievement</option>
@@ -1893,14 +1893,14 @@
                     <div id="res-prog-container" class="flex flex-col gap-1.5">
                         <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Target
                             Program</label>
-                        <select id="res-prog-select" onchange="window.updateResultSubjectsGrid(true)"
+                        <select id="res-prog-select"
                             class="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2.5 sm:p-3 text-sm font-bold w-full text-slate-700 dark:text-slate-300 focus:ring-2 focus:ring-yellow-500 outline-none"></select>
                     </div>
 
                     <div id="res-evaluation-type-container" class="flex flex-col gap-1.5 hidden">
                         <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Evaluation
                             Option</label>
-                        <select id="res-evaluation-type" onchange="window.toggleResultEvaluationType()"
+                        <select id="res-evaluation-type"
                             class="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2.5 sm:p-3 text-sm font-bold w-full text-slate-700 dark:text-slate-300 focus:ring-2 focus:ring-yellow-500 outline-none">
                             <option value="cgpa">CGPA-based</option>
                             <option value="grade">Grade-based [A, B, C...]</option>
@@ -1916,28 +1916,24 @@
                             <div class="flex gap-2 shrink-0 flex-wrap sm:justify-end">
                                 <!-- CGPA mode: CGPA input + auto grade badge -->
                                 <div class="res-cgpa-field flex items-center gap-1.5">
-                                    <input type="text" id="res-overall-cgpa"
+                                    <input type="text" id="res-overall-cgpa" data-cgpa-input
                                         class="w-20 sm:w-24 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-xs font-bold text-center focus:ring-2 focus:ring-yellow-500 outline-none"
-                                        placeholder="CGPA" oninput="window.onCgpaInput(this)"
-                                        onblur="window.onCgpaBlur(this)">
+                                        placeholder="CGPA">
                                     <span
                                         class="auto-grade-badge text-[10px] font-black text-yellow-500 bg-yellow-50 dark:bg-yellow-900/30 px-1.5 py-0.5 rounded-lg border border-yellow-200 dark:border-yellow-800 min-w-[28px] text-center opacity-40">—</span>
                                 </div>
                                 <div class="res-cgpa-field flex items-center gap-1.5">
-                                    <input type="text" id="res-overall-target-cgpa"
+                                    <input type="text" id="res-overall-target-cgpa" data-cgpa-input data-update-targets
                                         class="w-20 sm:w-24 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-xs font-bold text-center focus:ring-2 focus:ring-yellow-500 outline-none"
-                                        placeholder="Target CGPA"
-                                        oninput="window.onCgpaInput(this); window.updateSubjectTargets()"
-                                        onblur="window.onCgpaBlur(this); window.updateSubjectTargets()">
+                                        placeholder="Target CGPA">
                                     <span
                                         class="auto-grade-badge text-[10px] font-black text-amber-500 bg-amber-50 dark:bg-amber-900/30 px-1.5 py-0.5 rounded-lg border border-amber-200 dark:border-amber-800 min-w-[28px] text-center opacity-40">—</span>
                                 </div>
 
                                 <!-- Grade mode: Grade select (A–F) + auto CGPA badge -->
                                 <div class="res-grade-field hidden flex items-center gap-1.5">
-                                    <select id="res-overall-grade"
-                                        class="w-20 sm:w-24 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-xs font-bold text-center uppercase focus:ring-2 focus:ring-yellow-500 outline-none"
-                                        onchange="window.onGradeSelect(this)">
+                                    <select id="res-overall-grade" data-grade-select
+                                        class="w-20 sm:w-24 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-xs font-bold text-center uppercase focus:ring-2 focus:ring-yellow-500 outline-none">
                                         <option value="">Grade</option>
                                         <option value="A">A</option>
                                         <option value="B">B</option>
@@ -1950,9 +1946,8 @@
                                         class="auto-cgpa-badge text-[10px] font-black text-cyan-500 bg-cyan-50 dark:bg-cyan-900/30 px-1.5 py-0.5 rounded-lg border border-cyan-200 dark:border-cyan-800 min-w-[36px] text-center opacity-40">—</span>
                                 </div>
                                 <div class="res-grade-field hidden flex items-center gap-1.5">
-                                    <select id="res-overall-target-grade"
-                                        class="w-20 sm:w-24 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-xs font-bold text-center uppercase focus:ring-2 focus:ring-yellow-500 outline-none"
-                                        onchange="window.onGradeSelect(this); window.updateSubjectTargets()">
+                                    <select id="res-overall-target-grade" data-grade-select data-update-targets
+                                        class="w-20 sm:w-24 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-xs font-bold text-center uppercase focus:ring-2 focus:ring-yellow-500 outline-none">
                                         <option value="">Target</option>
                                         <option value="none">None</option>
                                         <option value="A">A</option>
@@ -2034,9 +2029,9 @@
 
                 <div
                     class="flex justify-end items-center mt-auto pt-3 sm:pt-4 border-t border-slate-100 dark:border-slate-700 gap-2 shrink-0">
-                    <button onclick="closeModal('result-modal')"
+                    <button data-close-modal="result-modal"
                         class="text-slate-500 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 font-black text-[10px] uppercase tracking-widest py-2 sm:py-2.5 px-4 rounded-lg transition-colors active:scale-95">Cancel</button>
-                    <button onclick="window.saveResult()"
+                    <button id="btn-save-result" data-result-save
                         class="bg-yellow-500 hover:bg-yellow-600 text-white font-black text-[10px] uppercase tracking-widest py-2 sm:py-2.5 px-6 rounded-lg transition-colors shadow-md active:scale-95">Save
                         Result</button>
                 </div>

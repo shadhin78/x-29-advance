@@ -2059,8 +2059,176 @@
         renderRevisionTrendChart,
         openRevisionTrendModal,
         openYearlyActionsModal,
+        initAnalyticsEventListeners,
         AnalyticsPage
     };
+
+    function initAnalyticsEventListeners() {
+        if (typeof document === 'undefined' || typeof document.addEventListener !== 'function') return;
+        if (global._analyticsListenersInitialized) return;
+        global._analyticsListenersInitialized = true;
+
+        document.addEventListener('click', (e) => {
+            const heatmapBtn = e.target.closest('[data-heatmap-range]');
+            if (heatmapBtn) {
+                e.preventDefault();
+                const range = parseInt(heatmapBtn.getAttribute('data-heatmap-range'), 10);
+                if (!isNaN(range) && typeof global.setSpectraHeatmapRange === 'function') {
+                    global.setSpectraHeatmapRange(range);
+                }
+                return;
+            }
+
+            const trendBtn = e.target.closest('[data-trend-filter]');
+            if (trendBtn) {
+                e.preventDefault();
+                const filter = trendBtn.getAttribute('data-trend-filter');
+                if (filter && typeof global.setTrendFilter === 'function') {
+                    global.setTrendFilter(filter);
+                }
+                return;
+            }
+
+            if (e.target.closest('#btn-open-yearly-actions, [data-yearly-actions-open]')) {
+                e.preventDefault();
+                openYearlyActionsModal();
+                return;
+            }
+
+            if (e.target.closest('#btn-open-subject-trend, [data-subject-trend-open]')) {
+                e.preventDefault();
+                if (typeof global.openSubjectTrendModal === 'function') {
+                    global.openSubjectTrendModal();
+                }
+                return;
+            }
+
+            const actionRangeBtn = e.target.closest('[data-action-analytics-range]');
+            if (actionRangeBtn) {
+                e.preventDefault();
+                const r = parseInt(actionRangeBtn.getAttribute('data-action-analytics-range'), 10);
+                if (!isNaN(r) && typeof global.setActionAnalyticsRange === 'function') {
+                    global.setActionAnalyticsRange(r);
+                }
+                return;
+            }
+
+            if (e.target.closest('#btn-prev-commitment-month, [data-commitment-prev]')) {
+                e.preventDefault();
+                prevCommitmentMonth();
+                return;
+            }
+            if (e.target.closest('#btn-next-commitment-month, [data-commitment-next]')) {
+                e.preventDefault();
+                nextCommitmentMonth();
+                return;
+            }
+
+            const progViewBtn = e.target.closest('[data-prog-analytics-view]');
+            if (progViewBtn) {
+                e.preventDefault();
+                const v = progViewBtn.getAttribute('data-prog-analytics-view');
+                if (v && typeof global.switchProgramAnalyticsView === 'function') {
+                    global.switchProgramAnalyticsView(v);
+                }
+                return;
+            }
+
+            const trendStyleBtn = e.target.closest('[data-subject-trend-style]');
+            if (trendStyleBtn) {
+                e.preventDefault();
+                const s = trendStyleBtn.getAttribute('data-subject-trend-style');
+                if (s && typeof global.setSubjectTrendChartStyle === 'function') {
+                    global.setSubjectTrendChartStyle(s);
+                }
+                return;
+            }
+
+            if (e.target.closest('#btn-toggle-subject-trend-global, [data-subject-trend-toggle-global]')) {
+                e.preventDefault();
+                if (typeof global.toggleSubjectTrendGlobal === 'function') {
+                    global.toggleSubjectTrendGlobal();
+                }
+                return;
+            }
+
+            const dadbTabBtn = e.target.closest('[data-dadb-tab]');
+            if (dadbTabBtn) {
+                e.preventDefault();
+                const t = dadbTabBtn.getAttribute('data-dadb-tab');
+                if (t && typeof global.switchDadbTab === 'function') {
+                    global.switchDadbTab(t);
+                }
+                return;
+            }
+
+            const timerRangeBtn = e.target.closest('[data-timer-analytics-range]');
+            if (timerRangeBtn) {
+                e.preventDefault();
+                const r = parseInt(timerRangeBtn.getAttribute('data-timer-analytics-range'), 10);
+                if (!isNaN(r) && typeof global.setTimerAnalyticsRange === 'function') {
+                    global.setTimerAnalyticsRange(r);
+                }
+                return;
+            }
+
+            const timerDayBtn = e.target.closest('[data-timer-analytics-day]');
+            if (timerDayBtn) {
+                e.preventDefault();
+                const d = parseInt(timerDayBtn.getAttribute('data-timer-analytics-day'), 10);
+                if (!isNaN(d) && typeof global.navigateTimerAnalyticsDay === 'function') {
+                    global.navigateTimerAnalyticsDay(d);
+                }
+                return;
+            }
+
+            const timerDayResetBtn = e.target.closest('[data-timer-analytics-day-reset]');
+            if (timerDayResetBtn) {
+                e.preventDefault();
+                if (typeof global.resetTimerAnalyticsDayOffset === 'function') {
+                    global.resetTimerAnalyticsDayOffset();
+                }
+                return;
+            }
+
+            const timerGroupingBtn = e.target.closest('[data-timer-analytics-grouping]');
+            if (timerGroupingBtn) {
+                e.preventDefault();
+                const g = timerGroupingBtn.getAttribute('data-timer-analytics-grouping');
+                if (g && typeof global.setTimerAnalyticsGrouping === 'function') {
+                    global.setTimerAnalyticsGrouping(g);
+                }
+                return;
+            }
+
+            const timerChartStyleBtn = e.target.closest('[data-timer-analytics-style]');
+            if (timerChartStyleBtn) {
+                e.preventDefault();
+                const s = timerChartStyleBtn.getAttribute('data-timer-analytics-style');
+                if (s && typeof global.setTimerAnalyticsChartStyle === 'function') {
+                    global.setTimerAnalyticsChartStyle(s);
+                }
+                return;
+            }
+        });
+
+        const handleDailyFocusTarget = (e) => {
+            const targetInput = e.target.closest('[data-daily-focus-target]');
+            if (targetInput && typeof global.updateDailyFocusHoursTarget === 'function') {
+                global.updateDailyFocusHoursTarget(targetInput.value);
+            }
+        };
+        document.addEventListener('input', handleDailyFocusTarget);
+        document.addEventListener('change', handleDailyFocusTarget);
+    }
+
+    if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initAnalyticsEventListeners);
+        } else {
+            initAnalyticsEventListeners();
+        }
+    }
 
     // Attach to global window scope
     global.SpectraAnalytics = SpectraAnalytics;
@@ -2096,6 +2264,7 @@
     global.renderRevisionTrendChart = renderRevisionTrendChart;
     global.openRevisionTrendModal = openRevisionTrendModal;
     global.openYearlyActionsModal = openYearlyActionsModal;
+    global.initAnalyticsEventListeners = initAnalyticsEventListeners;
 
     if (typeof module !== 'undefined' && module.exports) {
         module.exports = SpectraAnalytics;

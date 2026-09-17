@@ -335,8 +335,52 @@
                 global.closeModal('account-settings-modal');
             }
             toast("Account settings updated successfully.", "success");
+        },
+
+        handleLogout: async function () {
+            try {
+                await this.logout();
+            } catch (e) {
+                console.warn("[AuthService] Error during logout:", e);
+            } finally {
+                if (typeof window !== 'undefined' && window.location) {
+                    window.location.href = 'login.html';
+                }
+            }
+        },
+
+        initAuthEventListeners: function () {
+            if (typeof document === 'undefined' || typeof document.addEventListener !== 'function') return;
+            if (global._authListenersInitialized) return;
+            global._authListenersInitialized = true;
+
+            document.addEventListener('click', (e) => {
+                if (e.target.closest('#btn-logout, [data-logout-btn]')) {
+                    e.preventDefault();
+                    this.handleLogout();
+                    return;
+                }
+                if (e.target.closest('#profile-card-btn, [data-account-settings-trigger]')) {
+                    e.preventDefault();
+                    this.openAccountSettingsModal();
+                    return;
+                }
+                if (e.target.closest('#btn-submit-account-update, [data-submit-account-update]')) {
+                    e.preventDefault();
+                    this.submitAccountUpdate();
+                    return;
+                }
+            });
         }
     };
+
+    if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => AuthService.initAuthEventListeners());
+        } else {
+            AuthService.initAuthEventListeners();
+        }
+    }
 
     // Global window attachment
     global.AuthService = AuthService;
@@ -345,6 +389,9 @@
     };
     global.submitAccountUpdate = function () {
         return AuthService.submitAccountUpdate();
+    };
+    global.handleLogout = function () {
+        return AuthService.handleLogout();
     };
 
     // Node / CommonJS module export

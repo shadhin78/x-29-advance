@@ -696,6 +696,27 @@
                 return this.loadPage(pageId, sectionId);
             };
 
+            // Wire click delegation for navigation triggers
+            if (!this._navListenersInitialized && typeof document !== 'undefined') {
+                this._navListenersInitialized = true;
+                document.addEventListener('click', (e) => {
+                    const navEl = e.target.closest('[data-switch-page], #header-exam-countdown-compact-mobile');
+                    if (navEl) {
+                        if (navEl.id === 'header-exam-countdown-compact-mobile') {
+                            e.preventDefault();
+                            this.loadPage('exam');
+                            return;
+                        }
+                        const pageId = navEl.getAttribute('data-switch-page');
+                        const sectionId = navEl.getAttribute('data-nav-section') || null;
+                        if (pageId) {
+                            e.preventDefault();
+                            this.loadPage(pageId, sectionId);
+                        }
+                    }
+                });
+            }
+
             // Pre-load and mount Dashboard module if page-dashboard is in DOM
             if (document.getElementById('page-dashboard')) {
                 this.loadPage('dashboard');

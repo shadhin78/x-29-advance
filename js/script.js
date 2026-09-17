@@ -194,13 +194,10 @@ if (typeof window.sortAllCustomData !== 'function') {
 // js/firebase.js (Firebase service delegation wrapper)
 
 window.handleLogout = function () {
-    const authProvider = (typeof window !== 'undefined' && window.AuthService) ? window.AuthService : FirebaseService;
-    authProvider.logout().then(() => {
-        window.location.href = 'login.html';
-    }).catch(err => {
-        console.error("Logout error:", err);
-        window.location.href = 'login.html';
-    });
+    if (typeof AuthService !== 'undefined' && typeof AuthService.handleLogout === 'function') {
+        return AuthService.handleLogout();
+    }
+    window.location.href = 'login.html';
 };
 
 

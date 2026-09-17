@@ -1914,6 +1914,7 @@
         onCgpaInput,
         updateCgpaBadge,
         onGradeSelect,
+
         updateSubjectTargets,
         updateModalEstScore,
         updateResultSubjectsGrid,
@@ -1926,8 +1927,77 @@
         renderOutcomeProgramToggles,
         toggleOutcomeProgram,
         toggleOutcomeDateSort,
-        renderResults
+        renderResults,
+        initOutcomeEventListeners
     };
+
+    function initOutcomeEventListeners() {
+        if (typeof document === 'undefined' || typeof document.addEventListener !== 'function') return;
+        if (global._outcomeListenersInitialized) return;
+        global._outcomeListenersInitialized = true;
+
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('#btn-open-result-modal, [data-result-open]')) {
+                e.preventDefault();
+                openResultModal();
+            } else if (e.target.closest('#resm-type-exam, [data-result-type-toggle]')) {
+                e.preventDefault();
+                toggleResultType();
+            } else if (e.target.closest('#resm-eval-standard, [data-result-eval-toggle]')) {
+                e.preventDefault();
+                toggleResultEvaluationType();
+            } else if (e.target.closest('#btn-save-result, [data-result-save]')) {
+                e.preventDefault();
+                saveResult();
+            } else if (e.target.closest('#outcome-date-sort-btn, [data-outcome-sort]')) {
+                e.preventDefault();
+                toggleOutcomeDateSort();
+            }
+        });
+
+        document.addEventListener('change', (e) => {
+            if (e.target && e.target.id === 'trend-program-filter') {
+                renderResults();
+            } else if (e.target && (e.target.id === 'res-prog-select' || e.target.id === 'resm-program')) {
+                updateResultSubjectsGrid(true);
+            } else if (e.target && (e.target.id === 'res-type' || e.target.id === 'resm-type')) {
+                toggleResultType();
+            } else if (e.target && (e.target.id === 'res-evaluation-type' || e.target.id === 'resm-evaluation-type')) {
+                toggleResultEvaluationType();
+            } else if (e.target && (e.target.id === 'res-overall-grade' || e.target.id === 'res-overall-target-grade' || e.target.matches('[data-grade-select]'))) {
+                onGradeSelect(e.target);
+                if (e.target.hasAttribute('data-update-targets')) {
+                    updateSubjectTargets();
+                }
+            }
+        });
+
+        document.addEventListener('input', (e) => {
+            if (e.target && (e.target.id === 'resm-cgpa-input' || e.target.matches('[data-cgpa-input]'))) {
+                onCgpaInput(e.target);
+                if (e.target.hasAttribute('data-update-targets')) {
+                    updateSubjectTargets();
+                }
+            }
+        });
+
+        document.addEventListener('blur', (e) => {
+            if (e.target && (e.target.id === 'resm-cgpa-input' || e.target.matches('[data-cgpa-input]'))) {
+                onCgpaBlur(e.target);
+                if (e.target.hasAttribute('data-update-targets')) {
+                    updateSubjectTargets();
+                }
+            }
+        }, true);
+    }
+
+    if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initOutcomeEventListeners);
+        } else {
+            initOutcomeEventListeners();
+        }
+    }
 
     global.OutcomeResults = OutcomeResults;
     global.OutcomePage = OutcomePage;
@@ -1951,6 +2021,7 @@
     global.toggleOutcomeDateSort = toggleOutcomeDateSort;
     global.renderResults = renderResults;
     global.renderSuccessResults = renderResults;
+    global.initOutcomeEventListeners = initOutcomeEventListeners;
 
     if (typeof module !== 'undefined' && module.exports) {
         module.exports = OutcomeResults;
