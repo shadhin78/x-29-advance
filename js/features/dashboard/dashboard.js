@@ -1458,27 +1458,27 @@
             };
 
             deferRender(() => {
-                if (typeof window.renderChart === 'function') window.renderChart();
-                updateTrendsBar();
-                if (typeof window.renderDailyTracker === 'function') window.renderDailyTracker();
-                if (typeof window.renderDailyLogs === 'function') window.renderDailyLogs();
-                if (typeof window.renderSpectraCommitmentsChart === 'function') window.renderSpectraCommitmentsChart();
-                if (typeof window.renderTrendCharts === 'function') window.renderTrendCharts();
-                if (typeof window.renderResults === 'function') window.renderResults();
-                renderDashboardOutcomeCard();
-                renderDashboardUpcomingExamCard();
-                renderDashboardPassedSubjectsCard();
-                if (typeof window.renderMonthlyTargets === 'function') window.renderMonthlyTargets();
-                renderDashboardMonthlyChecklist();
-                if (typeof window.renderWeeklyTargets === 'function') window.renderWeeklyTargets();
-                if (typeof window.autoSyncWeeklyToDailyTargets === 'function') window.autoSyncWeeklyToDailyTargets();
-                renderDashboardWeeklyChecklist();
-                if (typeof window.renderDailyTargets === 'function') window.renderDailyTargets();
-                renderDashboardDailyChecklist();
-                if (typeof window.renderOutcomeProgramToggles === 'function') window.renderOutcomeProgramToggles();
-                if (typeof window.renderSchedulePage === 'function') window.renderSchedulePage();
-                if (typeof window.renderExamPage === 'function') window.renderExamPage();
-                if (typeof window.updateActiveScheduleSlot === 'function') window.updateActiveScheduleSlot();
+                try { if (typeof window.renderChart === 'function') window.renderChart(); } catch (e) { console.error('renderChart error:', e); }
+                try { updateTrendsBar(); } catch (e) { console.error('updateTrendsBar error:', e); }
+                try { if (typeof window.renderDailyTracker === 'function') window.renderDailyTracker(); } catch (e) { console.error('renderDailyTracker error:', e); }
+                try { if (typeof window.renderDailyLogs === 'function') window.renderDailyLogs(); } catch (e) { console.error('renderDailyLogs error:', e); }
+                try { if (typeof window.renderSpectraCommitmentsChart === 'function') window.renderSpectraCommitmentsChart(); } catch (e) { console.error('renderSpectraCommitmentsChart error:', e); }
+                try { if (typeof window.renderTrendCharts === 'function') window.renderTrendCharts(); } catch (e) { console.error('renderTrendCharts error:', e); }
+                try { if (typeof window.renderResults === 'function') window.renderResults(); } catch (e) { console.error('renderResults error:', e); }
+                try { renderDashboardOutcomeCard(); } catch (e) { console.error('renderDashboardOutcomeCard error:', e); }
+                try { renderDashboardUpcomingExamCard(); } catch (e) { console.error('renderDashboardUpcomingExamCard error:', e); }
+                try { renderDashboardPassedSubjectsCard(); } catch (e) { console.error('renderDashboardPassedSubjectsCard error:', e); }
+                try { if (typeof window.renderMonthlyTargets === 'function') window.renderMonthlyTargets(); } catch (e) { console.error('renderMonthlyTargets error:', e); }
+                try { renderDashboardMonthlyChecklist(); } catch (e) { console.error('renderDashboardMonthlyChecklist error:', e); }
+                try { if (typeof window.renderWeeklyTargets === 'function') window.renderWeeklyTargets(); } catch (e) { console.error('renderWeeklyTargets error:', e); }
+                try { if (typeof window.autoSyncWeeklyToDailyTargets === 'function') window.autoSyncWeeklyToDailyTargets(); } catch (e) { console.error('autoSyncWeeklyToDailyTargets error:', e); }
+                try { renderDashboardWeeklyChecklist(); } catch (e) { console.error('renderDashboardWeeklyChecklist error:', e); }
+                try { if (typeof window.renderDailyTargets === 'function') window.renderDailyTargets(); } catch (e) { console.error('renderDailyTargets error:', e); }
+                try { renderDashboardDailyChecklist(); } catch (e) { console.error('renderDashboardDailyChecklist error:', e); }
+                try { if (typeof window.renderOutcomeProgramToggles === 'function') window.renderOutcomeProgramToggles(); } catch (e) { console.error('renderOutcomeProgramToggles error:', e); }
+                try { if (typeof window.renderSchedulePage === 'function') window.renderSchedulePage(); } catch (e) { console.error('renderSchedulePage error:', e); }
+                try { if (typeof window.renderExamPage === 'function') window.renderExamPage(); } catch (e) { console.error('renderExamPage error:', e); }
+                try { if (typeof window.updateActiveScheduleSlot === 'function') window.updateActiveScheduleSlot(); } catch (e) { console.error('updateActiveScheduleSlot error:', e); }
             }, 20);
 
             // Dynamic Form & Manage UI Syncs

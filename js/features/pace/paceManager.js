@@ -1271,7 +1271,7 @@
                         reqPace: stats.reqPaceVal,
                         curPace: stats.curPaceVal,
                         projectedDate: stats.projectedDate,
-                        subjects: Array.from(stats.targetedSubjects),
+                        subjects: Array.from(stats.targetedSubjects || []),
                         title: goal.target + " Trend",
                         description: "Burn-up comparison of Required vs Actual trajectories for " + goal.target + "."
                     };
@@ -1348,7 +1348,7 @@
                         reqPace: stats.reqPaceVal,
                         curPace: stats.curPaceVal,
                         projectedDate: stats.projectedDate,
-                        subjects: Array.from(stats.targetedSubjects),
+                        subjects: Array.from(stats.targetedSubjects || []),
                         title: goal.target + " Trend",
                         description: "Burn-up comparison of Required vs Actual trajectories for " + goal.target + "."
                     };
