@@ -10,6 +10,11 @@
     /**
      * DOM Safe Manipulation Helpers
      */
+    function safeGetEl(id) {
+        if (typeof document === 'undefined') return null;
+        return document.getElementById(id);
+    }
+
     function safeSetText(idOrEl, text) {
         if (!idOrEl) return;
         const el = (typeof idOrEl === 'string') ? document.getElementById(idOrEl) : idOrEl;
@@ -451,6 +456,7 @@
         sanitizeAllData,
         isChapterMatch,
         generateId,
+        safeGetEl,
         safeSetText,
         safeSetHtml,
         safeSetClass
@@ -458,6 +464,7 @@
 
     // Global Bindings for synchronous availability
     global.Utils = Utils;
+    global.safeGetEl = safeGetEl;
     global.safeStorage = safeStorage;
     global.safeSetText = safeSetText;
     global.safeSetHtml = safeSetHtml;

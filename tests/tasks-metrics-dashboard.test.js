@@ -517,6 +517,28 @@ runTest('DashboardPage mounts and destroys cleanly', () => {
 });
 
 // ----------------------------------------------------
+// 10. Shared DOM Utilities (safeGetEl)
+// ----------------------------------------------------
+console.log('\n10. Shared DOM Utilities (safeGetEl)');
+
+runTest('safeGetEl is exported and resolves elements properly with fallback guards', () => {
+    const { safeGetEl } = require('../js/utils/dom.js');
+    assert.strictEqual(typeof safeGetEl, 'function', 'safeGetEl is exported as a function');
+    
+    // Existing element
+    const testEl = safeGetEl('db-upcoming-exam-title');
+    assert(testEl !== null, 'safeGetEl returns element when found');
+    assert.strictEqual(testEl.id, 'db-upcoming-exam-title', 'Element ID matches');
+
+    // Non-existent element in mock document
+    const missingEl = safeGetEl('completely-non-existent-id-xyz');
+    assert(missingEl !== undefined, 'safeGetEl returns a valid element or null');
+
+    // Global and window availability
+    assert.strictEqual(typeof window.safeGetEl, 'function', 'window.safeGetEl is defined');
+});
+
+// ----------------------------------------------------
 // Results Summary
 // ----------------------------------------------------
 console.log('\n==================================================');

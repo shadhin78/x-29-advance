@@ -4,6 +4,17 @@
  */
 
 /**
+ * Safely retrieves a DOM element by ID with SSR / existence guards.
+ * 
+ * @param {string} id - Element ID
+ * @returns {HTMLElement|null} DOM element or null if not found or in SSR
+ */
+export function safeGetEl(id) {
+    if (typeof document === 'undefined') return null;
+    return document.getElementById(id);
+}
+
+/**
  * Safely sets the text content of a DOM element by ID if it exists.
  * 
  * @param {string} id - Element ID
@@ -38,7 +49,14 @@ export function safeSetClass(id, className) {
 
 // Global window compatibility bridge
 if (typeof window !== 'undefined') {
+    window.safeGetEl = safeGetEl;
     window.safeSetText = safeSetText;
     window.safeSetHtml = safeSetHtml;
     window.safeSetClass = safeSetClass;
+} else if (typeof global !== 'undefined') {
+    global.safeGetEl = safeGetEl;
+    global.safeSetText = safeSetText;
+    global.safeSetHtml = safeSetHtml;
+    global.safeSetClass = safeSetClass;
 }
+

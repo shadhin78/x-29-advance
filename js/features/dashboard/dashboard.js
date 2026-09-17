@@ -39,10 +39,11 @@
         return { currentFilter: 'All', tasks: [] };
     }
 
-    function safeGetEl(id) {
-        if (typeof document === 'undefined') return null;
-        return document.getElementById(id);
-    }
+    const safeGetEl = (typeof window !== 'undefined' && typeof window.safeGetEl === 'function')
+        ? window.safeGetEl
+        : (typeof global !== 'undefined' && typeof global.safeGetEl === 'function')
+            ? global.safeGetEl
+            : (typeof require === 'function' ? require('../../utils/dom.js').safeGetEl : null);
 
     function safeSetText(id, text) {
         if (typeof window.safeSetText === 'function') {
