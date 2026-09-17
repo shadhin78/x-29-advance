@@ -2,7 +2,7 @@
 <div id="completion-stats-section" class="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
     <div
         class="lg:col-span-3 bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-800/80 p-5 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl md:rounded-[2rem] border border-slate-200/50 dark:border-slate-700/50 flex flex-col justify-between shadow-sm hover:shadow-xl transition-shadow relative group">
-        <button onclick="window.openGlobalHistoryModal()"
+        <button id="btn-open-global-history"
             class="absolute top-4 right-4 sm:top-6 sm:right-6 p-2 sm:px-3 sm:py-2 bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-xl hover:bg-blue-200 dark:hover:bg-blue-800/60 transition-all shadow-sm active:scale-95 flex items-center justify-center gap-1.5 z-10 border border-blue-200 dark:border-blue-800/50"
             title="Open History Database">
             <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -36,7 +36,7 @@
     </div>
     <div
         class="bg-white dark:bg-slate-800 p-5 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl md:rounded-[2rem] border border-slate-200/50 dark:border-slate-700/50 relative flex items-center justify-center shadow-sm hover:shadow-xl transition-shadow">
-        <button onclick="window.openGlobalChaptersModal()"
+        <button id="btn-open-global-chapters"
             class="relative flex items-center justify-center hover:scale-105 active:scale-95 transition-all focus:outline-none cursor-pointer group w-28 h-28 sm:w-36 sm:h-36 md:w-40 md:h-40"
             title="View All Subject Completions">
             <canvas id="progressChart"

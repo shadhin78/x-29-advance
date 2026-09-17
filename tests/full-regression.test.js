@@ -61,16 +61,15 @@ const indexHtml = fs.readFileSync('index.html', 'utf8');
 const appJs = fs.readFileSync('js/core/app.js', 'utf8');
 const authJs = fs.readFileSync('js/services/auth.js', 'utf8');
 const fbJs = fs.readFileSync('js/firebase.js', 'utf8');
-const scriptJs = fs.readFileSync('js/script.js', 'utf8');
 
 check('Core: Application starts via Native ES Module entry point', indexHtml.includes('type="module" src="/js/core/app.js"'));
 check('Core: Authentication service supports login, logout, and getCurrentUser', authJs.includes('login:') && authJs.includes('logout:') && authJs.includes('getCurrentUser:'));
 check('Core: Admin route guard enforces ris2k29@gmail.com', appJs.includes('ris2k29@gmail.com'));
-check('Core: Logout flow exists and redirects to login.html', scriptJs.includes('window.handleLogout') && scriptJs.includes('login.html'));
+check('Core: Logout flow exists and redirects to login.html', authJs.includes('logout') && authJs.includes('login.html'));
 check('Core: Navigation & page router registration present', fs.existsSync('router/router.js') && appJs.includes('initNavigation'));
 check('Core: Firebase connectivity, configuration & cloud methods', fbJs.includes('fetchConfig') && fbJs.includes('init') && fbJs.includes('saveToCloud'));
 check('Core: Cloud data loading and state hydration flow', fbJs.includes('loadFromCloud') || appJs.includes('initAuth'));
-check('Core: Data saving mechanism wired to state changes', scriptJs.includes('saveData') || fbJs.includes('saveToCloud'));
+check('Core: Data saving mechanism wired to state changes', fbJs.includes('saveToCloud'));
 
 // -------------------------------------------------------------
 // C. DASHBOARD CHECKS
@@ -84,7 +83,7 @@ check('Dashboard: Statistics calculations (Totals, Countdown, Success Score, Met
 check('Dashboard: Tasks rendering (Daily Checklist, Active Cards)', dashJs.includes('renderDashboardDailyChecklist'));
 check('Dashboard: Progress tracking (Weekly, Monthly Checklists)', 
     dashJs.includes('renderDashboardWeeklyChecklist') && dashJs.includes('renderDashboardMonthlyChecklist'));
-check('Dashboard: Charts rendering & trend bar updates', dashJs.includes('updateTrendsBar') && scriptJs.includes('renderChart'));
+check('Dashboard: Charts rendering & trend bar updates', dashJs.includes('updateTrendsBar') && dashJs.includes('renderChart'));
 
 // -------------------------------------------------------------
 // D. ANALYTICS CHECKS
@@ -151,13 +150,14 @@ check('Settings: Priority configurations reordering & persistence', priorityConf
 // I. MOBILE RESPONSIVENESS CHECKS
 // -------------------------------------------------------------
 console.log('\n--- I. MOBILE RESPONSIVENESS CHECKS ---');
+const sidebarJs = fs.readFileSync('js/shared/sidebar.js', 'utf8');
 
 check('Mobile: Responsive viewport meta tag in index.html & login.html', 
     indexHtml.includes('name="viewport"') && indexHtml.includes('width=device-width'));
 check('Mobile: Mobile sidebar toggle button (#mobile-sidebar-toggle)', indexHtml.includes('id="mobile-sidebar-toggle"'));
 check('Mobile: Mobile sidebar backdrop (#sidebar-backdrop)', indexHtml.includes('id="sidebar-backdrop"'));
 check('Mobile: Mobile drawer toggle logic (toggleMobileSidebar, closeMobileSidebar)', 
-    scriptJs.includes('toggleMobileSidebar') && scriptJs.includes('closeMobileSidebar'));
+    sidebarJs.includes('toggleMobileSidebar') && sidebarJs.includes('closeMobileSidebar'));
 check('Mobile: Responsive hidden/block breakpoints (md:hidden, md:flex)', indexHtml.includes('md:hidden') && indexHtml.includes('md:flex'));
 
 // -------------------------------------------------------------
@@ -255,8 +255,8 @@ check('Technical: 0 circular dependencies across modular graph', cycles.length =
 // Check Idempotency & Listeners
 check('Technical: App.init() has idempotency guard against duplicate initialization', appJs.includes('this.isInitialized'));
 check('Technical: TaskEngine has idempotency guard against duplicate listeners', taskEngineJs.includes('initTaskEventListeners'));
-check('Technical: Legacy monolithic script js/script.js retained as required by Step 14', 
-    fs.existsSync('js/script.js') && indexHtml.includes('js/script.js'));
+check('Technical: Legacy monolithic script js/script.js decommissioned in Phase 3', 
+    !fs.existsSync('js/script.js') && !indexHtml.includes('js/script.js'));
 
 console.log('\n================================================================');
 console.log(`FULL REGRESSION TEST RESULTS: ${passCount} Passed, ${failCount} Failed`);

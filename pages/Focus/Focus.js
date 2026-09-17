@@ -1563,6 +1563,106 @@
         }
     };
 
+    function initFocusEventListeners() {
+        if (typeof document === 'undefined' || typeof document.addEventListener !== 'function') return;
+        if (window._focusEventsInitialized) return;
+        window._focusEventsInitialized = true;
+
+        document.addEventListener('click', (e) => {
+            // Toggle timer
+            if (e.target.closest('#timer-fs-btn-toggle, #timer-btn-toggle')) {
+                if (typeof window.toggleTimerClick === 'function') window.toggleTimerClick();
+                return;
+            }
+            // Exit/Toggle fullscreen
+            if (e.target.closest('#timer-fs-btn-exit, #timer-btn-fullscreen')) {
+                if (typeof window.toggleTimerFullscreen === 'function') window.toggleTimerFullscreen();
+                return;
+            }
+            // Mode buttons
+            const modeBtn = e.target.closest('#tm-mode-stopwatch, #tm-mode-timer, #tm-mode-alarm');
+            if (modeBtn) {
+                const mode = modeBtn.id.replace('tm-mode-', '');
+                if (typeof window.setTimerMode === 'function') window.setTimerMode(mode);
+                return;
+            }
+            // Presets
+            const presetBtn = e.target.closest('[id^="timer-preset-btn-"]');
+            if (presetBtn) {
+                if (presetBtn.id === 'timer-preset-btn-custom') {
+                    if (typeof window.promptCustomTimer === 'function') window.promptCustomTimer();
+                } else {
+                    const mins = parseInt(presetBtn.id.replace('timer-preset-btn-', ''), 10);
+                    if (!isNaN(mins) && typeof window.setTimerPreset === 'function') window.setTimerPreset(mins);
+                }
+                return;
+            }
+            // Reset timer
+            if (e.target.closest('#timer-btn-reset')) {
+                if (typeof window.resetTimerClick === 'function') window.resetTimerClick();
+                return;
+            }
+            // Save session
+            if (e.target.closest('#timer-btn-save')) {
+                if (typeof window.saveTimerSession === 'function') window.saveTimerSession();
+                return;
+            }
+            // Subject target filters
+            const stFilter = e.target.closest('#st-filter-uncompleted, #st-filter-done');
+            if (stFilter) {
+                const filter = stFilter.id === 'st-filter-done' ? 'done' : 'uncompleted';
+                if (typeof window.setSubjectTargetFilter === 'function') window.setSubjectTargetFilter(filter);
+                return;
+            }
+            // Add subject target button
+            if (e.target.closest('#timer-btn-add-subject-target')) {
+                if (typeof window.openSubjectTargetModal === 'function') window.openSubjectTargetModal();
+                return;
+            }
+            // Session history filters
+            const shFilter = e.target.closest('[id^="sh-filter-"]');
+            if (shFilter) {
+                const filter = shFilter.id.replace('sh-filter-', '');
+                if (typeof window.setSessionHistoryFilter === 'function') window.setSessionHistoryFilter(filter);
+                return;
+            }
+            // Open Timer Analytics Modal
+            if (e.target.closest('#timer-btn-open-analytics')) {
+                if (typeof window.openTimerAnalyticsModal === 'function') window.openTimerAnalyticsModal();
+                return;
+            }
+            // Open Add Timer Session Modal
+            if (e.target.closest('#timer-btn-open-add-session')) {
+                if (typeof window.openAddTimerSessionModal === 'function') window.openAddTimerSessionModal();
+                return;
+            }
+        });
+
+        document.addEventListener('change', (e) => {
+            if (e.target.closest('#timer-alarm-use-current')) {
+                if (typeof window.toggleAlarmUseCurrent === 'function') window.toggleAlarmUseCurrent();
+                return;
+            }
+            if (e.target.closest('#timer-alarm-start, #timer-alarm-end')) {
+                if (window.TimerService && typeof window.TimerService.saveActiveStateToStore === 'function') {
+                    window.TimerService.saveActiveStateToStore();
+                }
+                if (window.FirebaseService && typeof window.FirebaseService.saveTimerToCloud === 'function') {
+                    window.FirebaseService.saveTimerToCloud();
+                }
+                return;
+            }
+        });
+    }
+
+    if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initFocusEventListeners);
+        } else {
+            initFocusEventListeners();
+        }
+    }
+
     // Auto-init if DOM is ready and Focus container is visible
     if (document.readyState === "complete" || document.readyState === "interactive") {
         const pageEl = document.getElementById("page-timer");

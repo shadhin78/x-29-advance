@@ -6,13 +6,13 @@
                         <!-- Fullscreen Top-Right Control Bar (Pause/Resume & Exit Fullview) -->
                         <div id="timer-fs-actions" class="hidden absolute top-3 right-3 sm:top-5 sm:right-5 z-30 items-center gap-2">
                             <!-- Fullscreen Pause / Resume Button -->
-                            <button id="timer-fs-btn-toggle" onclick="window.toggleTimerClick()"
+                            <button id="timer-fs-btn-toggle"
                                 class="px-4 py-2 sm:px-5 sm:py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-black text-xs uppercase tracking-widest rounded-xl shadow-lg active:scale-95 transition-all touch-action-manipulation flex items-center justify-center min-h-[40px]">
                                 START
                             </button>
 
                             <!-- Exit Fullscreen Button -->
-                            <button onclick="window.toggleTimerFullscreen()" id="timer-fs-btn-exit"
+                            <button id="timer-fs-btn-exit"
                                 class="p-2 sm:p-2.5 bg-slate-800/90 hover:bg-slate-700/90 rounded-xl transition-all active:scale-95 text-slate-300 border border-slate-700/60 shadow-md touch-action-manipulation flex items-center justify-center min-h-[40px]"
                                 title="Exit Fullscreen">
                                 <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -29,11 +29,11 @@
                                 <!-- Toggle Tabs -->
                                 <div id="timer-mode-switcher"
                                     class="flex bg-slate-950/80 p-1.5 rounded-2xl border border-slate-800/80 shadow-inner w-full justify-between backdrop-blur-md h-[46px] items-center">
-                                    <button onclick="window.setTimerMode('stopwatch')" id="tm-mode-stopwatch"
+                                    <button id="tm-mode-stopwatch"
                                         class="w-1/3 h-full text-[10px] sm:text-xs font-black rounded-xl transition-all bg-blue-600 text-white shadow touch-action-manipulation flex items-center justify-center">STOPWATCH</button>
-                                    <button onclick="window.setTimerMode('timer')" id="tm-mode-timer"
+                                    <button id="tm-mode-timer"
                                         class="w-1/3 h-full text-[10px] sm:text-xs font-black rounded-xl transition-all text-slate-400 hover:bg-slate-800/80 touch-action-manipulation flex items-center justify-center">TIMER</button>
-                                    <button onclick="window.setTimerMode('alarm')" id="tm-mode-alarm"
+                                    <button id="tm-mode-alarm"
                                         class="w-1/3 h-full text-[10px] sm:text-xs font-black rounded-xl transition-all text-slate-400 hover:bg-slate-800/80 touch-action-manipulation flex items-center justify-center">ALARM RANGE</button>
                                 </div>
 
@@ -47,7 +47,7 @@
                                             <!-- Options populated dynamically from tracks/programs/subjects -->
                                         </select>
                                         <!-- Fullscreen Toggle Button (Positioned right on the side of dropdown) -->
-                                        <button onclick="window.toggleTimerFullscreen()" id="timer-btn-fullscreen"
+                                        <button id="timer-btn-fullscreen"
                                             class="p-2.5 sm:p-3 bg-slate-800/90 hover:bg-slate-700/90 rounded-2xl transition-all active:scale-95 text-slate-300 border border-slate-700/60 shadow-md touch-action-manipulation flex items-center justify-center h-[46px] w-[46px] min-w-[46px] min-h-[46px] shrink-0 flex-shrink-0"
                                             title="Toggle Fullscreen" aria-label="Toggle Fullscreen">
                                             <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -68,7 +68,7 @@
                                     <label class="flex items-center gap-1.5 cursor-pointer select-none">
                                         <input type="checkbox" id="timer-alarm-use-current"
                                             class="rounded border-slate-700 text-blue-600 focus:ring-blue-500 w-3.5 h-3.5 bg-slate-900"
-                                            checked onchange="window.toggleAlarmUseCurrent()" />
+                                            checked />
                                         <span class="text-[9px] font-black uppercase tracking-wider text-slate-400">Use Current Time</span>
                                     </label>
                                 </div>
@@ -76,14 +76,12 @@
                                     <div class="flex flex-col gap-1.5">
                                         <label for="timer-alarm-start" class="text-[9px] font-black uppercase tracking-wider text-slate-400">Start Time</label>
                                         <input type="time" id="timer-alarm-start"
-                                            onchange="if(window.TimerService) window.TimerService.saveActiveStateToStore(); if(window.FirebaseService) window.FirebaseService.saveTimerToCloud();"
                                             class="bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-white font-bold outline-none w-full shadow-sm touch-action-manipulation"
                                             disabled />
                                     </div>
                                     <div class="flex flex-col gap-1.5">
                                         <label for="timer-alarm-end" class="text-[9px] font-black uppercase tracking-wider text-slate-400">End Time</label>
                                         <input type="time" id="timer-alarm-end"
-                                            onchange="if(window.TimerService) window.TimerService.saveActiveStateToStore(); if(window.FirebaseService) window.FirebaseService.saveTimerToCloud();"
                                             class="bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-white font-bold outline-none w-full shadow-sm touch-action-manipulation" />
                                     </div>
                                 </div>
@@ -130,31 +128,31 @@
 
                             <!-- Preset Timers & Targets (Visible in Stopwatch & Timer mode) -->
                             <div id="timer-presets-container" class="hidden flex-wrap justify-center gap-2 w-full max-w-xl my-1">
-                                <button onclick="window.setTimerPreset(0)" id="timer-preset-btn-0"
+                                <button id="timer-preset-btn-0"
                                     class="flex-1 min-w-[70px] py-2.5 px-3 bg-slate-800/80 hover:bg-blue-600 text-slate-300 hover:text-white rounded-xl text-xs font-black uppercase transition-all border border-slate-700/60 active:scale-95 touch-action-manipulation shadow-sm">Free</button>
-                                <button onclick="window.setTimerPreset(15)" id="timer-preset-btn-15"
+                                <button id="timer-preset-btn-15"
                                     class="flex-1 min-w-[70px] py-2.5 px-3 bg-slate-800/80 hover:bg-blue-600 text-slate-300 hover:text-white rounded-xl text-xs font-black uppercase transition-all border border-slate-700/60 active:scale-95 touch-action-manipulation shadow-sm">15 Min</button>
-                                <button onclick="window.setTimerPreset(25)" id="timer-preset-btn-25"
+                                <button id="timer-preset-btn-25"
                                     class="flex-1 min-w-[80px] py-2.5 px-3 bg-slate-800/80 hover:bg-blue-600 text-slate-300 hover:text-white rounded-xl text-xs font-black uppercase transition-all border border-slate-700/60 active:scale-95 touch-action-manipulation shadow-sm">25 Min</button>
-                                <button onclick="window.setTimerPreset(45)" id="timer-preset-btn-45"
+                                <button id="timer-preset-btn-45"
                                     class="flex-1 min-w-[70px] py-2.5 px-3 bg-slate-800/80 hover:bg-blue-600 text-slate-300 hover:text-white rounded-xl text-xs font-black uppercase transition-all border border-slate-700/60 active:scale-95 touch-action-manipulation shadow-sm">45 Min</button>
-                                <button onclick="window.setTimerPreset(60)" id="timer-preset-btn-60"
+                                <button id="timer-preset-btn-60"
                                     class="flex-1 min-w-[70px] py-2.5 px-3 bg-slate-800/80 hover:bg-blue-600 text-slate-300 hover:text-white rounded-xl text-xs font-black uppercase transition-all border border-slate-700/60 active:scale-95 touch-action-manipulation shadow-sm">60 Min</button>
-                                <button onclick="window.promptCustomTimer()" id="timer-preset-btn-custom"
+                                <button id="timer-preset-btn-custom"
                                     class="flex-1 min-w-[70px] py-2.5 px-3 bg-slate-800/80 hover:bg-blue-600 text-slate-300 hover:text-white rounded-xl text-xs font-black uppercase transition-all border border-slate-700/60 active:scale-95 touch-action-manipulation shadow-sm">Custom</button>
                             </div>
 
                             <!-- Control Buttons Bar -->
                             <div id="timer-control-buttons-bar" class="flex gap-2 sm:gap-4 w-full max-w-xl justify-center items-center mt-1 sm:mt-2">
-                                <button id="timer-btn-reset" onclick="window.resetTimerClick()"
+                                <button id="timer-btn-reset"
                                     class="flex-1 py-3 sm:py-3.5 bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/60 text-xs font-black uppercase tracking-widest rounded-2xl active:scale-95 transition-all text-slate-300 touch-action-manipulation min-h-[44px]">
                                     RESET
                                 </button>
-                                <button id="timer-btn-toggle" onclick="window.toggleTimerClick()"
+                                <button id="timer-btn-toggle"
                                     class="flex-[1.5] py-3 sm:py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-black text-xs uppercase tracking-widest rounded-2xl shadow-lg active:scale-95 transition-all touch-action-manipulation min-h-[44px]">
                                     START
                                 </button>
-                                <button id="timer-btn-save" onclick="window.saveTimerSession()" disabled
+                                <button id="timer-btn-save" disabled
                                     class="flex-1 py-3 sm:py-3.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 disabled:pointer-events-none text-white font-black text-xs uppercase tracking-widest rounded-2xl shadow-lg active:scale-95 transition-all touch-action-manipulation min-h-[44px]">
                                     SAVE
                                 </button>
@@ -256,13 +254,13 @@
                         <div class="flex flex-wrap items-center gap-2">
                             <!-- Section Filter Tabs: Uncompleted (Red) & Done (Green) -->
                             <div id="subject-target-filter-bar" class="flex items-center gap-1 bg-slate-100 dark:bg-slate-900/80 p-1 rounded-2xl border border-slate-200/60 dark:border-slate-800">
-                                <button onclick="window.setSubjectTargetFilter('uncompleted')" id="st-filter-uncompleted"
+                                <button id="st-filter-uncompleted"
                                     class="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider rounded-xl transition-all bg-rose-600 text-white shadow shadow-rose-500/20 active:scale-95">
                                     <span id="st-dot-uncompleted" class="w-2 h-2 rounded-full bg-rose-200 animate-pulse"></span>
                                     <span>Uncompleted</span>
                                     <span id="st-count-uncompleted" class="px-1.5 py-0.5 rounded-full bg-white/20 text-white text-[9px] font-mono leading-none">0</span>
                                 </button>
-                                <button onclick="window.setSubjectTargetFilter('done')" id="st-filter-done"
+                                <button id="st-filter-done"
                                     class="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider rounded-xl transition-all text-slate-500 dark:text-slate-400 hover:bg-slate-200/80 dark:hover:bg-slate-800 active:scale-95">
                                     <span id="st-dot-done" class="w-2 h-2 rounded-full bg-emerald-500"></span>
                                     <span>Done</span>
@@ -270,7 +268,7 @@
                                 </button>
                             </div>
 
-                            <button onclick="window.openSubjectTargetModal('')" id="timer-btn-add-subject-target"
+                            <button id="timer-btn-add-subject-target"
                                 class="flex items-center gap-1.5 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white font-black text-[10px] uppercase tracking-widest rounded-xl shadow-md active:scale-95 transition-all"
                                 title="Add Subject Target">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -313,19 +311,19 @@
                         <div class="flex flex-wrap items-center gap-2">
                             <!-- Day, Week, Month, Year, All Filter Bar -->
                             <div id="session-history-filter-bar" class="flex items-center gap-1 bg-slate-100 dark:bg-slate-900/80 p-1 rounded-2xl border border-slate-200/60 dark:border-slate-800">
-                                <button onclick="window.setSessionHistoryFilter('all')" id="sh-filter-all"
+                                <button id="sh-filter-all"
                                     class="px-3 py-1 text-[10px] font-black uppercase tracking-wider rounded-xl transition-all bg-blue-600 text-white shadow shadow-blue-500/20">All</button>
-                                <button onclick="window.setSessionHistoryFilter('day')" id="sh-filter-day"
+                                <button id="sh-filter-day"
                                     class="px-3 py-1 text-[10px] font-black uppercase tracking-wider rounded-xl transition-all text-slate-500 hover:bg-slate-200/80 dark:text-slate-400 dark:hover:bg-slate-800">Day</button>
-                                <button onclick="window.setSessionHistoryFilter('week')" id="sh-filter-week"
+                                <button id="sh-filter-week"
                                     class="px-3 py-1 text-[10px] font-black uppercase tracking-wider rounded-xl transition-all text-slate-500 hover:bg-slate-200/80 dark:text-slate-400 dark:hover:bg-slate-800">Week</button>
-                                <button onclick="window.setSessionHistoryFilter('month')" id="sh-filter-month"
+                                <button id="sh-filter-month"
                                     class="px-3 py-1 text-[10px] font-black uppercase tracking-wider rounded-xl transition-all text-slate-500 hover:bg-slate-200/80 dark:text-slate-400 dark:hover:bg-slate-800">Month</button>
-                                <button onclick="window.setSessionHistoryFilter('year')" id="sh-filter-year"
+                                <button id="sh-filter-year"
                                     class="px-3 py-1 text-[10px] font-black uppercase tracking-wider rounded-xl transition-all text-slate-500 hover:bg-slate-200/80 dark:text-slate-400 dark:hover:bg-slate-800">Year</button>
                             </div>
 
-                            <button onclick="window.openTimerAnalyticsModal()"
+                            <button id="timer-btn-open-analytics"
                                 class="flex items-center gap-1.5 px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-[10px] uppercase tracking-widest rounded-xl shadow-md active:scale-95 transition-all">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
@@ -334,7 +332,7 @@
                                 </svg>
                                 <span class="hidden sm:inline">Analytics</span>
                             </button>
-                            <button onclick="window.openAddTimerSessionModal()"
+                            <button id="timer-btn-open-add-session"
                                 class="flex items-center gap-1.5 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-[10px] uppercase tracking-widest rounded-xl shadow-md active:scale-95 transition-all">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
