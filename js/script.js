@@ -5,30 +5,52 @@
  ******************************************************************/
 // js/utils.js (Left behind utilities depending on DOM/Global states)
 
-function getSubjectColor(subjName) {
-    if (AppState.subjectColors[subjName]) return AppState.subjectColors[subjName];
-    const colors = ['#ef4444', '#f97316', '#eab308', '#84cc16', '#22c55e', '#14b8a6', '#06b6d4', '#3b82f6', '#6366f1', '#8b5cf6', '#a855f7', '#d946ef', '#ec4899', '#f43f5e'];
-    let hash = 0;
-    for (let i = 0; i < subjName.length; i++) hash = subjName.charCodeAt(i) + ((hash << 5) - hash);
-    const color = colors[Math.abs(hash) % colors.length];
-    AppState.subjectColors[subjName] = color;
-    return color;
-}
+// Delegated to js/utils/colors.js and js/utils.js
+const getSubjectColor = (typeof window !== 'undefined' && typeof window.getSubjectColor === 'function')
+    ? window.getSubjectColor
+    : (typeof global !== 'undefined' && typeof global.getSubjectColor === 'function')
+        ? global.getSubjectColor
+        : function (subjName) {
+            if (typeof Utils !== 'undefined' && typeof Utils.getSubjectColor === 'function') {
+                return Utils.getSubjectColor(subjName);
+            }
+            const colors = ['#ef4444', '#f97316', '#eab308', '#84cc16', '#22c55e', '#14b8a6', '#06b6d4', '#3b82f6', '#6366f1', '#8b5cf6', '#a855f7', '#d946ef', '#ec4899', '#f43f5e'];
+            let hash = 0;
+            const str = String(subjName || '');
+            for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+            return colors[Math.abs(hash) % colors.length];
+        };
 
-function hexToRgba(hex, alpha) {
-    if (!hex) return `rgba(16, 185, 129, ${alpha})`;
-    hex = hex.replace('#', '');
-    let r = 0, g = 0, b = 0;
-    if (hex.length === 3) {
-        r = parseInt(hex[0] + hex[0], 16);
-        g = parseInt(hex[1] + hex[1], 16);
-        b = parseInt(hex[2] + hex[2], 16);
-    } else if (hex.length === 6) {
-        r = parseInt(hex.substring(0, 2), 16);
-        g = parseInt(hex.substring(2, 4), 16);
-        b = parseInt(hex.substring(4, 6), 16);
-    }
-    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+const hexToRgba = (typeof window !== 'undefined' && typeof window.hexToRgba === 'function')
+    ? window.hexToRgba
+    : (typeof global !== 'undefined' && typeof global.hexToRgba === 'function')
+        ? global.hexToRgba
+        : function (hex, alpha) {
+            if (typeof Utils !== 'undefined' && typeof Utils.hexToRgba === 'function') {
+                return Utils.hexToRgba(hex, alpha);
+            }
+            if (!hex) return `rgba(16, 185, 129, ${alpha})`;
+            const clean = String(hex).replace('#', '');
+            let r = 0, g = 0, b = 0;
+            if (clean.length === 3) {
+                r = parseInt(clean[0] + clean[0], 16);
+                g = parseInt(clean[1] + clean[1], 16);
+                b = parseInt(clean[2] + clean[2], 16);
+            } else if (clean.length === 6) {
+                r = parseInt(clean.substring(0, 2), 16);
+                g = parseInt(clean.substring(2, 4), 16);
+                b = parseInt(clean.substring(4, 6), 16);
+            }
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        };
+
+if (typeof window !== 'undefined') {
+    window.getSubjectColor = getSubjectColor;
+    window.hexToRgba = hexToRgba;
+}
+if (typeof global !== 'undefined') {
+    global.getSubjectColor = getSubjectColor;
+    global.hexToRgba = hexToRgba;
 }
 
 window.parseDailyTargetDateKey = function (dateKey) {

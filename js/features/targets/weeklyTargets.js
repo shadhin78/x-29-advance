@@ -118,18 +118,19 @@
     }
 
     function safeHexToRgba(hex, alpha) {
-        if (typeof global.hexToRgba === 'function') {
+        if (typeof global !== 'undefined' && typeof global.hexToRgba === 'function') {
             return global.hexToRgba(hex, alpha);
         }
-        if (!hex || typeof hex !== 'string') return `rgba(59, 130, 246, ${alpha})`;
-        let c = hex.replace('#', '');
-        if (c.length === 3) c = c.split('').map(x => x + x).join('');
-        const num = parseInt(c, 16);
-        if (isNaN(num)) return `rgba(59, 130, 246, ${alpha})`;
-        const r = (num >> 16) & 255;
-        const g = (num >> 8) & 255;
-        const b = num & 255;
-        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        if (typeof window !== 'undefined' && typeof window.hexToRgba === 'function') {
+            return window.hexToRgba(hex, alpha);
+        }
+        if (typeof Utils !== 'undefined' && typeof Utils.hexToRgba === 'function') {
+            return Utils.hexToRgba(hex, alpha);
+        }
+        if (typeof require === 'function') {
+            try { return require('../../utils/colors.js').hexToRgba(hex, alpha); } catch (e) {}
+        }
+        return `rgba(59, 130, 246, ${alpha})`;
     }
 
     // Initialize databases on global if missing

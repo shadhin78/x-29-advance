@@ -39,11 +39,17 @@
     }
 
     function getSubjectColor(subject) {
-        if (typeof global.getSubjectColor === 'function') {
+        if (typeof global !== 'undefined' && typeof global.getSubjectColor === 'function') {
             return global.getSubjectColor(subject);
         }
         if (typeof window !== 'undefined' && typeof window.getSubjectColor === 'function') {
             return window.getSubjectColor(subject);
+        }
+        if (typeof Utils !== 'undefined' && typeof Utils.getSubjectColor === 'function') {
+            return Utils.getSubjectColor(subject);
+        }
+        if (typeof require === 'function') {
+            try { return require('../../utils/colors.js').getSubjectColor(subject); } catch (e) {}
         }
         return '#3b82f6';
     }

@@ -14,6 +14,9 @@ export const safeStorage = {
 
     getItem: function(key) {
         const namespacedKey = this._k(key);
+        if (typeof localStorage === 'undefined') {
+            return this.fallbackStore[namespacedKey] || null;
+        }
         try {
             return localStorage.getItem(namespacedKey);
         } catch (e) {
@@ -24,6 +27,10 @@ export const safeStorage = {
 
     setItem: function(key, value) {
         const namespacedKey = this._k(key);
+        if (typeof localStorage === 'undefined') {
+            this.fallbackStore[namespacedKey] = String(value);
+            return;
+        }
         try {
             localStorage.setItem(namespacedKey, value);
         } catch (e) {
@@ -34,6 +41,10 @@ export const safeStorage = {
 
     removeItem: function(key) {
         const namespacedKey = this._k(key);
+        if (typeof localStorage === 'undefined') {
+            delete this.fallbackStore[namespacedKey];
+            return;
+        }
         try {
             localStorage.removeItem(namespacedKey);
         } catch (e) {

@@ -539,6 +539,62 @@ runTest('safeGetEl is exported and resolves elements properly with fallback guar
 });
 
 // ----------------------------------------------------
+// 11. Shared Color Utilities (colors.js)
+// ----------------------------------------------------
+console.log('\n11. Shared Color Utilities (colors.js)');
+
+runTest('Color Utilities module exports canonical palette and helper functions', () => {
+    const colorsModule = require('../js/utils/colors.js');
+    assert(Array.isArray(colorsModule.SUBJECT_PALETTE_COLORS), 'SUBJECT_PALETTE_COLORS is an array');
+    assert.strictEqual(colorsModule.SUBJECT_PALETTE_COLORS.length, 14, 'Canonical palette contains 14 colors');
+    assert.strictEqual(typeof colorsModule.hashStringToColor, 'function', 'hashStringToColor is a function');
+    assert.strictEqual(typeof colorsModule.getSubjectColor, 'function', 'getSubjectColor is a function');
+    assert.strictEqual(typeof colorsModule.hexToRgba, 'function', 'hexToRgba is a function');
+});
+
+runTest('hashStringToColor and getSubjectColor produce deterministic colors', () => {
+    const { getSubjectColor, hashStringToColor } = require('../js/utils/colors.js');
+    const color1 = hashStringToColor('Audit');
+    const color2 = hashStringToColor('Audit');
+    assert.strictEqual(color1, color2, 'hashStringToColor is deterministic');
+    assert.strictEqual(color1.startsWith('#'), true, 'Color is a hex string');
+
+    const subColor1 = getSubjectColor('Financial Accounting');
+    const subColor2 = getSubjectColor('Financial Accounting');
+    assert.strictEqual(subColor1, subColor2, 'getSubjectColor returns consistent color');
+
+    // Missing subject fallback
+    assert.strictEqual(getSubjectColor(''), '#3b82f6', 'Empty subject falls back to default');
+    assert.strictEqual(getSubjectColor(null), '#3b82f6', 'Null subject falls back to default');
+});
+
+runTest('hexToRgba converts 3-digit and 6-digit hex to rgba with alpha', () => {
+    const { hexToRgba } = require('../js/utils/colors.js');
+    assert.strictEqual(hexToRgba('#fff', 0.5), 'rgba(255, 255, 255, 0.5)');
+    assert.strictEqual(hexToRgba('000', 1), 'rgba(0, 0, 0, 1)');
+    assert.strictEqual(hexToRgba('#3b82f6', 0.25), 'rgba(59, 130, 246, 0.25)');
+    assert.strictEqual(hexToRgba('#10b981', 1), 'rgba(16, 185, 129, 1)');
+
+    // Fallbacks
+    assert.strictEqual(hexToRgba('', 0.5), 'rgba(16, 185, 129, 0.5)');
+    assert.strictEqual(hexToRgba(null, 0.2), 'rgba(16, 185, 129, 0.2)');
+    assert.strictEqual(hexToRgba('invalid', 0.2), 'rgba(16, 185, 129, 0.2)');
+});
+
+runTest('Color Utilities are exposed on Utils namespace and global/window scope', () => {
+    const utils = require('../js/utils.js');
+    assert.strictEqual(typeof utils.getSubjectColor, 'function', 'Utils.getSubjectColor is exposed');
+    assert.strictEqual(typeof utils.hexToRgba, 'function', 'Utils.hexToRgba is exposed');
+    assert.strictEqual(typeof utils.hashStringToColor, 'function', 'Utils.hashStringToColor is exposed');
+    assert(Array.isArray(utils.SUBJECT_PALETTE_COLORS), 'Utils.SUBJECT_PALETTE_COLORS is exposed');
+
+    assert.strictEqual(typeof global.getSubjectColor, 'function', 'global.getSubjectColor is defined');
+    assert.strictEqual(typeof global.hexToRgba, 'function', 'global.hexToRgba is defined');
+    assert.strictEqual(typeof window.getSubjectColor, 'function', 'window.getSubjectColor is defined');
+    assert.strictEqual(typeof window.hexToRgba, 'function', 'window.hexToRgba is defined');
+});
+
+// ----------------------------------------------------
 // Results Summary
 // ----------------------------------------------------
 console.log('\n==================================================');

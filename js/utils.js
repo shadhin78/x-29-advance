@@ -110,6 +110,9 @@
         },
         getItem: function (key) {
             const namespacedKey = this._k(key);
+            if (typeof localStorage === 'undefined') {
+                return this.fallbackStore[namespacedKey] || null;
+            }
             try {
                 return localStorage.getItem(namespacedKey);
             } catch (e) {
@@ -119,6 +122,10 @@
         },
         setItem: function (key, value) {
             const namespacedKey = this._k(key);
+            if (typeof localStorage === 'undefined') {
+                this.fallbackStore[namespacedKey] = String(value);
+                return;
+            }
             try {
                 localStorage.setItem(namespacedKey, value);
             } catch (e) {
@@ -128,6 +135,10 @@
         },
         removeItem: function (key) {
             const namespacedKey = this._k(key);
+            if (typeof localStorage === 'undefined') {
+                delete this.fallbackStore[namespacedKey];
+                return;
+            }
             try {
                 localStorage.removeItem(namespacedKey);
             } catch (e) {
@@ -430,6 +441,69 @@
         return false;
     }
 
+    /**
+     * Color Utilities: Deterministic subject palette hashing & RGBA conversion
+     */
+    const SUBJECT_PALETTE_COLORS = [
+        '#ef4444', '#f97316', '#eab308', '#84cc16', '#22c55e',
+        '#14b8a6', '#06b6d4', '#3b82f6', '#6366f1', '#8b5cf6',
+        '#a855f7', '#d946ef', '#ec4899', '#f43f5e'
+    ];
+
+    function hashStringToColor(str, palette = SUBJECT_PALETTE_COLORS) {
+        if (!str) return '#3b82f6';
+        const pal = (Array.isArray(palette) && palette.length > 0) ? palette : SUBJECT_PALETTE_COLORS;
+        let hash = 0;
+        const s = String(str);
+        for (let i = 0; i < s.length; i++) {
+            hash = s.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        return pal[Math.abs(hash) % pal.length];
+    }
+
+    function getSubjectColor(subjName, palette = SUBJECT_PALETTE_COLORS) {
+        if (!subjName) return '#3b82f6';
+        if (typeof AppState !== 'undefined' && AppState && AppState.subjectColors && AppState.subjectColors[subjName]) {
+            return AppState.subjectColors[subjName];
+        }
+        if (typeof window !== 'undefined' && window.AppState && window.AppState.subjectColors && window.AppState.subjectColors[subjName]) {
+            return window.AppState.subjectColors[subjName];
+        }
+        if (typeof global !== 'undefined' && global.AppState && global.AppState.subjectColors && global.AppState.subjectColors[subjName]) {
+            return global.AppState.subjectColors[subjName];
+        }
+        const color = hashStringToColor(subjName, palette);
+        if (typeof AppState !== 'undefined' && AppState && typeof AppState.subjectColors === 'object') {
+            AppState.subjectColors[subjName] = color;
+        } else if (typeof window !== 'undefined' && window.AppState && typeof window.AppState.subjectColors === 'object') {
+            window.AppState.subjectColors[subjName] = color;
+        } else if (typeof global !== 'undefined' && global.AppState && typeof global.AppState.subjectColors === 'object') {
+            global.AppState.subjectColors[subjName] = color;
+        }
+        return color;
+    }
+
+    function hexToRgba(hex, alpha = 1) {
+        if (!hex) return `rgba(16, 185, 129, ${alpha})`;
+        const cleanHex = String(hex).replace('#', '').trim();
+        let r = 0, g = 0, b = 0;
+        if (cleanHex.length === 3) {
+            r = parseInt(cleanHex[0] + cleanHex[0], 16);
+            g = parseInt(cleanHex[1] + cleanHex[1], 16);
+            b = parseInt(cleanHex[2] + cleanHex[2], 16);
+        } else if (cleanHex.length === 6) {
+            r = parseInt(cleanHex.substring(0, 2), 16);
+            g = parseInt(cleanHex.substring(2, 4), 16);
+            b = parseInt(cleanHex.substring(4, 6), 16);
+        } else {
+            return `rgba(16, 185, 129, ${alpha})`;
+        }
+        if (isNaN(r) || isNaN(g) || isNaN(b)) {
+            return `rgba(16, 185, 129, ${alpha})`;
+        }
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+
     // Unified Utils Namespace Object
     const Utils = {
         getDailyActionDate,
@@ -459,7 +533,11 @@
         safeGetEl,
         safeSetText,
         safeSetHtml,
-        safeSetClass
+        safeSetClass,
+        SUBJECT_PALETTE_COLORS,
+        hashStringToColor,
+        getSubjectColor,
+        hexToRgba
     };
 
     // Global Bindings for synchronous availability
@@ -492,6 +570,10 @@
     global.formatCgpaMin2Dec = formatCgpaMin2Dec;
     global.validateAndFormatCgpa = validateAndFormatCgpa;
     global.isChapterMatch = isChapterMatch;
+    global.SUBJECT_PALETTE_COLORS = SUBJECT_PALETTE_COLORS;
+    global.hashStringToColor = hashStringToColor;
+    global.getSubjectColor = getSubjectColor;
+    global.hexToRgba = hexToRgba;
 
     if (typeof module !== 'undefined' && module.exports) {
         module.exports = Utils;
