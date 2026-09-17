@@ -1334,6 +1334,37 @@
         }
     }
 
+    function initDailyTrackerEventListeners() {
+        if (typeof document === 'undefined' || typeof document.addEventListener !== 'function') return;
+        if (global._dailyTrackerListenersInitialized) return;
+        global._dailyTrackerListenersInitialized = true;
+
+        document.addEventListener('click', (e) => {
+            const rangeBtn = e.target.closest('#am-range-90, #am-range-180, #am-range-365, [data-action-range]');
+            if (rangeBtn) {
+                const days = rangeBtn.id === 'am-range-90' ? 90 : (rangeBtn.id === 'am-range-180' ? 180 : (rangeBtn.id === 'am-range-365' ? 365 : Number(rangeBtn.getAttribute('data-action-range'))));
+                if (!isNaN(days)) setActionAnalyticsRange(days);
+                return;
+            }
+            if (e.target.closest('#edam-btn-delete, [data-edam-delete]')) {
+                requestDeleteDailyActionFromModal();
+                return;
+            }
+            if (e.target.closest('#edam-btn-save, [data-edam-save]')) {
+                saveDailyActionEditModal();
+                return;
+            }
+        });
+    }
+
+    if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initDailyTrackerEventListeners);
+        } else {
+            initDailyTrackerEventListeners();
+        }
+    }
+
     // Global attachments for window scope & cross-module integration
     global.getActionSVG = getActionSVG;
     global.renderDailyTracker = renderDailyTracker;
@@ -1351,6 +1382,7 @@
     global.openEditDailyActionModal = openEditDailyActionModal;
     global.saveDailyActionEditModal = saveDailyActionEditModal;
     global.requestDeleteDailyActionFromModal = requestDeleteDailyActionFromModal;
+    global.initDailyTrackerEventListeners = initDailyTrackerEventListeners;
 
     if (typeof module !== 'undefined' && module.exports) {
         module.exports = {

@@ -201,16 +201,72 @@ function closeModal(modalId) {
     }, 300);
 }
 
+/**
+ * Global click delegation for modal dismissal and backdrop clicks.
+ */
+function initModalEventListeners() {
+    if (typeof document === 'undefined' || typeof document.addEventListener !== 'function') return;
+    if (global._modalListenersInitialized) return;
+    global._modalListenersInitialized = true;
+
+    document.addEventListener('click', (e) => {
+        // 1. Close button with data-modal-close or class btn-modal-close
+        const closeBtn = e.target.closest('[data-modal-close], .btn-modal-close');
+        if (closeBtn) {
+            const targetId = closeBtn.getAttribute('data-modal-close');
+            if (targetId) {
+                if (targetId === 'spectra-heatmap-day-modal' && typeof window.closeSpectraHeatmapDayModal === 'function') {
+                    window.closeSpectraHeatmapDayModal();
+                    return;
+                }
+                closeModal(targetId);
+                return;
+            }
+            const modalEl = closeBtn.closest('[id$="-modal"]');
+            if (modalEl && modalEl.id) {
+                closeModal(modalEl.id);
+                return;
+            }
+        }
+
+        // 2. Click directly on backdrop element
+        const backdrop = e.target.closest('[id$="-backdrop"]');
+        if (backdrop && backdrop === e.target) {
+            for (const [mId, bId] of Object.entries(MODAL_BACKDROPS)) {
+                if (bId === backdrop.id) {
+                    closeModal(mId);
+                    return;
+                }
+            }
+            const modalEl = backdrop.closest('[id$="-modal"]') || backdrop.parentElement;
+            if (modalEl && modalEl.id) {
+                closeModal(modalEl.id);
+                return;
+            }
+        }
+    });
+}
+
+if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initModalEventListeners);
+    } else {
+        initModalEventListeners();
+    }
+}
+
 // Global window and environment compatibility bridge
 if (typeof window !== 'undefined') {
     window.openModal = openModal;
     window.closeModal = closeModal;
+    window.initModalEventListeners = initModalEventListeners;
     window.MODAL_BACKDROPS = MODAL_BACKDROPS;
     window.MODAL_CONTENTS = MODAL_CONTENTS;
 }
 if (typeof global !== 'undefined') {
     global.openModal = openModal;
     global.closeModal = closeModal;
+    global.initModalEventListeners = initModalEventListeners;
     global.MODAL_BACKDROPS = MODAL_BACKDROPS;
     global.MODAL_CONTENTS = MODAL_CONTENTS;
 }
@@ -220,9 +276,11 @@ if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
         openModal,
         closeModal,
+        initModalEventListeners,
         MODAL_BACKDROPS,
         MODAL_CONTENTS,
         backdrops: MODAL_BACKDROPS,
         contents: MODAL_CONTENTS
     };
 }
+

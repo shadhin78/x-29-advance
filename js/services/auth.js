@@ -355,7 +355,7 @@
             global._authListenersInitialized = true;
 
             document.addEventListener('click', (e) => {
-                if (e.target.closest('#btn-logout, [data-logout-btn]')) {
+                if (e.target.closest('#btn-logout, #btn-logout-relocated, [data-logout-btn]')) {
                     e.preventDefault();
                     this.handleLogout();
                     return;
@@ -365,7 +365,7 @@
                     this.openAccountSettingsModal();
                     return;
                 }
-                if (e.target.closest('#btn-submit-account-update, [data-submit-account-update]')) {
+                if (e.target.closest('#btn-submit-account-update, #asm-save-btn, [data-submit-account-update]')) {
                     e.preventDefault();
                     this.submitAccountUpdate();
                     return;
@@ -382,8 +382,17 @@
         }
     }
 
+    function setLoadingProgress(pct, statusText) {
+        if (typeof document === 'undefined') return;
+        const bar = document.getElementById('auth-loading-bar');
+        const text = document.getElementById('auth-loading-text');
+        if (bar) bar.style.width = pct + '%';
+        if (text) text.textContent = statusText || 'Loading Application...';
+    }
+
     // Global window attachment
     global.AuthService = AuthService;
+    global.setLoadingProgress = setLoadingProgress;
     global.openAccountSettingsModal = function () {
         return AuthService.openAccountSettingsModal();
     };

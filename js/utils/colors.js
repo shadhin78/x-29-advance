@@ -97,17 +97,46 @@ function hexToRgba(hex, alpha = 1) {
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
+/**
+ * Resolves a program color using AppState.dynamicLineColors and getAllPrograms() index.
+ *
+ * @param {string} pName - Program name
+ * @returns {string} Hex color string
+ */
+function getProgramColor(pName) {
+    if (!pName) return '#6366f1';
+    const AppStateRef = (typeof window !== 'undefined' && window.AppState)
+        || (typeof global !== 'undefined' && global.AppState)
+        || {};
+    const dynamicLineColors = (AppStateRef && Array.isArray(AppStateRef.dynamicLineColors) && AppStateRef.dynamicLineColors.length > 0)
+        ? AppStateRef.dynamicLineColors
+        : ['#3b82f6', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#06b6d4'];
+
+    const getAllProgs = (typeof window !== 'undefined' && typeof window.getAllPrograms === 'function')
+        ? window.getAllPrograms
+        : ((typeof global !== 'undefined' && typeof global.getAllPrograms === 'function') ? global.getAllPrograms : () => []);
+
+    const allProgs = getAllProgs().map(p => p.name || p);
+    const idx = allProgs.indexOf(pName);
+    if (idx !== -1) {
+        return dynamicLineColors[idx % dynamicLineColors.length];
+    }
+    return '#6366f1';
+}
+
 // Global window and environment compatibility bridge
 if (typeof window !== 'undefined') {
     window.SUBJECT_PALETTE_COLORS = SUBJECT_PALETTE_COLORS;
     window.hashStringToColor = hashStringToColor;
     window.getSubjectColor = getSubjectColor;
+    window.getProgramColor = getProgramColor;
     window.hexToRgba = hexToRgba;
 }
 if (typeof global !== 'undefined') {
     global.SUBJECT_PALETTE_COLORS = SUBJECT_PALETTE_COLORS;
     global.hashStringToColor = hashStringToColor;
     global.getSubjectColor = getSubjectColor;
+    global.getProgramColor = getProgramColor;
     global.hexToRgba = hexToRgba;
 }
 
@@ -116,6 +145,8 @@ if (typeof module !== 'undefined' && module.exports) {
         SUBJECT_PALETTE_COLORS,
         hashStringToColor,
         getSubjectColor,
+        getProgramColor,
         hexToRgba
     };
 }
+

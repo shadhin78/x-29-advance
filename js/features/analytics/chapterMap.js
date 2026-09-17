@@ -974,6 +974,18 @@
 
     if (typeof document !== 'undefined') {
         document.addEventListener('click', function (e) {
+            if (e.target.closest('#stm-circle-btn')) {
+                setSubjectTrendChartStyle('circle');
+                return;
+            }
+            if (e.target.closest('#stm-line-btn')) {
+                setSubjectTrendChartStyle('line');
+                return;
+            }
+            if (e.target.closest('#stm-global-btn')) {
+                toggleSubjectTrendGlobal();
+                return;
+            }
             const wrapper = document.getElementById('stm-subject-dropdown-wrapper');
             const panel = document.getElementById('stm-dropdown-panel');
             if (wrapper && panel && !wrapper.contains(e.target)) {

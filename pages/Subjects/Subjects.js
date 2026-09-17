@@ -1286,6 +1286,35 @@
         }
     };
 
+    function initSubjectsEventListeners() {
+        if (typeof document === 'undefined' || typeof document.addEventListener !== 'function') return;
+        if (window._subjectsEventsInitialized) return;
+        window._subjectsEventsInitialized = true;
+
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('#btn-open-global-history')) {
+                if (typeof window.openGlobalHistoryModal === 'function') {
+                    window.openGlobalHistoryModal();
+                }
+                return;
+            }
+            if (e.target.closest('#btn-open-global-chapters')) {
+                if (typeof window.openGlobalChaptersModal === 'function') {
+                    window.openGlobalChaptersModal();
+                }
+                return;
+            }
+        });
+    }
+
+    if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initSubjectsEventListeners);
+        } else {
+            initSubjectsEventListeners();
+        }
+    }
+
     // Auto-init if container exists and is visible on initial page load
     if (document.readyState === 'complete' || document.readyState === 'interactive') {
         const pageEl = document.getElementById('page-subjects');

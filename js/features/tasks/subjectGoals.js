@@ -747,10 +747,43 @@
         renderSubjectProgress,
         renderCategoryProgress,
         renderTrackProgress,
-        openProgramCompletionsModal
+        openProgramCompletionsModal,
+        initSubjectGoalsEventListeners
     };
 
+    function initSubjectGoalsEventListeners() {
+        if (typeof document === 'undefined' || typeof document.addEventListener !== 'function') return;
+        if (global._subjectGoalsListenersInitialized) return;
+        global._subjectGoalsListenersInitialized = true;
+
+        document.addEventListener('change', (e) => {
+            if (e.target && e.target.id === 'esm-track') {
+                updateEsmProgramDropdown();
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('#esm-btn-delete, [data-esm-delete]')) {
+                requestDeleteSubjectFromModal();
+                return;
+            }
+            if (e.target.closest('#esm-btn-save, [data-esm-save]')) {
+                saveSubjectEditModal();
+                return;
+            }
+        });
+    }
+
+    if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initSubjectGoalsEventListeners);
+        } else {
+            initSubjectGoalsEventListeners();
+        }
+    }
+
     window.SubjectGoals = SubjectGoals;
+    window.initSubjectGoalsEventListeners = initSubjectGoalsEventListeners;
 
     window.openSubjectTimeModal = openSubjectTimeModal;
     window.saveSubjectTimeGoal = saveSubjectTimeGoal;

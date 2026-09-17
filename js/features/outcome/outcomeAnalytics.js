@@ -470,6 +470,33 @@
         });
     }
 
+    function initOutcomeAnalyticsEventListeners() {
+        if (typeof document === 'undefined' || typeof document.addEventListener !== 'function') return;
+        if (global._outcomeAnalyticsListenersInitialized) return;
+        global._outcomeAnalyticsListenersInitialized = true;
+
+        document.addEventListener('click', (e) => {
+            const overallBtn = e.target.closest('#ptm-tab-overall, [data-ptm-tab="overall"]');
+            if (overallBtn) {
+                switchProgramAnalyticsView('overall');
+                return;
+            }
+            const subjectBtn = e.target.closest('#ptm-tab-subject, [data-ptm-tab="subject"]');
+            if (subjectBtn) {
+                switchProgramAnalyticsView('subject');
+                return;
+            }
+        });
+    }
+
+    if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initOutcomeAnalyticsEventListeners);
+        } else {
+            initOutcomeAnalyticsEventListeners();
+        }
+    }
+
     // Attach to global scope
     const OutcomeAnalytics = {
         toggleTrendDataset,
@@ -477,7 +504,8 @@
         showProgramAnalytics,
         switchProgramAnalyticsView,
         renderProgramTrendModal,
-        renderSubjectWiseTrend
+        renderSubjectWiseTrend,
+        initOutcomeAnalyticsEventListeners
     };
 
     global.OutcomeAnalytics = OutcomeAnalytics;
@@ -487,6 +515,7 @@
     global.switchProgramAnalyticsView = switchProgramAnalyticsView;
     global.renderProgramTrendModal = renderProgramTrendModal;
     global.renderSubjectWiseTrend = renderSubjectWiseTrend;
+    global.initOutcomeAnalyticsEventListeners = initOutcomeAnalyticsEventListeners;
 
     if (typeof module !== 'undefined' && module.exports) {
         module.exports = OutcomeAnalytics;

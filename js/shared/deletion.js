@@ -84,7 +84,56 @@ function executeConfirmedDelete() {
     if (typeof callback === 'function') {
         callback();
     }
-    closeConfirmModal();
+function closeTimerWarningModal() {
+    const modal = document.getElementById('timer-warning-modal');
+    const backdrop = document.getElementById('tw-backdrop');
+    const content = document.getElementById('tw-content');
+    if (!modal) return;
+
+    if (backdrop) {
+        backdrop.classList.remove('opacity-100');
+        backdrop.classList.add('opacity-0');
+    }
+    if (content) {
+        content.classList.remove('scale-100', 'opacity-100', 'translate-y-0');
+        content.classList.add('scale-95', 'opacity-0', 'translate-y-4');
+    }
+
+    setTimeout(() => {
+        modal.classList.add('hidden');
+        if (typeof document !== 'undefined' && document.body) {
+            document.body.classList.remove('overflow-hidden');
+        }
+    }, 300);
+}
+
+function initDeletionEventListeners() {
+    if (typeof document === 'undefined' || typeof document.addEventListener !== 'function') return;
+    if (global._deletionListenersInitialized) return;
+    global._deletionListenersInitialized = true;
+
+    document.addEventListener('click', (e) => {
+        if (e.target.closest('#cm-backdrop, #cm-cancel-btn, [data-confirm-cancel]')) {
+            closeConfirmModal();
+            return;
+        }
+        if (e.target.closest('#cm-confirm-btn, [data-confirm-delete]')) {
+            executeConfirmedDelete();
+            return;
+        }
+        if (e.target.closest('#tw-backdrop, #tw-confirm-btn, [data-warning-close]')) {
+            closeTimerWarningModal();
+            return;
+        }
+    });
+}
+
+if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initDeletionEventListeners);
+    } else {
+        initDeletionEventListeners();
+    }
 }
 
 // Global window compatibility bridge
@@ -92,5 +141,27 @@ if (typeof window !== 'undefined') {
     window.pendingDeleteAction = null;
     window.openConfirmModal = openConfirmModal;
     window.closeConfirmModal = closeConfirmModal;
+    window.closeTimerWarningModal = closeTimerWarningModal;
     window.executeConfirmedDelete = executeConfirmedDelete;
+    window.initDeletionEventListeners = initDeletionEventListeners;
 }
+if (typeof global !== 'undefined') {
+    global.openConfirmModal = openConfirmModal;
+    global.closeConfirmModal = closeConfirmModal;
+    global.closeTimerWarningModal = closeTimerWarningModal;
+    global.executeConfirmedDelete = executeConfirmedDelete;
+    global.initDeletionEventListeners = initDeletionEventListeners;
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+        getPendingDeleteAction,
+        setPendingDeleteAction,
+        openConfirmModal,
+        closeConfirmModal,
+        closeTimerWarningModal,
+        executeConfirmedDelete,
+        initDeletionEventListeners
+    };
+}
+

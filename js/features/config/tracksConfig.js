@@ -380,6 +380,27 @@
         showToast(`Track "${track.name}" and all associated data deleted.`, "success");
     }
 
+    function initTracksConfigEventListeners() {
+        if (typeof document === 'undefined' || typeof document.addEventListener !== 'function') return;
+        if (global._tracksConfigListenersInitialized) return;
+        global._tracksConfigListenersInitialized = true;
+
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('#etm-track-save-btn, [data-track-save]')) {
+                saveTrackEditModal();
+                return;
+            }
+        });
+    }
+
+    if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initTracksConfigEventListeners);
+        } else {
+            initTracksConfigEventListeners();
+        }
+    }
+
     // Attach to global window
     global.populateTrackDropdowns = populateTrackDropdowns;
     global.renderTrackList = renderTrackList;
@@ -388,6 +409,7 @@
     global.saveTrackEditModal = saveTrackEditModal;
     global.requestDeleteTrack = requestDeleteTrack;
     global.executeDeleteTrack = executeDeleteTrack;
+    global.initTracksConfigEventListeners = initTracksConfigEventListeners;
 
     // CommonJS / module export compatibility
     if (typeof module !== 'undefined' && module.exports) {

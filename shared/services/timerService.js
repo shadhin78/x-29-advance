@@ -2236,6 +2236,72 @@
                 }
             });
 
+            // 3. Click listener for timer analytics and modal controls
+            document.addEventListener('click', (e) => {
+                const rangeBtn = e.target.closest('#tar-btn-1, #tar-btn-7, #tar-btn-30, #tar-btn-180, [data-timer-range]');
+                if (rangeBtn) {
+                    const days = rangeBtn.id === 'tar-btn-1' ? 1 : (rangeBtn.id === 'tar-btn-7' ? 7 : (rangeBtn.id === 'tar-btn-30' ? 30 : (rangeBtn.id === 'tar-btn-180' ? 180 : Number(rangeBtn.getAttribute('data-timer-range')))));
+                    if (!isNaN(days)) window.setTimerAnalyticsRange(days);
+                    return;
+                }
+                const groupBtn = e.target.closest('#tag-btn-daily, #tag-btn-weekly, #tag-btn-monthly, [data-timer-group]');
+                if (groupBtn) {
+                    const g = groupBtn.id === 'tag-btn-daily' ? 'daily' : (groupBtn.id === 'tag-btn-weekly' ? 'weekly' : (groupBtn.id === 'tag-btn-monthly' ? 'monthly' : groupBtn.getAttribute('data-timer-group')));
+                    if (g) window.setTimerAnalyticsGrouping(g);
+                    return;
+                }
+                const styleBtn = e.target.closest('#tas-btn-combo, #tas-btn-bar, #tas-btn-line, [data-timer-style]');
+                if (styleBtn) {
+                    const s = styleBtn.id === 'tas-btn-combo' ? 'combo' : (styleBtn.id === 'tas-btn-bar' ? 'bar' : (styleBtn.id === 'tas-btn-line' ? 'line' : styleBtn.getAttribute('data-timer-style')));
+                    if (s) window.setTimerAnalyticsChartStyle(s);
+                    return;
+                }
+                if (e.target.closest('#day-prev-btn')) {
+                    window.navigateTimerAnalyticsDay(-1);
+                    return;
+                }
+                if (e.target.closest('#day-next-btn')) {
+                    window.navigateTimerAnalyticsDay(1);
+                    return;
+                }
+                if (e.target.closest('#day-label')) {
+                    window.resetTimerAnalyticsDayOffset();
+                    return;
+                }
+                if (e.target.closest('#ctm-btn-submit, [data-custom-timer-submit]')) {
+                    window.submitCustomTimer();
+                    return;
+                }
+                if (e.target.closest('#atsm-tab-hours, [data-atsm-tab="hours"]')) {
+                    window.switchAtsmTab('hours');
+                    return;
+                }
+                if (e.target.closest('#atsm-tab-range, [data-atsm-tab="range"]')) {
+                    window.switchAtsmTab('range');
+                    return;
+                }
+                if (e.target.closest('#atsm-btn-submit, [data-atsm-submit]')) {
+                    window.submitManualTimerSession();
+                    return;
+                }
+                if (e.target.closest('#etsm-btn-submit, [data-etsm-submit]')) {
+                    window.submitEditTimerSession();
+                    return;
+                }
+            });
+
+            // 4. Target input listener
+            document.addEventListener('input', (e) => {
+                if (e.target && e.target.id === 'timer-target-input') {
+                    window.updateDailyFocusHoursTarget(e.target.value);
+                }
+            });
+            document.addEventListener('change', (e) => {
+                if (e.target && e.target.id === 'timer-target-input') {
+                    window.updateDailyFocusHoursTarget(e.target.value);
+                }
+            });
+
             // Restore/synchronize state immediately
             window.TimerService.restore();
         },

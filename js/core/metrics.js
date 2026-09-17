@@ -852,139 +852,37 @@
     }
 
     // =========================================================================
-    // 4. ANALYTICAL PACE HELPERS
+    // 4. ANALYTICAL PACE HELPERS (Consolidated & Delegated to PaceEstimator)
     // =========================================================================
 
     function getTargetedSubjectsForGoal(goal) {
-        let subjects = [];
-        if (!goal) return subjects;
-
-        if (goal.type === 'global') {
-            if (goal.subjects && goal.subjects.length > 0) return goal.subjects;
-            const allSubs = typeof window.getAllSubjects === 'function' ? window.getAllSubjects() : [];
-            return allSubs.map(s => s.subject);
+        if (typeof global.PaceEstimator !== 'undefined' && typeof global.PaceEstimator.getTargetedSubjectsForGoal === 'function') {
+            return global.PaceEstimator.getTargetedSubjectsForGoal(goal);
         }
-
-        if (goal.type === 'subject') {
-            return [goal.target];
+        if (typeof window !== 'undefined' && window.PaceEstimator && typeof window.PaceEstimator.getTargetedSubjectsForGoal === 'function') {
+            return window.PaceEstimator.getTargetedSubjectsForGoal(goal);
         }
-
-        if (goal.type === 'program' && window.tracks && window.syllabusStructure) {
-            window.tracks.map(t => t.id).forEach(track => {
-                if (window.syllabusStructure[track]) {
-                    window.syllabusStructure[track].forEach(s => {
-                        if (goal.target === s.program) subjects.push(s.subject);
-                    });
-                }
-            });
-            return subjects;
-        }
-
-        if (goal.type === 'bundle') {
-            if (goal.subjects) subjects.push(...goal.subjects);
-            if (goal.programs && window.tracks && window.syllabusStructure) {
-                window.tracks.map(t => t.id).forEach(track => {
-                    if (window.syllabusStructure[track]) {
-                        window.syllabusStructure[track].forEach(s => {
-                            if (goal.programs.includes(s.program)) subjects.push(s.subject);
-                        });
-                    }
-                });
-            }
-            return subjects;
-        }
-
-        return subjects;
+        return new Set();
     }
 
     function calculatePaceGoalStats(goal, subjectStats = null) {
-        if (!goal) return null;
-        if (!subjectStats) subjectStats = window.lastSubjectStats || {};
-
-        const today = new Date(); today.setHours(0, 0, 0, 0);
-        const msPerDay = 1000 * 60 * 60 * 24;
-
-        let start = goal.startDate && typeof Utils !== 'undefined' ? Utils.parseDateSafe(goal.startDate) : new Date(AppState.PLAN_START_DATE);
-        let end = goal.deadline && typeof Utils !== 'undefined' ? Utils.parseDateSafe(goal.deadline) : new Date(today);
-        start.setHours(0, 0, 0, 0);
-        end.setHours(23, 59, 59, 999);
-
-        const targetedSubjects = getTargetedSubjectsForGoal(goal);
-        let total = 0;
-        let completed = 0;
-
-        targetedSubjects.forEach(sub => {
-            if (subjectStats[sub]) {
-                total += subjectStats[sub].totalChapters;
-                completed += subjectStats[sub].effectiveChapters;
-            }
-        });
-
-        const remaining = Math.max(0, total - completed);
-        const totalDays = Math.max(1, Math.ceil((end - start) / msPerDay));
-        const daysElapsed = Math.floor((today - start) / msPerDay) + 1;
-        const daysRemaining = Math.max(0, Math.ceil((end - today) / msPerDay));
-
-        let reqPace = 0;
-        let curPace = 0;
-
-        if (total > 0) {
-            if (today < start) {
-                reqPace = total / totalDays;
-                curPace = 0;
-            } else if (today > end) {
-                reqPace = remaining > 0 ? remaining : 0;
-                curPace = completed / Math.max(1, daysElapsed);
-            } else {
-                reqPace = remaining > 0 ? remaining / Math.max(1, daysRemaining) : 0;
-                curPace = completed / Math.max(1, daysElapsed);
-            }
+        if (typeof global.PaceEstimator !== 'undefined' && typeof global.PaceEstimator.calculatePaceGoalStats === 'function') {
+            return global.PaceEstimator.calculatePaceGoalStats(goal, subjectStats);
         }
-
-        const projectedDate = total === 0 || curPace <= 0 ? new Date(0) : new Date(today.getTime() + (remaining / curPace) * msPerDay);
-
-        return {
-            total,
-            completed,
-            remaining,
-            startDate: start,
-            targetDate: end,
-            daysTotal: totalDays,
-            daysElapsed,
-            daysRemaining,
-            reqPace: reqPace.toFixed(2),
-            curPace: curPace.toFixed(2),
-            reqPaceVal: reqPace,
-            curPaceVal: curPace,
-            projectedDate,
-            subjects: targetedSubjects
-        };
+        if (typeof window !== 'undefined' && window.PaceEstimator && typeof window.PaceEstimator.calculatePaceGoalStats === 'function') {
+            return window.PaceEstimator.calculatePaceGoalStats(goal, subjectStats);
+        }
+        return null;
     }
 
     function calculateIndependentEstFinish() {
-        const stats = window.lastSubjectStats || {};
-        const today = new Date(); today.setHours(0, 0, 0, 0);
-        const msPerDay = 1000 * 60 * 60 * 24;
-
-        let totalCh = 0;
-        let doneCh = 0;
-        let curPaceSum = 0;
-
-        Object.keys(stats).forEach(k => {
-            totalCh += stats[k].totalChapters || 0;
-            doneCh += stats[k].effectiveChapters || 0;
-            curPaceSum += stats[k].actualPace || 0;
-        });
-
-        const remaining = Math.max(0, totalCh - doneCh);
-        if (remaining === 0) return 'Finished';
-        if (curPaceSum <= 0) return 'No Data';
-
-        const daysLeft = remaining / curPaceSum;
-        const estDate = new Date(today.getTime() + (daysLeft * msPerDay));
-        return (typeof Utils !== 'undefined' && typeof Utils.formatDateResponsive === 'function')
-            ? Utils.formatDateResponsive(estDate)
-            : estDate.toLocaleDateString();
+        if (typeof global.PaceEstimator !== 'undefined' && typeof global.PaceEstimator.calculateIndependentEstFinish === 'function') {
+            return global.PaceEstimator.calculateIndependentEstFinish();
+        }
+        if (typeof window !== 'undefined' && window.PaceEstimator && typeof window.PaceEstimator.calculateIndependentEstFinish === 'function') {
+            return window.PaceEstimator.calculateIndependentEstFinish();
+        }
+        return '--';
     }
 
     // =========================================================================

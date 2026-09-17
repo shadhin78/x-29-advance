@@ -262,6 +262,22 @@
         return new Date(NaN);
     }
 
+    /**
+     * Parses daily target date key (e.g. 'Oct 14') into a valid Date object.
+     */
+    function parseDailyTargetDateKey(dateKey) {
+        if (!dateKey) return new Date();
+        if (dateKey.includes(',') || dateKey.split(' ').length > 2) {
+            return new Date(dateKey);
+        }
+        const currentYear = new Date().getFullYear();
+        const d = new Date(dateKey + ' ' + currentYear + ' 12:00:00');
+        if (isNaN(d.getTime())) {
+            return new Date();
+        }
+        return d;
+    }
+
     function getDailyActionDate(d = new Date()) {
         return new Date(d.getTime());
     }
@@ -521,6 +537,7 @@
         formatDateResponsive,
         formatDateRangeResponsive,
         parseDateSafe,
+        parseDailyTargetDateKey,
         mapGradeToNumeric,
         mapCgpaToGrade,
         formatCgpaMin2Dec,
@@ -607,6 +624,7 @@
     global.formatTime12h = formatTime12h;
     global.extractNum = extractNum;
     global.parseDateSafe = parseDateSafe;
+    global.parseDailyTargetDateKey = parseDailyTargetDateKey;
     global.getDailyActionDate = getDailyActionDate;
     global.parseStart = parseStart;
     global.parseEnd = parseEnd;

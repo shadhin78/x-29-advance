@@ -225,6 +225,63 @@
         }
     }
 
+    function getTaskDate(task) {
+        if (!task) return new Date(NaN);
+        if (task.date && !String(task.date).includes('Invalid') && !String(task.date).includes('NaN')) {
+            const d = (typeof Utils !== 'undefined' && typeof Utils.parseDateSafe === 'function')
+                ? Utils.parseDateSafe(task.date)
+                : new Date(task.date);
+            if (d && !isNaN(d.getTime())) return d;
+        }
+        return new Date(NaN);
+    }
+
+    function getTaskForDate(d) {
+        if (!d || isNaN(d.getTime())) return null;
+
+        if (!AppState._tasksDateMap || AppState._tasksDateMap.size === 0) {
+            if (typeof window.rebuildTaskDateMap === 'function') window.rebuildTaskDateMap();
+        }
+
+        const dStr = (typeof Utils !== 'undefined' && typeof Utils.formatDate === 'function') ? Utils.formatDate(d) : null;
+        const isoKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        const ymdKey = `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+
+        if (AppState._tasksDateMap) {
+            let task = (dStr && AppState._tasksDateMap.get(dStr)) || AppState._tasksDateMap.get(isoKey) || AppState._tasksDateMap.get(ymdKey);
+            if (task) return task;
+        }
+
+        // Fast fallback scan if not found in cache map
+        const targetY = d.getFullYear();
+        const targetM = d.getMonth();
+        const targetD = d.getDate();
+
+        const tasks = AppState.tasks || [];
+        for (let i = 0; i < tasks.length; i++) {
+            const t = tasks[i];
+            if (!t) continue;
+            if (t.date === dStr) {
+                if (AppState._tasksDateMap) {
+                    AppState._tasksDateMap.set(dStr, t);
+                    AppState._tasksDateMap.set(isoKey, t);
+                }
+                return t;
+            }
+            const taskD = getTaskDate(t);
+            if (taskD && !isNaN(taskD.getTime())) {
+                if (taskD.getFullYear() === targetY && taskD.getMonth() === targetM && taskD.getDate() === targetD) {
+                    if (AppState._tasksDateMap) {
+                        if (dStr) AppState._tasksDateMap.set(dStr, t);
+                        AppState._tasksDateMap.set(isoKey, t);
+                    }
+                    return t;
+                }
+            }
+        }
+        return null;
+    }
+
     function generateStudyPlan() {
         if (!window.tracks || !Array.isArray(window.tracks) || window.tracks.length === 0) {
             return [];
@@ -1665,6 +1722,8 @@
         ensureAvailableSlots,
         reorderSubjectChapters,
         rebuildTaskDates,
+        getTaskDate,
+        getTaskForDate,
         isSubjectPassed,
         isChapterCompleted,
         isChapterSkipped,
@@ -1698,6 +1757,8 @@
     window.ensureAvailableSlots = ensureAvailableSlots;
     window.reorderSubjectChapters = reorderSubjectChapters;
     window.rebuildTaskDates = rebuildTaskDates;
+    window.getTaskDate = getTaskDate;
+    window.getTaskForDate = getTaskForDate;
 
     window.isSubjectPassed = isSubjectPassed;
     window.isChapterCompleted = isChapterCompleted;

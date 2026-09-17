@@ -843,6 +843,20 @@
     global.hideSpectraHeatmapTooltip = hideSpectraHeatmapTooltip;
     global.renderHeatmap = renderHeatmap;
 
+    if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+        const bindHeatmapEvents = () => {
+            const btn = document.getElementById('spectra-hm-modal-close-btn');
+            if (btn) {
+                btn.addEventListener('click', closeSpectraHeatmapDayModal);
+            }
+        };
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', bindHeatmapEvents);
+        } else {
+            bindHeatmapEvents();
+        }
+    }
+
     if (typeof module !== 'undefined' && module.exports) {
         module.exports = HeatmapAnalytics;
     }
