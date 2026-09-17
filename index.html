@@ -516,7 +516,7 @@
                             </button>
                         </div>
                         <div class="flex gap-2 justify-end">
-                            <button data-close-modal="edit-task-modal"
+                            <button data-modal-close="edit-task-modal"
                                 class="text-slate-500 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 font-black text-[10px] uppercase tracking-widest py-2.5 px-4 rounded-lg transition-colors active:scale-95 flex-1 sm:flex-none">Cancel</button>
                             <button id="etm-save-btn" data-task-save
                                 class="bg-blue-600 hover:bg-blue-700 text-white font-black text-[10px] uppercase tracking-widest py-2.5 px-6 rounded-lg transition-colors shadow-md active:scale-95 flex-1 sm:flex-none">Save</button>
@@ -575,7 +575,7 @@
                     <div
                         class="flex justify-end items-center mt-auto pt-4 border-t border-slate-100 dark:border-slate-700 shrink-0">
                         <div class="flex gap-2">
-                            <button data-close-modal="edit-trends-pace-modal"
+                            <button data-modal-close="edit-trends-pace-modal"
                                 class="text-slate-500 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 font-black text-[10px] uppercase tracking-widest py-2.5 px-4 rounded-lg transition-colors active:scale-95">Cancel</button>
                             <button id="btn-save-trends-settings" data-trends-save
                                 class="bg-indigo-600 hover:bg-indigo-700 text-white font-black text-[10px] uppercase tracking-widest py-2.5 px-6 rounded-lg transition-colors shadow-md active:scale-95">Save
@@ -652,7 +652,7 @@
 
                     <div
                         class="flex justify-end items-center mt-auto pt-4 border-t border-slate-100 dark:border-slate-700 gap-2 shrink-0">
-                        <button data-close-modal="edit-pace-modal"
+                        <button data-modal-close="edit-pace-modal"
                             class="text-slate-500 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 font-black text-[10px] uppercase tracking-widest py-2.5 px-4 rounded-lg transition-colors active:scale-95">Cancel</button>
                         <button id="btn-save-pace-edit" data-pace-save
                             class="bg-orange-500 hover:bg-orange-600 text-white font-black text-[10px] uppercase tracking-widest py-2.5 px-6 rounded-lg transition-colors shadow-md active:scale-95">Save
@@ -1759,7 +1759,7 @@
                 </div>
 
                 <div class="flex justify-end space-x-3 mt-6 pt-4 border-t border-slate-100 dark:border-slate-700">
-                    <button data-close-modal="edit-timeline-entry-modal"
+                    <button data-modal-close="edit-timeline-entry-modal"
                         class="px-5 py-2.5 rounded-xl font-bold text-xs text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">Cancel</button>
                     <button id="etem-save-btn" data-timeline-save
                         class="px-5 py-2.5 rounded-xl font-black text-xs text-white bg-blue-600 hover:bg-blue-700 active:scale-95 transition-all shadow-md">Save
@@ -1773,7 +1773,7 @@
             class="fixed inset-0 z-[80] hidden flex items-center justify-center p-4 sm:p-6 transition-all duration-300">
             <div id="stm-time-backdrop"
                 class="fixed inset-0 bg-slate-900/80 backdrop-blur-xl opacity-0 transition-opacity duration-300"
-                data-close-modal="subject-time-modal"></div>
+                data-modal-close="subject-time-modal"></div>
             <div id="stm-time-content"
                 class="relative bg-white dark:bg-slate-800 p-6 md:p-8 rounded-3xl shadow-2xl w-full max-w-sm border border-slate-200/50 dark:border-slate-700/50 transform scale-95 opacity-0 translate-y-4 transition-all duration-300 mx-4 z-10 flex flex-col">
                 <div
@@ -1784,7 +1784,7 @@
                             custom
                             deadline</p>
                     </div>
-                    <button data-close-modal="subject-time-modal"
+                    <button data-modal-close="subject-time-modal"
                         class="p-2 bg-slate-100 dark:bg-slate-700 rounded-xl hover:rotate-90 transition-transform active:scale-95"><svg
                             class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
@@ -1838,7 +1838,7 @@
             class="fixed inset-0 z-[80] hidden flex items-center justify-center p-4 sm:p-6 transition-all duration-300">
             <div id="resm-backdrop"
                 class="fixed inset-0 bg-slate-900/80 backdrop-blur-xl opacity-0 transition-opacity duration-300"
-                data-close-modal="result-modal"></div>
+                data-modal-close="result-modal"></div>
             <div id="resm-content"
                 class="relative bg-white dark:bg-slate-800 p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-md md:max-w-xl border border-slate-200/50 dark:border-slate-700/50 transform scale-95 opacity-0 translate-y-4 transition-all duration-300 mx-3 sm:mx-4 z-10 flex flex-col max-h-[90vh] transition-all duration-300">
                 <div
@@ -1858,7 +1858,7 @@
                                 achievement</p>
                         </div>
                     </div>
-                    <button data-close-modal="result-modal"
+                    <button data-modal-close="result-modal"
                         class="p-2 bg-slate-100 dark:bg-slate-700 rounded-xl hover:rotate-90 transition-transform active:scale-95"><svg
                             class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
@@ -2024,7 +2024,7 @@
 
                 <div
                     class="flex justify-end items-center mt-auto pt-3 sm:pt-4 border-t border-slate-100 dark:border-slate-700 gap-2 shrink-0">
-                    <button data-close-modal="result-modal"
+                    <button data-modal-close="result-modal"
                         class="text-slate-500 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 font-black text-[10px] uppercase tracking-widest py-2 sm:py-2.5 px-4 rounded-lg transition-colors active:scale-95">Cancel</button>
                     <button id="btn-save-result" data-result-save
                         class="bg-yellow-500 hover:bg-yellow-600 text-white font-black text-[10px] uppercase tracking-widest py-2 sm:py-2.5 px-6 rounded-lg transition-colors shadow-md active:scale-95">Save
@@ -2555,7 +2555,7 @@
             class="fixed inset-0 z-[80] hidden flex items-center justify-center p-4 sm:p-6 transition-all duration-300">
             <div id="stm-target-backdrop"
                 class="fixed inset-0 bg-slate-900/80 backdrop-blur-xl opacity-0 transition-opacity duration-300"
-                data-close-subject-target-modal></div>
+                data-close-subject-target-modal data-modal-close="subject-target-modal"></div>
             <div id="stm-target-content"
                 class="relative bg-white dark:bg-slate-800 p-6 md:p-8 rounded-3xl shadow-2xl w-full max-w-md border border-slate-200/50 dark:border-slate-700/50 transform scale-95 opacity-0 translate-y-4 transition-all duration-300 mx-4 z-10 flex flex-col">
                 <div
@@ -2575,7 +2575,7 @@
                                 target for subject</p>
                         </div>
                     </div>
-                    <button data-close-subject-target-modal
+                    <button data-close-subject-target-modal data-modal-close="subject-target-modal"
                         class="p-2 bg-slate-100 dark:bg-slate-700 rounded-xl hover:rotate-90 transition-transform active:scale-95">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
@@ -2625,7 +2625,7 @@
                         class="mr-auto px-4 py-2.5 bg-red-600 hover:bg-red-700 rounded-xl text-xs font-black uppercase tracking-wider text-white active:scale-95 transition-all shadow-md hidden">
                         Delete
                     </button>
-                    <button data-close-subject-target-modal
+                    <button data-close-subject-target-modal data-modal-close="subject-target-modal"
                         class="px-4 py-2.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-xl text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-200 active:scale-95 transition-all">
                         Cancel
                     </button>

@@ -3,7 +3,12 @@
  * Universal confirmation modal & item deletion execution helpers.
  */
 
-let _pendingDeleteAction = null;
+(function () {
+    'use strict';
+
+    const _root = (typeof window !== 'undefined') ? window : ((typeof global !== 'undefined') ? global : globalThis);
+
+    let _pendingDeleteAction = null;
 
 /**
  * Returns the currently pending deletion callback action.
@@ -84,6 +89,8 @@ function executeConfirmedDelete() {
     if (typeof callback === 'function') {
         callback();
     }
+    closeConfirmModal();
+}
 function closeTimerWarningModal() {
     const modal = document.getElementById('timer-warning-modal');
     const backdrop = document.getElementById('tw-backdrop');
@@ -109,8 +116,8 @@ function closeTimerWarningModal() {
 
 function initDeletionEventListeners() {
     if (typeof document === 'undefined' || typeof document.addEventListener !== 'function') return;
-    if (global._deletionListenersInitialized) return;
-    global._deletionListenersInitialized = true;
+    if (_root._deletionListenersInitialized) return;
+    _root._deletionListenersInitialized = true;
 
     document.addEventListener('click', (e) => {
         if (e.target.closest('#cm-backdrop, #cm-cancel-btn, [data-confirm-cancel]')) {
@@ -153,15 +160,16 @@ if (typeof global !== 'undefined') {
     global.initDeletionEventListeners = initDeletionEventListeners;
 }
 
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = {
-        getPendingDeleteAction,
-        setPendingDeleteAction,
-        openConfirmModal,
-        closeConfirmModal,
-        closeTimerWarningModal,
-        executeConfirmedDelete,
-        initDeletionEventListeners
-    };
-}
+    if (typeof module !== 'undefined' && module.exports) {
+        module.exports = {
+            getPendingDeleteAction,
+            setPendingDeleteAction,
+            openConfirmModal,
+            closeConfirmModal,
+            closeTimerWarningModal,
+            executeConfirmedDelete,
+            initDeletionEventListeners
+        };
+    }
+})();
 

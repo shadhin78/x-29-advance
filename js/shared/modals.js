@@ -10,7 +10,12 @@
  * 5. Synchronizes and resizes Chart.js canvas dimensions after CSS entrance transitions (320ms).
  */
 
-const MODAL_BACKDROPS = {
+(function () {
+    'use strict';
+
+    const _root = (typeof window !== 'undefined') ? window : ((typeof global !== 'undefined') ? global : globalThis);
+
+    const MODAL_BACKDROPS = {
     'celebration-setup-modal': 'csm-backdrop',
     'edit-timeline-entry-modal': 'etem-backdrop',
     'global-chapters-modal': 'gcm-backdrop',
@@ -45,7 +50,12 @@ const MODAL_BACKDROPS = {
     'edit-timer-session-modal': 'etsm-backdrop',
     'timer-analytics-modal': 'tam-backdrop',
     'add-daily-target-modal': 'adtm-backdrop',
-    'add-weekly-target-modal': 'wtm-backdrop'
+    'add-weekly-target-modal': 'wtm-backdrop',
+    'subject-target-modal': 'stm-target-backdrop',
+    'confirm-modal': 'cm-backdrop',
+    'timer-warning-modal': 'tw-backdrop',
+    'congrats-modal': 'congrats-backdrop',
+    'spectra-heatmap-day-modal': 'spectra-heatmap-day-modal'
 };
 
 const MODAL_CONTENTS = {
@@ -83,7 +93,12 @@ const MODAL_CONTENTS = {
     'edit-timer-session-modal': 'etsm-content',
     'timer-analytics-modal': 'tam-content',
     'add-daily-target-modal': 'adtm-content',
-    'add-weekly-target-modal': 'wtm-content'
+    'add-weekly-target-modal': 'wtm-content',
+    'subject-target-modal': 'stm-target-content',
+    'confirm-modal': 'cm-content',
+    'timer-warning-modal': 'tw-content',
+    'congrats-modal': 'congrats-content',
+    'spectra-heatmap-day-modal': 'spectra-heatmap-day-modal'
 };
 
 /**
@@ -176,9 +191,11 @@ function openModal(modalId, typeKey = null) {
  */
 function closeModal(modalId) {
     const modal = document.getElementById(modalId);
-    const backdrop = (MODAL_BACKDROPS[modalId] && document.getElementById(MODAL_BACKDROPS[modalId])) || (modal ? modal.children[0] : null);
-    const content = (MODAL_CONTENTS[modalId] && document.getElementById(MODAL_CONTENTS[modalId])) || (modal ? modal.children[1] : null);
-    if (!modal || !backdrop || !content) return;
+    const backdrop = (MODAL_BACKDROPS[modalId] && document.getElementById(MODAL_BACKDROPS[modalId])) 
+        || (modal ? (modal.querySelector('[id$="-backdrop"]') || modal.children[0]) : null);
+    const content = (MODAL_CONTENTS[modalId] && document.getElementById(MODAL_CONTENTS[modalId])) 
+        || (modal ? (modal.querySelector('[id$="-content"]') || modal.children[1] || modal.children[0]) : null);
+    if (!modal) return;
 
     if (modalId === 'analytics-modal') {
         if (typeof window !== 'undefined' && typeof window.hideActionHeatmapTooltip === 'function') {
@@ -188,10 +205,14 @@ function closeModal(modalId) {
         }
     }
 
-    backdrop.classList.remove('opacity-100');
-    backdrop.classList.add('opacity-0');
-    content.classList.remove('scale-100', 'opacity-100', 'translate-y-0');
-    content.classList.add('scale-95', 'opacity-0', 'translate-y-4');
+    if (backdrop) {
+        backdrop.classList.remove('opacity-100');
+        backdrop.classList.add('opacity-0');
+    }
+    if (content) {
+        content.classList.remove('scale-100', 'opacity-100', 'translate-y-0');
+        content.classList.add('scale-95', 'opacity-0', 'translate-y-4');
+    }
 
     setTimeout(() => {
         if (modal) modal.classList.add('hidden');
@@ -206,24 +227,44 @@ function closeModal(modalId) {
  */
 function initModalEventListeners() {
     if (typeof document === 'undefined' || typeof document.addEventListener !== 'function') return;
-    if (global._modalListenersInitialized) return;
-    global._modalListenersInitialized = true;
+    if (_root._modalListenersInitialized) return;
+    _root._modalListenersInitialized = true;
 
     document.addEventListener('click', (e) => {
-        // 1. Close button with data-modal-close or class btn-modal-close
-        const closeBtn = e.target.closest('[data-modal-close], .btn-modal-close');
+        // 1. Close button with data-modal-close, data-close-modal, .btn-modal-close, or standard close button
+        const closeBtn = e.target.closest('[data-modal-close], [data-close-modal], .btn-modal-close, [data-close-subject-target-modal], [data-close-congrats], button[class*="hover:rotate-90"], [aria-label="Close"], [title="Close"]');
         if (closeBtn) {
-            const targetId = closeBtn.getAttribute('data-modal-close');
+            const targetId = closeBtn.getAttribute('data-modal-close') || closeBtn.getAttribute('data-close-modal');
             if (targetId) {
-                if (targetId === 'spectra-heatmap-day-modal' && typeof window.closeSpectraHeatmapDayModal === 'function') {
+                if (targetId === 'spectra-heatmap-day-modal' && typeof window !== 'undefined' && typeof window.closeSpectraHeatmapDayModal === 'function') {
                     window.closeSpectraHeatmapDayModal();
                     return;
                 }
                 closeModal(targetId);
                 return;
             }
+            if (closeBtn.hasAttribute('data-close-subject-target-modal')) {
+                if (typeof window !== 'undefined' && typeof window.closeSubjectTargetModal === 'function') {
+                    window.closeSubjectTargetModal();
+                } else {
+                    closeModal('subject-target-modal');
+                }
+                return;
+            }
+            if (closeBtn.hasAttribute('data-close-congrats')) {
+                if (typeof window !== 'undefined' && typeof window.closeCongratulationsModal === 'function') {
+                    window.closeCongratulationsModal();
+                } else {
+                    closeModal('congrats-modal');
+                }
+                return;
+            }
             const modalEl = closeBtn.closest('[id$="-modal"]');
             if (modalEl && modalEl.id) {
+                if (modalEl.id === 'spectra-heatmap-day-modal' && typeof window !== 'undefined' && typeof window.closeSpectraHeatmapDayModal === 'function') {
+                    window.closeSpectraHeatmapDayModal();
+                    return;
+                }
                 closeModal(modalEl.id);
                 return;
             }
@@ -247,14 +288,6 @@ function initModalEventListeners() {
     });
 }
 
-if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initModalEventListeners);
-    } else {
-        initModalEventListeners();
-    }
-}
-
 // Global window and environment compatibility bridge
 if (typeof window !== 'undefined') {
     window.openModal = openModal;
@@ -271,16 +304,25 @@ if (typeof global !== 'undefined') {
     global.MODAL_CONTENTS = MODAL_CONTENTS;
 }
 
-// CommonJS compatibility for test runners
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = {
-        openModal,
-        closeModal,
-        initModalEventListeners,
-        MODAL_BACKDROPS,
-        MODAL_CONTENTS,
-        backdrops: MODAL_BACKDROPS,
-        contents: MODAL_CONTENTS
-    };
+if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initModalEventListeners);
+    } else {
+        initModalEventListeners();
+    }
 }
+
+    // CommonJS compatibility for test runners
+    if (typeof module !== 'undefined' && module.exports) {
+        module.exports = {
+            openModal,
+            closeModal,
+            initModalEventListeners,
+            MODAL_BACKDROPS,
+            MODAL_CONTENTS,
+            backdrops: MODAL_BACKDROPS,
+            contents: MODAL_CONTENTS
+        };
+    }
+})();
 
