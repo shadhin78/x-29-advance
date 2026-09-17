@@ -16,6 +16,7 @@ import '../firebase.js';
 import '../../shared/services/timerService.js';
 import '../../router/router.js';
 import '../features/dashboard/dashboard.js';
+import './rollover.js';
 
 export const App = {
     isInitialized: false,
@@ -200,12 +201,16 @@ export const App = {
             }
         });
 
-        // Date rollover monitor on tab visibility change
-        document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'visible' && typeof window.checkAndRefreshDateChange === 'function') {
-                window.checkAndRefreshDateChange();
-            }
-        });
+        // Date rollover monitor & cross-tab synchronization
+        if (typeof window !== 'undefined' && typeof window.initRollover === 'function') {
+            window.initRollover();
+        } else if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible' && typeof window.checkAndRefreshDateChange === 'function') {
+                    window.checkAndRefreshDateChange();
+                }
+            });
+        }
     },
 
     /**
