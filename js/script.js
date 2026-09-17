@@ -167,249 +167,8 @@ window.setLoadingProgress = function (pct, statusText) {
 /**
  * Sanitizes and migrates old AppState.appState values to keep data structure parity.
  *
- * TODO(R2):
- * Split during module extraction.
- * No logic changes in this phase.
- */
-window.migrateLegacyData = function () {
-    let dataPurged = false;
-
-    if (!window.tracks) {
-        window.tracks = [];
-    }
-    if (Array.isArray(window.tracks)) {
-        window.tracks = window.tracks.map(t => {
-            if (typeof t === 'string') {
-                return { id: t, name: t.toUpperCase(), priority: 3 };
-            }
-            if (t && typeof t === 'object' && t.priority === undefined) {
-                t.priority = 3;
-            }
-            return t;
-        });
-    }
-    if (!window.customPrograms) {
-        window.customPrograms = {};
-    }
-
-    window.tracks.forEach(trackObj => {
-        const track = trackObj.id;
-        if (!Array.isArray(window.customPrograms[track])) {
-            window.customPrograms[track] = [];
-        }
-
-        window.customPrograms[track] = window.customPrograms[track].map((p, idx) => {
-            if (typeof p === 'string') {
-                const id = p.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-                return {
-                    id: id || 'prog-' + idx,
-                    name: p,
-                    priority: 3,
-                    order: idx
-                };
-            } else if (p && typeof p === 'object') {
-                if (!p.id) {
-                    p.id = (p.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'prog-' + idx;
-                }
-                if (p.priority === undefined) p.priority = 3;
-                if (p.order === undefined) p.order = idx;
-                return p;
-            }
-            return null;
-        }).filter(Boolean);
-
-        const origLength = window.customPrograms[track].length;
-        window.customPrograms[track] = window.customPrograms[track].filter(p => {
-            const name = (p.name || '').trim();
-            const id = (p.id || '').trim().toLowerCase();
-            if (!name) return false;
-            if (id.includes('onerror') || id.includes('onload') || id.includes('json') || id.includes('document-body') || id.includes('img-src')) return false;
-            return true;
-        });
-
-        if (window.customPrograms[track].length !== origLength) {
-            dataPurged = true;
-        }
-    });
-
-    if (syllabusStructure) {
-        window.tracks.forEach(trackObj => {
-            const track = trackObj.id;
-            if (!syllabusStructure[track]) {
-                syllabusStructure[track] = [];
-            }
-            if (Array.isArray(syllabusStructure[track])) {
-                const origLength = syllabusStructure[track].length;
-                syllabusStructure[track] = syllabusStructure[track].filter(s => {
-                    const prog = (s.program || '').trim();
-                    if (!prog) return false;
-                    const id = prog.toLowerCase();
-                    if (id.includes('onerror') || id.includes('onload') || id.includes('json') || id.includes('document-body') || id.includes('img-src')) return false;
-                    return true;
-                });
-
-                if (syllabusStructure[track].length !== origLength) {
-                    dataPurged = true;
-                }
-
-                syllabusStructure[track].forEach((s, idx) => {
-                    if (s.priority === undefined) s.priority = 3;
-                    if (s.order === undefined) s.order = idx;
-                    if (!s.program) {
-                        s.program = trackObj.name + " Prog";
-                    }
-                });
-            }
-        });
-    }
-
-    if (window.successResults) {
-        const origLength = window.successResults.length;
-        window.successResults = window.successResults.filter(r => {
-            const title = (r.title || '').trim();
-            if (!title) return false;
-            const id = title.toLowerCase();
-            if (id.includes('onerror') || id.includes('onload') || id.includes('json') || id.includes('document-body') || id.includes('img-src')) return false;
-            return true;
-        });
-        if (window.successResults.length !== origLength) {
-            dataPurged = true;
-        }
-    }
-
-    if (window.passedItems) {
-        if (window.passedItems.programs) {
-            const origLength = window.passedItems.programs.length;
-            window.passedItems.programs = window.passedItems.programs.filter(p => {
-                const id = p.trim().toLowerCase();
-                if (!id) return false;
-                if (id.includes('onerror') || id.includes('onload') || id.includes('json') || id.includes('document-body') || id.includes('img-src')) return false;
-                return true;
-            });
-            if (window.passedItems.programs.length !== origLength) {
-                dataPurged = true;
-            }
-        }
-    }
-
-    if (window.paceGoals) {
-        const origLength = window.paceGoals.length;
-        window.paceGoals = window.paceGoals.filter(g => {
-            const tgt = (g.target || '').trim();
-            if (!tgt) return false;
-            const id = tgt.toLowerCase();
-            if (id.includes('onerror') || id.includes('onload') || id.includes('json') || id.includes('document-body') || id.includes('img-src')) return false;
-            return true;
-        });
-        if (window.paceGoals.length !== origLength) {
-            dataPurged = true;
-        }
-    }
-
-    // Purge legacy preset sample exams & sessions
-    if (Array.isArray(AppState.examSessions)) {
-        const origLength = AppState.examSessions.length;
-        AppState.examSessions = AppState.examSessions.filter(s => {
-            if (!s) return false;
-            if (s.id && s.id.startsWith('session_sample_')) return false;
-            return true;
-        });
-        if (AppState.examSessions.length !== origLength) {
-            dataPurged = true;
-        }
-    }
-    if (Array.isArray(AppState.examRoutine)) {
-        const origLength = AppState.examRoutine.length;
-        AppState.examRoutine = AppState.examRoutine.filter(e => {
-            if (!e) return false;
-            if (e.id && e.id.startsWith('exam_sample_')) return false;
-            if (e.subject === 'Software Engineering' || e.subject === 'Database Systems') return false;
-            return true;
-        });
-        if (AppState.examRoutine.length !== origLength) {
-            dataPurged = true;
-        }
-    }
-
-    // And AppState.customActions
-    if (Array.isArray(window.customActions)) {
-        window.customActions.forEach((a, idx) => {
-            if (a.priority === undefined) a.priority = 3;
-            if (a.order === undefined) a.order = idx;
-        });
-    }
-
-    window.ensureConfigDefaults();
-    window.normalizePriorities();
-    window.syncPassFreezeFromResults();
-
-    if (!window.timerLogs) {
-        window.timerLogs = [];
-    }
-    if (window.dailyFocusHoursTarget === undefined || window.dailyFocusHoursTarget === null) {
-        window.dailyFocusHoursTarget = 0;
-    }
-    if (!window.dailyFocusHoursTargetHistory) {
-        window.dailyFocusHoursTargetHistory = [];
-    }
-    if (!window.activeTimerState || typeof window.activeTimerState !== 'object') {
-        window.activeTimerState = {
-            isRunning: false,
-            mode: 'stopwatch',
-            startTime: null,
-            elapsedBeforeStart: 0,
-            targetDuration: 0,
-            selectedSubject: 'General Study'
-        };
-    }
-    if (!window.scheduleBlocks) {
-        window.scheduleBlocks = [];
-    }
-    if (!window.scheduleBlocks2) {
-        window.scheduleBlocks2 = [];
-    }
-    if (!window.scheduleGroups) {
-        window.scheduleGroups = [];
-    }
-    if (window.scheduleShowGrouped === undefined) {
-        window.scheduleShowGrouped = false;
-    }
-};
-
-// Curriculum Taxonomy (getAllSubjects, getAllPrograms)
-// Extracted to canonical service module: js/services/taxonomy.js
-// Backward-compatibility references: window.getAllSubjects, window.getAllPrograms maintained by js/services/taxonomy.js
-
-window.ensureConfigDefaults = function () {
-    if (!window.dashboardConfig) {
-        window.dashboardConfig = {};
-    }
-    if (window.dashboardConfig.activePaceGoalId === undefined) {
-        const defaultGoal = (window.paceGoals && window.paceGoals.find(g => g.id === 'global-timeline')) || (window.paceGoals && window.paceGoals[0]);
-        window.dashboardConfig.activePaceGoalId = defaultGoal ? defaultGoal.id : null;
-    }
-    if (!window.dashboardConfig.trendStartDate) {
-        window.dashboardConfig.trendStartDate = AppState.PLAN_START_DATE.toISOString().split('T')[0];
-    }
-    if (window.dashboardConfig.trendEndDate === undefined) {
-        window.dashboardConfig.trendEndDate = "";
-    }
-    if (window.dashboardConfig.showDaysRemaining === undefined) {
-        window.dashboardConfig.showDaysRemaining = false;
-    }
-    if (!window.dashboardConfig.independentPaces) {
-        window.dashboardConfig.independentPaces = { tracks: {}, programs: {}, subjects: {} };
-    }
-    if (!window.dashboardConfig.independentPaces.tracks) {
-        window.dashboardConfig.independentPaces.tracks = {};
-    }
-    if (!window.dashboardConfig.independentPaces.programs) {
-        window.dashboardConfig.independentPaces.programs = {};
-    }
-    if (!window.dashboardConfig.independentPaces.subjects) {
-        window.dashboardConfig.independentPaces.subjects = {};
-    }
-};
+// Master data migration and sanitization engine extracted to js/state.js & js/core/state.js
+// Canonical implementations owned by js/state.js; backward-compatibility references on window maintained.
 
 // Dynamic Tracks & Priority Configuration Systems
 // (normalizePriorities, populateTrackDropdowns, sortAllCustomData)
@@ -611,61 +370,15 @@ if (typeof recalculateTotals === 'function') {
 
 
 window.openAccountSettingsModal = function () {
-    const user = window.currentUser || { displayName: 'ris2k29', email: 'ris2k29@gmail.com' };
-    const nameInput = document.getElementById('account-input-name');
-    const emailInput = document.getElementById('account-input-email');
-
-    if (nameInput) nameInput.value = user.displayName || '';
-    if (emailInput) emailInput.value = user.email || '';
-
-    openModal('account-settings-modal');
+    if (window.AuthService && typeof window.AuthService.openAccountSettingsModal === 'function') {
+        return window.AuthService.openAccountSettingsModal();
+    }
 };
 
 window.submitAccountUpdate = function () {
-    const nameInput = document.getElementById('account-input-name');
-    const emailInput = document.getElementById('account-input-email');
-    if (!nameInput || !emailInput) return;
-
-    const newName = nameInput.value.trim();
-    const newEmail = emailInput.value.trim();
-
-    if (!newName) {
-        showToast("Display Name cannot be empty.", "error");
-        return;
+    if (window.AuthService && typeof window.AuthService.submitAccountUpdate === 'function') {
+        return window.AuthService.submitAccountUpdate();
     }
-    if (!newEmail || !newEmail.includes('@')) {
-        showToast("Please enter a valid email address.", "error");
-        return;
-    }
-
-    if (window.currentUser) {
-        window.currentUser.displayName = newName;
-        window.currentUser.email = newEmail;
-    } else {
-        window.currentUser = { displayName: newName, email: newEmail };
-    }
-
-    const profileNameEl = document.getElementById('profile-name');
-    const profileEmailEl = document.getElementById('profile-email');
-    const profileAvatarEl = document.getElementById('profile-avatar');
-    if (profileNameEl) profileNameEl.textContent = newName;
-    if (profileEmailEl) profileEmailEl.textContent = newEmail;
-    if (profileAvatarEl) {
-        profileAvatarEl.textContent = newName.charAt(0).toUpperCase();
-    }
-
-    const authProvider = (typeof window !== 'undefined' && window.AuthService) ? window.AuthService : (typeof FirebaseService !== 'undefined' ? FirebaseService : null);
-    if (authProvider) {
-        const fbUser = authProvider.getCurrentUser();
-        if (fbUser && typeof fbUser.updateProfile === 'function') {
-            fbUser.updateProfile({
-                displayName: newName
-            }).catch(err => console.warn("Firebase updateProfile failed:", err));
-        }
-    }
-
-    closeModal('account-settings-modal');
-    showToast("Account settings updated successfully.", "success");
 };
 
 /* ===== SCHEDULE SLOT ENGINE & LIVE HEADER CLOCK ===== */
@@ -1215,160 +928,78 @@ window.closeCongratsModal = function () {
 
 
 window.openSubjectTrendModal = function () {
-    window.activeSingleSubjectTrend = null;
-    window.subjectTrendChartStyle = window.subjectTrendChartStyle || 'circle';
-    if (!window.lastSubjectTrendData || !window.lastTrendMonths) {
-        if (typeof renderTrendCharts === 'function') renderTrendCharts();
+    if (window.ChapterMap && typeof window.ChapterMap.openSubjectTrendModal === 'function') {
+        return window.ChapterMap.openSubjectTrendModal();
     }
-    openModal('subject-trend-modal');
-    window.renderSubjectTrendCircle();
-    window.setSubjectTrendChartStyle(window.subjectTrendChartStyle);
 };
+
 window.openSingleSubjectTrendModal = function (subjectName) {
-    window.activeSingleSubjectTrend = subjectName;
-    window.subjectTrendChartStyle = window.subjectTrendChartStyle || 'circle';
-    if (!window.lastSubjectTrendData || !window.lastTrendMonths) {
-        if (typeof renderTrendCharts === 'function') renderTrendCharts();
+    if (window.ChapterMap && typeof window.ChapterMap.openSingleSubjectTrendModal === 'function') {
+        return window.ChapterMap.openSingleSubjectTrendModal(subjectName);
     }
-    openModal('subject-trend-modal');
-    window.renderSubjectTrendCircle();
-    window.setSubjectTrendChartStyle(window.subjectTrendChartStyle);
 };
+
 window.setSubjectTrendChartStyle = function (style) {
-    window.subjectTrendChartStyle = style;
-    const circleContainer = document.getElementById('subject-trend-circle-container');
-    const lineContainer = document.getElementById('subject-trend-line-container');
-    const circleBtn = document.getElementById('stm-circle-btn');
-    const lineBtn = document.getElementById('stm-line-btn');
-
-    const activeClass = 'flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-wider transition-all bg-indigo-600 text-white shadow';
-    const inactiveClass = 'flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-wider transition-all text-slate-400 hover:text-white hover:bg-slate-700';
-
-    if (style === 'line') {
-        safeSetText('stm-title', 'Subject Completion Trends');
-        safeSetText('stm-desc', 'Detailed month-by-month progression for all subjects');
-        if (circleContainer) circleContainer.classList.add('hidden');
-        if (lineContainer) lineContainer.classList.remove('hidden');
-        if (circleBtn) circleBtn.className = inactiveClass;
-        if (lineBtn) lineBtn.className = activeClass;
-        // Re-render the line chart since the container was hidden and may need a resize
-        if (window.subjectTrendLineChartInstance) {
-            window.subjectTrendLineChartInstance.resize();
-            window.subjectTrendLineChartInstance.update();
-        }
-        // Sync global button state
-        if (window.updateGlobalBtnStyle) window.updateGlobalBtnStyle();
-    } else {
-        const activeSub = window.activeSingleSubjectTrend || 'Subject';
-        safeSetText('stm-title', `${activeSub}`);
-        safeSetText('stm-desc', 'Chapter completion analysis');
-        if (circleContainer) circleContainer.classList.remove('hidden');
-        if (lineContainer) lineContainer.classList.add('hidden');
-        if (circleBtn) circleBtn.className = activeClass;
-        if (lineBtn) lineBtn.className = inactiveClass;
+    if (window.ChapterMap && typeof window.ChapterMap.setSubjectTrendChartStyle === 'function') {
+        return window.ChapterMap.setSubjectTrendChartStyle(style);
     }
 };
 
 // --- Multi-select dropdown helpers for Subject Trend modal ---
-
-// Toggle dropdown open/close
 window.stmToggleDropdown = function () {
-    const panel = document.getElementById('stm-dropdown-panel');
-    const arrow = document.getElementById('stm-dropdown-arrow');
-    if (!panel) return;
-    const isHidden = panel.classList.contains('hidden');
-    if (isHidden) {
-        panel.classList.remove('hidden');
-        if (arrow) arrow.style.transform = 'rotate(180deg)';
-    } else {
-        panel.classList.add('hidden');
-        if (arrow) arrow.style.transform = '';
+    if (window.ChapterMap && typeof window.ChapterMap.stmToggleDropdown === 'function') {
+        return window.ChapterMap.stmToggleDropdown();
     }
 };
 
-// Close dropdown when clicking outside
-document.addEventListener('click', function (e) {
-    const wrapper = document.getElementById('stm-subject-dropdown-wrapper');
-    const panel = document.getElementById('stm-dropdown-panel');
-    if (wrapper && panel && !wrapper.contains(e.target)) {
-        panel.classList.add('hidden');
-        const arrow = document.getElementById('stm-dropdown-arrow');
-        if (arrow) arrow.style.transform = '';
-    }
-});
-
-// Click a subject row → set as active circle subject AND check it
 window.stmSelectSubject = function (subjectName) {
-    window.activeSingleSubjectTrend = subjectName;
-    if (!window.selectedSubjectsTrend) window.selectedSubjectsTrend = [];
-    if (!window.selectedSubjectsTrend.includes(subjectName)) {
-        window.selectedSubjectsTrend.push(subjectName);
+    if (window.ChapterMap && typeof window.ChapterMap.stmSelectSubject === 'function') {
+        return window.ChapterMap.stmSelectSubject(subjectName);
     }
-    window.renderSubjectTrendCircle();
-    // Restore view mode after re-render
-    window.setSubjectTrendChartStyle(window.subjectTrendChartStyle || 'circle');
 };
 
-// Toggle checkbox only (doesn't change active circle subject)
 window.stmToggleSubjectCheck = function (subjectName) {
-    if (!window.selectedSubjectsTrend) window.selectedSubjectsTrend = [];
-    const idx = window.selectedSubjectsTrend.indexOf(subjectName);
-    if (idx !== -1) {
-        // Don't allow unchecking the active circle subject
-        if (subjectName === window.activeSingleSubjectTrend && window.selectedSubjectsTrend.length <= 1) return;
-        window.selectedSubjectsTrend.splice(idx, 1);
-    } else {
-        window.selectedSubjectsTrend.push(subjectName);
+    if (window.ChapterMap && typeof window.ChapterMap.stmToggleSubjectCheck === 'function') {
+        return window.ChapterMap.stmToggleSubjectCheck(subjectName);
     }
-    window.renderSubjectTrendCircle();
-    window.setSubjectTrendChartStyle(window.subjectTrendChartStyle || 'circle');
 };
 
-// Select all subjects
 window.stmSelectAll = function () {
-    window.selectedSubjectsTrend = window.getAllSubjects().map(s => s.subject);
-    window.renderSubjectTrendCircle();
-    window.setSubjectTrendChartStyle(window.subjectTrendChartStyle || 'circle');
-};
-
-// Deselect all (keep only the active circle subject)
-window.stmDeselectAll = function () {
-    window.selectedSubjectsTrend = window.activeSingleSubjectTrend ? [window.activeSingleSubjectTrend] : [];
-    window.renderSubjectTrendCircle();
-    window.setSubjectTrendChartStyle(window.subjectTrendChartStyle || 'circle');
-};
-
-// Toggle Global mode for the line chart
-window.toggleSubjectTrendGlobal = function () {
-    window.subjectTrendGlobalMode = !window.subjectTrendGlobalMode;
-    window.updateGlobalBtnStyle();
-    // Re-render the line chart with new filtering
-    window.renderSubjectTrendCircle();
-    window.setSubjectTrendChartStyle(window.subjectTrendChartStyle || 'circle');
-};
-
-// Update global button visual state
-window.updateGlobalBtnStyle = function () {
-    const btn = document.getElementById('stm-global-btn');
-    if (!btn) return;
-    if (window.subjectTrendGlobalMode) {
-        btn.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-wider transition-all bg-indigo-600 text-white shadow border border-indigo-500/50 hover:bg-indigo-700 active:scale-95';
-    } else {
-        btn.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-wider transition-all bg-slate-800 text-slate-400 border border-slate-700 hover:bg-slate-700 hover:text-white active:scale-95';
+    if (window.ChapterMap && typeof window.ChapterMap.stmSelectAll === 'function') {
+        return window.ChapterMap.stmSelectAll();
     }
 };
 
-window.openRevisionTrendModal = function () { openModal('revision-trend-modal'); };
+window.stmDeselectAll = function () {
+    if (window.ChapterMap && typeof window.ChapterMap.stmDeselectAll === 'function') {
+        return window.ChapterMap.stmDeselectAll();
+    }
+};
+
+window.toggleSubjectTrendGlobal = function () {
+    if (window.ChapterMap && typeof window.ChapterMap.toggleSubjectTrendGlobal === 'function') {
+        return window.ChapterMap.toggleSubjectTrendGlobal();
+    }
+};
+
+window.updateGlobalBtnStyle = function () {
+    if (window.ChapterMap && typeof window.ChapterMap.updateGlobalBtnStyle === 'function') {
+        return window.ChapterMap.updateGlobalBtnStyle();
+    }
+};
+
+window.openRevisionTrendModal = function () {
+    if (window.SpectraAnalytics && typeof window.SpectraAnalytics.openRevisionTrendModal === 'function') {
+        return window.SpectraAnalytics.openRevisionTrendModal();
+    } else if (typeof window.openModal === 'function') {
+        window.openModal('revision-trend-modal');
+    }
+};
+
 window.openYearlyActionsModal = function () {
-    if (typeof renderTrendCharts === 'function') renderTrendCharts();
-    if (typeof renderHeatmap === 'function') renderHeatmap();
-    openModal('yearly-actions-modal');
-    setTimeout(() => {
-        if (window.yearlyChartActions && typeof window.yearlyChartActions.resize === 'function') {
-            window.yearlyChartActions.resize();
-            window.yearlyChartActions.update('none');
-        }
-    }, 60);
+    if (window.SpectraAnalytics && typeof window.SpectraAnalytics.openYearlyActionsModal === 'function') {
+        return window.SpectraAnalytics.openYearlyActionsModal();
+    }
 };
 
 // Pace Charts and Visualizations extracted to js/features/pace/paceManager.js
@@ -1420,109 +1051,9 @@ window.renderGlobalPaceTrendChart = function () {
 // Backward-compatibility references: window.getTargetedSubjectsForGoal maintained by js/features/pace/paceEstimator.js
 
 window.renderRevisionTrendChart = function () {
-    const ctxSub = document.getElementById('revisionTrendChart');
-    if (!ctxSub) return;
-
-    let chartStart = new Date(AppState.PLAN_START_DATE.getTime());
-    let chartEnd = new Date(AppState.PLAN_END_DATE.getTime());
-    const todayObj = new Date();
-
-    if (window.trendTimeFilter === '1Y') {
-        chartEnd = new Date(chartStart);
-        chartEnd.setFullYear(chartEnd.getFullYear() + 1);
-        chartEnd.setMonth(chartEnd.getMonth() - 1);
-    } else if (window.trendTimeFilter === '2Y') {
-        chartEnd = new Date(chartStart);
-        chartEnd.setFullYear(chartEnd.getFullYear() + 2);
-        chartEnd.setMonth(chartEnd.getMonth() - 1);
-    } else if (window.trendTimeFilter === '3Y') {
-        chartEnd = new Date(chartStart);
-        chartEnd.setFullYear(chartEnd.getFullYear() + 3);
-        chartEnd.setMonth(chartEnd.getMonth() - 1);
-    } else {
-        chartStart = new Date(AppState.PLAN_START_DATE.getTime());
-        chartEnd = new Date(todayObj.getTime());
-        if (chartEnd < chartStart) {
-            chartEnd = new Date(chartStart.getTime());
-            chartEnd.setMonth(chartEnd.getMonth() + 1);
-        }
+    if (window.SpectraAnalytics && typeof window.SpectraAnalytics.renderRevisionTrendChart === 'function') {
+        return window.SpectraAnalytics.renderRevisionTrendChart();
     }
-
-    const sYear = chartStart.getFullYear();
-    const sMonth = chartStart.getMonth();
-    const eYear = chartEnd.getFullYear();
-    const eMonth = chartEnd.getMonth();
-    const totalMonths = Math.max(1, (eYear - sYear) * 12 + (eMonth - sMonth) + 1);
-
-    const months = [];
-    for (let i = 0; i < totalMonths; i++) {
-        const d = new Date(sYear, sMonth + i, 1);
-        months.push(d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' }));
-    }
-
-    let revSubData = {};
-    window.getAllSubjects().forEach(s => {
-        revSubData[s.subject] = Array(totalMonths).fill(0);
-        if (window.chartVisibility.revSubjects[s.subject] === undefined) window.chartVisibility.revSubjects[s.subject] = true;
-    });
-
-    let latestActiveMonth = -1;
-    const todayMidx = (todayObj.getFullYear() - sYear) * 12 + (todayObj.getMonth() - sMonth);
-
-    Object.keys(window.revisionData.progress || {}).forEach(sub => {
-        if (!revSubData[sub]) return;
-        Object.keys(window.revisionData.progress[sub]).forEach(chNum => {
-            const val = window.revisionData.progress[sub][chNum];
-            if (val) {
-                let d;
-                if (typeof val === 'string' || typeof val === 'number') {
-                    d = new Date(val);
-                } else {
-                    d = todayObj;
-                }
-                let mIdx = (d.getFullYear() - sYear) * 12 + (d.getMonth() - sMonth);
-                if (mIdx < 0) mIdx = 0;
-                if (mIdx < totalMonths) {
-                    revSubData[sub][mIdx]++;
-                    latestActiveMonth = Math.max(latestActiveMonth, mIdx);
-                }
-            }
-        });
-    });
-
-    let boundedToday = todayMidx >= totalMonths ? totalMonths - 1 : (todayMidx < 0 ? 0 : todayMidx);
-    let boundedLatest = latestActiveMonth >= totalMonths ? totalMonths - 1 : latestActiveMonth;
-    const cutoff = Math.max(boundedToday, boundedLatest, 0);
-
-    Object.keys(revSubData).forEach(k => {
-        let sTotal = 1;
-        const sObj = window.getAllSubjects().find(s => s.subject === k);
-        if (sObj) sTotal = sObj.chapters;
-        sTotal = Math.max(1, sTotal);
-
-        for (let i = 1; i <= cutoff; i++) revSubData[k][i] += revSubData[k][i - 1];
-        for (let i = 0; i <= cutoff; i++) revSubData[k][i] = Math.round((revSubData[k][i] / sTotal) * 100);
-
-        window.latestChartStats.revSubjects[k] = revSubData[k][cutoff] || 0;
-        for (let i = cutoff + 1; i < totalMonths; i++) revSubData[k][i] = null;
-    });
-
-    Chart.defaults.color = '#94a3b8'; Chart.defaults.font.family = 'Inter, ui-sans-serif, system-ui';
-    const chartOptions = { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', titleColor: '#fff', bodyColor: '#cbd5e1', borderColor: 'rgba(255,255,255,0.1)', borderWidth: 1, padding: 12, cornerRadius: 8, usePointStyle: true, boxPadding: 6, callbacks: { label: c => ' ' + c.dataset.label + ': ' + c.parsed.y + '%' } } }, scales: { y: { min: 0, max: 100, ticks: { font: { size: 9, weight: 'bold' }, callback: v => v + '%' }, grid: { color: 'rgba(148, 163, 184, 0.1)', drawBorder: false } }, x: { ticks: { font: { size: 9, weight: 'bold' } }, grid: { display: false, drawBorder: false } } } };
-
-    const subDatasets = Object.keys(revSubData).map(k => ({
-        label: getDynamicChartLabel(k), data: revSubData[k], borderColor: getSubjectColor(k), backgroundColor: 'transparent', tension: 0.4, borderWidth: 3, pointBackgroundColor: '#0f172a', pointBorderColor: getSubjectColor(k), pointBorderWidth: 2, pointRadius: 4, pointHoverRadius: 6, pointHoverBackgroundColor: getSubjectColor(k), pointHoverBorderColor: '#fff', pointHoverBorderWidth: 2, hidden: !window.chartVisibility.revSubjects[k], subjectKey: k
-    }));
-
-    if (window.revisionTrendChartInstance) {
-        window.revisionTrendChartInstance.data.labels = months;
-        window.revisionTrendChartInstance.data.datasets = subDatasets;
-        window.revisionTrendChartInstance.update('none');
-    } else {
-        window.revisionTrendChartInstance = new Chart(ctxSub.getContext('2d'), { type: 'line', data: { labels: months, datasets: subDatasets }, options: { ...chartOptions, interaction: { mode: 'nearest', axis: 'x', intersect: false } } });
-    }
-
-    window.updateRevisionLegends();
 };
 // Pace Modal Editing (openEditPaceModal, savePaceEdit)
 // Extracted to canonical feature module: js/features/pace/paceManager.js
@@ -2582,38 +2113,14 @@ window.addEventListener('resize', () => {
 
 
 window.toggleMobileSidebar = function () {
-    const sidebar = document.getElementById('sidebar-container');
-    const backdrop = document.getElementById('sidebar-backdrop');
-    if (sidebar) {
-        const isOpen = sidebar.classList.contains('translate-x-0');
-        if (isOpen) {
-            sidebar.classList.remove('translate-x-0');
-            sidebar.classList.add('-translate-x-full');
-            if (backdrop) {
-                backdrop.classList.add('opacity-0', 'pointer-events-none');
-                backdrop.classList.remove('opacity-100');
-            }
-        } else {
-            sidebar.classList.remove('-translate-x-full');
-            sidebar.classList.add('translate-x-0');
-            if (backdrop) {
-                backdrop.classList.remove('opacity-0', 'pointer-events-none');
-                backdrop.classList.add('opacity-100');
-            }
-        }
+    if (window.Sidebar && typeof window.Sidebar.toggleMobileSidebar === 'function') {
+        return window.Sidebar.toggleMobileSidebar();
     }
 };
 
 window.closeMobileSidebar = function () {
-    const sidebar = document.getElementById('sidebar-container');
-    const backdrop = document.getElementById('sidebar-backdrop');
-    if (sidebar) {
-        sidebar.classList.remove('translate-x-0');
-        sidebar.classList.add('-translate-x-full');
-    }
-    if (backdrop) {
-        backdrop.classList.add('opacity-0', 'pointer-events-none');
-        backdrop.classList.remove('opacity-100');
+    if (window.Sidebar && typeof window.Sidebar.closeMobileSidebar === 'function') {
+        return window.Sidebar.closeMobileSidebar();
     }
 };
 

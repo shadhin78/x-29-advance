@@ -261,11 +261,91 @@
                     this._authListeners = this._authListeners.filter(cb => cb !== callback);
                 };
             }
+        },
+
+        /**
+         * Populates and opens the Account Settings modal.
+         */
+        openAccountSettingsModal: function () {
+            const user = (typeof this.getCurrentUser === 'function' && this.getCurrentUser()) || global.currentUser || { displayName: 'ris2k29', email: 'ris2k29@gmail.com' };
+            const nameInput = document.getElementById('account-input-name');
+            const emailInput = document.getElementById('account-input-email');
+
+            if (nameInput) nameInput.value = user.displayName || '';
+            if (emailInput) emailInput.value = user.email || '';
+
+            if (typeof global.openModal === 'function') {
+                global.openModal('account-settings-modal');
+            }
+        },
+
+        /**
+         * Validates, saves, and syncs account settings updates.
+         */
+        submitAccountUpdate: function () {
+            const nameInput = document.getElementById('account-input-name');
+            const emailInput = document.getElementById('account-input-email');
+            if (!nameInput || !emailInput) return;
+
+            const newName = nameInput.value.trim();
+            const newEmail = emailInput.value.trim();
+
+            const toast = typeof global.showToast === 'function' ? global.showToast : console.log;
+
+            if (!newName) {
+                toast("Display Name cannot be empty.", "error");
+                return;
+            }
+            if (!newEmail || !newEmail.includes('@')) {
+                toast("Please enter a valid email address.", "error");
+                return;
+            }
+
+            if (global.currentUser) {
+                global.currentUser.displayName = newName;
+                global.currentUser.email = newEmail;
+            } else {
+                global.currentUser = { displayName: newName, email: newEmail };
+            }
+
+            const profileNameEl = document.getElementById('profile-name');
+            const profileEmailEl = document.getElementById('profile-email');
+            const profileAvatarEl = document.getElementById('profile-avatar');
+            if (profileNameEl) profileNameEl.textContent = newName;
+            if (profileEmailEl) profileEmailEl.textContent = newEmail;
+            if (profileAvatarEl) {
+                profileAvatarEl.textContent = newName.charAt(0).toUpperCase();
+            }
+
+            const fbUser = typeof this.getCurrentUser === 'function' ? this.getCurrentUser() : null;
+            if (fbUser && typeof fbUser.updateProfile === 'function') {
+                fbUser.updateProfile({
+                    displayName: newName
+                }).catch(err => console.warn("Firebase updateProfile failed:", err));
+            }
+
+            const storage = getStorage();
+            storage.setItem('local_auth_user', JSON.stringify({
+                email: newEmail,
+                uid: fbUser ? fbUser.uid : 'local-user',
+                displayName: newName
+            }));
+
+            if (typeof global.closeModal === 'function') {
+                global.closeModal('account-settings-modal');
+            }
+            toast("Account settings updated successfully.", "success");
         }
     };
 
     // Global window attachment
     global.AuthService = AuthService;
+    global.openAccountSettingsModal = function () {
+        return AuthService.openAccountSettingsModal();
+    };
+    global.submitAccountUpdate = function () {
+        return AuthService.submitAccountUpdate();
+    };
 
     // Node / CommonJS module export
     if (typeof module !== 'undefined' && module.exports) {

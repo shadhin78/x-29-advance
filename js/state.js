@@ -897,4 +897,269 @@ window.getDefaultAppState = function() {
     };
 };
 
+/**
+ * Ensures configuration defaults for dashboardConfig and related settings.
+ */
+function ensureConfigDefaults() {
+    const root = (typeof window !== 'undefined') ? window : ((typeof global !== 'undefined') ? global : globalThis);
+    if (!root.dashboardConfig) {
+        root.dashboardConfig = {};
+    }
+    if (root.dashboardConfig.activePaceGoalId === undefined) {
+        const defaultGoal = (root.paceGoals && root.paceGoals.find(g => g.id === 'global-timeline')) || (root.paceGoals && root.paceGoals[0]);
+        root.dashboardConfig.activePaceGoalId = defaultGoal ? defaultGoal.id : null;
+    }
+    const appState = root.AppState || {};
+    const planStartDate = appState.PLAN_START_DATE || new Date();
+    if (!root.dashboardConfig.trendStartDate) {
+        root.dashboardConfig.trendStartDate = planStartDate.toISOString().split('T')[0];
+    }
+    if (root.dashboardConfig.trendEndDate === undefined) {
+        root.dashboardConfig.trendEndDate = "";
+    }
+    if (root.dashboardConfig.showDaysRemaining === undefined) {
+        root.dashboardConfig.showDaysRemaining = false;
+    }
+    if (!root.dashboardConfig.independentPaces) {
+        root.dashboardConfig.independentPaces = { tracks: {}, programs: {}, subjects: {} };
+    }
+    if (!root.dashboardConfig.independentPaces.tracks) {
+        root.dashboardConfig.independentPaces.tracks = {};
+    }
+    if (!root.dashboardConfig.independentPaces.programs) {
+        root.dashboardConfig.independentPaces.programs = {};
+    }
+    if (!root.dashboardConfig.independentPaces.subjects) {
+        root.dashboardConfig.independentPaces.subjects = {};
+    }
+}
+
+/**
+ * Master data migration and sanitization engine for legacy state schemas.
+ */
+function migrateLegacyData() {
+    let dataPurged = false;
+    const root = (typeof window !== 'undefined') ? window : ((typeof global !== 'undefined') ? global : globalThis);
+    const appState = root.AppState || {};
+
+    if (!root.tracks) {
+        root.tracks = [];
+    }
+    if (Array.isArray(root.tracks)) {
+        root.tracks = root.tracks.map(t => {
+            if (typeof t === 'string') {
+                return { id: t, name: t.toUpperCase(), priority: 3 };
+            }
+            if (t && typeof t === 'object' && t.priority === undefined) {
+                t.priority = 3;
+            }
+            return t;
+        });
+    }
+    if (!root.customPrograms) {
+        root.customPrograms = {};
+    }
+
+    root.tracks.forEach(trackObj => {
+        const track = trackObj.id;
+        if (!Array.isArray(root.customPrograms[track])) {
+            root.customPrograms[track] = [];
+        }
+
+        root.customPrograms[track] = root.customPrograms[track].map((p, idx) => {
+            if (typeof p === 'string') {
+                const id = p.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+                return {
+                    id: id || 'prog-' + idx,
+                    name: p,
+                    priority: 3,
+                    order: idx
+                };
+            } else if (p && typeof p === 'object') {
+                if (!p.id) {
+                    p.id = (p.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'prog-' + idx;
+                }
+                if (p.priority === undefined) p.priority = 3;
+                if (p.order === undefined) p.order = idx;
+                return p;
+            }
+            return null;
+        }).filter(Boolean);
+
+        const origLength = root.customPrograms[track].length;
+        root.customPrograms[track] = root.customPrograms[track].filter(p => {
+            const name = (p.name || '').trim();
+            const id = (p.id || '').trim().toLowerCase();
+            if (!name) return false;
+            if (id.includes('onerror') || id.includes('onload') || id.includes('json') || id.includes('document-body') || id.includes('img-src')) return false;
+            return true;
+        });
+
+        if (root.customPrograms[track].length !== origLength) {
+            dataPurged = true;
+        }
+    });
+
+    const sylStructure = root.syllabusStructure || (appState && appState.syllabusStructure);
+    if (sylStructure) {
+        root.tracks.forEach(trackObj => {
+            const track = trackObj.id;
+            if (!sylStructure[track]) {
+                sylStructure[track] = [];
+            }
+            if (Array.isArray(sylStructure[track])) {
+                const origLength = sylStructure[track].length;
+                sylStructure[track] = sylStructure[track].filter(s => {
+                    const prog = (s.program || '').trim();
+                    if (!prog) return false;
+                    const id = prog.toLowerCase();
+                    if (id.includes('onerror') || id.includes('onload') || id.includes('json') || id.includes('document-body') || id.includes('img-src')) return false;
+                    return true;
+                });
+
+                if (sylStructure[track].length !== origLength) {
+                    dataPurged = true;
+                }
+
+                sylStructure[track].forEach((s, idx) => {
+                    if (s.priority === undefined) s.priority = 3;
+                    if (s.order === undefined) s.order = idx;
+                    if (!s.program) {
+                        s.program = trackObj.name + " Prog";
+                    }
+                });
+            }
+        });
+    }
+
+    if (root.successResults) {
+        const origLength = root.successResults.length;
+        root.successResults = root.successResults.filter(r => {
+            const title = (r.title || '').trim();
+            if (!title) return false;
+            const id = title.toLowerCase();
+            if (id.includes('onerror') || id.includes('onload') || id.includes('json') || id.includes('document-body') || id.includes('img-src')) return false;
+            return true;
+        });
+        if (root.successResults.length !== origLength) {
+            dataPurged = true;
+        }
+    }
+
+    if (root.passedItems) {
+        if (root.passedItems.programs) {
+            const origLength = root.passedItems.programs.length;
+            root.passedItems.programs = root.passedItems.programs.filter(p => {
+                const id = p.trim().toLowerCase();
+                if (!id) return false;
+                if (id.includes('onerror') || id.includes('onload') || id.includes('json') || id.includes('document-body') || id.includes('img-src')) return false;
+                return true;
+            });
+            if (root.passedItems.programs.length !== origLength) {
+                dataPurged = true;
+            }
+        }
+    }
+
+    if (root.paceGoals) {
+        const origLength = root.paceGoals.length;
+        root.paceGoals = root.paceGoals.filter(g => {
+            const tgt = (g.target || '').trim();
+            if (!tgt) return false;
+            const id = tgt.toLowerCase();
+            if (id.includes('onerror') || id.includes('onload') || id.includes('json') || id.includes('document-body') || id.includes('img-src')) return false;
+            return true;
+        });
+        if (root.paceGoals.length !== origLength) {
+            dataPurged = true;
+        }
+    }
+
+    // Purge legacy preset sample exams & sessions
+    if (Array.isArray(appState.examSessions)) {
+        const origLength = appState.examSessions.length;
+        appState.examSessions = appState.examSessions.filter(s => {
+            if (!s) return false;
+            if (s.id && s.id.startsWith('session_sample_')) return false;
+            return true;
+        });
+        if (appState.examSessions.length !== origLength) {
+            dataPurged = true;
+        }
+    }
+    if (Array.isArray(appState.examRoutine)) {
+        const origLength = appState.examRoutine.length;
+        appState.examRoutine = appState.examRoutine.filter(e => {
+            if (!e) return false;
+            if (e.id && e.id.startsWith('exam_sample_')) return false;
+            if (e.subject === 'Software Engineering' || e.subject === 'Database Systems') return false;
+            return true;
+        });
+        if (appState.examRoutine.length !== origLength) {
+            dataPurged = true;
+        }
+    }
+
+    // And customActions
+    if (Array.isArray(root.customActions)) {
+        root.customActions.forEach((a, idx) => {
+            if (a.priority === undefined) a.priority = 3;
+            if (a.order === undefined) a.order = idx;
+        });
+    }
+
+    if (typeof root.ensureConfigDefaults === 'function') {
+        root.ensureConfigDefaults();
+    }
+    if (typeof root.normalizePriorities === 'function') {
+        root.normalizePriorities();
+    }
+    if (typeof root.syncPassFreezeFromResults === 'function') {
+        root.syncPassFreezeFromResults();
+    }
+
+    if (!root.timerLogs) {
+        root.timerLogs = [];
+    }
+    if (root.dailyFocusHoursTarget === undefined || root.dailyFocusHoursTarget === null) {
+        root.dailyFocusHoursTarget = 0;
+    }
+    if (!root.dailyFocusHoursTargetHistory) {
+        root.dailyFocusHoursTargetHistory = [];
+    }
+    if (!root.activeTimerState || typeof root.activeTimerState !== 'object') {
+        root.activeTimerState = {
+            isRunning: false,
+            mode: 'stopwatch',
+            startTime: null,
+            elapsedBeforeStart: 0,
+            targetDuration: 0,
+            selectedSubject: 'General Study'
+        };
+    }
+    if (!root.scheduleBlocks) {
+        root.scheduleBlocks = [];
+    }
+    if (!root.scheduleBlocks2) {
+        root.scheduleBlocks2 = [];
+    }
+    if (!root.scheduleGroups) {
+        root.scheduleGroups = [];
+    }
+    if (root.scheduleShowGrouped === undefined) {
+        root.scheduleShowGrouped = false;
+    }
+}
+
+_root.ensureConfigDefaults = ensureConfigDefaults;
+_root.migrateLegacyData = migrateLegacyData;
+
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+        AppState: _root.AppState,
+        ensureConfigDefaults,
+        migrateLegacyData
+    };
+}
+
 

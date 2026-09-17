@@ -1890,6 +1890,28 @@
         }, 60);
     }
 
+    function setTrendFilter(f) {
+        global.trendTimeFilter = f;
+        renderTrendCharts();
+        if (global.revisionTrendChartInstance && typeof global.renderRevisionTrendChart === 'function') {
+            global.renderRevisionTrendChart();
+        }
+        if (typeof document !== 'undefined') {
+            ['1Y', '2Y', '3Y', 'ALL'].forEach(id => {
+                const btn = document.getElementById('tf-' + id);
+                if (btn) {
+                    if (id === f) {
+                        btn.classList.add('bg-blue-600', 'text-white', 'shadow');
+                        btn.classList.remove('text-slate-500', 'hover:bg-slate-300', 'dark:text-slate-400', 'dark:hover:bg-slate-600');
+                    } else {
+                        btn.classList.remove('bg-blue-600', 'text-white', 'shadow');
+                        btn.classList.add('text-slate-500', 'hover:bg-slate-300', 'dark:text-slate-400', 'dark:hover:bg-slate-600');
+                    }
+                }
+            });
+        }
+    }
+
 
     /* ==========================================================================
        4. Canonical AnalyticsPage Lifecycle Object
