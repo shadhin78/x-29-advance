@@ -1051,6 +1051,124 @@
         }
     };
 
+    function initExamEventListeners() {
+        if (typeof document === 'undefined' || typeof document.addEventListener !== 'function') return;
+        if (global._examListenersInitialized) return;
+        global._examListenersInitialized = true;
+
+        document.addEventListener('click', (e) => {
+            const openSessionBtn = e.target.closest('[data-open-session-modal]');
+            if (openSessionBtn) {
+                e.preventDefault();
+                const sessionId = openSessionBtn.getAttribute('data-open-session-modal') || null;
+                if (typeof global.openSessionModal === 'function') global.openSessionModal(sessionId === 'true' || sessionId === '' ? null : sessionId);
+                return;
+            }
+
+            const examFilterBtn = e.target.closest('[data-exam-filter]');
+            if (examFilterBtn) {
+                e.preventDefault();
+                const filter = examFilterBtn.getAttribute('data-exam-filter');
+                if (typeof global.setExamFilter === 'function') global.setExamFilter(filter);
+                return;
+            }
+
+            if (e.target.closest('[data-close-session-modal]')) {
+                e.preventDefault();
+                if (typeof global.closeSessionModal === 'function') global.closeSessionModal();
+                return;
+            }
+
+            if (e.target.closest('[data-close-exam-modal]')) {
+                e.preventDefault();
+                if (typeof global.closeExamModal === 'function') global.closeExamModal();
+                return;
+            }
+
+            const examModeBtn = e.target.closest('[data-exam-mode]');
+            if (examModeBtn) {
+                e.preventDefault();
+                const mode = examModeBtn.getAttribute('data-exam-mode');
+                if (typeof global.setExamMode === 'function') global.setExamMode(mode);
+                return;
+            }
+
+            const openExamBtn = e.target.closest('[data-open-exam-modal]');
+            if (openExamBtn) {
+                e.preventDefault();
+                const examId = openExamBtn.getAttribute('data-open-exam-modal');
+                const sessionId = openExamBtn.getAttribute('data-session-id');
+                if (typeof global.openExamModal === 'function') global.openExamModal(examId === 'null' ? null : examId, sessionId);
+                return;
+            }
+
+            const toggleStatusBtn = e.target.closest('[data-toggle-exam-status]');
+            if (toggleStatusBtn) {
+                e.preventDefault();
+                const examId = toggleStatusBtn.getAttribute('data-toggle-exam-status');
+                if (typeof global.toggleExamStatus === 'function') global.toggleExamStatus(examId);
+                return;
+            }
+
+            const deleteExamBtn = e.target.closest('[data-delete-exam]');
+            if (deleteExamBtn) {
+                e.preventDefault();
+                const examId = deleteExamBtn.getAttribute('data-delete-exam');
+                if (typeof global.deleteExam === 'function') global.deleteExam(examId);
+                return;
+            }
+
+            const deleteSessionBtn = e.target.closest('[data-delete-session]');
+            if (deleteSessionBtn) {
+                e.preventDefault();
+                const sessionId = deleteSessionBtn.getAttribute('data-delete-session');
+                if (typeof global.deleteSession === 'function') global.deleteSession(sessionId);
+                return;
+            }
+        });
+
+        document.addEventListener('submit', (e) => {
+            if (e.target && (e.target.matches('[data-save-session-form]') || e.target.closest('#session-modal form'))) {
+                e.preventDefault();
+                if (typeof global.saveSessionForm === 'function') global.saveSessionForm(e);
+                return;
+            }
+            if (e.target && (e.target.matches('[data-save-exam-form]') || e.target.closest('#exam-modal form'))) {
+                e.preventDefault();
+                if (typeof global.saveExamForm === 'function') global.saveExamForm(e);
+                return;
+            }
+        });
+
+        document.addEventListener('input', (e) => {
+            if (e.target && (e.target.id === 'exam-search-input' || e.target.matches('[data-exam-search]'))) {
+                if (typeof global.renderExamRoutine === 'function') global.renderExamRoutine();
+            }
+        });
+
+        document.addEventListener('change', (e) => {
+            const countdownSelect = e.target.closest('#exam-hero-select-target, #exam-countdown-select, [data-exam-countdown-target]');
+            if (countdownSelect) {
+                if (typeof global.onSelectCountdownTarget === 'function') global.onSelectCountdownTarget(countdownSelect.value);
+                return;
+            }
+
+            const progSelect = e.target.closest('#exam-program-select, [data-exam-program-select]');
+            if (progSelect) {
+                if (typeof global.onExamProgramChange === 'function') global.onExamProgramChange();
+                return;
+            }
+        });
+    }
+
+    if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initExamEventListeners);
+        } else {
+            initExamEventListeners();
+        }
+    }
+
     // Attach to global window
     global.ExamRoutinePage = typeof ExamRoutinePage !== 'undefined' ? ExamRoutinePage : window.ExamRoutinePage;
     global.examCurrentFilter = window.examCurrentFilter || 'upcoming';
@@ -1072,6 +1190,7 @@
     global.toggleExamStatus = window.toggleExamStatus;
     global.deleteExam = window.deleteExam;
     global.renderExamPage = window.renderExamPage;
+    global.initExamEventListeners = initExamEventListeners;
 
     if (typeof module !== 'undefined' && module.exports) {
         module.exports = {
@@ -1093,7 +1212,8 @@
             closeExamModal: global.closeExamModal,
             saveExamForm: global.saveExamForm,
             toggleExamStatus: global.toggleExamStatus,
-            deleteExam: global.deleteExam
+            deleteExam: global.deleteExam,
+            initExamEventListeners: global.initExamEventListeners
         };
     }
 })(typeof window !== 'undefined' ? window : globalThis);

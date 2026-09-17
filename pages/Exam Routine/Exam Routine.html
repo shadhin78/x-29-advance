@@ -28,7 +28,7 @@
                     <label for="exam-hero-select-target"
                         class="text-[10px] font-black uppercase text-rose-300 tracking-wider shrink-0">Pin:</label>
                     <select id="exam-hero-select-target"
-                        onchange="window.onSelectCountdownTarget(this.value)"
+                        data-exam-countdown-target
                         class="bg-transparent text-white font-bold text-xs outline-none cursor-pointer truncate min-w-0 max-w-[190px] sm:max-w-xs md:max-w-sm">
                         <option value="auto" class="bg-slate-900 text-white">⚡ Auto (Nearest Upcoming
                             Subject Exam)</option>
@@ -152,7 +152,7 @@
         </div>
 
         <div class="flex items-center gap-2">
-            <button onclick="window.openSessionModal()"
+            <button data-open-session-modal
                 class="w-full sm:w-auto justify-center bg-rose-600 hover:bg-rose-700 text-white font-black text-xs uppercase tracking-widest px-4 py-2.5 rounded-xl transition-all shadow-md active:scale-95 flex items-center gap-2 min-h-[42px]">
                 <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
@@ -172,7 +172,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
             </svg>
-            <input id="exam-search-input" type="text" oninput="window.renderExamRoutine()"
+            <input id="exam-search-input" type="text" data-exam-search
                 placeholder="Search exam title, subject, program..."
                 class="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold text-slate-800 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-rose-500 outline-none transition-all min-h-[42px]">
         </div>
@@ -180,11 +180,11 @@
         <!-- Filter Tabs -->
         <div
             class="grid grid-cols-3 w-full sm:w-auto sm:flex items-center bg-slate-100 dark:bg-slate-700/60 p-1 rounded-xl gap-1 shrink-0">
-            <button onclick="window.setExamFilter('all')" id="btn-exam-filter-all"
+            <button data-exam-filter="all" id="btn-exam-filter-all"
                 class="justify-center py-2 px-2.5 sm:px-3 sm:py-1.5 rounded-lg text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-all min-h-[34px] flex items-center">All</button>
-            <button onclick="window.setExamFilter('upcoming')" id="btn-exam-filter-upcoming"
+            <button data-exam-filter="upcoming" id="btn-exam-filter-upcoming"
                 class="justify-center py-2 px-2.5 sm:px-3 sm:py-1.5 rounded-lg text-[10px] sm:text-[11px] font-black uppercase tracking-wider bg-white dark:bg-slate-800 text-slate-800 dark:text-white shadow-sm transition-all min-h-[34px] flex items-center">Upcoming</button>
-            <button onclick="window.setExamFilter('completed')" id="btn-exam-filter-completed"
+            <button data-exam-filter="completed" id="btn-exam-filter-completed"
                 class="justify-center py-2 px-2.5 sm:px-3 sm:py-1.5 rounded-lg text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-all min-h-[34px] flex items-center">Completed</button>
         </div>
     </div>
@@ -221,7 +221,7 @@
                         a timeframe group for exams</p>
                 </div>
             </div>
-            <button onclick="window.closeSessionModal()"
+            <button data-close-session-modal
                 class="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all min-w-[36px] min-h-[36px] flex items-center justify-center shrink-0">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -231,7 +231,7 @@
         </div>
 
         <!-- Form Body -->
-        <form onsubmit="window.saveSessionForm(event)"
+        <form data-save-session-form
             class="p-4 sm:p-5 md:p-6 space-y-4 overflow-y-auto max-h-[calc(92vh-75px)] sm:max-h-[calc(88vh-75px)]">
             <input type="hidden" id="session-id">
 
@@ -272,7 +272,7 @@
 
             <div
                 class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2.5 sm:gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
-                <button type="button" onclick="window.closeSessionModal()"
+                <button type="button" data-close-session-modal
                     class="w-full sm:w-auto px-4 py-2.5 text-xs font-bold text-slate-500 hover:text-slate-800 dark:hover:text-white rounded-xl bg-slate-100 sm:bg-transparent dark:bg-slate-800 sm:dark:bg-transparent min-h-[42px] flex items-center justify-center transition-all">Cancel</button>
                 <button type="submit"
                     class="w-full sm:w-auto bg-rose-600 hover:bg-rose-700 text-white text-xs font-black uppercase tracking-wider px-5 py-2.5 rounded-xl shadow-md transition-all active:scale-95 min-h-[42px] flex items-center justify-center">Save
@@ -307,7 +307,7 @@
                         Configure exam routine item</p>
                 </div>
             </div>
-            <button onclick="window.closeExamModal()"
+            <button data-close-exam-modal
                 class="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all min-w-[36px] min-h-[36px] flex items-center justify-center shrink-0">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -317,7 +317,7 @@
         </div>
 
         <!-- Form Body -->
-        <form onsubmit="window.saveExamForm(event)"
+        <form data-save-exam-form
             class="p-4 sm:p-5 md:p-6 space-y-4 overflow-y-auto max-h-[calc(92vh-75px)] sm:max-h-[calc(88vh-75px)]">
             <input type="hidden" id="exam-id">
             <input type="hidden" id="exam-session-id">
@@ -336,12 +336,12 @@
                     Type / Mode *</label>
                 <div
                     class="grid grid-cols-2 gap-2 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-2xl border border-slate-200/60 dark:border-slate-700/60">
-                    <button type="button" id="btn-exam-mode-program" onclick="window.setExamMode('program')"
+                    <button type="button" id="btn-exam-mode-program" data-exam-mode="program"
                         class="py-2 px-3 rounded-xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 bg-rose-600 text-white shadow-sm min-h-[38px]">
                         🎓 Program Wise
                     </button>
                     <button type="button" id="btn-exam-mode-non-program"
-                        onclick="window.setExamMode('non-program')"
+                        data-exam-mode="non-program"
                         class="py-2 px-3 rounded-xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 text-slate-600 dark:text-slate-300 hover:bg-white/50 dark:hover:bg-slate-700/50 min-h-[38px]">
                         ⚙️ Non-Program Wise
                     </button>
@@ -354,7 +354,7 @@
                     <label
                         class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Select
                         Program *</label>
-                    <select id="exam-program-select" onchange="window.onExamProgramChange()"
+                    <select id="exam-program-select" data-exam-program-select
                         class="w-full min-h-[42px] px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 dark:text-white focus:ring-2 focus:ring-rose-500 outline-none">
                         <option value="">-- Select Program --</option>
                     </select>
@@ -401,7 +401,7 @@
 
             <div
                 class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2.5 sm:gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
-                <button type="button" onclick="window.closeExamModal()"
+                <button type="button" data-close-exam-modal
                     class="w-full sm:w-auto px-4 py-2.5 text-xs font-bold text-slate-500 hover:text-slate-800 dark:hover:text-white rounded-xl bg-slate-100 sm:bg-transparent dark:bg-slate-800 sm:dark:bg-transparent min-h-[42px] flex items-center justify-center transition-all">Cancel</button>
                 <button type="submit"
                     class="w-full sm:w-auto bg-rose-600 hover:bg-rose-700 text-white text-xs font-black uppercase tracking-wider px-5 py-2.5 rounded-xl shadow-md transition-all active:scale-95 min-h-[42px] flex items-center justify-center">Save

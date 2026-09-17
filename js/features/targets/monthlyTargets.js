@@ -4932,8 +4932,327 @@ function renderMtdbMonthView() {
         toggleMtdbTargetCompletion,
         calculateMonthWiseMonthlyTargets,
         renderMtdbMonthChart,
-        renderMtdbMonthView
+        renderMtdbMonthView,
+        initTargetsEventListeners
     };
+
+    function initTargetsEventListeners() {
+        if (typeof document === 'undefined' || typeof document.addEventListener !== 'function') return;
+        if (global._targetsListenersInitialized) return;
+        global._targetsListenersInitialized = true;
+
+        document.addEventListener('click', (e) => {
+            // Target navigation buttons
+            const navMonthBtn = e.target.closest('[data-navigate-month], #mt-btn-past, #mt-btn-present, #mt-btn-future');
+            if (navMonthBtn) {
+                e.preventDefault();
+                const mode = navMonthBtn.getAttribute('data-navigate-month') ||
+                    (navMonthBtn.id === 'mt-btn-past' ? 'past' : navMonthBtn.id === 'mt-btn-present' ? 'present' : 'future');
+                if (typeof global.navigateMonth === 'function') global.navigateMonth(mode);
+                return;
+            }
+
+            const navWeekBtn = e.target.closest('[data-navigate-week], #wt-btn-past, #wt-btn-present, #wt-btn-future');
+            if (navWeekBtn) {
+                e.preventDefault();
+                const mode = navWeekBtn.getAttribute('data-navigate-week') ||
+                    (navWeekBtn.id === 'wt-btn-past' ? 'past' : navWeekBtn.id === 'wt-btn-present' ? 'present' : 'future');
+                if (typeof global.navigateWeek === 'function') global.navigateWeek(mode);
+                return;
+            }
+
+            const navDayBtn = e.target.closest('[data-navigate-day], #dt-btn-past, #dt-btn-present, #dt-btn-future');
+            if (navDayBtn) {
+                e.preventDefault();
+                const mode = navDayBtn.getAttribute('data-navigate-day') ||
+                    (navDayBtn.id === 'dt-btn-past' ? 'past' : navDayBtn.id === 'dt-btn-present' ? 'present' : 'future');
+                if (typeof global.navigateDay === 'function') global.navigateDay(mode);
+                return;
+            }
+
+            // Target databases open
+            if (e.target.closest('[data-open-mtdb], [data-modal-open="mtdb-modal"]')) {
+                e.preventDefault();
+                if (typeof global.openMonthlyTargetsDatabase === 'function') global.openMonthlyTargetsDatabase();
+                return;
+            }
+            if (e.target.closest('[data-open-wtdb], [data-modal-open="wtdb-modal"]')) {
+                e.preventDefault();
+                if (typeof global.openWeeklyTargetsDatabase === 'function') global.openWeeklyTargetsDatabase();
+                return;
+            }
+            if (e.target.closest('[data-open-dtdb], [data-modal-open="dtdb-modal"]')) {
+                e.preventDefault();
+                if (typeof global.openDailyTargetsDatabase === 'function') global.openDailyTargetsDatabase();
+                return;
+            }
+            if (e.target.closest('[data-open-monthly-target-setup], [data-modal-open="monthly-target-page"]')) {
+                e.preventDefault();
+                if (typeof global.openAddMonthlyTargetPage === 'function') global.openAddMonthlyTargetPage();
+                return;
+            }
+            if (e.target.closest('[data-open-dadb], [data-modal-open="dadb-modal"]')) {
+                e.preventDefault();
+                if (typeof global.openDailyActionsDBModal === 'function') global.openDailyActionsDBModal();
+                return;
+            }
+            if (e.target.closest('[data-append-new-action], #btn-append-new-action')) {
+                e.preventDefault();
+                if (typeof global.appendNewAction === 'function') global.appendNewAction();
+                return;
+            }
+
+            // Monthly Target Setup Page controls
+            if (e.target.closest('[data-close-monthly-target-page], #btn-close-monthly-target-page')) {
+                e.preventDefault();
+                if (typeof global.closeMonthlyTargetPage === 'function') global.closeMonthlyTargetPage();
+                return;
+            }
+
+            const setupNavBtn = e.target.closest('[data-navigate-monthly-target-setup-month], #mt-setup-btn-prev, #mt-setup-btn-current, #mt-setup-btn-next');
+            if (setupNavBtn) {
+                e.preventDefault();
+                const mode = setupNavBtn.getAttribute('data-navigate-monthly-target-setup-month') ||
+                    (setupNavBtn.id === 'mt-setup-btn-prev' ? 'past' : setupNavBtn.id === 'mt-setup-btn-current' ? 'present' : 'future');
+                if (typeof global.navigateMonthlyTargetSetupMonth === 'function') global.navigateMonthlyTargetSetupMonth(mode);
+                return;
+            }
+
+            const toggleProgBtn = e.target.closest('[data-toggle-all-programs]');
+            if (toggleProgBtn) {
+                e.preventDefault();
+                const state = toggleProgBtn.getAttribute('data-toggle-all-programs') === 'true';
+                if (typeof global.toggleAllMonthlyPrograms === 'function') global.toggleAllMonthlyPrograms(state);
+                return;
+            }
+
+            const toggleSubjBtn = e.target.closest('[data-toggle-all-subjects]');
+            if (toggleSubjBtn) {
+                e.preventDefault();
+                const state = toggleSubjBtn.getAttribute('data-toggle-all-subjects') === 'true';
+                if (typeof global.toggleAllMonthlySubjects === 'function') global.toggleAllMonthlySubjects(state);
+                return;
+            }
+
+            const toggleChapBtn = e.target.closest('[data-toggle-all-chapters]');
+            if (toggleChapBtn) {
+                e.preventDefault();
+                const state = toggleChapBtn.getAttribute('data-toggle-all-chapters') === 'true';
+                if (typeof global.toggleAllMonthlyChapters === 'function') global.toggleAllMonthlyChapters(state);
+                return;
+            }
+
+            const bulkSizeBtn = e.target.closest('[data-bulk-size-preset]');
+            if (bulkSizeBtn) {
+                e.preventDefault();
+                const sz = parseInt(bulkSizeBtn.getAttribute('data-bulk-size-preset'), 10);
+                if (!isNaN(sz) && typeof global.setBulkSizePreset === 'function') global.setBulkSizePreset(sz);
+                return;
+            }
+
+            if (e.target.closest('[data-apply-bulk-size]')) {
+                e.preventDefault();
+                if (typeof global.applyBulkSizeToMonthlyChapters === 'function') global.applyBulkSizeToMonthlyChapters();
+                return;
+            }
+            if (e.target.closest('[data-apply-bulk-week]')) {
+                e.preventDefault();
+                if (typeof global.applyBulkWeekToMonthlyChapters === 'function') global.applyBulkWeekToMonthlyChapters();
+                return;
+            }
+            if (e.target.closest('[data-distribute-chapters-weeks]')) {
+                e.preventDefault();
+                if (typeof global.distributeChaptersAcrossWeeks === 'function') global.distributeChaptersAcrossWeeks();
+                return;
+            }
+
+            const splitChapBtn = e.target.closest('[data-split-all-chapters]');
+            if (splitChapBtn) {
+                e.preventDefault();
+                const count = parseInt(splitChapBtn.getAttribute('data-split-all-chapters'), 10);
+                if (!isNaN(count) && typeof global.splitAllChaptersAcrossDays === 'function') global.splitAllChaptersAcrossDays(count);
+                return;
+            }
+
+            const autoSpreadBtn = e.target.closest('[data-auto-spread-days]');
+            if (autoSpreadBtn) {
+                e.preventDefault();
+                const mode = autoSpreadBtn.getAttribute('data-auto-spread-days') || 'month';
+                if (typeof global.autoSpreadAllChaptersAcrossDays === 'function') global.autoSpreadAllChaptersAcrossDays(mode);
+                return;
+            }
+
+            if (e.target.closest('[data-clear-daily-allocations]')) {
+                e.preventDefault();
+                if (typeof global.clearAllDailyAllocations === 'function') global.clearAllDailyAllocations();
+                return;
+            }
+            if (e.target.closest('[data-spread-from-start-date]')) {
+                e.preventDefault();
+                if (typeof global.spreadAllChaptersFromStartDate === 'function') global.spreadAllChaptersFromStartDate();
+                return;
+            }
+            if (e.target.closest('[data-add-monthly-target], #mt-btn-save-bottom')) {
+                e.preventDefault();
+                if (typeof global.addMonthlyTarget === 'function') global.addMonthlyTarget();
+                return;
+            }
+
+            // MTDB / WTDB / DTDB / DADB / ADT tabs and filters
+            const mtdbTabBtn = e.target.closest('[data-mtdb-tab], [data-switch-mtdb-tab]');
+            if (mtdbTabBtn) {
+                e.preventDefault();
+                const tab = mtdbTabBtn.getAttribute('data-mtdb-tab') || mtdbTabBtn.getAttribute('data-switch-mtdb-tab');
+                if (typeof global.switchMtdbTab === 'function') global.switchMtdbTab(tab);
+                return;
+            }
+
+            const wtdbTabBtn = e.target.closest('[data-wtdb-tab], [data-switch-wtdb-tab]');
+            if (wtdbTabBtn) {
+                e.preventDefault();
+                const tab = wtdbTabBtn.getAttribute('data-wtdb-tab') || wtdbTabBtn.getAttribute('data-switch-wtdb-tab');
+                if (typeof global.switchWtdbTab === 'function') global.switchWtdbTab(tab);
+                return;
+            }
+
+            const dadbTabBtn = e.target.closest('[data-dadb-tab], [data-switch-dadb-tab]');
+            if (dadbTabBtn) {
+                e.preventDefault();
+                const tab = dadbTabBtn.getAttribute('data-dadb-tab') || dadbTabBtn.getAttribute('data-switch-dadb-tab');
+                if (typeof global.switchDadbTab === 'function') global.switchDadbTab(tab);
+                return;
+            }
+
+            const adtTabBtn = e.target.closest('[data-adt-tab], [data-switch-adt-tab]');
+            if (adtTabBtn) {
+                e.preventDefault();
+                const tab = adtTabBtn.getAttribute('data-adt-tab') || adtTabBtn.getAttribute('data-switch-adt-tab');
+                if (typeof global.switchAdtTab === 'function') global.switchAdtTab(tab);
+                return;
+            }
+
+            if (e.target.closest('[data-render-mtdb-list]')) {
+                e.preventDefault();
+                if (typeof global.renderMtdbList === 'function') global.renderMtdbList();
+                return;
+            }
+            if (e.target.closest('[data-render-wtdb-list]')) {
+                e.preventDefault();
+                if (typeof global.renderWtdbList === 'function') global.renderWtdbList();
+                return;
+            }
+            if (e.target.closest('[data-render-dtdb-list]')) {
+                e.preventDefault();
+                if (typeof global.renderDtdbList === 'function') global.renderDtdbList();
+                return;
+            }
+
+            // Target modals actions
+            if (e.target.closest('[data-add-custom-todo-target], #btn-add-custom-todo-target')) {
+                e.preventDefault();
+                if (typeof global.addCustomTodoTarget === 'function') global.addCustomTodoTarget();
+                return;
+            }
+            if (e.target.closest('[data-add-daily-target], #btn-add-daily-target')) {
+                e.preventDefault();
+                if (typeof global.addDailyTarget === 'function') global.addDailyTarget();
+                return;
+            }
+            if (e.target.closest('[data-add-weekly-target], #btn-add-weekly-target')) {
+                e.preventDefault();
+                if (typeof global.addWeeklyTarget === 'function') global.addWeeklyTarget();
+                return;
+            }
+
+            const celebBtn = e.target.closest('[data-celebration-targets]');
+            if (celebBtn) {
+                e.preventDefault();
+                const targets = celebBtn.getAttribute('data-celebration-targets');
+                if (typeof global.selectCelebrationModalTargets === 'function') global.selectCelebrationModalTargets(targets);
+                return;
+            }
+
+            if (e.target.closest('[data-close-subject-target-modal]')) {
+                e.preventDefault();
+                if (typeof global.closeSubjectTargetModal === 'function') global.closeSubjectTargetModal();
+                return;
+            }
+            if (e.target.closest('[data-submit-subject-target]')) {
+                e.preventDefault();
+                if (typeof global.submitSubjectTarget === 'function') global.submitSubjectTarget();
+                return;
+            }
+        });
+
+        document.addEventListener('input', (e) => {
+            const chapSearch = e.target.closest('[data-filter-monthly-chapters], #mt-chapter-search-input');
+            if (chapSearch && typeof global.filterMonthlyTargetChapters === 'function') {
+                global.filterMonthlyTargetChapters(chapSearch.value);
+            }
+        });
+
+        document.addEventListener('change', (e) => {
+            const monthInput = e.target.closest('[data-monthly-setup-month-date], #mt-setup-month-input');
+            if (monthInput && typeof global.setMonthlyTargetSetupMonthDate === 'function') {
+                global.setMonthlyTargetSetupMonthDate(monthInput.value);
+                return;
+            }
+
+            const selectWeeklyTarget = e.target.closest('[data-select-weekly-target], #dt-select-weekly-target');
+            if (selectWeeklyTarget && typeof global.handleSelectFromWeeklyTargetChange === 'function') {
+                global.handleSelectFromWeeklyTargetChange();
+                return;
+            }
+
+            const dailySubject = e.target.closest('[data-daily-target-subject], #dt-subject-select');
+            if (dailySubject && typeof global.updateDailyTargetSubjectDropdown === 'function') {
+                global.updateDailyTargetSubjectDropdown();
+                return;
+            }
+
+            const dailyChap = e.target.closest('[data-daily-target-chapter], #dt-chapter-select');
+            if (dailyChap) {
+                if (typeof global.updateDailyTargetChapterDropdown === 'function') global.updateDailyTargetChapterDropdown();
+                if (typeof global.handleDailyTargetChapterChange === 'function') global.handleDailyTargetChapterChange();
+                return;
+            }
+
+            const weeklyProg = e.target.closest('[data-weekly-target-program], #wt-select-prog');
+            if (weeklyProg && typeof global.updateWeeklyTargetSubjectDropdown === 'function') {
+                global.updateWeeklyTargetSubjectDropdown();
+                return;
+            }
+
+            const weeklySubject = e.target.closest('[data-weekly-target-subject], #wt-select-sub, #wt-subject-select');
+            if (weeklySubject && typeof global.updateWeeklyTargetChapterDropdown === 'function') {
+                global.updateWeeklyTargetChapterDropdown();
+                return;
+            }
+
+            if (e.target.closest('[data-render-wtdb-list]') || (e.target.id && e.target.id.startsWith('wtdb-filter-'))) {
+                if (typeof global.renderWtdbList === 'function') global.renderWtdbList();
+                return;
+            }
+
+            if (e.target.closest('[data-render-mtdb-list]') || (e.target.id && e.target.id.startsWith('mtdb-filter-'))) {
+                if (typeof global.renderMtdbList === 'function') global.renderMtdbList();
+                return;
+            }
+
+            if (e.target.closest('[data-render-dtdb-list]') || (e.target.id && e.target.id.startsWith('dtdb-filter-'))) {
+                if (typeof global.renderDtdbList === 'function') global.renderDtdbList();
+                return;
+            }
+        });
+    }
+
+    if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initTargetsEventListeners);
+        } else {
+            initTargetsEventListeners();
+        }
+    }
 
     // Attach to global window scope
     global.MonthlyTargets = MonthlyTargets;

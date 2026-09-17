@@ -1952,6 +1952,16 @@
             } else if (e.target.closest('#outcome-date-sort-btn, [data-outcome-sort]')) {
                 e.preventDefault();
                 toggleOutcomeDateSort();
+            } else if (e.target.closest('[data-save-celebration-setup], #btn-save-celebration-setup')) {
+                e.preventDefault();
+                if (typeof global.saveCelebrationSetup === 'function') global.saveCelebrationSetup();
+            } else if (e.target.closest('[data-congrats-page]')) {
+                e.preventDefault();
+                const page = parseInt(e.target.closest('[data-congrats-page]').getAttribute('data-congrats-page'), 10);
+                if (!isNaN(page) && typeof global.switchCongratsPage === 'function') global.switchCongratsPage(page);
+            } else if (e.target.closest('[data-close-congrats]')) {
+                e.preventDefault();
+                if (typeof global.closeCongratsModal === 'function') global.closeCongratsModal();
             }
         });
 
@@ -1973,7 +1983,9 @@
         });
 
         document.addEventListener('input', (e) => {
-            if (e.target && (e.target.id === 'resm-cgpa-input' || e.target.matches('[data-cgpa-input]'))) {
+            if (e.target && (e.target.id === 'csm-search-input' || e.target.matches('[data-filter-celebration-items]'))) {
+                if (typeof global.filterCelebrationSetupItems === 'function') global.filterCelebrationSetupItems(e.target.value);
+            } else if (e.target && (e.target.id === 'resm-cgpa-input' || e.target.matches('[data-cgpa-input]'))) {
                 onCgpaInput(e.target);
                 if (e.target.hasAttribute('data-update-targets')) {
                     updateSubjectTargets();

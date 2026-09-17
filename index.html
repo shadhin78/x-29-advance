@@ -2075,10 +2075,10 @@
                 <!-- Tab Buttons -->
                 <div
                     class="sticky top-0 z-10 bg-white dark:bg-slate-800 flex space-x-2 md:space-x-4 mb-4 border-b border-slate-200 dark:border-slate-700 pb-3 pt-1 shrink-0 overflow-x-auto scrollbar-hide">
-                    <button id="wtdb-tab-btn-list" onclick="window.switchWtdbTab('list')"
+                    <button id="wtdb-tab-btn-list" data-wtdb-tab="list"
                         class="px-4 py-2 text-[10px] md:text-xs font-black uppercase tracking-widest rounded-xl transition-all bg-blue-600 text-white shadow-md whitespace-nowrap">Weekly
                         List</button>
-                    <button id="wtdb-tab-btn-month" onclick="window.switchWtdbTab('month')"
+                    <button id="wtdb-tab-btn-month" data-wtdb-tab="month"
                         class="px-4 py-2 text-[10px] md:text-xs font-black uppercase tracking-widest rounded-xl transition-all bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 whitespace-nowrap">Month-wise
                         sorting & bar trend</button>
                 </div>
@@ -2091,25 +2091,25 @@
                         <div class="flex flex-col gap-1 w-full">
                             <label class="text-[9px] font-black uppercase tracking-wider text-slate-400">Week
                                 Filter</label>
-                            <select id="wtdb-filter-week" onchange="window.renderWtdbList()"
+                            <select id="wtdb-filter-week"
                                 class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none"></select>
                         </div>
                         <div class="flex flex-col gap-1 w-full">
                             <label class="text-[9px] font-black uppercase tracking-wider text-slate-400">Program
                                 Filter</label>
-                            <select id="wtdb-filter-prog" onchange="window.renderWtdbList()"
+                            <select id="wtdb-filter-prog"
                                 class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none"></select>
                         </div>
                         <div class="flex flex-col gap-1 w-full">
                             <label class="text-[9px] font-black uppercase tracking-wider text-slate-400">Subject
                                 Filter</label>
-                            <select id="wtdb-filter-sub" onchange="window.renderWtdbList()"
+                            <select id="wtdb-filter-sub"
                                 class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none"></select>
                         </div>
                         <div class="flex flex-col gap-1 w-full">
                             <label class="text-[9px] font-black uppercase tracking-wider text-slate-400">Status
                                 Filter</label>
-                            <select id="wtdb-filter-status" onchange="window.renderWtdbList()"
+                            <select id="wtdb-filter-status"
                                 class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none">
                                 <option value="all">All</option>
                                 <option value="completed">Completed</option>
@@ -2235,10 +2235,10 @@
                 <!-- Tab Buttons -->
                 <div
                     class="sticky top-0 z-10 bg-white dark:bg-slate-800 flex space-x-2 md:space-x-4 mb-4 border-b border-slate-200 dark:border-slate-700 pb-3 pt-1 shrink-0 overflow-x-auto scrollbar-hide">
-                    <button id="mtdb-tab-btn-list" onclick="window.switchMtdbTab('list')"
+                    <button id="mtdb-tab-btn-list" data-mtdb-tab="list"
                         class="px-4 py-2 text-[10px] md:text-xs font-black uppercase tracking-widest rounded-xl transition-all bg-indigo-600 text-white shadow-md whitespace-nowrap">Monthly
                         List</button>
-                    <button id="mtdb-tab-btn-month" onclick="window.switchMtdbTab('month')"
+                    <button id="mtdb-tab-btn-month" data-mtdb-tab="month"
                         class="px-4 py-2 text-[10px] md:text-xs font-black uppercase tracking-widest rounded-xl transition-all bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 whitespace-nowrap">Month-wise
                         sorting & bar trend</button>
                 </div>
@@ -2251,25 +2251,25 @@
                         <div class="flex flex-col gap-1 w-full">
                             <label class="text-[9px] font-black uppercase tracking-wider text-slate-400">Month
                                 Filter</label>
-                            <select id="mtdb-filter-month" onchange="window.renderMtdbList()"
+                            <select id="mtdb-filter-month"
                                 class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none"></select>
                         </div>
                         <div class="flex flex-col gap-1 w-full">
                             <label class="text-[9px] font-black uppercase tracking-wider text-slate-400">Program
                                 Filter</label>
-                            <select id="mtdb-filter-prog" onchange="window.renderMtdbList()"
+                            <select id="mtdb-filter-prog"
                                 class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none"></select>
                         </div>
                         <div class="flex flex-col gap-1 w-full">
                             <label class="text-[9px] font-black uppercase tracking-wider text-slate-400">Subject
                                 Filter</label>
-                            <select id="mtdb-filter-sub" onchange="window.renderMtdbList()"
+                            <select id="mtdb-filter-sub"
                                 class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none"></select>
                         </div>
                         <div class="flex flex-col gap-1 w-full">
                             <label class="text-[9px] font-black uppercase tracking-wider text-slate-400">Status
                                 Filter</label>
-                            <select id="mtdb-filter-status" onchange="window.renderMtdbList()"
+                            <select id="mtdb-filter-status"
                                 class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none">
                                 <option value="all">All</option>
                                 <option value="completed">Completed</option>
@@ -2382,28 +2382,28 @@
                         <div class="flex flex-col gap-1 w-full">
                             <label class="text-[9px] font-black uppercase tracking-wider text-slate-400">Date
                                 Filter</label>
-                            <select id="dtdb-filter-date" onchange="window.renderDtdbList()"
+                            <select id="dtdb-filter-date"
                                 class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none">
                             </select>
                         </div>
                         <div class="flex flex-col gap-1 w-full">
                             <label class="text-[9px] font-black uppercase tracking-wider text-slate-400">Program
                                 Filter</label>
-                            <select id="dtdb-filter-prog" onchange="window.renderDtdbList()"
+                            <select id="dtdb-filter-prog"
                                 class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none">
                             </select>
                         </div>
                         <div class="flex flex-col gap-1 w-full">
                             <label class="text-[9px] font-black uppercase tracking-wider text-slate-400">Subject
                                 Filter</label>
-                            <select id="dtdb-filter-sub" onchange="window.renderDtdbList()"
+                            <select id="dtdb-filter-sub"
                                 class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none">
                             </select>
                         </div>
                         <div class="flex flex-col gap-1 w-full">
                             <label class="text-[9px] font-black uppercase tracking-wider text-slate-400">Status
                                 Filter</label>
-                            <select id="dtdb-filter-status" onchange="window.renderDtdbList()"
+                            <select id="dtdb-filter-status"
                                 class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none">
                                 <option value="all">All</option>
                                 <option value="completed">Completed</option>
@@ -2473,13 +2473,13 @@
 
                 <div
                     class="sticky top-0 z-10 bg-white dark:bg-slate-800 flex space-x-2 md:space-x-4 mb-4 border-b border-slate-200 dark:border-slate-700 pb-3 pt-1 shrink-0 overflow-x-auto scrollbar-hide">
-                    <button id="dadb-tab-btn-date" onclick="window.switchDadbTab('date')"
+                    <button id="dadb-tab-btn-date" data-dadb-tab="date"
                         class="px-4 py-2 text-[10px] md:text-xs font-black uppercase tracking-widest rounded-xl transition-all bg-blue-600 text-white shadow-md whitespace-nowrap">Date
                         View</button>
-                    <button id="dadb-tab-btn-action" onclick="window.switchDadbTab('action')"
+                    <button id="dadb-tab-btn-action" data-dadb-tab="action"
                         class="px-4 py-2 text-[10px] md:text-xs font-black uppercase tracking-widest rounded-xl transition-all bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 whitespace-nowrap">Action
                         View</button>
-                    <button id="dadb-tab-btn-trend" onclick="window.switchDadbTab('trend')"
+                    <button id="dadb-tab-btn-trend" data-dadb-tab="trend"
                         class="px-4 py-2 text-[10px] md:text-xs font-black uppercase tracking-widest rounded-xl transition-all bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 whitespace-nowrap">Trend
                         Chart</button>
                 </div>
@@ -2560,7 +2560,7 @@
             class="fixed inset-0 z-[80] hidden flex items-center justify-center p-4 sm:p-6 transition-all duration-300">
             <div id="stm-target-backdrop"
                 class="fixed inset-0 bg-slate-900/80 backdrop-blur-xl opacity-0 transition-opacity duration-300"
-                onclick="window.closeSubjectTargetModal()"></div>
+                data-close-subject-target-modal></div>
             <div id="stm-target-content"
                 class="relative bg-white dark:bg-slate-800 p-6 md:p-8 rounded-3xl shadow-2xl w-full max-w-md border border-slate-200/50 dark:border-slate-700/50 transform scale-95 opacity-0 translate-y-4 transition-all duration-300 mx-4 z-10 flex flex-col">
                 <div
@@ -2580,7 +2580,7 @@
                                 target for subject</p>
                         </div>
                     </div>
-                    <button onclick="window.closeSubjectTargetModal()"
+                    <button data-close-subject-target-modal
                         class="p-2 bg-slate-100 dark:bg-slate-700 rounded-xl hover:rotate-90 transition-transform active:scale-95">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
@@ -2630,11 +2630,11 @@
                         class="mr-auto px-4 py-2.5 bg-red-600 hover:bg-red-700 rounded-xl text-xs font-black uppercase tracking-wider text-white active:scale-95 transition-all shadow-md hidden">
                         Delete
                     </button>
-                    <button onclick="window.closeSubjectTargetModal()"
+                    <button data-close-subject-target-modal
                         class="px-4 py-2.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-xl text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-200 active:scale-95 transition-all">
                         Cancel
                     </button>
-                    <button onclick="window.submitSubjectTarget()"
+                    <button data-submit-subject-target
                         class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 rounded-xl text-xs font-black uppercase tracking-wider text-white active:scale-95 transition-all shadow-md">
                         Save Target
                     </button>
@@ -3300,7 +3300,7 @@
                         <div class="flex flex-col gap-2">
                             <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Track
                                 (Optional):</label>
-                            <select id="schedule-input-track" onchange="window.onScheduleTrackChange()"
+                            <select id="schedule-input-track" data-schedule-track-select
                                 class="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-xs sm:text-sm text-slate-900 dark:text-white font-bold focus:ring-2 focus:ring-blue-500 outline-none w-full shadow-inner cursor-pointer">
                                 <!-- Populated dynamically -->
                             </select>
@@ -3318,28 +3318,28 @@
                         <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Routine
                             Color:</label>
                         <div class="flex flex-wrap gap-2.5 mt-1" id="schedule-color-picker">
-                            <button type="button" onclick="window.selectScheduleColor('#6366f1', this)"
+                            <button type="button" data-schedule-color="#6366f1"
                                 class="w-7 h-7 rounded-full bg-[#6366f1] ring-2 ring-offset-2 ring-blue-500 transition-all active:scale-90"
                                 data-color="#6366f1" title="Indigo"></button>
-                            <button type="button" onclick="window.selectScheduleColor('#8b5cf6', this)"
+                            <button type="button" data-schedule-color="#8b5cf6"
                                 class="w-7 h-7 rounded-full bg-[#8b5cf6] transition-all active:scale-90"
                                 data-color="#8b5cf6" title="Violet"></button>
-                            <button type="button" onclick="window.selectScheduleColor('#f43f5e', this)"
+                            <button type="button" data-schedule-color="#f43f5e"
                                 class="w-7 h-7 rounded-full bg-[#f43f5e] transition-all active:scale-90"
                                 data-color="#f43f5e" title="Rose"></button>
-                            <button type="button" onclick="window.selectScheduleColor('#10b981', this)"
+                            <button type="button" data-schedule-color="#10b981"
                                 class="w-7 h-7 rounded-full bg-[#10b981] transition-all active:scale-90"
                                 data-color="#10b981" title="Emerald"></button>
-                            <button type="button" onclick="window.selectScheduleColor('#f97316', this)"
+                            <button type="button" data-schedule-color="#f97316"
                                 class="w-7 h-7 rounded-full bg-[#f97316] transition-all active:scale-90"
                                 data-color="#f97316" title="Orange"></button>
-                            <button type="button" onclick="window.selectScheduleColor('#06b6d4', this)"
+                            <button type="button" data-schedule-color="#06b6d4"
                                 class="w-7 h-7 rounded-full bg-[#06b6d4] transition-all active:scale-90"
                                 data-color="#06b6d4" title="Cyan"></button>
-                            <button type="button" onclick="window.selectScheduleColor('#f59e0b', this)"
+                            <button type="button" data-schedule-color="#f59e0b"
                                 class="w-7 h-7 rounded-full bg-[#f59e0b] transition-all active:scale-90"
                                 data-color="#f59e0b" title="Amber"></button>
-                            <button type="button" onclick="window.selectScheduleColor('#64748b', this)"
+                            <button type="button" data-schedule-color="#64748b"
                                 class="w-7 h-7 rounded-full bg-[#64748b] transition-all active:scale-90"
                                 data-color="#64748b" title="Slate"></button>
                         </div>
@@ -3352,7 +3352,7 @@
                         class="px-4 py-2.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-xl text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-200 active:scale-95 transition-all">
                         Cancel
                     </button>
-                    <button onclick="window.submitAddScheduleBlock()"
+                    <button data-submit-add-schedule id="btn-submit-add-schedule"
                         class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 rounded-xl text-xs font-black uppercase tracking-wider text-white active:scale-95 transition-all shadow-md">
                         Add Slot
                     </button>
@@ -3418,7 +3418,7 @@
                         class="px-4 py-2.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-xl text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-200 active:scale-95 transition-all">
                         Cancel
                     </button>
-                    <button id="csgm-submit-btn" onclick="window.submitCreateScheduleGroup()"
+                    <button id="csgm-submit-btn" data-submit-create-group
                         class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 rounded-xl text-xs font-black uppercase tracking-wider text-white active:scale-95 transition-all shadow-md">
                         Create Group
                     </button>
@@ -3461,10 +3461,10 @@
                 <!-- Tabs selector inside modal -->
                 <div
                     class="flex bg-slate-100 dark:bg-slate-900/60 p-1 rounded-xl border border-slate-200/50 dark:border-slate-800/80 shadow-inner mb-4 shrink-0">
-                    <button type="button" id="adt-tab-btn-todo" onclick="window.switchAdtTab('todo')"
+                    <button type="button" id="adt-tab-btn-todo" data-adt-tab="todo"
                         class="flex-1 py-2 text-[10px] font-black uppercase tracking-wider rounded-lg transition-all bg-blue-600 text-white shadow">Custom
                         Task</button>
-                    <button type="button" id="adt-tab-btn-study" onclick="window.switchAdtTab('study')"
+                    <button type="button" id="adt-tab-btn-study" data-adt-tab="study"
                         class="flex-1 py-2 text-[10px] font-black uppercase tracking-wider rounded-lg transition-all text-slate-500 dark:text-slate-400">Study
                         Target</button>
                 </div>
@@ -3487,7 +3487,7 @@
                     <div class="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-700/60 mt-4">
                         <button onclick="closeModal('add-daily-target-modal')"
                             class="px-4 py-2.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-xl text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-200 active:scale-95 transition-all">Cancel</button>
-                        <button onclick="window.addCustomTodoTarget()"
+                        <button data-add-custom-todo-target id="btn-add-custom-todo-target"
                             class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-black uppercase tracking-wider active:scale-95 transition-all shadow-md">Add
                             Task</button>
                     </div>
@@ -3498,14 +3498,14 @@
                     <div class="flex flex-col gap-2">
                         <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Select from
                             Weekly Targets</label>
-                        <select id="dt-select-from-wt" onchange="window.handleSelectFromWeeklyTargetChange()"
+                        <select id="dt-select-from-wt" data-select-weekly-target
                             class="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm text-slate-900 dark:text-white font-bold focus:ring-2 focus:ring-blue-500 outline-none w-full shadow-inner">
                             <option value="">-- Choose a Weekly Target --</option>
                         </select>
                     </div>
                     <div class="flex flex-col gap-2">
                         <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Program</label>
-                        <select id="dt-select-prog" onchange="window.updateDailyTargetSubjectDropdown()"
+                        <select id="dt-select-prog" data-daily-target-subject
                             class="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm text-slate-900 dark:text-white font-bold focus:ring-2 focus:ring-blue-500 outline-none w-full shadow-inner">
                         </select>
                     </div>
@@ -3515,13 +3515,13 @@
                             Subject
                             <span id="dt-sub-color-dot" class="inline-block w-2 h-2 rounded-full hidden"></span>
                         </label>
-                        <select id="dt-select-sub" onchange="window.updateDailyTargetChapterDropdown()"
+                        <select id="dt-select-sub" data-daily-target-chapter
                             class="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm text-slate-900 dark:text-white font-bold focus:ring-2 focus:ring-blue-500 outline-none w-full shadow-inner">
                         </select>
                     </div>
                     <div class="flex flex-col gap-2">
                         <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Chapter</label>
-                        <select id="dt-select-ch" onchange="window.handleDailyTargetChapterChange()"
+                        <select id="dt-select-ch" data-daily-target-chapter
                             class="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm text-slate-900 dark:text-white font-bold focus:ring-2 focus:ring-blue-500 outline-none w-full shadow-inner">
                         </select>
                     </div>
@@ -3542,7 +3542,7 @@
                     <div class="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-700/60 mt-4">
                         <button onclick="closeModal('add-daily-target-modal')"
                             class="px-4 py-2.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-xl text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-200 active:scale-95 transition-all">Cancel</button>
-                        <button onclick="window.addDailyTarget()"
+                        <button data-add-daily-target id="btn-add-daily-target"
                             class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-black uppercase tracking-wider active:scale-95 transition-all shadow-md">Add
                             Study Target</button>
                     </div>
@@ -3585,7 +3585,7 @@
                 <div class="space-y-4 my-2 overflow-y-auto max-h-[60vh] pr-1">
                     <div class="flex flex-col gap-2">
                         <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Program</label>
-                        <select id="wt-select-prog" onchange="window.updateWeeklyTargetSubjectDropdown()"
+                        <select id="wt-select-prog" data-weekly-target-program
                             class="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm text-slate-900 dark:text-white font-bold focus:ring-2 focus:ring-blue-500 outline-none w-full shadow-inner">
                         </select>
                     </div>
@@ -3595,7 +3595,7 @@
                             Subject
                             <span id="wt-sub-color-dot" class="inline-block w-2 h-2 rounded-full hidden"></span>
                         </label>
-                        <select id="wt-select-sub" onchange="window.updateWeeklyTargetChapterDropdown()"
+                        <select id="wt-select-sub" data-weekly-target-subject
                             class="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm text-slate-900 dark:text-white font-bold focus:ring-2 focus:ring-blue-500 outline-none w-full shadow-inner">
                         </select>
                     </div>
@@ -3631,7 +3631,7 @@
                     <div class="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-700/60 mt-4">
                         <button onclick="closeModal('add-weekly-target-modal')"
                             class="px-4 py-2.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-650 rounded-xl text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-200 active:scale-95 transition-all">Cancel</button>
-                        <button onclick="window.addWeeklyTarget()"
+                        <button data-add-weekly-target
                             class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-black uppercase tracking-wider active:scale-95 transition-all shadow-md">Add
                             Target</button>
                     </div>
@@ -3690,20 +3690,20 @@
                                 d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                         </svg>
                         <input type="text" id="csm-search-input"
-                            oninput="window.filterCelebrationSetupItems(this.value)"
+                            data-filter-celebration-items
                             placeholder="Search programs or subjects..."
                             class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl pl-9 pr-3 py-2 text-xs font-bold text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:ring-2 focus:ring-amber-500 outline-none transition-all">
                     </div>
 
                     <!-- Quick Preset Buttons -->
                     <div class="flex items-center gap-1.5 flex-wrap">
-                        <button onclick="window.selectCelebrationModalTargets('all-passed')"
+                        <button data-celebration-targets="all-passed"
                             class="px-2.5 py-1.5 bg-slate-100 dark:bg-slate-700/80 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 text-[10px] font-black uppercase tracking-wider rounded-lg transition-all active:scale-95 border border-slate-200/60 dark:border-slate-600/50 shadow-sm">Select
                             Passed</button>
-                        <button onclick="window.selectCelebrationModalTargets('all')"
+                        <button data-celebration-targets="all"
                             class="px-2.5 py-1.5 bg-slate-100 dark:bg-slate-700/80 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 text-[10px] font-black uppercase tracking-wider rounded-lg transition-all active:scale-95 border border-slate-200/60 dark:border-slate-600/50 shadow-sm">Select
                             All</button>
-                        <button onclick="window.selectCelebrationModalTargets('clear')"
+                        <button data-celebration-targets="clear"
                             class="px-2.5 py-1.5 bg-rose-50 dark:bg-rose-950/30 hover:bg-rose-100 text-rose-600 dark:text-rose-400 text-[10px] font-black uppercase tracking-wider rounded-lg transition-all active:scale-95 border border-rose-200/60 dark:border-rose-800/50 shadow-sm">Clear</button>
                     </div>
                 </div>
@@ -3731,7 +3731,7 @@
                     <div class="flex items-center gap-2">
                         <button onclick="closeModal('celebration-setup-modal')"
                             class="text-slate-500 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 font-black text-[10px] uppercase tracking-widest py-2.5 px-4 rounded-xl transition-colors active:scale-95">Cancel</button>
-                        <button onclick="window.saveCelebrationSetup()"
+                        <button data-save-celebration-setup
                             class="bg-gradient-to-r from-amber-500 to-emerald-500 hover:from-amber-600 hover:to-emerald-600 text-white font-black text-[10px] uppercase tracking-widest py-2.5 px-6 rounded-xl transition-all shadow-md active:scale-95 flex items-center gap-1.5">
                             <span>💾</span>
                             <span>Save Criteria</span>
@@ -3776,7 +3776,7 @@
                             Success
                             Score</span>
                     </div>
-                    <button onclick="window.switchCongratsPage(2)"
+                    <button data-congrats-page="2"
                         class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-black text-[11px] md:text-sm uppercase tracking-widest py-4 rounded-xl transition-all shadow-lg active:scale-95">View
                         Summary</button>
                 </div>
@@ -3797,9 +3797,9 @@
                     </div>
 
                     <div class="flex gap-3 shrink-0 mt-auto">
-                        <button onclick="window.switchCongratsPage(1)"
+                        <button data-congrats-page="1"
                             class="w-1/3 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-black text-[10px] md:text-xs uppercase tracking-widest py-3.5 rounded-xl transition-all hover:bg-slate-200 dark:hover:bg-slate-600 active:scale-95 border border-slate-200 dark:border-slate-600">Back</button>
-                        <button onclick="closeCongratsModal()"
+                        <button data-close-congrats
                             class="w-2/3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-black text-[10px] md:text-xs uppercase tracking-widest py-3.5 rounded-xl transition-all shadow-lg active:scale-95">Celebrate
                             & Continue</button>
                     </div>

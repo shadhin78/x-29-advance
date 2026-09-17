@@ -871,11 +871,76 @@
         }
     };
 
-    // Auto-init if container exists and is visible on initial page load
-    if (document.readyState === 'complete' || document.readyState === 'interactive') {
-        const pageEl = document.getElementById('page-schedule');
-        if (pageEl && !pageEl.classList.contains('hidden')) {
-            window.DailySchedulePage.init();
+    function initScheduleEventListeners() {
+        if (typeof document === 'undefined' || typeof document.addEventListener !== 'function') return;
+        if (global._scheduleListenersInitialized) return;
+        global._scheduleListenersInitialized = true;
+
+        document.addEventListener('click', (e) => {
+            const createGroupBtn = e.target.closest('[data-create-schedule-group], #btn-create-schedule-group');
+            if (createGroupBtn) {
+                e.preventDefault();
+                if (typeof window.openCreateScheduleGroup === 'function') window.openCreateScheduleGroup();
+                return;
+            }
+
+            const addScheduleBtn = e.target.closest('[data-open-add-schedule], #btn-open-add-schedule');
+            if (addScheduleBtn) {
+                e.preventDefault();
+                if (typeof window.openAddScheduleModal === 'function') window.openAddScheduleModal();
+                return;
+            }
+
+            const switchRoutineBtn = e.target.closest('[data-switch-routine]');
+            if (switchRoutineBtn) {
+                e.preventDefault();
+                const dir = parseInt(switchRoutineBtn.getAttribute('data-switch-routine'), 10);
+                if (!isNaN(dir) && typeof window.switchRoutineSet === 'function') window.switchRoutineSet(dir);
+                return;
+            }
+
+            const colorBtn = e.target.closest('[data-schedule-color]');
+            if (colorBtn) {
+                e.preventDefault();
+                const color = colorBtn.getAttribute('data-schedule-color');
+                if (color && typeof window.selectScheduleColor === 'function') window.selectScheduleColor(color, colorBtn);
+                return;
+            }
+
+            const submitAddBtn = e.target.closest('[data-submit-add-schedule], #btn-submit-add-schedule');
+            if (submitAddBtn) {
+                e.preventDefault();
+                if (typeof window.submitAddScheduleBlock === 'function') window.submitAddScheduleBlock();
+                return;
+            }
+
+            const submitCreateGroupBtn = e.target.closest('[data-submit-create-group], #csgm-submit-btn');
+            if (submitCreateGroupBtn) {
+                e.preventDefault();
+                if (typeof window.submitCreateScheduleGroup === 'function') window.submitCreateScheduleGroup();
+                return;
+            }
+        });
+
+        document.addEventListener('change', (e) => {
+            const trackSelect = e.target.closest('[data-schedule-track-select], #schedule-input-track');
+            if (trackSelect && typeof window.onScheduleTrackChange === 'function') {
+                window.onScheduleTrackChange();
+            }
+        });
+    }
+
+    if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initScheduleEventListeners);
+        } else {
+            initScheduleEventListeners();
+        }
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+            const pageEl = document.getElementById('page-schedule');
+            if (pageEl && !pageEl.classList.contains('hidden')) {
+                window.DailySchedulePage.init();
+            }
         }
     }
 
