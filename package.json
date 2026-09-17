@@ -5,7 +5,8 @@
   "main": "js/dev-server.js",
   "scripts": {
     "dev": "node js/dev-server.js",
-    "test": "node tests/auth-service.test.js && node tests/config-tracks.test.js && node tests/pace-outcome.test.js && node tests/analytics-visualization.test.js && node tests/daily-targets.test.js && node tests/weekly-targets.test.js && node tests/monthly-targets.test.js && node tests/tasks-metrics-dashboard.test.js",
+    "test": "node tests/auth-service.test.js && node tests/config-tracks.test.js && node tests/pace-outcome.test.js && node tests/analytics-visualization.test.js && node tests/daily-targets.test.js && node tests/weekly-targets.test.js && node tests/monthly-targets.test.js && node tests/tasks-metrics-dashboard.test.js && node tests/app-core.test.js",
+    "test:app": "node tests/app-core.test.js",
     "test:auth": "node tests/auth-service.test.js",
     "test:rules": "mocha tests/firestore-rules.test.js",
     "test:config": "node tests/config-tracks.test.js",

@@ -704,14 +704,18 @@
     };
 
     // Expose Router on window
-    window.Router = Router;
+    if (typeof window !== 'undefined') {
+        window.Router = Router;
+    }
 
     // Auto-init when DOM is ready
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => {
+    if (typeof document !== 'undefined') {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                Router.init();
+            });
+        } else {
             Router.init();
-        });
-    } else {
-        Router.init();
+        }
     }
 })();

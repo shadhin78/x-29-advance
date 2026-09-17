@@ -6,7 +6,7 @@
 /**
  * Standard 14-color palette used for deterministic subject identification.
  */
-export const SUBJECT_PALETTE_COLORS = [
+const SUBJECT_PALETTE_COLORS = [
     '#ef4444', '#f97316', '#eab308', '#84cc16', '#22c55e',
     '#14b8a6', '#06b6d4', '#3b82f6', '#6366f1', '#8b5cf6',
     '#a855f7', '#d946ef', '#ec4899', '#f43f5e'
@@ -19,7 +19,7 @@ export const SUBJECT_PALETTE_COLORS = [
  * @param {string[]} [palette=SUBJECT_PALETTE_COLORS] - Optional color palette array
  * @returns {string} Hex color string
  */
-export function hashStringToColor(str, palette = SUBJECT_PALETTE_COLORS) {
+function hashStringToColor(str, palette = SUBJECT_PALETTE_COLORS) {
     if (!str) return '#3b82f6';
     const pal = (Array.isArray(palette) && palette.length > 0) ? palette : SUBJECT_PALETTE_COLORS;
     let hash = 0;
@@ -37,7 +37,7 @@ export function hashStringToColor(str, palette = SUBJECT_PALETTE_COLORS) {
  * @param {string[]} [palette=SUBJECT_PALETTE_COLORS] - Optional color palette array
  * @returns {string} Hex color string
  */
-export function getSubjectColor(subjName, palette = SUBJECT_PALETTE_COLORS) {
+function getSubjectColor(subjName, palette = SUBJECT_PALETTE_COLORS) {
     if (!subjName) return '#3b82f6';
 
     // 1. Check existing AppState subjectColors cache
@@ -73,7 +73,7 @@ export function getSubjectColor(subjName, palette = SUBJECT_PALETTE_COLORS) {
  * @param {number|string} [alpha=1] - Alpha transparency value (0.0 to 1.0)
  * @returns {string} rgba(...) CSS color string
  */
-export function hexToRgba(hex, alpha = 1) {
+function hexToRgba(hex, alpha = 1) {
     if (!hex) return `rgba(16, 185, 129, ${alpha})`;
     const cleanHex = String(hex).replace('#', '').trim();
     let r = 0, g = 0, b = 0;

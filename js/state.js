@@ -12,7 +12,13 @@ initPlanEndDate.setMonth(initPlanEndDate.getMonth() + 10);
 initPlanEndDate.setHours(23, 59, 59, 999);
 
 
-window.AppState = {
+const _root = (typeof window !== 'undefined') ? window : ((typeof global !== 'undefined') ? global : globalThis);
+if (typeof window === 'undefined') {
+    _root.window = _root;
+}
+
+if (!_root.AppState) {
+    _root.AppState = {
     appState: {},
     tracks: [],
     timerLogs: [],
@@ -139,6 +145,7 @@ window.AppState = {
     _tombstones: {},
     _tasksDateMap: new Map()
 };
+}
 
 // Define transparent properties on window to alias AppState keys
 const stateKeys = [
@@ -156,7 +163,7 @@ const stateKeys = [
     'trendDatasetVisibility', 'dashboardConfig', 'passedItems', 'celebrationTargets', 'revisionData',
     'currentGhmTab', 'subjectColors', 'twColors', 'customActions', 'paceGoals',
     'globalStartDate', 'globalEndDate', 'dynamicLineColors', 'isInitialLoad',
-    'currentFilter', 'PLAN_START_DATE', 'PLAN_END_DATE', 'showSync', 'serverTimeOffset',
+    'currentFilter', 'PLAN_START_DATE', 'PLAN_END_DATE', 'serverTimeOffset',
     'fiscalLedger', 'examSessions', 'examRoutine', 'selectedCountdownExamId',
     'syllabusStructure', 'customSyllabus', 'customPrograms', 'programVisibility', 'weeklyTargetsDatabase',
     'monthlyTargetsDatabase', 'dailyTargetsDatabase', 'scheduleBlocks', 'scheduleBlocks2', 'scheduleGroups',
@@ -167,13 +174,20 @@ const stateKeys = [
 ];
 
 stateKeys.forEach(key => {
-    Object.defineProperty(window, key, {
-        get: () => window.AppState[key],
-        set: (val) => {
-            window.AppState[key] = val;
-        },
-        configurable: true
-    });
+    try {
+        const desc = Object.getOwnPropertyDescriptor(_root, key);
+        if (!desc || desc.configurable) {
+            Object.defineProperty(_root, key, {
+                get: () => (_root.AppState ? _root.AppState[key] : undefined),
+                set: (val) => {
+                    if (_root.AppState) _root.AppState[key] = val;
+                },
+                configurable: true
+            });
+        }
+    } catch (e) {
+        // Ignore unconfigurable property collision
+    }
 });
 
 /**

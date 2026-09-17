@@ -6,7 +6,7 @@
 // js/utils.js (Left behind utilities depending on DOM/Global states)
 
 // Delegated to js/utils/colors.js and js/utils.js
-const getSubjectColor = (typeof window !== 'undefined' && typeof window.getSubjectColor === 'function')
+var getSubjectColor = (typeof window !== 'undefined' && typeof window.getSubjectColor === 'function')
     ? window.getSubjectColor
     : (typeof global !== 'undefined' && typeof global.getSubjectColor === 'function')
         ? global.getSubjectColor
@@ -21,7 +21,7 @@ const getSubjectColor = (typeof window !== 'undefined' && typeof window.getSubje
             return colors[Math.abs(hash) % colors.length];
         };
 
-const hexToRgba = (typeof window !== 'undefined' && typeof window.hexToRgba === 'function')
+var hexToRgba = (typeof window !== 'undefined' && typeof window.hexToRgba === 'function')
     ? window.hexToRgba
     : (typeof global !== 'undefined' && typeof global.hexToRgba === 'function')
         ? global.hexToRgba
@@ -652,9 +652,15 @@ function generateStudyPlan() {
 }
 window.generateStudyPlan = generateStudyPlan;
 
-let defaultTasks = generateStudyPlan();
-AppState.tasks = defaultTasks;
-recalculateTotals();
+let defaultTasks = typeof generateStudyPlan === 'function' ? generateStudyPlan() : [];
+if (typeof AppState !== 'undefined' && AppState) {
+    AppState.tasks = defaultTasks;
+} else if (typeof window !== 'undefined' && window.AppState) {
+    window.AppState.tasks = defaultTasks;
+}
+if (typeof recalculateTotals === 'function') {
+    recalculateTotals();
+}
 
 
 
@@ -3731,124 +3737,7 @@ window.switchPage = function (pageId, sectionId) {
     }
 };
 
-document.addEventListener('DOMContentLoaded', async () => {
-    if (!document.getElementById('app-wrapper')) return;
-    if (AppState.isAppInitialized) return;
-    // Loading screen safety fallback timer (3s max)
-    setTimeout(() => {
-        if (typeof window.dismissLoadingScreen === 'function') {
-            window.dismissLoadingScreen();
-        } else {
-            const loadingEl = document.getElementById('auth-loading');
-            const wrapperEl = document.getElementById('app-wrapper');
-            if (loadingEl) loadingEl.remove();
-            if (wrapperEl) wrapperEl.classList.remove('hidden');
-        }
-    }, 3000);
-
-    // Dismiss tooltips on document click
-    document.addEventListener('click', () => {
-        if (window.hideChapterTooltip) window.hideChapterTooltip();
-        if (window.hideSubjectChapterTooltip) window.hideSubjectChapterTooltip();
-        if (window.hideSpectraChapterTooltip) window.hideSpectraChapterTooltip();
-    });
-
-    // Initialize Focus Timer Service
-    if (window.TimerService) {
-        window.TimerService.init();
-    }
-
-    // Start progress
-    if (window.setLoadingProgress) window.setLoadingProgress(15, 'Initializing workspace...');
-
-    // Load configurations & Initialize Firebase Service
-    try {
-        const config = await FirebaseService.fetchConfig();
-        if (window.setLoadingProgress) window.setLoadingProgress(40, 'Connecting to server...');
-        FirebaseService.init(config);
-        if (window.setLoadingProgress) window.setLoadingProgress(55, 'Authenticating session...');
-    } catch (e) {
-        console.error("Firebase init failed:", e);
-    }
-
-    // Route guard
-    const authProvider = (typeof window !== 'undefined' && window.AuthService) ? window.AuthService : FirebaseService;
-    authProvider.onAuthStateChanged(async (user) => {
-        if (!user) {
-            window.location.href = 'login.html';
-            return;
-        }
-
-        const userEmail = (user.email || '').trim().toLowerCase();
-        if (userEmail !== 'ris2k29@gmail.com') {
-            authProvider.logout().then(() => {
-                window.location.href = 'login.html?error=denied';
-            });
-            return;
-        }
-
-        // Authorized
-        console.log("Admin authorized:", user.email);
-        window.currentUser = user;
-        if (window.setLoadingProgress) window.setLoadingProgress(70, 'Loading cloud workspace...');
-
-        // Update profile section
-        const displayName = user.displayName || 'ris2k29';
-        const displayEmail = user.email;
-
-        const profileNameEl = document.getElementById('profile-name');
-        const profileEmailEl = document.getElementById('profile-email');
-        const profileAvatarEl = document.getElementById('profile-avatar');
-        if (profileNameEl) profileNameEl.textContent = displayName;
-        if (profileEmailEl) profileEmailEl.textContent = displayEmail;
-        if (profileAvatarEl) {
-            profileAvatarEl.textContent = displayName.charAt(0).toUpperCase();
-        }
-
-        // Subscribe and sync from cloud
-        FirebaseService.loadFromCloud();
-        window.switchPage('dashboard');
-    });
-
-    // --- Progressive Web App (PWA) Logic ---
-    let deferredPrompt = null;
-    const installBtn = document.getElementById('pwa-install-btn');
-
-    window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        if (installBtn) {
-            installBtn.classList.remove('hidden');
-            installBtn.classList.add('flex');
-        }
-        console.log("[PWA] beforeinstallprompt event fired.");
-    });
-
-    if (installBtn) {
-        installBtn.addEventListener('click', async () => {
-            if (!deferredPrompt) return;
-            deferredPrompt.prompt();
-            const { outcome } = await deferredPrompt.userChoice;
-            console.log(`[PWA] User response to install prompt: ${outcome}`);
-            if (outcome === 'accepted') {
-                installBtn.classList.add('hidden');
-                installBtn.classList.remove('flex');
-            }
-            deferredPrompt = null;
-        });
-    }
-
-    window.addEventListener('appinstalled', (evt) => {
-        console.log('[PWA] X-29 was installed successfully!');
-        if (installBtn) {
-            installBtn.classList.add('hidden');
-            installBtn.classList.remove('flex');
-        }
-        if (typeof showToast === 'function') {
-            showToast('X-29 Installed Successfully!', 'success');
-        }
-    });
-});
+// Application bootstrapper and lifecycle orchestrator migrated to Native ES Module entry point: js/core/app.js
 
 /******************************************************************
  * LOGIN AUTH

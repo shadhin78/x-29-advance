@@ -1249,7 +1249,8 @@ window.resetLocalWorkspace = window.FirebaseService.resetLocalWorkspace.bind(win
 window.showSync = showSync;
 
 // Cross-tab real-time state synchronization listener (strictly namespaced for X-29 Advance)
-window.addEventListener('storage', (e) => {
+if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
+    window.addEventListener('storage', (e) => {
     const targetKey1 = (window.safeStorage && window.safeStorage._k ? window.safeStorage._k('local_app_state') : 'x29_adv_local_app_state');
     const targetKey2 = (window.safeStorage && window.safeStorage._k ? window.safeStorage._k('appState') : 'x29_adv_appState');
     if ((e.key === targetKey1 || e.key === targetKey2) && e.newValue) {
@@ -1262,7 +1263,8 @@ window.addEventListener('storage', (e) => {
             console.warn("Cross-tab storage synchronization notice:", err);
         }
     }
-});
+    });
+}
 
 // Register persistence & snapshot teardown hook with AuthService
 if (typeof window !== 'undefined' && window.AuthService && typeof window.AuthService.registerLogoutHook === 'function') {
