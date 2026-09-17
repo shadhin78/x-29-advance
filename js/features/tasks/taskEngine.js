@@ -1234,9 +1234,42 @@
         if (typeof window.renderTrendCharts === 'function') window.renderTrendCharts();
     }
 
+    /**
+     * Initializes delegated event listeners for the Tasks feature.
+     * Uses container delegation on #task-list to eliminate repeated per-element listener registration.
+     * Includes idempotency guards to prevent duplicate listener accumulation.
+     */
+    function initTaskEventListeners() {
+        const list = safeGetEl('task-list');
+        if (list && !list._taskListenersBound) {
+            list._taskListenersBound = true;
+            list.addEventListener('change', (e) => {
+                if (e.target && e.target.classList && e.target.classList.contains('task-checkbox')) {
+                    handleTaskToggle(e);
+                }
+            });
+        }
+
+        const editModal = safeGetEl('edit-task-modal');
+        if (editModal && !editModal._taskListenersBound) {
+            editModal._taskListenersBound = true;
+            editModal.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && e.target && (e.target.id === 'edit-task-num' || e.target.id === 'edit-task-title')) {
+                    e.preventDefault();
+                    if (typeof window !== 'undefined' && typeof window.saveTaskEdit === 'function') {
+                        window.saveTaskEdit();
+                    } else if (typeof saveTaskEdit === 'function') {
+                        saveTaskEdit();
+                    }
+                }
+            });
+        }
+    }
+
     function renderTaskList() {
         const list = safeGetEl('task-list');
         if (!list) return;
+        initTaskEventListeners();
         list.className = 'flex flex-col space-y-6 md:space-y-8 w-full pb-4';
 
         let subjectsToRender = [];
@@ -1380,9 +1413,7 @@
         }
 
         list.innerHTML = html;
-        if (typeof document !== 'undefined') {
-            document.querySelectorAll('.task-checkbox').forEach(cb => { cb.onchange = handleTaskToggle; });
-        }
+        // Event delegation on #task-list handles all dynamic .task-checkbox changes without per-element listener binding
     }
 
     function generateSingleTaskHtml(dayObj, taskObj, type) {
@@ -1623,6 +1654,7 @@
         deleteTask,
         setFilter,
         renderTaskList,
+        initTaskEventListeners,
         generateSingleTaskHtml,
         generateRevisionTaskHtml,
         openRevisionModal,
@@ -1658,6 +1690,7 @@
 
     window.setFilter = setFilter;
     window.renderTaskList = renderTaskList;
+    window.initTaskEventListeners = initTaskEventListeners;
     window.generateSingleTaskHtml = generateSingleTaskHtml;
     window.generateRevisionTaskHtml = generateRevisionTaskHtml;
 

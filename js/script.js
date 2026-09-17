@@ -3706,11 +3706,19 @@ window.switchPage = function (pageId, sectionId) {
             if (window.resultsTrendChartInstance) window.resultsTrendChartInstance.resize();
         }, 50);
     } else if (pageId === 'master-config') {
-        if (typeof window.populateTrackDropdowns === 'function') window.populateTrackDropdowns();
-        if (typeof window.updateManageDropdown === 'function') window.updateManageDropdown();
-        if (typeof window.renderPassConfig === 'function') window.renderPassConfig();
-        if (typeof window.renderCelebrationConfig === 'function') window.renderCelebrationConfig();
-        if (typeof window.renderPriorityConfig === 'function') window.renderPriorityConfig();
+        if (window.MasterConfigPage && typeof window.MasterConfigPage.mount === 'function') {
+            window.MasterConfigPage.mount();
+        } else {
+            if (typeof window.populateTrackDropdowns === 'function') window.populateTrackDropdowns();
+            const activeSysTab = document.querySelector('[id^="sys-tab-"].bg-blue-600');
+            const currentTab = activeSysTab ? activeSysTab.id.replace('sys-tab-', '') : 'chapter';
+            if (typeof window.switchSysTab === 'function') {
+                window.switchSysTab(currentTab);
+            }
+            if (typeof window.renderPassConfig === 'function') window.renderPassConfig();
+            if (typeof window.renderCelebrationConfig === 'function') window.renderCelebrationConfig();
+            if (typeof window.renderPriorityConfig === 'function') window.renderPriorityConfig();
+        }
 
     } else if (pageId === 'schedule') {
         window.renderSchedulePage();

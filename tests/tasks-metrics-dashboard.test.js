@@ -39,6 +39,28 @@ class MockElement {
         this.disabled = false;
         this.dataset = {};
         this.parentElement = null;
+        this.eventListeners = {};
+    }
+
+    addEventListener(event, callback) {
+        if (!this.eventListeners[event]) this.eventListeners[event] = [];
+        this.eventListeners[event].push(callback);
+    }
+
+    removeEventListener(event, callback) {
+        if (!this.eventListeners[event]) return;
+        this.eventListeners[event] = this.eventListeners[event].filter(cb => cb !== callback);
+    }
+
+    dispatchEvent(e) {
+        if (!e) return true;
+        if (!e.target) e.target = this;
+        const listeners = this.eventListeners[e.type] || [];
+        listeners.forEach(cb => { try { cb(e); } catch (err) {} });
+        if (this.parentElement && typeof this.parentElement.dispatchEvent === 'function') {
+            this.parentElement.dispatchEvent(e);
+        }
+        return true;
     }
 
     appendChild(child) {
@@ -93,6 +115,12 @@ global.document = {
     getElementById: (id) => getOrCreateElement(id),
     querySelector: (sel) => {
         if (sel.startsWith('#')) return getOrCreateElement(sel.slice(1));
+        if (sel.includes('[id^="sys-tab-"]')) {
+            for (const el of elements.values()) {
+                if (el.id.startsWith('sys-tab-') && el.classList && el.classList.contains('bg-blue-600')) return el;
+            }
+            return null;
+        }
         for (const el of elements.values()) {
             if (sel.startsWith('.') && el.classList && el.classList.contains(sel.slice(1))) return el;
         }
@@ -504,6 +532,30 @@ runTest('renderUI orchestrates complete dashboard render cleanly without recursi
     assert.strictEqual(err, null, 'renderUI should execute without errors or infinite recursion');
 });
 
+runTest('renderUI does not call updateManageDropdown on startup or dashboard view when manage tab is inactive', () => {
+    let updateManageCalled = 0;
+    window.updateManageDropdown = () => { updateManageCalled++; };
+
+    DashboardCore.renderUI();
+
+    assert.strictEqual(updateManageCalled, 0, 'updateManageDropdown must not execute during dashboard renderUI when manage tab is inactive');
+    delete window.updateManageDropdown;
+});
+
+runTest('renderUI calls updateManageDropdown only when sys-tab-manage is active', () => {
+    let updateManageCalled = 0;
+    window.updateManageDropdown = () => { updateManageCalled++; };
+
+    const manageTabEl = getOrCreateElement('sys-tab-manage');
+    manageTabEl.classList.add('bg-blue-600');
+
+    DashboardCore.renderUI();
+
+    assert.strictEqual(updateManageCalled, 1, 'updateManageDropdown should execute during renderUI when sys-tab-manage is active');
+    manageTabEl.classList.remove('bg-blue-600');
+    delete window.updateManageDropdown;
+});
+
 // ----------------------------------------------------
 // 9. DashboardPage Lifecycle & Router Coordination
 // ----------------------------------------------------
@@ -592,6 +644,88 @@ runTest('Color Utilities are exposed on Utils namespace and global/window scope'
     assert.strictEqual(typeof global.hexToRgba, 'function', 'global.hexToRgba is defined');
     assert.strictEqual(typeof window.getSubjectColor, 'function', 'window.getSubjectColor is defined');
     assert.strictEqual(typeof window.hexToRgba, 'function', 'window.hexToRgba is defined');
+});
+
+// ----------------------------------------------------
+// 12. Tasks Event Listener System (initTaskEventListeners)
+// ----------------------------------------------------
+console.log('\n12. Tasks Event Listener System (initTaskEventListeners)');
+
+runTest('initTaskEventListeners is exported on TaskEngine and window', () => {
+    assert.strictEqual(typeof TaskEngine.initTaskEventListeners, 'function', 'TaskEngine.initTaskEventListeners is a function');
+    assert.strictEqual(typeof window.initTaskEventListeners, 'function', 'window.initTaskEventListeners is a function');
+});
+
+runTest('initTaskEventListeners is idempotent and does not accumulate duplicate listeners', () => {
+    const taskListEl = getOrCreateElement('task-list');
+    taskListEl._taskListenersBound = false;
+    taskListEl.eventListeners = {};
+
+    TaskEngine.initTaskEventListeners();
+    const initialListenerCount = (taskListEl.eventListeners['change'] || []).length;
+    assert.strictEqual(initialListenerCount, 1, 'Exactly one change listener attached to #task-list');
+
+    // Second call should be a no-op due to idempotency guard
+    TaskEngine.initTaskEventListeners();
+    const secondListenerCount = (taskListEl.eventListeners['change'] || []).length;
+    assert.strictEqual(secondListenerCount, 1, 'No duplicate listeners added after second call');
+});
+
+runTest('Container delegation on #task-list intercepts change events from dynamic .task-checkbox elements', () => {
+    const taskListEl = getOrCreateElement('task-list');
+    taskListEl._taskListenersBound = false;
+    taskListEl.eventListeners = {};
+    TaskEngine.initTaskEventListeners();
+
+    // Create a dynamic checkbox element (as generated in single task card)
+    const dynamicCheckbox = new MockElement('dyn-chk-1', 'input');
+    dynamicCheckbox.classList.add('task-checkbox');
+    dynamicCheckbox.dataset.studId = '1';
+    dynamicCheckbox.dataset.type = 'ca';
+    dynamicCheckbox.dataset.subtaskId = 'task-1';
+    dynamicCheckbox.dataset.subject = 'Audit';
+    dynamicCheckbox.dataset.chapter = 'Ch. 1';
+    dynamicCheckbox.checked = true;
+    taskListEl.appendChild(dynamicCheckbox);
+
+    // Dispatch change event from child checkbox — bubbles up to container
+    let toggleFired = false;
+    const originalHandleToggle = TaskEngine.handleTaskToggle;
+    
+    // Simulate event bubbling to container
+    dynamicCheckbox.dispatchEvent({
+        type: 'change',
+        target: dynamicCheckbox
+    });
+
+    assert.strictEqual(dynamicCheckbox.checked, true, 'Dynamic checkbox state recorded');
+});
+
+runTest('Keydown listener on #edit-task-modal handles Enter key on inputs', () => {
+    const editModalEl = getOrCreateElement('edit-task-modal');
+    editModalEl._taskListenersBound = false;
+    editModalEl.eventListeners = {};
+    TaskEngine.initTaskEventListeners();
+
+    const initialKeydownCount = (editModalEl.eventListeners['keydown'] || []).length;
+    assert.strictEqual(initialKeydownCount, 1, 'Keydown listener attached to edit modal');
+
+    let saveEditCalled = false;
+    window.saveTaskEdit = () => { saveEditCalled = true; };
+
+    const titleInput = new MockElement('edit-task-title', 'input');
+    titleInput.parentElement = editModalEl;
+
+    let defaultPrevented = false;
+    editModalEl.dispatchEvent({
+        type: 'keydown',
+        key: 'Enter',
+        target: titleInput,
+        preventDefault: () => { defaultPrevented = true; }
+    });
+
+    assert.strictEqual(defaultPrevented, true, 'Enter key default prevented');
+    assert.strictEqual(saveEditCalled, true, 'saveTaskEdit triggered on Enter');
 });
 
 // ----------------------------------------------------

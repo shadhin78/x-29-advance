@@ -272,9 +272,14 @@
                         window.MasterConfigPage.mount();
                     } else {
                         if (typeof window.populateTrackDropdowns === 'function') window.populateTrackDropdowns();
-                        if (typeof window.updateManageDropdown === 'function') window.updateManageDropdown();
-                        if (typeof window.renderPriorityConfig === 'function') window.renderPriorityConfig();
-                        if (typeof window.renderTrackList === 'function') window.renderTrackList();
+                        const activeSysTab = document.querySelector('[id^="sys-tab-"].bg-blue-600');
+                        const currentTab = activeSysTab ? activeSysTab.id.replace('sys-tab-', '') : 'chapter';
+                        if (typeof window.switchSysTab === 'function') {
+                            window.switchSysTab(currentTab);
+                        } else {
+                            if (typeof window.renderPriorityConfig === 'function') window.renderPriorityConfig();
+                            if (typeof window.renderTrackList === 'function') window.renderTrackList();
+                        }
                     }
                 },
                 onDestroy: function () {

@@ -1483,7 +1483,6 @@
 
             // Dynamic Form & Manage UI Syncs
             if (typeof window.populateTrackDropdowns === 'function') window.populateTrackDropdowns();
-            if (typeof window.updateManageDropdown === 'function') window.updateManageDropdown();
             if (typeof window.renderPassConfig === 'function') window.renderPassConfig();
             if (typeof window.renderCelebrationConfig === 'function') window.renderCelebrationConfig();
             if (typeof window.togglePaceBundleType === 'function') window.togglePaceBundleType();
@@ -1494,6 +1493,7 @@
                     const tabName = activeSysTab.id.replace('sys-tab-', '');
                     if (tabName === 'chapter' && typeof window.updateChProgDropdown === 'function') window.updateChProgDropdown();
                     if (tabName === 'subject' && typeof window.updateSubProgDropdown === 'function') window.updateSubProgDropdown();
+                    if (tabName === 'manage' && typeof window.updateManageDropdown === 'function') window.updateManageDropdown();
                     if (tabName === 'priority') {
                         const activeEl = document.activeElement;
                         const isFocusInPriority = activeEl && document.getElementById('sys-content-priority')?.contains(activeEl);

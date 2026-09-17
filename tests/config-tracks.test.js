@@ -64,6 +64,8 @@ const mockDocument = {
 // Initialize necessary DOM elements for config systems
 [
     'sys-content-curriculum', 'sys-content-priority', 'sys-content-track',
+    'sys-tab-chapter', 'sys-tab-subject', 'sys-tab-program', 'sys-tab-manage', 'sys-tab-priority', 'sys-tab-track', 'sys-tab-clean',
+    'sys-content-chapter', 'sys-content-subject', 'sys-content-program', 'sys-content-manage', 'sys-content-clean',
     'add-track-name', 'etm-track-id', 'etm-track-name',
     'add-prog-track', 'add-prog-name',
     'add-sub-track', 'add-sub-program', 'add-sub-name', 'add-sub-bulk', 'add-sub-chapters-num',
@@ -464,6 +466,63 @@ it('should maintain task structure and not corrupt daily action track linkages',
     assert.strictEqual(window.AppState.tasks[0].coreTasks[0].completed, true, 'Task completed state must remain intact');
     assert.strictEqual(window.customActions[0].track, 'core', 'Action track reference must remain intact');
     assert.strictEqual(window.customActions[0].title, 'Daily Review', 'Action title must remain intact');
+});
+
+// ----------------------------------------------------
+// TEST GROUP 6: Initialization Order and Lifecycle Safety (updateManageDropdown)
+// ----------------------------------------------------
+console.log('\nGroup 6: Initialization Order and Lifecycle Safety (updateManageDropdown)');
+
+it('should not call updateManageDropdown when switching to chapter tab', () => {
+    let updateManageCalled = 0;
+    const origUpdateManage = window.updateManageDropdown;
+    window.updateManageDropdown = () => { updateManageCalled++; };
+
+    window.switchSysTab('chapter');
+
+    assert.strictEqual(updateManageCalled, 0, 'updateManageDropdown must not execute on chapter tab switch');
+    const chapterTab = mockDocument.getElementById('sys-tab-chapter');
+    assert(chapterTab.classList.contains('bg-blue-600'), 'sys-tab-chapter should be active');
+
+    window.updateManageDropdown = origUpdateManage;
+});
+
+it('should execute updateManageDropdown when switching to manage tab', () => {
+    let updateManageCalled = 0;
+    const origUpdateManage = window.updateManageDropdown;
+    window.updateManageDropdown = () => { updateManageCalled++; };
+
+    window.switchSysTab('manage');
+
+    assert.strictEqual(updateManageCalled, 1, 'updateManageDropdown must execute exactly once when manage tab is activated');
+    const manageTab = mockDocument.getElementById('sys-tab-manage');
+    assert(manageTab.classList.contains('bg-blue-600'), 'sys-tab-manage should be active');
+
+    window.updateManageDropdown = origUpdateManage;
+});
+
+it('should populate target select correctly when updateManageDropdown executes with required DOM', () => {
+    window.customActions = [
+        { id: 'act-1', title: 'Daily Problem', priority: 1 },
+        { id: 'act-2', title: 'Code Review', priority: 2 }
+    ];
+    window.customPrograms = {
+        core: [{ name: 'Algorithms' }, { name: 'Data Structures' }]
+    };
+
+    // Test Action type
+    mockDocument.getElementById('manage-type').value = 'action';
+    window.updateManageDropdown();
+    const targetSelect = mockDocument.getElementById('manage-target');
+    assert(targetSelect.innerHTML.includes('Daily Problem'), 'Target select should include action options');
+    assert(targetSelect.innerHTML.includes('Code Review'), 'Target select should include all action options');
+
+    // Test Program type
+    mockDocument.getElementById('manage-type').value = 'program';
+    mockDocument.getElementById('manage-track').value = 'core';
+    window.updateManageDropdown();
+    assert(targetSelect.innerHTML.includes('Algorithms'), 'Target select should include program options');
+    assert(targetSelect.innerHTML.includes('Data Structures'), 'Target select should include all program options');
 });
 
 console.log('\n==================================================');

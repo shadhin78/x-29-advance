@@ -847,7 +847,11 @@
             if (typeof renderUI === 'function') renderUI();
 
             if (typeof window.populateTrackDropdowns === 'function') window.populateTrackDropdowns();
-            if (typeof window.updateManageDropdown === 'function') window.updateManageDropdown();
+            const activeSysTab = typeof document !== 'undefined' && document.querySelector ? document.querySelector('[id^="sys-tab-"].bg-blue-600') : null;
+            const currentTab = activeSysTab ? activeSysTab.id.replace('sys-tab-', '') : null;
+            if (currentTab === 'manage' && typeof window.updateManageDropdown === 'function') {
+                window.updateManageDropdown();
+            }
             if (typeof window.renderTrackList === 'function') window.renderTrackList();
             if (typeof window.renderExamSessions === 'function') window.renderExamSessions();
 

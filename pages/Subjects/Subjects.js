@@ -787,7 +787,16 @@
     if (html === '') html = `<div class="flex flex-col items-center py-12 text-slate-400"><span class="text-4xl mb-4">📭</span><p class="font-black uppercase tracking-widest text-sm">No tasks scheduled for this selection</p></div>`;
 
     list.innerHTML = html;
-    list.querySelectorAll('.task-checkbox').forEach(cb => cb.onchange = (window.handleTaskToggle || handleTaskToggle));
+    if (typeof window.initTaskEventListeners === 'function') {
+        window.initTaskEventListeners();
+    } else if (!list._taskListenersBound) {
+        list._taskListenersBound = true;
+        list.addEventListener('change', (e) => {
+            if (e.target && e.target.classList && e.target.classList.contains('task-checkbox')) {
+                (window.handleTaskToggle || handleTaskToggle)(e);
+            }
+        });
+    }
 }
 
 
