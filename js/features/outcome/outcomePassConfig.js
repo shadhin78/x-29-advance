@@ -266,13 +266,141 @@
         togglePassStatus('program', pName, passAll);
     }
 
+    /**
+     * Synchronizes pass/freeze states for programs and subjects based on outcome results against target CGPA/Grade.
+     */
+    function syncPassFreezeFromResults() {
+        const AppStateRef = typeof global.AppState !== 'undefined' ? global.AppState : (typeof window !== 'undefined' ? window.AppState : {});
+        if (!global.passedItems) global.passedItems = { programs: [], subjects: [] };
+        if (AppStateRef && !AppStateRef.passedItems) AppStateRef.passedItems = global.passedItems;
+
+        const getResultsFn = typeof global.getProcessedResults === 'function' ? global.getProcessedResults : (global.OutcomeResults && typeof global.OutcomeResults.getProcessedResults === 'function' ? global.OutcomeResults.getProcessedResults : null);
+        const processedResults = getResultsFn ? getResultsFn() : [];
+        const programGroups = {};
+        processedResults.forEach(res => {
+            if (res.type === 'cgpa') {
+                const progName = res.title;
+                if (!programGroups[progName]) {
+                    programGroups[progName] = {
+                        overall: null,
+                        subjects: {}
+                    };
+                }
+                if (!res.subject) {
+                    programGroups[progName].overall = res;
+                } else {
+                    programGroups[progName].subjects[res.subject] = res;
+                }
+            }
+        });
+
+        const tracksList = global.tracks || (AppStateRef && AppStateRef.tracks) || [];
+        const customPrograms = global.customPrograms || (AppStateRef && AppStateRef.customPrograms) || {};
+        const syllabusStructure = global.syllabusStructure || (AppStateRef && AppStateRef.syllabusStructure) || {};
+        const getMainTargetFn = typeof global.getProgramMainTarget === 'function' ? global.getProgramMainTarget : (global.OutcomeResults && typeof global.OutcomeResults.getProgramMainTarget === 'function' ? global.OutcomeResults.getProgramMainTarget : () => ({ targetCGPA: '', targetGrade: '' }));
+
+        // For each track and its custom programs
+        tracksList.forEach(track => {
+            if (customPrograms[track.id]) {
+                customPrograms[track.id].forEach(prog => {
+                    const progName = prog.name || prog;
+                    const group = programGroups[progName];
+                    const mainTarget = getMainTargetFn(progName);
+                    const targetCGPA = (group && group.overall && group.overall.targetCGPA) || mainTarget.targetCGPA;
+                    const targetGrade = (group && group.overall && group.overall.targetGrade) || mainTarget.targetGrade;
+                    const hasTgt = targetCGPA && targetCGPA !== 'none' && targetCGPA !== '';
+
+                    const subs = (syllabusStructure[track.id] || []).filter(s => s.program === progName);
+
+                    // Check if all subjects in this program have been attempted
+                    let allSubjectsAttempted = (subs.length > 0);
+                    subs.forEach(s => {
+                        const subRes = group && group.subjects && group.subjects[s.subject];
+                        let attempted = false;
+                        if (subRes) {
+                            const evalType = subRes.evaluationType || 'cgpa';
+                            if (evalType === 'grade') {
+                                if (subRes.grade && subRes.grade.trim() !== '' && subRes.grade.trim().toUpperCase() !== 'F') {
+                                    attempted = true;
+                                }
+                            } else {
+                                const val = parseFloat(subRes.value);
+                                if (subRes.value && !isNaN(val) && val > 0) {
+                                    attempted = true;
+                                }
+                            }
+                        }
+                        if (!attempted) {
+                            allSubjectsAttempted = false;
+                        }
+                    });
+
+                    // 1. Program Level Goal
+                    let isProgramGoalMet = false;
+                    if (allSubjectsAttempted && hasTgt && group && group.overall) {
+                        const evalType = group.overall.evaluationType;
+                        const utilsRef = typeof Utils !== 'undefined' ? Utils : (typeof global.Utils !== 'undefined' ? global.Utils : null);
+                        if (evalType === 'grade') {
+                            const currentGradeVal = (utilsRef && typeof utilsRef.mapGradeToNumeric === 'function') ? utilsRef.mapGradeToNumeric(group.overall.grade, 'grade') : 0;
+                            const targetGradeVal = (utilsRef && typeof utilsRef.mapGradeToNumeric === 'function') ? utilsRef.mapGradeToNumeric(targetGrade, 'grade') : 0;
+                            isProgramGoalMet = currentGradeVal >= targetGradeVal;
+                        } else {
+                            const currentCgpaVal = parseFloat(group.overall.value) || 0;
+                            const targetCgpaVal = parseFloat(targetCGPA) || 0;
+                            isProgramGoalMet = currentCgpaVal >= targetCgpaVal;
+                        }
+                    }
+
+                    if (isProgramGoalMet) {
+                        if (!global.passedItems.programs.includes(progName)) {
+                            global.passedItems.programs.push(progName);
+                        }
+                    }
+
+                    // 2. Subject Level Goal
+                    subs.forEach(s => {
+                        const subRes = group && group.subjects && group.subjects[s.subject];
+                        const subTargetCgpa = (subRes && subRes.targetCGPA) || targetCGPA;
+                        const subTargetGrade = (subRes && subRes.targetGrade) || targetGrade;
+                        const hasSubTgt = subTargetCgpa && subTargetCgpa !== 'none' && subTargetCgpa !== '';
+
+                        let isSubjectGoalMet = false;
+                        if (isProgramGoalMet) {
+                            // If program goal is met, all its subjects are automatically passed/frozen
+                            isSubjectGoalMet = true;
+                        } else if (hasSubTgt && subRes) {
+                            const evalType = subRes.evaluationType || 'cgpa';
+                            const utilsRef = typeof Utils !== 'undefined' ? Utils : (typeof global.Utils !== 'undefined' ? global.Utils : null);
+                            if (evalType === 'grade') {
+                                const currentGradeVal = (utilsRef && typeof utilsRef.mapGradeToNumeric === 'function') ? utilsRef.mapGradeToNumeric(subRes.grade, 'grade') : 0;
+                                const targetGradeVal = (utilsRef && typeof utilsRef.mapGradeToNumeric === 'function') ? utilsRef.mapGradeToNumeric(subTargetGrade, 'grade') : 0;
+                                isSubjectGoalMet = currentGradeVal >= targetGradeVal;
+                            } else {
+                                const currentCgpaVal = parseFloat(subRes.value) || 0;
+                                const targetCgpaVal = parseFloat(subTargetCgpa) || 0;
+                                isSubjectGoalMet = currentCgpaVal >= targetCgpaVal;
+                            }
+                        }
+
+                        if (isSubjectGoalMet) {
+                            if (!global.passedItems.subjects.includes(s.subject)) {
+                                global.passedItems.subjects.push(s.subject);
+                            }
+                        }
+                    });
+                });
+            }
+        });
+    }
+
     // Attach to global scope
     const OutcomePassConfig = {
         renderPassConfig,
         togglePassStatus,
         togglePassProgram,
         togglePassSubject,
-        bulkPassProgram
+        bulkPassProgram,
+        syncPassFreezeFromResults
     };
 
     global.OutcomePassConfig = OutcomePassConfig;
@@ -281,6 +409,7 @@
     global.togglePassProgram = togglePassProgram;
     global.togglePassSubject = togglePassSubject;
     global.bulkPassProgram = bulkPassProgram;
+    global.syncPassFreezeFromResults = syncPassFreezeFromResults;
 
     if (typeof module !== 'undefined' && module.exports) {
         module.exports = OutcomePassConfig;

@@ -537,8 +537,60 @@
         SUBJECT_PALETTE_COLORS,
         hashStringToColor,
         getSubjectColor,
-        hexToRgba
+        hexToRgba,
+        getDynamicChartLabel,
+        getDynamicCleanLabel
     };
+
+    function getDynamicChartLabel(subjName) {
+        const syl = global.syllabusStructure || (typeof window !== 'undefined' ? window.syllabusStructure : {}) || {};
+        let programName = "";
+        for (const trackId in syl) {
+            if (Array.isArray(syl[trackId])) {
+                const sObj = syl[trackId].find(s => s.subject === subjName);
+                if (sObj) {
+                    programName = sObj.program;
+                    break;
+                }
+            }
+        }
+        if (!programName) return subjName;
+        if (subjName.startsWith(programName + ' - ')) {
+            const shortProg = programName.replace(/\s+/g, '');
+            return subjName.replace(programName + ' - ', shortProg + ': ');
+        }
+        if (subjName.startsWith(programName + ' ')) {
+            const shortProg = programName.replace(/\s+/g, '');
+            return subjName.replace(programName + ' ', shortProg + ': ');
+        }
+        return subjName;
+    }
+
+    function getDynamicCleanLabel(subjName, lengthLimit = 12) {
+        let cleanLabel = subjName;
+        const syl = global.syllabusStructure || (typeof window !== 'undefined' ? window.syllabusStructure : {}) || {};
+        let programName = "";
+        for (const trackId in syl) {
+            if (Array.isArray(syl[trackId])) {
+                const sObj = syl[trackId].find(s => s.subject === subjName);
+                if (sObj) {
+                    programName = sObj.program;
+                    break;
+                }
+            }
+        }
+        if (programName) {
+            if (cleanLabel.startsWith(programName + ' - ')) {
+                cleanLabel = cleanLabel.replace(programName + ' - ', '');
+            } else if (cleanLabel.startsWith(programName + ' ')) {
+                cleanLabel = cleanLabel.replace(programName + ' ', '');
+            }
+        }
+        if (cleanLabel.length > lengthLimit) {
+            return cleanLabel.substring(0, lengthLimit) + '..';
+        }
+        return cleanLabel;
+    }
 
     // Global Bindings for synchronous availability
     global.Utils = Utils;
@@ -574,6 +626,8 @@
     global.hashStringToColor = hashStringToColor;
     global.getSubjectColor = getSubjectColor;
     global.hexToRgba = hexToRgba;
+    global.getDynamicChartLabel = getDynamicChartLabel;
+    global.getDynamicCleanLabel = getDynamicCleanLabel;
 
     if (typeof module !== 'undefined' && module.exports) {
         module.exports = Utils;

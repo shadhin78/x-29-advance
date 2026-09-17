@@ -847,6 +847,143 @@
         }
     }
 
+    function openSubjectTrendModal() {
+        global.activeSingleSubjectTrend = null;
+        global.subjectTrendChartStyle = global.subjectTrendChartStyle || 'circle';
+        if (!global.lastSubjectTrendData || !global.lastTrendMonths) {
+            if (typeof global.renderTrendCharts === 'function') global.renderTrendCharts();
+        }
+        if (typeof global.openModal === 'function') global.openModal('subject-trend-modal');
+        renderSubjectTrendCircle();
+        setSubjectTrendChartStyle(global.subjectTrendChartStyle);
+    }
+
+    function openSingleSubjectTrendModal(subjectName) {
+        global.activeSingleSubjectTrend = subjectName;
+        global.subjectTrendChartStyle = global.subjectTrendChartStyle || 'circle';
+        if (!global.lastSubjectTrendData || !global.lastTrendMonths) {
+            if (typeof global.renderTrendCharts === 'function') global.renderTrendCharts();
+        }
+        if (typeof global.openModal === 'function') global.openModal('subject-trend-modal');
+        renderSubjectTrendCircle();
+        setSubjectTrendChartStyle(global.subjectTrendChartStyle);
+    }
+
+    function setSubjectTrendChartStyle(style) {
+        global.subjectTrendChartStyle = style;
+        if (typeof document === 'undefined') return;
+        const circleContainer = document.getElementById('subject-trend-circle-container');
+        const lineContainer = document.getElementById('subject-trend-line-container');
+        const circleBtn = document.getElementById('stm-circle-btn');
+        const lineBtn = document.getElementById('stm-line-btn');
+
+        const activeClass = 'flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-wider transition-all bg-indigo-600 text-white shadow';
+        const inactiveClass = 'flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-wider transition-all text-slate-400 hover:text-white hover:bg-slate-700';
+
+        if (style === 'line') {
+            safeText('stm-title', 'Subject Completion Trends');
+            safeText('stm-desc', 'Detailed month-by-month progression for all subjects');
+            if (circleContainer) circleContainer.classList.add('hidden');
+            if (lineContainer) lineContainer.classList.remove('hidden');
+            if (circleBtn) circleBtn.className = inactiveClass;
+            if (lineBtn) lineBtn.className = activeClass;
+            if (global.subjectTrendLineChartInstance) {
+                global.subjectTrendLineChartInstance.resize();
+                global.subjectTrendLineChartInstance.update();
+            }
+            updateGlobalBtnStyle();
+        } else {
+            const activeSub = global.activeSingleSubjectTrend || 'Subject';
+            safeText('stm-title', `${activeSub}`);
+            safeText('stm-desc', 'Chapter completion analysis');
+            if (circleContainer) circleContainer.classList.remove('hidden');
+            if (lineContainer) lineContainer.classList.add('hidden');
+            if (circleBtn) circleBtn.className = activeClass;
+            if (lineBtn) lineBtn.className = inactiveClass;
+        }
+    }
+
+    function stmToggleDropdown() {
+        if (typeof document === 'undefined') return;
+        const panel = document.getElementById('stm-dropdown-panel');
+        const arrow = document.getElementById('stm-dropdown-arrow');
+        if (!panel) return;
+        const isHidden = panel.classList.contains('hidden');
+        if (isHidden) {
+            panel.classList.remove('hidden');
+            if (arrow) arrow.style.transform = 'rotate(180deg)';
+        } else {
+            panel.classList.add('hidden');
+            if (arrow) arrow.style.transform = '';
+        }
+    }
+
+    function stmSelectSubject(subjectName) {
+        global.activeSingleSubjectTrend = subjectName;
+        if (!global.selectedSubjectsTrend) global.selectedSubjectsTrend = [];
+        if (!global.selectedSubjectsTrend.includes(subjectName)) {
+            global.selectedSubjectsTrend.push(subjectName);
+        }
+        renderSubjectTrendCircle();
+        setSubjectTrendChartStyle(global.subjectTrendChartStyle || 'circle');
+    }
+
+    function stmToggleSubjectCheck(subjectName) {
+        if (!global.selectedSubjectsTrend) global.selectedSubjectsTrend = [];
+        const idx = global.selectedSubjectsTrend.indexOf(subjectName);
+        if (idx !== -1) {
+            if (subjectName === global.activeSingleSubjectTrend && global.selectedSubjectsTrend.length <= 1) return;
+            global.selectedSubjectsTrend.splice(idx, 1);
+        } else {
+            global.selectedSubjectsTrend.push(subjectName);
+        }
+        renderSubjectTrendCircle();
+        setSubjectTrendChartStyle(global.subjectTrendChartStyle || 'circle');
+    }
+
+    function stmSelectAll() {
+        const getAllSubsFn = global.getAllSubjects || (typeof window !== 'undefined' ? window.getAllSubjects : null) || (() => []);
+        global.selectedSubjectsTrend = getAllSubsFn().map(s => s.subject);
+        renderSubjectTrendCircle();
+        setSubjectTrendChartStyle(global.subjectTrendChartStyle || 'circle');
+    }
+
+    function stmDeselectAll() {
+        global.selectedSubjectsTrend = global.activeSingleSubjectTrend ? [global.activeSingleSubjectTrend] : [];
+        renderSubjectTrendCircle();
+        setSubjectTrendChartStyle(global.subjectTrendChartStyle || 'circle');
+    }
+
+    function toggleSubjectTrendGlobal() {
+        global.subjectTrendGlobalMode = !global.subjectTrendGlobalMode;
+        updateGlobalBtnStyle();
+        renderSubjectTrendCircle();
+        setSubjectTrendChartStyle(global.subjectTrendChartStyle || 'circle');
+    }
+
+    function updateGlobalBtnStyle() {
+        if (typeof document === 'undefined') return;
+        const btn = document.getElementById('stm-global-btn');
+        if (!btn) return;
+        if (global.subjectTrendGlobalMode) {
+            btn.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-wider transition-all bg-indigo-600 text-white shadow border border-indigo-500/50 hover:bg-indigo-700 active:scale-95';
+        } else {
+            btn.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-wider transition-all bg-slate-800 text-slate-400 border border-slate-700 hover:bg-slate-700 hover:text-white active:scale-95';
+        }
+    }
+
+    if (typeof document !== 'undefined') {
+        document.addEventListener('click', function (e) {
+            const wrapper = document.getElementById('stm-subject-dropdown-wrapper');
+            const panel = document.getElementById('stm-dropdown-panel');
+            if (wrapper && panel && !wrapper.contains(e.target)) {
+                panel.classList.add('hidden');
+                const arrow = document.getElementById('stm-dropdown-arrow');
+                if (arrow) arrow.style.transform = '';
+            }
+        });
+    }
+
     const ChapterMap = {
         generateGlobalChaptersSVG,
         openGlobalChaptersModal,
@@ -856,7 +993,17 @@
         hideSubjectChapterTooltip,
         showSpectraChapterTooltip,
         hideSpectraChapterTooltip,
-        renderSubjectTrendCircle
+        renderSubjectTrendCircle,
+        openSubjectTrendModal,
+        openSingleSubjectTrendModal,
+        setSubjectTrendChartStyle,
+        stmToggleDropdown,
+        stmSelectSubject,
+        stmToggleSubjectCheck,
+        stmSelectAll,
+        stmDeselectAll,
+        toggleSubjectTrendGlobal,
+        updateGlobalBtnStyle
     };
 
     // Attach to global window scope
@@ -870,6 +1017,16 @@
     global.showSpectraChapterTooltip = showSpectraChapterTooltip;
     global.hideSpectraChapterTooltip = hideSpectraChapterTooltip;
     global.renderSubjectTrendCircle = renderSubjectTrendCircle;
+    global.openSubjectTrendModal = openSubjectTrendModal;
+    global.openSingleSubjectTrendModal = openSingleSubjectTrendModal;
+    global.setSubjectTrendChartStyle = setSubjectTrendChartStyle;
+    global.stmToggleDropdown = stmToggleDropdown;
+    global.stmSelectSubject = stmSelectSubject;
+    global.stmToggleSubjectCheck = stmToggleSubjectCheck;
+    global.stmSelectAll = stmSelectAll;
+    global.stmDeselectAll = stmDeselectAll;
+    global.toggleSubjectTrendGlobal = toggleSubjectTrendGlobal;
+    global.updateGlobalBtnStyle = updateGlobalBtnStyle;
 
     if (typeof module !== 'undefined' && module.exports) {
         module.exports = ChapterMap;

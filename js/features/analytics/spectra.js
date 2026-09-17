@@ -1697,26 +1697,197 @@
         }
     }
 
-    function setTrendFilter(f) {
-        global.trendTimeFilter = f;
-        renderTrendCharts();
-        if (global.revisionTrendChartInstance && typeof global.renderRevisionTrendChart === 'function') {
-            global.renderRevisionTrendChart();
+    function renderRevisionTrendChart() {
+        if (typeof document === 'undefined') return;
+        const ctxSub = document.getElementById('revisionTrendChart');
+        if (!ctxSub) return;
+
+        const AppStateRef = typeof global.AppState !== 'undefined' ? global.AppState : (typeof window !== 'undefined' ? window.AppState : {});
+        const planStart = (AppStateRef && AppStateRef.PLAN_START_DATE) ? AppStateRef.PLAN_START_DATE : new Date();
+        const planEnd = (AppStateRef && AppStateRef.PLAN_END_DATE) ? AppStateRef.PLAN_END_DATE : new Date();
+
+        let chartStart = new Date(planStart.getTime());
+        let chartEnd = new Date(planEnd.getTime());
+        const todayObj = new Date();
+
+        const timeFilter = global.trendTimeFilter || 'ALL';
+        if (timeFilter === '1Y') {
+            chartEnd = new Date(chartStart);
+            chartEnd.setFullYear(chartEnd.getFullYear() + 1);
+            chartEnd.setMonth(chartEnd.getMonth() - 1);
+        } else if (timeFilter === '2Y') {
+            chartEnd = new Date(chartStart);
+            chartEnd.setFullYear(chartEnd.getFullYear() + 2);
+            chartEnd.setMonth(chartEnd.getMonth() - 1);
+        } else if (timeFilter === '3Y') {
+            chartEnd = new Date(chartStart);
+            chartEnd.setFullYear(chartEnd.getFullYear() + 3);
+            chartEnd.setMonth(chartEnd.getMonth() - 1);
+        } else {
+            chartStart = new Date(planStart.getTime());
+            chartEnd = new Date(todayObj.getTime());
+            if (chartEnd < chartStart) {
+                chartEnd = new Date(chartStart.getTime());
+                chartEnd.setMonth(chartEnd.getMonth() + 1);
+            }
         }
-        if (typeof document !== 'undefined') {
-            ['1Y', '2Y', '3Y', 'ALL'].forEach(id => {
-                const btn = document.getElementById('tf-' + id);
-                if (btn) {
-                    if (id === f) {
-                        btn.classList.add('bg-blue-600', 'text-white', 'shadow');
-                        btn.classList.remove('text-slate-500', 'hover:bg-slate-300', 'dark:text-slate-400', 'dark:hover:bg-slate-600');
+
+        const sYear = chartStart.getFullYear();
+        const sMonth = chartStart.getMonth();
+        const eYear = chartEnd.getFullYear();
+        const eMonth = chartEnd.getMonth();
+        const totalMonths = Math.max(1, (eYear - sYear) * 12 + (eMonth - sMonth) + 1);
+
+        const months = [];
+        for (let i = 0; i < totalMonths; i++) {
+            const d = new Date(sYear, sMonth + i, 1);
+            months.push(d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' }));
+        }
+
+        let revSubData = {};
+        if (!global.chartVisibility) global.chartVisibility = { prog: {}, monthly: {}, yearly: {}, subjects: {}, revSubjects: {} };
+        if (!global.chartVisibility.revSubjects) global.chartVisibility.revSubjects = {};
+        if (!global.latestChartStats) global.latestChartStats = { revSubjects: {} };
+
+        const getAllSubsFn = global.getAllSubjects || (typeof window !== 'undefined' ? window.getAllSubjects : null) || (() => []);
+        getAllSubsFn().forEach(s => {
+            revSubData[s.subject] = Array(totalMonths).fill(0);
+            if (global.chartVisibility.revSubjects[s.subject] === undefined) global.chartVisibility.revSubjects[s.subject] = true;
+        });
+
+        let latestActiveMonth = -1;
+        const todayMidx = (todayObj.getFullYear() - sYear) * 12 + (todayObj.getMonth() - sMonth);
+
+        const revProgress = (global.revisionData && global.revisionData.progress) ? global.revisionData.progress : {};
+        Object.keys(revProgress).forEach(sub => {
+            if (!revSubData[sub]) return;
+            Object.keys(revProgress[sub]).forEach(chNum => {
+                const val = revProgress[sub][chNum];
+                if (val) {
+                    let d;
+                    if (typeof val === 'string' || typeof val === 'number') {
+                        d = new Date(val);
                     } else {
-                        btn.classList.remove('bg-blue-600', 'text-white', 'shadow');
-                        btn.classList.add('text-slate-500', 'hover:bg-slate-300', 'dark:text-slate-400', 'dark:hover:bg-slate-600');
+                        d = todayObj;
+                    }
+                    let mIdx = (d.getFullYear() - sYear) * 12 + (d.getMonth() - sMonth);
+                    if (mIdx < 0) mIdx = 0;
+                    if (mIdx < totalMonths) {
+                        revSubData[sub][mIdx]++;
+                        latestActiveMonth = Math.max(latestActiveMonth, mIdx);
                     }
                 }
             });
+        });
+
+        let boundedToday = todayMidx >= totalMonths ? totalMonths - 1 : (todayMidx < 0 ? 0 : todayMidx);
+        let boundedLatest = latestActiveMonth >= totalMonths ? totalMonths - 1 : latestActiveMonth;
+        const cutoff = Math.max(boundedToday, boundedLatest, 0);
+
+        Object.keys(revSubData).forEach(k => {
+            let sTotal = 1;
+            const sObj = getAllSubsFn().find(s => s.subject === k);
+            if (sObj) sTotal = sObj.chapters;
+            sTotal = Math.max(1, sTotal);
+
+            for (let i = 1; i <= cutoff; i++) revSubData[k][i] += revSubData[k][i - 1];
+            for (let i = 0; i <= cutoff; i++) revSubData[k][i] = Math.round((revSubData[k][i] / sTotal) * 100);
+
+            if (!global.latestChartStats.revSubjects) global.latestChartStats.revSubjects = {};
+            global.latestChartStats.revSubjects[k] = revSubData[k][cutoff] || 0;
+            for (let i = cutoff + 1; i < totalMonths; i++) revSubData[k][i] = null;
+        });
+
+        if (typeof Chart === 'undefined') return;
+
+        Chart.defaults.color = '#94a3b8';
+        Chart.defaults.font.family = 'Inter, ui-sans-serif, system-ui';
+        const chartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                    titleColor: '#fff',
+                    bodyColor: '#cbd5e1',
+                    borderColor: 'rgba(255,255,255,0.1)',
+                    borderWidth: 1,
+                    padding: 12,
+                    cornerRadius: 8,
+                    usePointStyle: true,
+                    boxPadding: 6,
+                    callbacks: { label: c => ' ' + c.dataset.label + ': ' + c.parsed.y + '%' }
+                }
+            },
+            scales: {
+                y: {
+                    min: 0,
+                    max: 100,
+                    ticks: { font: { size: 9, weight: 'bold' }, callback: v => v + '%' },
+                    grid: { color: 'rgba(148, 163, 184, 0.1)', drawBorder: false }
+                },
+                x: {
+                    ticks: { font: { size: 9, weight: 'bold' } },
+                    grid: { display: false, drawBorder: false }
+                }
+            }
+        };
+
+        const getDynLabel = global.getDynamicChartLabel || (typeof window !== 'undefined' ? window.getDynamicChartLabel : (k => k));
+        const getSubColor = global.getSubjectColor || (typeof window !== 'undefined' ? window.getSubjectColor : (() => '#3b82f6'));
+
+        const subDatasets = Object.keys(revSubData).map(k => ({
+            label: getDynLabel(k),
+            data: revSubData[k],
+            borderColor: getSubColor(k),
+            backgroundColor: 'transparent',
+            tension: 0.4,
+            borderWidth: 3,
+            pointBackgroundColor: '#0f172a',
+            pointBorderColor: getSubColor(k),
+            pointBorderWidth: 2,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            pointHoverBackgroundColor: getSubColor(k),
+            pointHoverBorderColor: '#fff',
+            pointHoverBorderWidth: 2,
+            hidden: !global.chartVisibility.revSubjects[k],
+            subjectKey: k
+        }));
+
+        if (global.revisionTrendChartInstance) {
+            global.revisionTrendChartInstance.data.labels = months;
+            global.revisionTrendChartInstance.data.datasets = subDatasets;
+            global.revisionTrendChartInstance.update('none');
+        } else {
+            global.revisionTrendChartInstance = new Chart(ctxSub.getContext('2d'), {
+                type: 'line',
+                data: { labels: months, datasets: subDatasets },
+                options: { ...chartOptions, interaction: { mode: 'nearest', axis: 'x', intersect: false } }
+            });
         }
+
+        updateRevisionLegends();
+    }
+
+    function openRevisionTrendModal() {
+        if (typeof global.openModal === 'function') {
+            global.openModal('revision-trend-modal');
+        }
+    }
+
+    function openYearlyActionsModal() {
+        if (typeof renderTrendCharts === 'function') renderTrendCharts();
+        if (typeof global.renderHeatmap === 'function') global.renderHeatmap();
+        if (typeof global.openModal === 'function') global.openModal('yearly-actions-modal');
+        setTimeout(() => {
+            if (global.yearlyChartActions && typeof global.yearlyChartActions.resize === 'function') {
+                global.yearlyChartActions.resize();
+                global.yearlyChartActions.update('none');
+            }
+        }, 60);
     }
 
 
@@ -1863,6 +2034,9 @@
         updateLegends,
         updateRevisionLegends,
         setTrendFilter,
+        renderRevisionTrendChart,
+        openRevisionTrendModal,
+        openYearlyActionsModal,
         AnalyticsPage
     };
 
@@ -1897,6 +2071,9 @@
     global.updateLegends = updateLegends;
     global.updateRevisionLegends = updateRevisionLegends;
     global.setTrendFilter = setTrendFilter;
+    global.renderRevisionTrendChart = renderRevisionTrendChart;
+    global.openRevisionTrendModal = openRevisionTrendModal;
+    global.openYearlyActionsModal = openYearlyActionsModal;
 
     if (typeof module !== 'undefined' && module.exports) {
         module.exports = SpectraAnalytics;

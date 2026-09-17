@@ -1622,9 +1622,71 @@
         renderDashboardOutcomeCard,
         renderDashboardUpcomingExamCard,
         renderDashboardPassedSubjectsCard,
+        renderChart,
         renderUI,
         DashboardPage
     };
+
+    function renderChart() {
+        if (typeof document === 'undefined') return;
+        const canvas = document.getElementById('progressChart');
+        if (!canvas) return;
+
+        let displayCompleted = 0;
+        let totalChapters = 1;
+        const AppStateRef = typeof AppState !== 'undefined' ? AppState : (typeof window !== 'undefined' ? window.AppState : {});
+        const stats = window.lastSubjectStats || (typeof window.updateMetrics === 'function' ? (window.updateMetrics(), window.lastSubjectStats) : null);
+        if (stats) {
+            let eff = 0;
+            let total = 0;
+            const getAllSubsFn = typeof window.getAllSubjects === 'function' ? window.getAllSubjects : () => [];
+            const allSubs = getAllSubsFn().map(s => s.subject);
+            allSubs.forEach(sub => {
+                if (stats[sub]) {
+                    total += stats[sub].totalChapters || 0;
+                    eff += stats[sub].effectiveChapters || 0;
+                }
+            });
+            if (total > 0) {
+                displayCompleted = Math.round(eff);
+                totalChapters = total;
+            }
+        }
+
+        const remaining = Math.max(0, totalChapters - displayCompleted);
+
+        if (AppStateRef.progressChart && typeof AppStateRef.progressChart.update === 'function') {
+            AppStateRef.progressChart.data.datasets[0].data = [displayCompleted, remaining];
+            AppStateRef.progressChart.update();
+            return;
+        }
+
+        if (typeof Chart === 'undefined') return;
+
+        if (AppStateRef.progressChart && typeof AppStateRef.progressChart.destroy === 'function') {
+            AppStateRef.progressChart.destroy();
+        }
+
+        AppStateRef.progressChart = new Chart(canvas.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                datasets: [{
+                    data: [displayCompleted, remaining],
+                    backgroundColor: ['#3b82f6', 'rgba(148, 163, 184, 0.15)'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '82%',
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { enabled: false }
+                }
+            }
+        });
+    }
 
     window.DashboardCore = DashboardCore;
     window.DashboardPage = DashboardPage;
@@ -1647,6 +1709,7 @@
     window.renderDashboardOutcomeCard = renderDashboardOutcomeCard;
     window.renderDashboardUpcomingExamCard = renderDashboardUpcomingExamCard;
     window.renderDashboardPassedSubjectsCard = renderDashboardPassedSubjectsCard;
+    window.renderChart = renderChart;
 
     window.renderUI = renderUI;
 

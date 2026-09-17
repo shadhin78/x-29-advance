@@ -376,41 +376,9 @@ window.migrateLegacyData = function () {
     }
 };
 
-window.getAllSubjects = function () {
-    let all = [];
-    window.tracks.forEach(t => {
-        if (syllabusStructure[t.id]) {
-            all = all.concat(syllabusStructure[t.id]);
-        }
-    });
-    return all.sort((a, b) => {
-        const pA = a.priority !== undefined ? a.priority : 3;
-        const pB = b.priority !== undefined ? b.priority : 3;
-        if (pA !== pB) return pA - pB;
-        const oA = a.order !== undefined ? a.order : 999;
-        const oB = b.order !== undefined ? b.order : 999;
-        return oA - oB;
-    });
-};
-
-window.getAllPrograms = function () {
-    let all = [];
-    window.tracks.forEach(t => {
-        if (window.customPrograms[t.id]) {
-            window.customPrograms[t.id].forEach(p => {
-                all.push({ ...p, _trackId: t.id, _trackName: t.name });
-            });
-        }
-    });
-    return all.sort((a, b) => {
-        const pA = a.priority !== undefined ? a.priority : 999;
-        const pB = b.priority !== undefined ? b.priority : 999;
-        if (pA !== pB) return pA - pB;
-        const oA = a.order !== undefined ? a.order : 999;
-        const oB = b.order !== undefined ? b.order : 999;
-        return oA - oB;
-    });
-};
+// Curriculum Taxonomy (getAllSubjects, getAllPrograms)
+// Extracted to canonical service module: js/services/taxonomy.js
+// Backward-compatibility references: window.getAllSubjects, window.getAllPrograms maintained by js/services/taxonomy.js
 
 window.ensureConfigDefaults = function () {
     if (!window.dashboardConfig) {
@@ -456,33 +424,9 @@ if (typeof window.sortAllCustomData !== 'function') {
     window.sortAllCustomData = function () {};
 }
 
-// Deprecated
-// Currently unused
-// Retained for compatibility
-window.getSortedPrograms = function (track) {
-    if (!window.customPrograms || !window.customPrograms[track]) return [];
-    return [...window.customPrograms[track]];
-};
-
-// Deprecated
-// Currently unused
-// Retained for compatibility
-window.sortAllSubjects = function (subjects, track) {
-    if (!Array.isArray(subjects)) return [];
-    return [...subjects].sort((a, b) => {
-        const pA = a.priority !== undefined ? a.priority : 3;
-        const pB = b.priority !== undefined ? b.priority : 3;
-        if (pA !== pB) return pA - pB;
-        const oA = a.order !== undefined ? a.order : 999;
-        const oB = b.order !== undefined ? b.order : 999;
-        return oA - oB;
-    });
-};
-
-window.getSortedTrackSubjects = function (track) {
-    if (!syllabusStructure || !syllabusStructure[track]) return [];
-    return [...syllabusStructure[track]];
-};
+// Curriculum Taxonomy (getSortedPrograms, sortAllSubjects, getSortedTrackSubjects)
+// Extracted to canonical service module: js/services/taxonomy.js
+// Backward-compatibility references maintained by js/services/taxonomy.js
 
 
 /******************************************************************
@@ -993,63 +937,18 @@ window.renderSubjectTrendCircle = function () {
     }
 };
 
+// Dashboard Progress Doughnut Chart extracted to js/features/dashboard/dashboard.js
 function renderChart() {
-    const canvas = document.getElementById('progressChart');
-    if (!canvas) return;
-
-    let displayCompleted = 0;
-    let remaining = totalStaticChapters || 1;
-    if (window.lastSubjectStats) {
-        let eff = 0;
-        let total = 0;
-        const allSubs = typeof window.getAllSubjects === 'function' ? window.getAllSubjects().map(s => s.subject) : [];
-        allSubs.forEach(sub => {
-            if (window.lastSubjectStats[sub]) {
-                total += window.lastSubjectStats[sub].totalChapters || 0;
-                eff += window.lastSubjectStats[sub].effectiveChapters || 0;
-            }
-        });
-        if (total > 0) {
-            displayCompleted = Math.round(eff);
-            remaining = Math.max(0, total - displayCompleted);
-        }
+    if (window.DashboardCore && typeof window.DashboardCore.renderChart === 'function') {
+        return window.DashboardCore.renderChart();
     }
-
-    if (AppState.progressChart && typeof AppState.progressChart.update === 'function') {
-        AppState.progressChart.data.datasets[0].data = [displayCompleted, remaining];
-        AppState.progressChart.update();
-        return;
-    }
-
-    if (AppState.progressChart && typeof AppState.progressChart.destroy === 'function') {
-        AppState.progressChart.destroy();
-    }
-
-    AppState.progressChart = new Chart(canvas.getContext('2d'), {
-        type: 'doughnut',
-        data: {
-            datasets: [{
-                data: [displayCompleted, remaining],
-                backgroundColor: ['#3b82f6', 'rgba(148, 163, 184, 0.15)'],
-                borderWidth: 0
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            cutout: '82%',
-            plugins: {
-                legend: { display: false },
-                tooltip: { enabled: false }
-            }
-        }
-    });
 }
+window.renderChart = renderChart;
 
 /* ==========================================================================
-   Analytical Trend Charts & Heatmap extracted to:
-   - js/features/analytics/spectra.js (SpectraAnalytics.renderTrendCharts)
-   - js/features/analytics/heatmap.js (HeatmapAnalytics.renderHeatmap)
+   Analytical Trend Charts, Legends & Heatmap extracted to:
+   - js/features/analytics/spectra.js (SpectraAnalytics)
+   - js/features/analytics/heatmap.js (HeatmapAnalytics)
    ========================================================================== */
 function renderTrendCharts() {
     if (window.SpectraAnalytics && typeof window.SpectraAnalytics.renderTrendCharts === 'function') {
@@ -1073,80 +972,26 @@ function reorderSubjectChapters(prog, subj) {
 window.reorderSubjectChapters = reorderSubjectChapters;
 
 window.toggleSubDataset = function (k) {
-    window.chartVisibility.subjects[k] = !window.chartVisibility.subjects[k];
-    if (window.subjectTrendLineChartInstance) {
-        const ds = window.subjectTrendLineChartInstance.data.datasets.find(d => d.subjectKey === k);
-        if (ds) { ds.hidden = !window.chartVisibility.subjects[k]; window.subjectTrendLineChartInstance.update(); }
+    if (window.SpectraAnalytics && typeof window.SpectraAnalytics.toggleSubDataset === 'function') {
+        return window.SpectraAnalytics.toggleSubDataset(k);
     }
-    window.updateLegends();
 };
 
 window.toggleRevSubDataset = function (k) {
-    window.chartVisibility.revSubjects[k] = !window.chartVisibility.revSubjects[k];
-    if (window.revisionTrendChartInstance) {
-        const ds = window.revisionTrendChartInstance.data.datasets.find(d => d.subjectKey === k);
-        if (ds) { ds.hidden = !window.chartVisibility.revSubjects[k]; window.revisionTrendChartInstance.update(); }
+    if (window.SpectraAnalytics && typeof window.SpectraAnalytics.toggleRevSubDataset === 'function') {
+        return window.SpectraAnalytics.toggleRevSubDataset(k);
     }
-    window.updateRevisionLegends();
 };
 
 window.updateRevisionLegends = function () {
-    const sLeg = document.getElementById('revision-trend-legend');
-    if (sLeg) {
-        const sortedSubs = window.getAllSubjects().sort((a, b) => (a.priority ?? 999) - (b.priority ?? 999));
-        sLeg.innerHTML = sortedSubs.map(s => {
-            const k = s.subject;
-            const val = window.latestChartStats.revSubjects ? window.latestChartStats.revSubjects[k] : 0;
-            const active = window.chartVisibility.revSubjects[k];
-            const color = getSubjectColor(k);
-            const label = getDynamicCleanLabel(k, 12);
-            const activeStyle = active ? `border-color: ${color}40; background-color: rgba(15,23,42,0.8); box-shadow: 0 0 10px ${color}20; opacity: 1;` : `border-color: rgba(255,255,255,0.1); background-color: transparent; opacity: 0.4; filter: grayscale(100%);`;
-            return `<div onclick="toggleRevSubDataset('${k}')" class="cursor-pointer flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg border active:scale-95 transition-all duration-300 hover:scale-105 backdrop-blur-sm" style="${activeStyle}"><div class="w-2 h-2 rounded-full shrink-0 shadow-md" style="background-color: ${color}; box-shadow: 0 0 8px ${color}"></div><span class="text-[8px] md:text-[9px] font-black text-slate-200 uppercase whitespace-nowrap">${label}: ${val}%</span></div>`;
-        }).join('');
+    if (window.SpectraAnalytics && typeof window.SpectraAnalytics.updateRevisionLegends === 'function') {
+        return window.SpectraAnalytics.updateRevisionLegends();
     }
 };
 
 window.updateLegends = function () {
-    const getLegend = (key, idxKey, color, label, valKey) => {
-        const val = window.latestChartStats[key] ? window.latestChartStats[key][valKey] : 0;
-        const active = window.chartVisibility[key][idxKey];
-        return `<div onclick="toggleDataset('${key}', '${idxKey}')" class="cursor-pointer flex items-center space-x-1.5 md:space-x-2 px-2.5 md:px-3 py-1.5 md:px-3.5 md:py-2 bg-slate-900 rounded-lg md:rounded-xl border border-slate-700 hover:bg-slate-800 active:scale-95 transition-all ${active ? 'opacity-100 scale-100 shadow-md' : 'opacity-40 grayscale scale-95 line-through'}"><div class="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full shrink-0" style="background-color: ${color}; box-shadow: 0 0 8px ${color}"></div><span class="text-[8px] md:text-[10px] font-black text-white uppercase tracking-widest whitespace-nowrap">${label}: ${val}%</span></div>`;
-    };
-    const pLeg = document.getElementById('prog-legend');
-    if (pLeg) {
-        let pIdx = 0;
-        const sortedAllProgs = window.getAllPrograms();
-        pLeg.innerHTML = sortedAllProgs.map(pObj => {
-            const p = pObj.name || pObj;
-            const html = getLegend('prog', p, window.getProgramColor(p), p, p);
-            return html;
-        }).join('');
-    }
-
-    const sortedActions = [...window.customActions].sort((a, b) => (a.priority ?? 999) - (b.priority ?? 999));
-    let actHtml = sortedActions.map(a => getLegend('monthly', a.id, AppState.twColors[a.color].hex, a.title, a.id)).join('');
-    const aLeg = document.getElementById('act-legend'); if (aLeg) aLeg.innerHTML = actHtml;
-
-    let yearHtml = sortedActions.map(a => getLegend('yearly', a.id, AppState.twColors[a.color].hex, a.title, a.id)).join('');
-    const yLeg = document.getElementById('yearly-legend'); if (yLeg) yLeg.innerHTML = yearHtml;
-
-    const sLeg = document.getElementById('subject-trend-legend');
-    if (sLeg) {
-        const sortedSubs = window.getAllSubjects().sort((a, b) => (a.priority ?? 999) - (b.priority ?? 999));
-        const isGlobal = window.subjectTrendGlobalMode !== false;
-        const filteredSubs = isGlobal
-            ? sortedSubs
-            : sortedSubs.filter(s => window.selectedSubjectsTrend && window.selectedSubjectsTrend.includes(s.subject));
-        sLeg.innerHTML = filteredSubs.map(s => {
-            const k = s.subject; const val = window.latestChartStats.subjects ? window.latestChartStats.subjects[k] : 0; const active = window.chartVisibility.subjects[k]; const color = getSubjectColor(k);
-            const label = getDynamicCleanLabel(k, 12);
-            const isProgVisible = !window.programVisibility || window.programVisibility[s.program] !== false;
-            const isSubjectActive = isGlobal ? (active && isProgVisible) : true;
-            const activeStyle = isSubjectActive ? `border-color: ${color}40; background-color: rgba(15,23,42,0.8); box-shadow: 0 0 10px ${color}20; opacity: 1;` : `border-color: rgba(255,255,255,0.1); background-color: transparent; opacity: 0.4; filter: grayscale(100%); line-through;`;
-            const onClickStr = isGlobal && isProgVisible ? `toggleSubDataset('${k}')` : '';
-            const cursorClass = isGlobal && isProgVisible ? 'cursor-pointer' : '';
-            return `<div onclick="${onClickStr}" class="${cursorClass} flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg border active:scale-95 transition-all duration-300 hover:scale-105 backdrop-blur-sm" style="${activeStyle}"><div class="w-2 h-2 rounded-full shrink-0 shadow-md" style="background-color: ${color}; box-shadow: 0 0 8px ${color}"></div><span class="text-[8px] md:text-[9px] font-black text-slate-200 uppercase whitespace-nowrap">${label}: ${val}%</span></div>`;
-        }).join('');
+    if (window.SpectraAnalytics && typeof window.SpectraAnalytics.updateLegends === 'function') {
+        return window.SpectraAnalytics.updateLegends();
     }
 };
 /* ===== DAILY ACTIONS & HABIT TRACKER ENGINE ===== */
@@ -1571,89 +1416,8 @@ window.renderGlobalPaceTrendChart = function () {
     }
 };
 
-window.getTargetedSubjectsForGoal = function (goal) {
-    let targetedSubjects = new Set();
-    if (!goal) return targetedSubjects;
-    if (goal.type === 'global') {
-        const isManual = goal.subjects || goal.secondaryPaces;
-        if (isManual) {
-            if (goal.subjects) goal.subjects.forEach(s => targetedSubjects.add(s));
-            if (goal.secondaryPaces) {
-                goal.secondaryPaces.forEach(pid => {
-                    const g = window.paceGoals.find(x => x.id === pid);
-                    if (g) {
-                        if (g.type === 'bundle') {
-                            if (g.subjects) g.subjects.forEach(s => targetedSubjects.add(s));
-                            if (g.programs) {
-                                window.tracks.map(t => t.id).forEach(track => {
-                                    if (syllabusStructure[track]) {
-                                        syllabusStructure[track].forEach(s => { if (g.programs.includes(s.program)) targetedSubjects.add(s.subject); });
-                                    }
-                                });
-                            }
-                        } else if (g.type === 'subject') {
-                            targetedSubjects.add(g.target);
-                        } else if (g.type === 'program') {
-                            window.tracks.map(t => t.id).forEach(track => {
-                                if (syllabusStructure[track]) {
-                                    syllabusStructure[track].forEach(s => { if (g.target === s.program) targetedSubjects.add(s.subject); });
-                                }
-                            });
-                        }
-                    }
-                });
-            }
-        } else {
-            window.paceGoals.forEach(g => {
-                if (g.id === goal.id) return;
-                if (!AppState.globalStartDate || !AppState.globalEndDate) return;
-                const gStart = g.startDate ? Utils.parseDateSafe(g.startDate) : new Date(AppState.globalStartDate);
-                const gEnd = g.deadline ? Utils.parseDateSafe(g.deadline) : new Date(AppState.globalEndDate);
-                gStart.setHours(0, 0, 0, 0); gEnd.setHours(23, 59, 59, 999);
-                if (gEnd < AppState.globalStartDate || gStart > AppState.globalEndDate) return;
-                if (g.type === 'bundle') {
-                    if (g.subjects) g.subjects.forEach(s => targetedSubjects.add(s));
-                    if (g.programs) {
-                        window.tracks.map(t => t.id).forEach(track => {
-                            if (syllabusStructure[track]) {
-                                syllabusStructure[track].forEach(s => { if (g.programs.includes(s.program)) targetedSubjects.add(s.subject); });
-                            }
-                        });
-                    }
-                } else if (g.type === 'subject') {
-                    targetedSubjects.add(g.target);
-                } else if (g.type === 'program') {
-                    window.tracks.map(t => t.id).forEach(track => {
-                        if (syllabusStructure[track]) {
-                            syllabusStructure[track].forEach(s => { if (g.target === s.program) targetedSubjects.add(s.subject); });
-                        }
-                    });
-                }
-            });
-        }
-    } else if (goal.type === 'bundle') {
-        if (goal.subjects) {
-            goal.subjects.forEach(sub => targetedSubjects.add(sub));
-        } else if (goal.programs) {
-            window.tracks.map(t => t.id).forEach(track => {
-                if (syllabusStructure[track]) {
-                    syllabusStructure[track].forEach(s => {
-                        if (goal.programs.includes(s.program)) targetedSubjects.add(s.subject);
-                    });
-                }
-            });
-        }
-    } else if (goal.type === 'subject') {
-        targetedSubjects.add(goal.target);
-    } else if (goal.type === 'program') {
-        window.tracks.map(t => t.id).forEach(track => {
-            if (syllabusStructure[track]) {
-                syllabusStructure[track].forEach(s => { if (s.program === goal.target) targetedSubjects.add(s.subject); });
-            }
-        });
-    }
-    return targetedSubjects;
-};
+// getTargetedSubjectsForGoal extracted to canonical module: js/features/pace/paceEstimator.js
+// Backward-compatibility references: window.getTargetedSubjectsForGoal maintained by js/features/pace/paceEstimator.js
 
 window.renderRevisionTrendChart = function () {
     const ctxSub = document.getElementById('revisionTrendChart');
@@ -1760,266 +1524,10 @@ window.renderRevisionTrendChart = function () {
 
     window.updateRevisionLegends();
 };
+// Pace Modal Editing (openEditPaceModal, savePaceEdit)
+// Extracted to canonical feature module: js/features/pace/paceManager.js
+// Backward-compatibility references maintained by js/features/pace/paceManager.js
 
-window.openEditPaceModal = function (goalId) {
-    const goal = window.paceGoals.find(g => g.id === goalId);
-    if (!goal) return;
-    window.editingPaceId = goalId;
-
-    const nameContainer = document.getElementById('epm-name-container');
-    const checklistSection = document.getElementById('epm-checklist-section');
-    const nameInput = document.getElementById('edit-pace-name');
-    const subjectsContainer = document.getElementById('edit-pace-subjects-container');
-
-    if (goal.type === 'global') {
-        nameContainer.classList.add('hidden');
-        checklistSection.classList.remove('hidden');
-        nameInput.value = goal.target;
-
-        let html = '';
-        html += `<div class="mb-4"><h5 class="text-[10px] font-black uppercase text-slate-400 mb-2">Subjects</h5>`;
-        window.tracks.forEach(track => {
-            if (window.customPrograms[track.id]) {
-                window.customPrograms[track.id].forEach(prog => {
-                    const progName = prog.name || prog;
-                    const subs = (syllabusStructure[track.id] || []).filter(s => s.program === progName);
-                    if (subs.length > 0) {
-                        html += `<div class="mb-2"><div class="text-[10px] font-black uppercase text-slate-400 mb-1.5 pl-1">${progName}</div><div class="grid grid-cols-1 sm:grid-cols-2 gap-2">`;
-                        subs.forEach(s => {
-                            const isChecked = (goal.subjects && goal.subjects.includes(s.subject)) ? 'checked' : '';
-                            let displaySub = s.subject.replace(progName + ' - ', '').replace(progName + ' ', '');
-                            const isPassed = Boolean(window.passedItems && ((window.passedItems.subjects && window.passedItems.subjects.includes(s.subject)) || (window.passedItems.programs && window.passedItems.programs.includes(progName))));
-                            const isAlreadyInGoal = Boolean(goal.subjects && goal.subjects.includes(s.subject));
-
-                            if (isPassed && !isAlreadyInGoal) {
-                                html += `
-                                        <label class="flex items-center justify-between space-x-2 p-2.5 rounded-xl border border-slate-200/60 dark:border-slate-700/50 bg-slate-100/60 dark:bg-slate-900/30 opacity-60 cursor-not-allowed shadow-none pace-passed-item" title="${s.subject} (Passed - cannot be added to pace)">
-                                            <div class="flex items-center space-x-2 min-w-0 flex-1">
-                                                <input type="checkbox" value="${s.subject}" disabled class="edit-pace-subject-cb form-checkbox h-4 w-4 text-slate-400 rounded border-slate-300 dark:border-slate-600 cursor-not-allowed">
-                                                <del class="text-[10px] md:text-xs font-bold text-slate-400 dark:text-slate-500 truncate line-through" title="${s.subject}">${displaySub}</del>
-                                            </div>
-                                            <span class="text-[8px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded border border-emerald-200/50 dark:border-emerald-800/40 shrink-0">Passed</span>
-                                        </label>`;
-                            } else if (isPassed && isAlreadyInGoal) {
-                                html += `
-                                        <label class="flex items-center justify-between space-x-2 cursor-pointer bg-slate-50 dark:bg-slate-900/50 p-2.5 rounded-xl border border-emerald-300 dark:border-emerald-700/60 active:scale-95 transition-all shadow-sm pace-passed-included-item" title="${s.subject} (Passed - currently included in this pace)">
-                                            <div class="flex items-center space-x-2 min-w-0 flex-1">
-                                                <input type="checkbox" value="${s.subject}" class="edit-pace-subject-cb form-checkbox h-4 w-4 text-orange-500 rounded border-slate-300 focus:ring-orange-500 accent-orange-500 transition-all" checked>
-                                                <del class="text-[10px] md:text-xs font-bold text-slate-700 dark:text-slate-300 truncate line-through" title="${s.subject}">${displaySub}</del>
-                                            </div>
-                                            <span class="text-[8px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded border border-emerald-200/50 dark:border-emerald-800/40 shrink-0">Passed</span>
-                                        </label>`;
-                            } else {
-                                html += `
-                                        <label class="flex items-center space-x-2 cursor-pointer bg-slate-50 dark:bg-slate-900/50 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 active:scale-95 transition-all shadow-sm">
-                                            <input type="checkbox" value="${s.subject}" class="edit-pace-subject-cb form-checkbox h-4 w-4 text-orange-500 rounded border-slate-300 focus:ring-orange-500 accent-orange-500 transition-all" ${isChecked}>
-                                            <span class="text-[10px] md:text-xs font-bold text-slate-700 dark:text-slate-300 truncate" title="${s.subject}">${displaySub}</span>
-                                        </label>`;
-                            }
-                        });
-                        html += `</div></div>`;
-                    }
-                });
-            }
-        });
-        html += `</div>`;
-
-        html += `<div><h5 class="text-[10px] font-black uppercase text-slate-400 mb-2">Secondary Paces</h5>`;
-        const otherGoals = window.paceGoals.filter(g => g.type !== 'global');
-        if (otherGoals.length > 0) {
-            html += `<div class="grid grid-cols-1 sm:grid-cols-2 gap-2">`;
-            otherGoals.forEach(g => {
-                const isChecked = (goal.secondaryPaces && goal.secondaryPaces.includes(g.id)) ? 'checked' : '';
-                html += `
-                        <label class="flex items-center space-x-2 cursor-pointer bg-slate-50 dark:bg-slate-900/50 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 active:scale-95 transition-all shadow-sm">
-                            <input type="checkbox" value="${g.id}" class="edit-pace-sec-cb form-checkbox h-4 w-4 text-indigo-500 rounded border-slate-300 focus:ring-indigo-500 accent-indigo-500 transition-all" ${isChecked}>
-                            <span class="text-[10px] md:text-xs font-bold text-slate-700 dark:text-slate-300 truncate" title="${g.target}">${g.target}</span>
-                        </label>`;
-            });
-            html += `</div>`;
-        } else {
-            html += `<span class="text-[10px] text-slate-500">No other pace goals available.</span>`;
-        }
-        html += `</div>`;
-
-        subjectsContainer.innerHTML = html;
-    } else {
-        nameContainer.classList.remove('hidden');
-        checklistSection.classList.remove('hidden');
-        nameInput.value = goal.target;
-
-        let html = '';
-        const isProgramTarget = goal.type === 'program' || (goal.type === 'bundle' && goal.programs);
-
-        if (isProgramTarget) {
-            html += `<div class="grid grid-cols-2 gap-2 w-full">`;
-            const selectedProgs = goal.programs || (goal.type === 'program' ? [goal.target] : []);
-            window.tracks.forEach(track => {
-                if (window.customPrograms[track.id]) {
-                    window.customPrograms[track.id].forEach(p => {
-                        const pName = p.name || p;
-                        const isChecked = selectedProgs.some(sp => (sp.name || sp) === pName) ? 'checked' : '';
-                        const isProgPassed = Boolean(window.passedItems && window.passedItems.programs && window.passedItems.programs.includes(pName));
-                        const isAlreadyInGoal = Boolean(selectedProgs.some(sp => (sp.name || sp) === pName));
-
-                        if (isProgPassed && !isAlreadyInGoal) {
-                            html += `
-                                    <label class="flex items-center justify-between space-x-2 p-2.5 rounded-xl border border-slate-200/60 dark:border-slate-700/50 bg-slate-100/60 dark:bg-slate-900/30 opacity-60 cursor-not-allowed shadow-none pace-passed-item" title="${pName} (Passed - cannot be added to pace)">
-                                        <div class="flex items-center space-x-2 min-w-0 flex-1">
-                                            <input type="checkbox" value="${pName}" disabled class="edit-pace-cb form-checkbox h-4 w-4 text-slate-400 rounded border-slate-300 dark:border-slate-600 cursor-not-allowed">
-                                            <del class="text-[10px] md:text-xs font-bold text-slate-400 dark:text-slate-500 truncate line-through">${pName}</del>
-                                        </div>
-                                        <span class="text-[8px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded border border-emerald-200/50 dark:border-emerald-800/40 shrink-0">Passed</span>
-                                    </label>`;
-                        } else if (isProgPassed && isAlreadyInGoal) {
-                            html += `
-                                    <label class="flex items-center justify-between space-x-2 cursor-pointer bg-slate-50 dark:bg-slate-900/50 p-2.5 rounded-xl border border-emerald-300 dark:border-emerald-700/60 active:scale-95 transition-all shadow-sm pace-passed-included-item" title="${pName} (Passed - currently included in this pace)">
-                                        <div class="flex items-center space-x-2 min-w-0 flex-1">
-                                            <input type="checkbox" value="${pName}" class="edit-pace-cb form-checkbox h-4 w-4 text-violet-500 rounded border-slate-300 focus:ring-violet-500 accent-violet-500 transition-all" checked>
-                                            <del class="text-[10px] md:text-xs font-bold text-slate-700 dark:text-slate-300 truncate line-through">${pName}</del>
-                                        </div>
-                                        <span class="text-[8px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded border border-emerald-200/50 dark:border-emerald-800/40 shrink-0">Passed</span>
-                                    </label>`;
-                        } else {
-                            html += `
-                                    <label class="flex items-center space-x-2 cursor-pointer bg-slate-50 dark:bg-slate-900/50 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 active:scale-95 transition-all shadow-sm">
-                                        <input type="checkbox" value="${pName}" class="edit-pace-cb form-checkbox h-4 w-4 text-violet-500 rounded border-slate-300 focus:ring-violet-500 accent-violet-500 transition-all" ${isChecked}>
-                                        <span class="text-[10px] md:text-xs font-bold text-slate-700 dark:text-slate-300 truncate">${pName}</span>
-                                    </label>`;
-                        }
-                    });
-                }
-            });
-            html += `</div>`;
-        } else {
-            const selectedSubs = goal.subjects || (goal.type === 'subject' ? [goal.target] : []);
-            window.tracks.forEach(track => {
-                if (window.customPrograms[track.id]) {
-                    window.customPrograms[track.id].forEach(prog => {
-                        const progName = prog.name || prog;
-                        const subs = (syllabusStructure[track.id] || []).filter(s => s.program === progName);
-                        if (subs.length > 0) {
-                            html += `<div class="mb-2"><div class="text-[10px] font-black uppercase text-slate-400 mb-1.5 pl-1">${progName}</div><div class="grid grid-cols-1 sm:grid-cols-2 gap-2">`;
-                            subs.forEach(s => {
-                                const isChecked = selectedSubs.includes(s.subject) ? 'checked' : '';
-                                let displaySub = s.subject.replace(progName + ' - ', '').replace(progName + ' ', '');
-                                const isPassed = Boolean(window.passedItems && ((window.passedItems.subjects && window.passedItems.subjects.includes(s.subject)) || (window.passedItems.programs && window.passedItems.programs.includes(progName))));
-                                const isAlreadyInGoal = Boolean(selectedSubs.includes(s.subject));
-
-                                if (isPassed && !isAlreadyInGoal) {
-                                    html += `
-                                            <label class="flex items-center justify-between space-x-2 p-2.5 rounded-xl border border-slate-200/60 dark:border-slate-700/50 bg-slate-100/60 dark:bg-slate-900/30 opacity-60 cursor-not-allowed shadow-none pace-passed-item" title="${s.subject} (Passed - cannot be added to pace)">
-                                                <div class="flex items-center space-x-2 min-w-0 flex-1">
-                                                    <input type="checkbox" value="${s.subject}" disabled class="edit-pace-cb form-checkbox h-4 w-4 text-slate-400 rounded border-slate-300 dark:border-slate-600 cursor-not-allowed">
-                                                    <del class="text-[10px] md:text-xs font-bold text-slate-400 dark:text-slate-500 truncate line-through" title="${s.subject}">${displaySub}</del>
-                                                </div>
-                                                <span class="text-[8px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded border border-emerald-200/50 dark:border-emerald-800/40 shrink-0">Passed</span>
-                                            </label>`;
-                                } else if (isPassed && isAlreadyInGoal) {
-                                    html += `
-                                            <label class="flex items-center justify-between space-x-2 cursor-pointer bg-slate-50 dark:bg-slate-900/50 p-2.5 rounded-xl border border-emerald-300 dark:border-emerald-700/60 active:scale-95 transition-all shadow-sm pace-passed-included-item" title="${s.subject} (Passed - currently included in this pace)">
-                                                <div class="flex items-center space-x-2 min-w-0 flex-1">
-                                                    <input type="checkbox" value="${s.subject}" class="edit-pace-cb form-checkbox h-4 w-4 text-orange-500 rounded border-slate-300 focus:ring-orange-500 accent-orange-500 transition-all" checked>
-                                                    <del class="text-[10px] md:text-xs font-bold text-slate-700 dark:text-slate-300 truncate line-through" title="${s.subject}">${displaySub}</del>
-                                                </div>
-                                                <span class="text-[8px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded border border-emerald-200/50 dark:border-emerald-800/40 shrink-0">Passed</span>
-                                            </label>`;
-                                } else {
-                                    html += `
-                                            <label class="flex items-center space-x-2 cursor-pointer bg-slate-50 dark:bg-slate-900/50 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 active:scale-95 transition-all shadow-sm">
-                                                <input type="checkbox" value="${s.subject}" class="edit-pace-cb form-checkbox h-4 w-4 text-orange-500 rounded border-slate-300 focus:ring-orange-500 accent-orange-500 transition-all" ${isChecked}>
-                                                <span class="text-[10px] md:text-xs font-bold text-slate-700 dark:text-slate-300 truncate" title="${s.subject}">${displaySub}</span>
-                                            </label>`;
-                                }
-                            });
-                            html += `</div></div>`;
-                        }
-                    });
-                }
-            });
-        }
-        subjectsContainer.innerHTML = html || '<span class="text-[10px] text-slate-500">No items available.</span>';
-    }
-
-    document.getElementById('edit-pace-start').value = goal.startDate || '';
-    document.getElementById('edit-pace-date').value = goal.deadline || '';
-    openModal('edit-pace-modal');
-};
-
-window.savePaceEdit = function () {
-    if (!window.editingPaceId) return;
-    const goal = window.paceGoals.find(g => g.id === window.editingPaceId);
-    if (!goal) return;
-
-    const startStr = document.getElementById('edit-pace-start').value;
-    const deadStr = document.getElementById('edit-pace-date').value;
-    if (!startStr || !deadStr) return showToast("Both dates are required", "error");
-    if (new Date(deadStr) <= new Date(startStr)) return showToast("Deadline must be after start date", "error");
-
-    if (goal.type === 'global') {
-        const subjCheckboxes = document.querySelectorAll('.edit-pace-subject-cb:checked');
-        const secCheckboxes = document.querySelectorAll('.edit-pace-sec-cb:checked');
-
-        const selectedSubjects = Array.from(subjCheckboxes).map(cb => cb.value).filter(sub => {
-            const wasAlreadyInGoal = goal.subjects && goal.subjects.includes(sub);
-            if (wasAlreadyInGoal) return true;
-            const sObj = window.getAllSubjects ? window.getAllSubjects().find(s => s.subject === sub) : null;
-            const progName = sObj ? sObj.program : '';
-            const isPassed = Boolean(window.passedItems && ((window.passedItems.subjects && window.passedItems.subjects.includes(sub)) || (window.passedItems.programs && window.passedItems.programs.includes(progName))));
-            return !isPassed;
-        });
-        const selectedSec = Array.from(secCheckboxes).map(cb => cb.value);
-
-        goal.subjects = selectedSubjects;
-        goal.secondaryPaces = selectedSec;
-    } else if (goal.type !== 'global') {
-        const name = document.getElementById('edit-pace-name').value.trim();
-        if (!name) return showToast("Goal name is required.", "error");
-
-        const checkboxes = document.querySelectorAll('.edit-pace-cb:checked');
-        const selectedItems = Array.from(checkboxes).map(cb => cb.value);
-
-        if (selectedItems.length === 0) return showToast("Please select at least one item.", "error");
-
-        goal.target = name;
-        const previousSubjects = goal.subjects || (goal.type === 'subject' ? [goal.target] : []);
-        const previousPrograms = goal.programs || (goal.type === 'program' ? [goal.target] : []);
-
-        goal.type = 'bundle';
-        delete goal.subjects;
-        delete goal.programs;
-
-        const firstItem = selectedItems[0];
-        let isProg = false;
-        window.tracks.forEach(track => {
-            if (window.customPrograms[track.id] && window.customPrograms[track.id].some(p => (p.name || p) === firstItem)) {
-                isProg = true;
-            }
-        });
-
-        if (isProg) {
-            goal.programs = selectedItems.filter(pName => {
-                const wasAlreadyInGoal = previousPrograms.some(sp => (sp.name || sp) === pName);
-                if (wasAlreadyInGoal) return true;
-                const isPassed = Boolean(window.passedItems && window.passedItems.programs && window.passedItems.programs.includes(pName));
-                return !isPassed;
-            });
-        } else {
-            goal.subjects = selectedItems.filter(sub => {
-                const wasAlreadyInGoal = previousSubjects.includes(sub);
-                if (wasAlreadyInGoal) return true;
-                const sObj = window.getAllSubjects ? window.getAllSubjects().find(s => s.subject === sub) : null;
-                const progName = sObj ? sObj.program : '';
-                const isPassed = Boolean(window.passedItems && ((window.passedItems.subjects && window.passedItems.subjects.includes(sub)) || (window.passedItems.programs && window.passedItems.programs.includes(progName))));
-                return !isPassed;
-            });
-        }
-    }
-
-    goal.startDate = startStr;
-    goal.deadline = deadStr;
-    FirebaseService.saveToCloud(); renderUI(); closeModal('edit-pace-modal'); showToast("Pace Goal timeline updated!", "success");
-};
 
 // Daily Action Day Toggle function extracted to js/features/habits/dailyTracker.js
 
@@ -3028,402 +2536,18 @@ window.togglePassStatus = function (type, name, isChecked) {
 };
 
 window.syncPassFreezeFromResults = function () {
-    if (!window.passedItems) window.passedItems = { programs: [], subjects: [] };
-
-    const processedResults = window.getProcessedResults();
-    const programGroups = {};
-    processedResults.forEach(res => {
-        if (res.type === 'cgpa') {
-            const progName = res.title;
-            if (!programGroups[progName]) {
-                programGroups[progName] = {
-                    overall: null,
-                    subjects: {}
-                };
-            }
-            if (!res.subject) {
-                programGroups[progName].overall = res;
-            } else {
-                programGroups[progName].subjects[res.subject] = res;
-            }
-        }
-    });
-
-    // For each track and its custom programs
-    window.tracks.forEach(track => {
-        if (window.customPrograms[track.id]) {
-            window.customPrograms[track.id].forEach(prog => {
-                const progName = prog.name || prog;
-                const group = programGroups[progName];
-                const mainTarget = window.getProgramMainTarget(progName);
-                const targetCGPA = (group && group.overall && group.overall.targetCGPA) || mainTarget.targetCGPA;
-                const targetGrade = (group && group.overall && group.overall.targetGrade) || mainTarget.targetGrade;
-                const hasTgt = targetCGPA && targetCGPA !== 'none' && targetCGPA !== '';
-
-                const subs = (syllabusStructure[track.id] || []).filter(s => s.program === progName);
-
-                // Check if all subjects in this program have been attempted
-                let allSubjectsAttempted = (subs.length > 0);
-                subs.forEach(s => {
-                    const subRes = group && group.subjects && group.subjects[s.subject];
-                    let attempted = false;
-                    if (subRes) {
-                        const evalType = subRes.evaluationType || 'cgpa';
-                        if (evalType === 'grade') {
-                            if (subRes.grade && subRes.grade.trim() !== '' && subRes.grade.trim().toUpperCase() !== 'F') {
-                                attempted = true;
-                            }
-                        } else {
-                            const val = parseFloat(subRes.value);
-                            if (subRes.value && !isNaN(val) && val > 0) {
-                                attempted = true;
-                            }
-                        }
-                    }
-                    if (!attempted) {
-                        allSubjectsAttempted = false;
-                    }
-                });
-
-                // 1. Program Level Goal
-                let isProgramGoalMet = false;
-                if (allSubjectsAttempted && hasTgt && group && group.overall) {
-                    const evalType = group.overall.evaluationType;
-                    if (evalType === 'grade') {
-                        const currentGradeVal = Utils.mapGradeToNumeric(group.overall.grade, 'grade');
-                        const targetGradeVal = Utils.mapGradeToNumeric(targetGrade, 'grade');
-                        isProgramGoalMet = currentGradeVal >= targetGradeVal;
-                    } else {
-                        const currentCgpaVal = parseFloat(group.overall.value) || 0;
-                        const targetCgpaVal = parseFloat(targetCGPA) || 0;
-                        isProgramGoalMet = currentCgpaVal >= targetCgpaVal;
-                    }
-                }
-
-                if (isProgramGoalMet) {
-                    if (!window.passedItems.programs.includes(progName)) {
-                        window.passedItems.programs.push(progName);
-                    }
-                }
-
-                // 2. Subject Level Goal
-                subs.forEach(s => {
-                    const subRes = group && group.subjects && group.subjects[s.subject];
-                    const subTargetCgpa = (subRes && subRes.targetCGPA) || targetCGPA;
-                    const subTargetGrade = (subRes && subRes.targetGrade) || targetGrade;
-                    const hasSubTgt = subTargetCgpa && subTargetCgpa !== 'none' && subTargetCgpa !== '';
-
-                    let isSubjectGoalMet = false;
-                    if (isProgramGoalMet) {
-                        // If program goal is met, all its subjects are automatically passed/frozen
-                        isSubjectGoalMet = true;
-                    } else if (hasSubTgt && subRes) {
-                        const evalType = subRes.evaluationType || 'cgpa';
-                        if (evalType === 'grade') {
-                            const currentGradeVal = Utils.mapGradeToNumeric(subRes.grade, 'grade');
-                            const targetGradeVal = Utils.mapGradeToNumeric(subTargetGrade, 'grade');
-                            isSubjectGoalMet = currentGradeVal >= targetGradeVal;
-                        } else {
-                            const currentCgpaVal = parseFloat(subRes.value) || 0;
-                            const targetCgpaVal = parseFloat(subTargetCgpa) || 0;
-                            isSubjectGoalMet = currentCgpaVal >= targetCgpaVal;
-                        }
-                    }
-
-                    if (isSubjectGoalMet) {
-                        if (!window.passedItems.subjects.includes(s.subject)) {
-                            window.passedItems.subjects.push(s.subject);
-                        }
-                    }
-                });
-            });
-        }
-    });
+    if (window.OutcomePassConfig && typeof window.OutcomePassConfig.syncPassFreezeFromResults === 'function') {
+        return window.OutcomePassConfig.syncPassFreezeFromResults();
+    }
 };
 
 // Global Priority Ordering System (syncPriorityInputsFromDOM, moveTrack, moveProgramGlobal, moveSubjectGlobal, moveAction, onPriorityDropdownChange, renderPriorityConfig, savePriorities)
 // extracted to js/features/config/priorityConfig.js
 
 
-// --- Pace Management System Logic ---
-window.togglePaceBundleType = function () {
-    const bTypeEl = document.getElementById('add-pace-bundle-type');
-    if (!bTypeEl) return;
-    const bType = bTypeEl.value;
-    const nameContainer = document.getElementById('add-pace-name-container');
-    const checklistSection = document.getElementById('add-pace-checklist-section');
-    const checklistLabel = document.getElementById('add-pace-checklist-label');
-    if (!nameContainer || !checklistSection || !checklistLabel) return;
-
-    if (bType === 'global') {
-        nameContainer.classList.add('hidden');
-        checklistSection.classList.remove('hidden');
-        checklistLabel.textContent = "Select Subjects & Secondary Paces";
-        window.updatePaceSubjects();
-    } else {
-        nameContainer.classList.remove('hidden');
-        checklistSection.classList.remove('hidden');
-
-        if (bType === 'subjects') {
-            checklistLabel.textContent = "Select Subjects to Include (Organized by Program)";
-        } else {
-            checklistLabel.textContent = "Select Entire Programs to Include";
-        }
-        window.updatePaceSubjects();
-    }
-};
-
-window.updatePaceSubjects = function () {
-    const bType = document.getElementById('add-pace-bundle-type').value;
-    const container = document.getElementById('add-pace-subjects-container');
-    if (!container) return;
-
-    let html = '';
-
-    if (bType === 'subjects') {
-        window.tracks.forEach(track => {
-            if (window.customPrograms[track.id]) {
-                window.customPrograms[track.id].forEach(prog => {
-                    const progName = prog.name || prog;
-                    const subs = (syllabusStructure[track.id] || []).filter(s => s.program === progName);
-                    if (subs.length > 0) {
-                        html += `
-                                <details class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm group">
-                                    <summary class="cursor-pointer font-black text-[10px] md:text-[11px] uppercase tracking-widest text-slate-700 dark:text-slate-300 p-3 outline-none select-none list-none flex justify-between items-center hover:bg-slate-50 dark:hover:bg-slate-700/50 active:scale-95 rounded-xl transition-all [&::-webkit-details-marker]:hidden">
-                                        <div class="flex items-center space-x-2">
-                                            <span>${progName}</span>
-                                            <span class="bg-orange-100 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400 px-2 py-0.5 rounded-md text-[8px]">${subs.length} Subjects</span>
-                                        </div>
-                                        <svg class="w-4 h-4 text-slate-400 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                                    </summary>
-                                    <div class="p-3 pt-0 border-t border-slate-100 dark:border-slate-700">
-                                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 mt-3">
-                                `;
-                        subs.forEach(s => {
-                            let displaySub = s.subject.replace(progName + ' - ', '').replace(progName + ' ', '');
-                            const isPassed = Boolean(window.passedItems && ((window.passedItems.subjects && window.passedItems.subjects.includes(s.subject)) || (window.passedItems.programs && window.passedItems.programs.includes(progName))));
-                            if (isPassed) {
-                                html += `
-                                            <label class="flex items-center justify-between space-x-2 p-2.5 rounded-xl border border-slate-200/60 dark:border-slate-700/50 bg-slate-100/60 dark:bg-slate-900/30 opacity-60 cursor-not-allowed shadow-none pace-passed-item" title="${s.subject} (Passed - cannot be added to new pace)">
-                                                <div class="flex items-center space-x-2 min-w-0 flex-1">
-                                                    <input type="checkbox" value="${s.subject}" disabled class="pace-subject-cb form-checkbox h-4 w-4 text-slate-400 rounded border-slate-300 dark:border-slate-600 cursor-not-allowed">
-                                                    <del class="text-[10px] md:text-xs font-bold text-slate-400 dark:text-slate-500 truncate line-through" title="${s.subject}">${displaySub}</del>
-                                                </div>
-                                                <span class="text-[8px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded border border-emerald-200/50 dark:border-emerald-800/40 shrink-0">Passed</span>
-                                            </label>`;
-                            } else {
-                                html += `
-                                            <label class="flex items-center space-x-2 cursor-pointer bg-slate-50 dark:bg-slate-900/50 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-orange-400 active:scale-95 transition-all shadow-sm group/label">
-                                                <input type="checkbox" value="${s.subject}" class="pace-subject-cb form-checkbox h-4 w-4 text-orange-500 rounded border-slate-300 focus:ring-orange-500 accent-orange-500 transition-all">
-                                                <span class="text-[10px] md:text-xs font-bold text-slate-700 dark:text-slate-300 truncate group-hover/label:text-orange-600 dark:group-hover/label:text-orange-400 transition-colors" title="${s.subject}">${displaySub}</span>
-                                            </label>`;
-                            }
-                        });
-                        html += `
-                                        </div>
-                                    </div>
-                                </details>`;
-                    }
-                });
-            }
-        });
-    } else if (bType === 'programs') {
-        html += `<div class="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 w-full">`;
-        window.tracks.forEach(track => {
-            if (window.customPrograms[track.id] && window.customPrograms[track.id].length > 0) {
-                window.customPrograms[track.id].forEach(p => {
-                    const pName = p.name || p;
-                    const isProgPassed = Boolean(window.passedItems && window.passedItems.programs && window.passedItems.programs.includes(pName));
-                    if (isProgPassed) {
-                        html += `
-                                <label class="flex items-center justify-between space-x-2 p-2.5 rounded-xl border border-slate-200/60 dark:border-slate-700/50 bg-slate-100/60 dark:bg-slate-900/30 opacity-60 cursor-not-allowed shadow-none pace-passed-item" title="${pName} (Passed - cannot be added to new pace)">
-                                    <div class="flex items-center space-x-2 min-w-0 flex-1">
-                                        <input type="checkbox" value="${pName}" disabled class="pace-subject-cb form-checkbox h-4 w-4 text-slate-400 rounded border-slate-300 dark:border-slate-600 cursor-not-allowed">
-                                        <del class="text-[10px] md:text-xs font-bold text-slate-400 dark:text-slate-500 truncate line-through">${pName}</del>
-                                    </div>
-                                    <span class="text-[8px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded border border-emerald-200/50 dark:border-emerald-800/40 shrink-0">Passed</span>
-                                </label>`;
-                    } else {
-                        html += `
-                                <label class="flex items-center space-x-2 cursor-pointer bg-white dark:bg-slate-800 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-violet-400 active:scale-95 transition-all shadow-sm">
-                                    <input type="checkbox" value="${pName}" class="pace-subject-cb form-checkbox h-4 w-4 text-violet-500 rounded border-slate-300 focus:ring-violet-500 accent-violet-500 transition-all">
-                                    <span class="text-[10px] md:text-xs font-bold text-slate-700 dark:text-slate-300 truncate">${pName}</span>
-                                </label>`;
-                    }
-                });
-            }
-        });
-        html += `</div>`;
-    } else if (bType === 'global') {
-        html += `<div class="mb-4"><h5 class="text-[10px] font-black uppercase text-slate-400 mb-2">Subjects</h5>`;
-        window.tracks.forEach(track => {
-            if (window.customPrograms[track.id]) {
-                window.customPrograms[track.id].forEach(prog => {
-                    const progName = prog.name || prog;
-                    const subs = (syllabusStructure[track.id] || []).filter(s => s.program === progName);
-                    if (subs.length > 0) {
-                        html += `
-                                <details class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm group mb-2">
-                                    <summary class="cursor-pointer font-black text-[10px] md:text-[11px] uppercase tracking-widest text-slate-700 dark:text-slate-300 p-3 outline-none select-none list-none flex justify-between items-center hover:bg-slate-50 dark:hover:bg-slate-700/50 active:scale-95 rounded-xl transition-all [&::-webkit-details-marker]:hidden">
-                                        <div class="flex items-center space-x-2">
-                                            <span>${progName}</span>
-                                            <span class="bg-orange-100 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400 px-2 py-0.5 rounded-md text-[8px]">${subs.length} Subjects</span>
-                                        </div>
-                                        <svg class="w-4 h-4 text-slate-400 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                                    </summary>
-                                    <div class="p-3 pt-0 border-t border-slate-100 dark:border-slate-700">
-                                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 mt-3">
-                                `;
-                        subs.forEach(s => {
-                            let displaySub = s.subject.replace(progName + ' - ', '').replace(progName + ' ', '');
-                            const isPassed = Boolean(window.passedItems && ((window.passedItems.subjects && window.passedItems.subjects.includes(s.subject)) || (window.passedItems.programs && window.passedItems.programs.includes(progName))));
-                            if (isPassed) {
-                                html += `
-                                            <label class="flex items-center justify-between space-x-2 p-2.5 rounded-xl border border-slate-200/60 dark:border-slate-700/50 bg-slate-100/60 dark:bg-slate-900/30 opacity-60 cursor-not-allowed shadow-none pace-passed-item" title="${s.subject} (Passed - cannot be added to new pace)">
-                                                <div class="flex items-center space-x-2 min-w-0 flex-1">
-                                                    <input type="checkbox" value="${s.subject}" disabled class="global-subject-cb form-checkbox h-4 w-4 text-slate-400 rounded border-slate-300 dark:border-slate-600 cursor-not-allowed">
-                                                    <del class="text-[10px] md:text-xs font-bold text-slate-400 dark:text-slate-500 truncate line-through" title="${s.subject}">${displaySub}</del>
-                                                </div>
-                                                <span class="text-[8px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded border border-emerald-200/50 dark:border-emerald-800/40 shrink-0">Passed</span>
-                                            </label>`;
-                            } else {
-                                html += `
-                                            <label class="flex items-center space-x-2 cursor-pointer bg-slate-50 dark:bg-slate-900/50 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-orange-400 active:scale-95 transition-all shadow-sm group/label">
-                                                <input type="checkbox" value="${s.subject}" class="global-subject-cb form-checkbox h-4 w-4 text-orange-500 rounded border-slate-300 focus:ring-orange-500 accent-orange-500 transition-all">
-                                                <span class="text-[10px] md:text-xs font-bold text-slate-700 dark:text-slate-300 truncate group-hover/label:text-orange-600 dark:group-hover/label:text-orange-400 transition-colors" title="${s.subject}">${displaySub}</span>
-                                            </label>`;
-                            }
-                        });
-                        html += `
-                                        </div>
-                                    </div>
-                                </details>`;
-                    }
-                });
-            }
-        });
-        html += `</div>`;
-
-        html += `<div><h5 class="text-[10px] font-black uppercase text-slate-400 mb-2">Secondary Paces</h5>`;
-        const otherGoals = window.paceGoals.filter(g => g.type !== 'global');
-        if (otherGoals.length > 0) {
-            html += `<div class="grid grid-cols-1 sm:grid-cols-2 gap-2">`;
-            otherGoals.forEach(g => {
-                html += `
-                        <label class="flex items-center space-x-2 cursor-pointer bg-white dark:bg-slate-800 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-indigo-400 active:scale-95 transition-all shadow-sm">
-                            <input type="checkbox" value="${g.id}" class="global-pace-cb form-checkbox h-4 w-4 text-indigo-500 rounded border-slate-300 focus:ring-indigo-500 accent-indigo-500 transition-all">
-                            <span class="text-[10px] md:text-xs font-bold text-slate-700 dark:text-slate-300 truncate" title="${g.target}">${g.target}</span>
-                        </label>`;
-            });
-            html += `</div>`;
-        } else {
-            html += `<span class="text-[10px] text-slate-500">No other pace goals available to link.</span>`;
-        }
-        html += `</div>`;
-    }
-
-    container.innerHTML = html || '<span class="text-[10px] text-slate-500 col-span-full">No items found.</span>';
-};
-
-window.addPaceGoal = function () {
-    const bType = document.getElementById('add-pace-bundle-type').value;
-    const name = bType === 'global' ? 'Global Overall' : document.getElementById('add-pace-name').value.trim();
-    const startStr = document.getElementById('add-pace-start').value;
-    const dateStr = document.getElementById('add-pace-date').value;
-
-    if (bType !== 'global' && !name) return showToast("Please provide a Goal Name.", "error");
-    if (!startStr) return showToast("Please select a target start date.", "error");
-    if (!dateStr) return showToast("Please select a target deadline date.", "error");
-
-    const startDate = Utils.parseDateSafe(startStr);
-    const targetDate = Utils.parseDateSafe(dateStr);
-    if (targetDate <= startDate) return showToast("Target deadline must be after the start date.", "error");
-
-    if (bType === 'global') {
-        if (window.paceGoals.some(g => g.type === 'global')) return showToast("A Global Pace Goal already exists.", "error");
-
-        const subjCheckboxes = document.querySelectorAll('.global-subject-cb:checked');
-        const secCheckboxes = document.querySelectorAll('.global-pace-cb:checked');
-
-        const selectedSubjects = Array.from(subjCheckboxes).map(cb => cb.value).filter(sub => {
-            const sObj = window.getAllSubjects ? window.getAllSubjects().find(s => s.subject === sub) : null;
-            const progName = sObj ? sObj.program : '';
-            const isPassed = Boolean(window.passedItems && ((window.passedItems.subjects && window.passedItems.subjects.includes(sub)) || (window.passedItems.programs && window.passedItems.programs.includes(progName))));
-            return !isPassed;
-        });
-        const selectedSec = Array.from(secCheckboxes).map(cb => cb.value);
-
-        window.paceGoals.push({
-            id: 'pg_' + Date.now(),
-            type: 'global',
-            target: name,
-            startDate: startStr,
-            deadline: dateStr,
-            subjects: selectedSubjects,
-            secondaryPaces: selectedSec
-        });
-    } else {
-        const checkboxes = document.querySelectorAll('.pace-subject-cb:checked');
-        const selectedItems = Array.from(checkboxes).map(cb => cb.value);
-
-        if (selectedItems.length === 0) return showToast("Please select at least one item.", "error");
-        if (window.paceGoals.some(g => g.target === name)) return showToast("A custom goal with this name already exists.", "error");
-
-        let filteredItems = [];
-        if (bType === 'subjects') {
-            filteredItems = selectedItems.filter(sub => {
-                const sObj = window.getAllSubjects ? window.getAllSubjects().find(s => s.subject === sub) : null;
-                const progName = sObj ? sObj.program : '';
-                const isPassed = Boolean(window.passedItems && ((window.passedItems.subjects && window.passedItems.subjects.includes(sub)) || (window.passedItems.programs && window.passedItems.programs.includes(progName))));
-                return !isPassed;
-            });
-            if (filteredItems.length === 0) return showToast("Selected subjects are already passed and cannot be added to a new pace.", "error");
-        } else {
-            filteredItems = selectedItems.filter(pName => {
-                const isPassed = Boolean(window.passedItems && window.passedItems.programs && window.passedItems.programs.includes(pName));
-                return !isPassed;
-            });
-            if (filteredItems.length === 0) return showToast("Selected programs are already passed and cannot be added to a new pace.", "error");
-        }
-
-        let newGoal = {
-            id: 'pg_' + Date.now(),
-            type: 'bundle',
-            target: name,
-            startDate: startStr,
-            deadline: dateStr
-        };
-
-        if (bType === 'subjects') {
-            newGoal.subjects = filteredItems;
-        } else {
-            newGoal.programs = filteredItems;
-        }
-
-        window.paceGoals.push(newGoal);
-    }
-
-    document.getElementById('add-pace-name').value = '';
-    document.getElementById('add-pace-start').value = '';
-    document.getElementById('add-pace-date').value = '';
-    FirebaseService.saveToCloud(); renderUI(); showToast("Custom Pace Goal added!", "success");
-};
-
-window.requestDeletePaceGoal = function (id) {
-    window.openConfirmModal("Delete Pace Goal", "Are you sure you want to remove this target timeline?", () => window.deletePaceGoal(id));
-};
-
-window.deletePaceGoal = function (id) {
-    if (typeof window.recordItemDeletion === 'function') {
-        window.recordItemDeletion(id);
-    }
-    window.paceGoals = window.paceGoals.filter(g => g.id !== id);
-    if (window.dashboardConfig && window.dashboardConfig.activePaceGoalId === id) {
-        const defaultGoal = window.paceGoals.find(g => g.id === 'global-timeline') || window.paceGoals[0];
-        window.dashboardConfig.activePaceGoalId = defaultGoal ? defaultGoal.id : null;
-    }
-    FirebaseService.saveToCloud(); renderUI(); showToast("Pace Goal deleted.", "success");
-};
+// Pace Management System Logic (togglePaceBundleType, updatePaceSubjects, addPaceGoal, requestDeletePaceGoal, deletePaceGoal)
+// Extracted to canonical feature module: js/features/pace/paceManager.js
+// Backward-compatibility references maintained by js/features/pace/paceManager.js
 
 // Toast notification UI system extracted to ES module: js/shared/toast.js
 // Backward-compatibility references maintained by window.showToast
@@ -3665,93 +2789,8 @@ window.switchPage = function (pageId, sectionId) {
 
 // Application bootstrapper and lifecycle orchestrator migrated to Native ES Module entry point: js/core/app.js
 
-/******************************************************************
- * LOGIN AUTH
- ******************************************************************/
-document.addEventListener('DOMContentLoaded', async () => {
-    if (!document.getElementById('login-form')) return;
-    const loginForm = document.getElementById('login-form');
-    const emailInput = document.getElementById('email');
-    const passwordInput = document.getElementById('password');
-    const btnSubmit = document.getElementById('btn-submit');
-    const spinner = document.getElementById('spinner');
-    const errorBanner = document.getElementById('error-banner');
-    const errorMessage = document.getElementById('error-message');
-
-    // Show error banner if redirected with error
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('error') === 'denied') {
-        showError("Access denied. X-29 is private.");
-    }
-
-    function showError(msg) {
-        errorMessage.textContent = msg;
-        errorBanner.classList.remove('hidden');
-    }
-
-    function hideError() {
-        errorBanner.classList.add('hidden');
-    }
-
-    // Load configurations & Initialize Firebase
-    let config;
-    try {
-        config = await FirebaseService.fetchConfig();
-        FirebaseService.init(config);
-        console.log("Firebase initialized for login.");
-    } catch (e) {
-        console.error("Firebase init error:", e);
-        showError("Firebase initialization failed.");
-        return;
-    }
-
-    // Route guard checking if user is already logged in as admin
-    const authProvider = (typeof window !== 'undefined' && window.AuthService) ? window.AuthService : FirebaseService;
-    authProvider.onAuthStateChanged((user) => {
-        if (user && (user.email || '').trim().toLowerCase() === 'ris2k29@gmail.com') {
-            window.location.href = 'index.html';
-        }
-    });
-
-    // Handle Form Submission
-    loginForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        hideError();
-
-        const email = emailInput.value.trim();
-        const password = passwordInput.value;
-
-        btnSubmit.disabled = true;
-        spinner.classList.remove('hidden');
-
-        try {
-            const userCredential = await authProvider.login(email, password);
-            const user = userCredential.user;
-
-            if ((user.email || '').trim().toLowerCase() !== 'ris2k29@gmail.com') {
-                await authProvider.logout();
-                showError("Access denied. X-29 is private.");
-                btnSubmit.disabled = false;
-                spinner.classList.add('hidden');
-            } else {
-                window.location.href = 'index.html';
-            }
-        } catch (error) {
-            console.error("Auth error:", error);
-            let friendlyMsg = "Authentication failed. Please check your credentials.";
-            if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
-                friendlyMsg = "Invalid email or password.";
-            } else if (error.code === 'auth/invalid-email') {
-                friendlyMsg = "Invalid email address format.";
-            } else if (error.code === 'auth/user-disabled') {
-                friendlyMsg = "This user account has been disabled.";
-            }
-            showError(friendlyMsg);
-            btnSubmit.disabled = false;
-            spinner.classList.add('hidden');
-        }
-    });
-});
+// Login Page Authentication Controller
+// Extracted to page controller: js/pages/login/login.js
 
 
 
