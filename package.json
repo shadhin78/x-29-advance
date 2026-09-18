@@ -4,8 +4,9 @@
   "description": "Dynamic Multi-Track Execution & Tracking Dashboard",
   "main": "js/dev-server.js",
   "scripts": {
-    "dev": "node js/dev-server.js",
-    "dev:next": "next dev -p 3001",
+    "dev": "next dev",
+    "dev:next": "next dev",
+    "dev:legacy": "node js/dev-server.js",
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
