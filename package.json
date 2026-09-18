@@ -5,6 +5,10 @@
   "main": "js/dev-server.js",
   "scripts": {
     "dev": "node js/dev-server.js",
+    "dev:next": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
     "test": "node tests/auth-service.test.js && node tests/config-tracks.test.js && node tests/pace-outcome.test.js && node tests/analytics-visualization.test.js && node tests/daily-targets.test.js && node tests/weekly-targets.test.js && node tests/monthly-targets.test.js && node tests/tasks-metrics-dashboard.test.js && node tests/app-core.test.js && node tests/modals.test.js",
     "test:app": "node tests/app-core.test.js",
     "test:auth": "node tests/auth-service.test.js",
@@ -18,7 +22,26 @@
     "test:tasks-metrics-dashboard": "node tests/tasks-metrics-dashboard.test.js"
   },
   "dependencies": {
+    "@radix-ui/react-dialog": "^1.1.23",
+    "@radix-ui/react-dropdown-menu": "^2.1.24",
+    "clsx": "^2.1.1",
     "firebase": "^12.17.1",
-    "firebase-admin": "^14.2.0"
+    "firebase-admin": "^14.2.0",
+    "idb": "^8.0.3",
+    "lucide-react": "^1.47.0",
+    "next": "^16.3.5",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "tailwind-merge": "^3.7.0",
+    "zustand": "^5.0.15"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^26.6.1",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "postcss": "^8.5.28",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^7.0.2"
   }
 }
