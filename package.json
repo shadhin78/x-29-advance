@@ -5,7 +5,7 @@
   "main": "js/dev-server.js",
   "scripts": {
     "dev": "node js/dev-server.js",
-    "dev:next": "next dev",
+    "dev:next": "next dev -p 3001",
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
@@ -19,7 +19,9 @@
     "test:targets": "node tests/daily-targets.test.js",
     "test:weekly": "node tests/weekly-targets.test.js",
     "test:monthly": "node tests/monthly-targets.test.js",
-    "test:tasks-metrics-dashboard": "node tests/tasks-metrics-dashboard.test.js"
+    "test:tasks-metrics-dashboard": "node tests/tasks-metrics-dashboard.test.js",
+    "test:timer": "node --experimental-strip-types tests/timer-engine.test.mjs",
+    "test:unit": "node --test tests/*.test.mjs"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.23",

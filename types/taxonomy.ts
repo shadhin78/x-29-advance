@@ -17,6 +17,8 @@ export interface Program {
   trackId?: string;
   _trackId?: string;
   _trackName?: string;
+  isPassed?: boolean;
+  targetCGPA?: string | number;
 }
 
 export interface SyllabusItem {
@@ -34,4 +36,22 @@ export interface SyllabusStructure {
 
 export interface CustomProgramsMap {
   [trackId: string]: Program[];
+}
+
+export interface NormalizedSubject {
+  id: string;
+  name: string;
+  trackId: string;
+  trackName: string;
+  program: string;
+  chaptersCount: number;
+  priority: number;
+  order: number;
+  color: string;
+  isPassed: boolean;
+}
+
+export interface PassedItemsState {
+  programs: string[];
+  subjects: string[];
 }

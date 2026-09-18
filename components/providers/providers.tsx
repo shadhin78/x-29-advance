@@ -15,6 +15,13 @@ export function Providers({ children }: { children: React.ReactNode }) {
       setUser(user);
     });
 
+    // PWA Service Worker Registration
+    if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch((err) => {
+        console.warn('[PWA] Service worker registration failed:', err);
+      });
+    }
+
     return () => {
       unsubscribe();
     };
