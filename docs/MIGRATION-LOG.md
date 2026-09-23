@@ -164,5 +164,37 @@
   - `npm run build`: Compiled in 2.0s with Turbopack (13 static pages).
   - Live Browser Subagent verification: PASS.
 - **Result**: STEP 011 completed with 100% visual, behavioral, and responsive parity.
+- **Git Checkpoint**: `bd2d37e` (`feat: achieve 100% visual and behavioral parity for /login (STEP 011)`)
+
+---
+
+### Milestone: Page-by-Page Migration & Visual Parity: / (Dashboard Overview & KPI Cards) (STEP 012)
+- **Date**: 2026-09-24
+- **Step**: STEP 012 (Phase 10 / Page 2)
+- **Changes**:
+  - Audited legacy `pages/Dashboard/Dashboard.html` and `js/features/dashboard/dashboard.js` against modern `features/dashboard/components/*`.
+  - Identified and implemented missing bottom sections from legacy:
+    - Created `features/dashboard/components/TrendsBar.tsx` (legacy `#trends-bar-*`): Start Date, Days Passed, Days Remaining, Req. Pace, Actual Pace, Est. Finish, and Edit Settings CTA.
+    - Created `features/dashboard/components/TrackCompletionGrid.tsx` (legacy `#track-progress-container`): circular SVG progress gauges and chapter fraction pills for Academic Core, Competitive Track, and Self-Paced Specialization.
+  - Updated `features/dashboard/components/DashboardStudio.tsx` to render all 11 KPI cards + Program Completion Grid + TrendsBar (X Bar) + Track Completion Grid.
+  - Verified live in browser subagent: verified all 11 KPI cards, Program Completion, TrendsBar (X Bar), and Track Completion with zero React rendering or hydration errors.
+- **Files Modified/Created**:
+  - `features/dashboard/components/DashboardStudio.tsx`
+  - `features/dashboard/components/TrendsBar.tsx`
+  - `features/dashboard/components/TrackCompletionGrid.tsx`
+  - `docs/DESIGN-PARITY.md`
+  - `docs/MODERNIZATION-PLAN.md`
+  - `docs/TASKS.md`
+  - `docs/MEMORY.md`
+  - `docs/MIGRATION-LOG.md`
+- **Tests**:
+  - `npm run typecheck`: Exit Code 0 (0 errors).
+  - `npm run test:auth`: 11 / 11 passed (100%).
+  - `node tests/tasks-metrics-dashboard.test.js`: 36 / 36 passed (100%).
+  - `npm run test:unit`: 27 / 27 passed (100%).
+  - `npm run build`: Compiled in 1.7s with Turbopack (14 static pages).
+  - Live Browser Subagent verification: PASS (1920x945 full viewport audit).
+- **Result**: STEP 012 completed with 100% visual, behavioral, and responsive parity.
 - **Git Checkpoint**: Ready to commit.
+
 

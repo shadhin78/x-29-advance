@@ -16,6 +16,8 @@
  * - UpcomingExamsCard
  * - PassedSubjectsCard
  * - ProgramCompletionGrid
+ * - TrendsBar (X Bar)
+ * - TrackCompletionGrid
  */
 
 import React, { useEffect } from 'react';
@@ -41,6 +43,8 @@ import { DailyActionsCard } from './DailyActionsCard';
 import { UpcomingExamsCard } from './UpcomingExamsCard';
 import { PassedSubjectsCard } from './PassedSubjectsCard';
 import { ProgramCompletionGrid } from './ProgramCompletionGrid';
+import { TrendsBar } from './TrendsBar';
+import { TrackCompletionGrid } from './TrackCompletionGrid';
 
 export const DashboardStudio: React.FC = () => {
   const initTaxonomy = useTaxonomyStore((s) => s.initFromStorage);
@@ -101,6 +105,14 @@ export const DashboardStudio: React.FC = () => {
 
       {/* Program Completion Section */}
       <ProgramCompletionGrid />
+
+      {/* X Bar — Baseline & Velocity Trends */}
+      <TrendsBar />
+
+      {/* Track Completion Section */}
+      <TrackCompletionGrid />
     </div>
   );
 };
+
+export default DashboardStudio;

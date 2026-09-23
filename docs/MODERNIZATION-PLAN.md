@@ -23,7 +23,7 @@ FOUNDATION & ARCHITECTURE (COMPLETED)
 
 PAGE-BY-PAGE PARITY VERIFICATION (IN PROGRESS)
 [x] STEP 011 — Page-by-Page Migration & Visual Parity: /login
-[ ] STEP 012 — Page-by-Page Migration & Visual Parity: / (Dashboard Overview & KPI Cards)
+[x] STEP 012 — Page-by-Page Migration & Visual Parity: / (Dashboard Overview & KPI Cards)
 [ ] STEP 013 — Page-by-Page Migration & Visual Parity: /focus (Timer & Chronograph Dial)
 [ ] STEP 014 — Page-by-Page Migration & Visual Parity: /subjects (Taxonomy Tree & Chapter Checklist)
 [ ] STEP 015 — Page-by-Page Migration & Visual Parity: /daily-actions & Monthly Target Setup
@@ -235,7 +235,7 @@ OPTIMIZATION & PRODUCTION HARDENING (PENDING)
 - **Risk**: Missing KPI calculation or mismatched card heights.
 - **Validation method**: Side-by-side browser audit; data parity check against test store data.
 - **Completion criteria**: Dashboard renders identical cards, identical numbers, and identical glass styling.
-- **Status**: **NOT STARTED**
+- **Status**: **COMPLETED**
 
 ---
 

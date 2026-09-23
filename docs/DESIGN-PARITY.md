@@ -69,7 +69,7 @@ Deterministic hashing (`hashStringToColor`) assigns each subject/track consisten
 
 
 ### Page 2: Dashboard Overview (`/` vs `pages/Dashboard/Dashboard.html`)
-- [ ] **Visual Parity**:
+- [x] **Visual Parity**:
   - 3-column responsive card grid matching legacy dimensions and order.
   - Card 1: Pace & Velocity Timeline card with days left and required pace badge.
   - Card 2: Compact Heatmap card showing recent study intensity tiers.
@@ -82,17 +82,19 @@ Deterministic hashing (`hashStringToColor`) assigns each subject/track consisten
   - Card 9: Daily Actions & Habits adherence card.
   - Card 10: Upcoming Exams card with live countdown pill.
   - Card 11: Passed Subjects badge cloud.
-  - Bottom Section: Multi-track Program Completion Grid with track color bars.
-- [ ] **Behavioral Parity**:
+  - Bottom Section 1: Multi-track Program Completion Grid with track color bars.
+  - Bottom Section 2: Trends Bar (X Bar) with Start Date, Days Passed, Days Remaining, Req. Pace, Actual Pace, Est. Finish, and Edit Settings CTA.
+  - Bottom Section 3: Track Completion Grid with circular SVG gauges for Academic Core, Competitive Track, and Self-Paced Specialization.
+- [x] **Behavioral Parity**:
   - All numbers calculate from active stores (Tasks, Targets, Pace, Schedule, Outcome).
   - Checkbox toggling updates completion percentage and triggers local-first sync.
   - Clicking on widgets navigates to respective deep-dive feature pages.
-- [ ] **Responsive Parity**:
+- [x] **Responsive Parity**:
   - Desktop (> 1024px): 3-column layout.
   - Tablet (768px - 1024px): 2-column layout.
   - Mobile (< 768px): 1-column vertical stack with `px-4` side margins.
-- **Status**: **PENDING VERIFICATION (STEP 012)**
-- **Notes**: Scaffolded in `features/dashboard/components/*`.
+- **Status**: **COMPLETED (STEP 012 VERIFIED)**
+- **Notes**: All 11 KPI cards, Program Completion Grid, TrendsBar (X Bar), and Track Completion Grid verified in live browser subagent; responsive grid verified across desktop, tablet, and mobile; zero React rendering or hydration errors.
 
 ---
 

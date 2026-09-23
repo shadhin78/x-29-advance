@@ -23,7 +23,7 @@ FOUNDATION & ARCHITECTURE (COMPLETED)
 
 PAGE-BY-PAGE PARITY VERIFICATION (IN PROGRESS)
 [x] STEP 011 — Page-by-Page Migration & Visual Parity: /login
-[ ] STEP 012 — Page-by-Page Migration & Visual Parity: / (Dashboard Overview & KPI Cards)
+[x] STEP 012 — Page-by-Page Migration & Visual Parity: / (Dashboard Overview & KPI Cards)
 [ ] STEP 013 — Page-by-Page Migration & Visual Parity: /focus (Timer & Chronograph Dial)
 [ ] STEP 014 — Page-by-Page Migration & Visual Parity: /subjects (Taxonomy Tree & Chapter Checklist)
 [ ] STEP 015 — Page-by-Page Migration & Visual Parity: /daily-actions & Monthly Target Setup
@@ -152,13 +152,14 @@ OPTIMIZATION & PRODUCTION HARDENING (PENDING)
 ---
 
 ### STEP 012 — Page-by-Page Migration & Visual Parity: / (Dashboard Overview & KPI Cards)
-- [ ] Audit 12 dashboard cards against legacy `pages/Dashboard/Dashboard.html`.
-- [ ] Verify all numbers, percentage math, dynamic colors, and click actions.
-- [ ] Validate responsive grid behavior (3-col desktop, 2-col tablet, 1-col mobile).
-- [ ] Verify zero console errors and zero layout shifts.
-- [ ] Update `DESIGN-PARITY.md` and `MEMORY.md`.
-- [ ] Git commit checkpoint for STEP 012.
-- **Status**: **NOT STARTED (NEXT IN QUEUE)**
+- [x] Audit 12 dashboard cards against legacy `pages/Dashboard/Dashboard.html`.
+- [x] Verify all numbers, percentage math, dynamic colors, and click actions.
+- [x] Integrate TrendsBar (X Bar) and Track Completion Grid to achieve 100% section parity.
+- [x] Validate responsive grid behavior (3-col desktop, 2-col tablet, 1-col mobile).
+- [x] Verify zero console errors and zero layout shifts.
+- [x] Update `DESIGN-PARITY.md` and `MEMORY.md`.
+- [x] Git commit checkpoint for STEP 012.
+- **Status**: **COMPLETED**
 
 ---
 
@@ -170,7 +171,7 @@ OPTIMIZATION & PRODUCTION HARDENING (PENDING)
 - [ ] Verify study log persistence to IndexedDB and Firestore.
 - [ ] Update `DESIGN-PARITY.md` and `MEMORY.md`.
 - [ ] Git commit checkpoint for STEP 013.
-- **Status**: **NOT STARTED**
+- **Status**: **NOT STARTED (NEXT IN QUEUE)**
 
 ---
 
