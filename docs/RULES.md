@@ -6,9 +6,10 @@
 
 ---
 
-## 1. THE 15 PERMANENT AI ENGINEERING RULES (NON-NEGOTIABLE)
+> **PERMANENT PARITY MANDATE**:  
+> The original X-29 HTML/CSS/JS implementation is the visual source of truth. Technical modernization must not redesign, restyle, reinterpret, or alter the established interface unless the user explicitly requests a design change.
 
-1. **Existing X-29 design is the visual source of truth.**
+1. **Existing X-29 design is the visual source of truth.** The original X-29 HTML + CSS + JavaScript application is the absolute visual and behavioral source of truth. The modern Next.js/React/TypeScript implementation must reproduce the original application, not reinterpret it.
 2. **Do NOT redesign.** Never make the interface "better looking", minimalist, or generic corporate.
 3. **Do NOT remove functionality.** Never drop buttons, filters, modals, audio chimes, or settings.
 4. **Do NOT change behavior without explicit user approval.** Preserve all calculations, workflows, and edge cases.

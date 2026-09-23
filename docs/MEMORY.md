@@ -4,12 +4,15 @@
 > **Last Updated**: 2026-09-24  
 > **Rule**: Update this file after EVERY meaningful development session or milestone.
 
+> **PERMANENT PARITY MANDATE**:  
+> The original X-29 HTML/CSS/JS implementation is the visual source of truth. Technical modernization must not redesign, restyle, reinterpret, or alter the established interface unless the user explicitly requests a design change.
+
 ---
 
 ## 1. Current Migration Status
-- **Current Step**: **STEP 012 COMPLETED — Page-by-Page Migration & Visual Parity: / (Dashboard Overview & KPI Cards)**
-- **Next Step in Queue**: **STEP 013 — Page-by-Page Migration & Visual Parity: /focus (Timer & Chronograph Dial)**
-- **Previous Completed Step**: **STEP 012 — Page-by-Page Migration & Visual Parity: / (Dashboard Overview & KPI Cards)**
+- **Current Step**: **STEP 012 — DESIGN PARITY RECOVERY: Shell, Sidebar, Header & Dashboard (/) COMPLETED & VERIFIED**
+- **Next Step in Queue**: **STEP 013 — Page-by-Page Migration & Visual Parity: /focus (Timer & Chronograph Dial) (STOPPED / AWAITING USER APPROVAL TO PROCEED)**
+- **Previous Completed Step**: **STEP 011 — Page-by-Page Migration & Visual Parity: /login**
 - **Completed Steps**:
   - STEP 001 — Full Project Architecture Audit & Inventory
   - STEP 002 — Baseline Performance & Disaster Recovery Safeguards

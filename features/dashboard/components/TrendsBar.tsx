@@ -22,15 +22,6 @@ import {
   calculatePaceStats,
   resolveTargetedSubjects,
 } from '@/features/pace/services/paceEngine';
-import {
-  Calendar,
-  TrendingUp,
-  Clock,
-  Layers,
-  Zap,
-  CheckCircle2,
-  SlidersHorizontal,
-} from 'lucide-react';
 
 export const TrendsBar: React.FC = () => {
   const { paceGoals } = usePaceStore();
@@ -65,7 +56,7 @@ export const TrendsBar: React.FC = () => {
       {/* Header Label */}
       <div className="w-full flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-2 mb-1">
         <span className="text-[10px] md:text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">
-          X Bar — Baseline & Velocity Trends
+          X Bar
         </span>
       </div>
 
@@ -74,13 +65,23 @@ export const TrendsBar: React.FC = () => {
         {/* Start Date */}
         <div className="flex items-center space-x-3">
           <div className="p-2.5 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-2xl border border-blue-500/20 backdrop-blur-md">
-            <Calendar className="w-4 h-4" />
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2.5"
+                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+              />
+            </svg>
           </div>
           <div>
             <span className="block text-[9px] font-black uppercase text-slate-400 tracking-widest">
               Start Date
             </span>
-            <span className="text-xs sm:text-sm font-black text-slate-800 dark:text-slate-200">
+            <span
+              id="trends-bar-start-date"
+              className="text-xs sm:text-sm font-black text-slate-800 dark:text-slate-200"
+            >
               {primaryGoal?.startDate || '--'}
             </span>
           </div>
@@ -89,59 +90,99 @@ export const TrendsBar: React.FC = () => {
         {/* Days Passed */}
         <div className="flex items-center space-x-3">
           <div className="p-2.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-2xl border border-emerald-500/20 backdrop-blur-md">
-            <TrendingUp className="w-4 h-4" />
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2.5"
+                d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
+              />
+            </svg>
           </div>
           <div>
             <span className="block text-[9px] font-black uppercase text-slate-400 tracking-widest">
               Days Passed
             </span>
-            <span className="text-xs sm:text-sm font-black text-slate-800 dark:text-slate-200">
-              {stats ? `${stats.daysElapsed} Days` : '--'}
+            <span
+              id="trends-bar-days-passed"
+              className="text-xs sm:text-sm font-black text-slate-800 dark:text-slate-200"
+            >
+              {stats ? `${stats.daysElapsed}` : '--'}
             </span>
           </div>
         </div>
 
         {/* Days Remaining */}
-        <div className="flex items-center space-x-3">
+        <div id="trends-bar-days-remain-container" className="flex items-center space-x-3">
           <div className="p-2.5 bg-rose-500/10 text-rose-600 dark:text-rose-400 rounded-2xl border border-rose-500/20 backdrop-blur-md">
-            <Clock className="w-4 h-4" />
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2.5"
+                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
           </div>
           <div>
             <span className="block text-[9px] font-black uppercase text-slate-400 tracking-widest">
               Days Remaining
             </span>
-            <span className="text-xs sm:text-sm font-black text-slate-800 dark:text-slate-200">
-              {stats ? `${stats.daysRemaining} Days` : '--'}
+            <span
+              id="trends-bar-days-remaining"
+              className="text-xs sm:text-sm font-black text-slate-800 dark:text-slate-200"
+            >
+              {stats ? `${stats.daysRemaining}` : '--'}
             </span>
           </div>
         </div>
 
         {/* Required Pace */}
-        <div className="flex items-center space-x-3">
+        <div id="trends-bar-req-pace-container" className="flex items-center space-x-3">
           <div className="p-2.5 bg-fuchsia-500/10 text-fuchsia-600 dark:text-fuchsia-400 rounded-2xl border border-fuchsia-500/20 backdrop-blur-md">
-            <Layers className="w-4 h-4" />
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2.5"
+                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+              />
+            </svg>
           </div>
           <div>
             <span className="block text-[9px] font-black uppercase text-slate-400 tracking-widest">
               Req. Pace
             </span>
-            <span className="text-xs sm:text-sm font-black text-slate-800 dark:text-slate-200">
-              {stats ? `${stats.reqPace} Ch/Day` : '--'}
+            <span
+              id="trends-bar-req-pace"
+              className="text-xs sm:text-sm font-black text-slate-800 dark:text-slate-200"
+            >
+              {stats ? `${stats.reqPace}` : '--'}
             </span>
           </div>
         </div>
 
         {/* Actual Pace */}
-        <div className="flex items-center space-x-3">
+        <div id="trends-bar-actual-pace-container" className="flex items-center space-x-3">
           <div className="p-2.5 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 rounded-2xl border border-cyan-500/20 backdrop-blur-md">
-            <Zap className="w-4 h-4" />
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2.5"
+                d="M13 10V3L4 14h7v7l9-11h-7z"
+              />
+            </svg>
           </div>
           <div>
             <span className="block text-[9px] font-black uppercase text-slate-400 tracking-widest">
               Actual Pace
             </span>
-            <span className="text-xs sm:text-sm font-black text-slate-800 dark:text-slate-200">
-              {stats ? `${stats.curPace} Ch/Day` : '--'}
+            <span
+              id="trends-bar-actual-pace"
+              className="text-xs sm:text-sm font-black text-slate-800 dark:text-slate-200"
+            >
+              {stats ? `${stats.curPace}` : '--'}
             </span>
           </div>
         </div>
@@ -149,14 +190,24 @@ export const TrendsBar: React.FC = () => {
         {/* Est Finish */}
         <div className="flex items-center space-x-3">
           <div className="p-2.5 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-2xl border border-indigo-500/20 backdrop-blur-md">
-            <CheckCircle2 className="w-4 h-4" />
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2.5"
+                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
+              />
+            </svg>
           </div>
           <div>
             <span className="block text-[9px] font-black uppercase text-slate-400 tracking-widest">
               Est. Finish
             </span>
-            <span className="text-xs sm:text-sm font-black text-slate-800 dark:text-slate-200">
-              {stats?.projectedFinish ? `${stats.projectedFinish} (${stats.daysNeeded}d @ ${stats.curPace} ch/d)` : '--'}
+            <span
+              id="trends-bar-est-finish"
+              className="text-xs sm:text-sm font-black text-slate-800 dark:text-slate-200"
+            >
+              {stats?.projectedFinish ? `${stats.projectedFinish}` : '--'}
             </span>
           </div>
         </div>
@@ -165,9 +216,22 @@ export const TrendsBar: React.FC = () => {
       {/* Edit Settings Link */}
       <Link
         href="/pace"
+        id="btn-open-trends-settings"
         className="relative z-10 flex items-center space-x-2 px-4 py-2.5 bg-white/40 dark:bg-slate-900/40 hover:bg-white/60 dark:hover:bg-slate-900/60 border border-white/60 dark:border-slate-800/80 rounded-2xl text-[10px] font-black uppercase tracking-wider text-slate-700 dark:text-slate-200 active:scale-95 transition-all shadow-sm backdrop-blur-sm"
       >
-        <SlidersHorizontal className="w-4 h-4 text-slate-500 dark:text-slate-300" />
+        <svg
+          className="w-4 h-4 text-slate-500 dark:text-slate-300"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
+          />
+        </svg>
         <span>Edit Settings</span>
       </Link>
     </div>

@@ -39,8 +39,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${inter.variable} ${outfit.variable} dark`} suppressHydrationWarning>
-      <body className="bg-[#0b0f19] text-slate-100 min-h-screen font-sans antialiased overflow-x-hidden" suppressHydrationWarning>
+    <html lang="en" className={`${inter.variable} ${outfit.variable} dark scroll-smooth`} suppressHydrationWarning>
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700;800&family=Rajdhani:wght@600;700;800&family=Chakra+Petch:wght@600;700&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body className="bg-slate-50 dark:bg-[#0f172a] text-slate-900 dark:text-slate-100 font-sans overflow-hidden h-screen w-screen flex flex-col md:flex-row touch-action-manipulation" suppressHydrationWarning>
         <Providers>{children}</Providers>
       </body>
     </html>

@@ -21,10 +21,13 @@ FOUNDATION & ARCHITECTURE (COMPLETED)
 [x] STEP 009 — Local-First IndexedDB Engine & Coalesced Sync Service
 [x] STEP 010 — Feature Domain Slices & Component Tree Scaffolding
 
-PAGE-BY-PAGE PARITY VERIFICATION (IN PROGRESS)
+> **PERMANENT PARITY MANDATE**:  
+> The original X-29 HTML/CSS/JS implementation is the visual source of truth. Technical modernization must not redesign, restyle, reinterpret, or alter the established interface unless the user explicitly requests a design change.
+
+PAGE-BY-PAGE PARITY VERIFICATION
 [x] STEP 011 — Page-by-Page Migration & Visual Parity: /login
-[x] STEP 012 — Page-by-Page Migration & Visual Parity: / (Dashboard Overview & KPI Cards)
-[ ] STEP 013 — Page-by-Page Migration & Visual Parity: /focus (Timer & Chronograph Dial)
+[x] STEP 012 — DESIGN PARITY RECOVERY: Shell, Sidebar, Header & Dashboard (/) (COMPLETED & VERIFIED)
+[ ] STEP 013 — Page-by-Page Migration & Visual Parity: /focus (Timer & Chronograph Dial) (FROZEN - READY FOR NEXT STEP)
 [ ] STEP 014 — Page-by-Page Migration & Visual Parity: /subjects (Taxonomy Tree & Chapter Checklist)
 [ ] STEP 015 — Page-by-Page Migration & Visual Parity: /daily-actions & Monthly Target Setup
 [ ] STEP 016 — Page-by-Page Migration & Visual Parity: /schedule (24h Daily Timeline & Active Slot)

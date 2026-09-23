@@ -195,6 +195,57 @@
   - `npm run build`: Compiled in 1.7s with Turbopack (14 static pages).
   - Live Browser Subagent verification: PASS (1920x945 full viewport audit).
 - **Result**: STEP 012 completed with 100% visual, behavioral, and responsive parity.
-- **Git Checkpoint**: `4fd5cc7` (`feat: achieve 100% visual and behavioral parity for / dashboard (STEP 012)`)
+---
+
+### Milestone: Design Parity Recovery — Shell, Sidebar, Header & Dashboard (/) (STEP 012)
+- **Date**: 2026-09-24
+- **Step**: STEP 012 DESIGN PARITY RECOVERY
+- **Root Causes of Design Drift Identified**:
+  1. *Container Width Constraint*: `<div className="max-w-7xl mx-auto w-full">` artificially constrained layout on viewports > 1280px; original was fully fluid (`min-w-0 flex-1`).
+  2. *Missing Original Stylesheets*: `css/style.css` and `pages/Dashboard/Dashboard.css` were not imported into Next.js root layout, dropping key CSS rules (`animate-aura`, `animate-page-enter`, custom scrollbars, `font-countdown`, drop shadows).
+  3. *Generic Icon Sets*: Generic Lucide icons had different stroke widths and shapes compared to legacy raw Tailwind SVGs (`stroke-width="2.5"`).
+  4. *Redesigned Top Stats Header*: Header was transformed into a generic 4-card grid instead of the exact dual-segment legacy layout: Left `#header-exam-countdown-compact` (rose badge, ping dot, exam subject, live countdown timer with numbers and white unit labels), Right unified 4-segment stats card (Current Time in blue box, Success Score in emerald box, Time Elapsed in red box, Final Deadline with gradient text).
+  5. *Sidebar Navigation Drift*: Replaced vibrant per-route active states (`/` blue, `/analytics` fuchsia gradient, `/focus` emerald, `/daily-actions` orange, etc.) with monochrome blue pills and generic "PRO" badge.
+  6. *Redesigned Dashboard Widgets*: ProgramCompletionGrid was redesigned with linear bars instead of the canonical circular SVG gauges and shadows matching TrackCompletionGrid; WeeklyTargetsCard and DailyActionsCard had been turned into generic checklist lists rather than 2-column and dynamic grid card buttons.
+- **Corrections Applied**:
+  - `app/globals.css`: Imported original `../css/style.css` and `../pages/Dashboard/Dashboard.css`.
+  - `app/layout.tsx`: Restored Google Fonts link and legacy body classes.
+  - `components/shell/AppShell.tsx`: Removed artificial `max-w-7xl mx-auto` wrapper, restoring fluid `#main-content-panel`.
+  - `components/shell/Sidebar.tsx`: Restored pulsing Aura Glow tag (`#dash-top-tag`, `animate-aura`), original navigation buttons with per-route vibrant active colors/shadows, raw SVG icons with `stroke-width="2.5"`, original profile card, and full-width logout button (`#btn-logout`).
+  - `components/shell/TopStatsBar.tsx`: Replaced 4-card generic grid with exact legacy dual-sided header layout and live countdown timer.
+  - `components/shell/MobileHeader.tsx`: Restored 3-dot menu toggle button, centered compact exam countdown pill, and blue clock pill.
+  - `features/dashboard/components/*`: Restored exact legacy IDs, classes, raw SVGs, and layouts across all 11 KPI cards (`PaceTimelineCard`, `CompactHeatmapCard`, `MonthlyTargetsCard`, `GlobalCompletionCard`, `OutcomeOverviewCard`, `ActiveNowCard`, `DailyTargetsCard`, `WeeklyTargetsCard`, `DailyActionsCard`, `UpcomingExamsCard`, `PassedSubjectsCard`), `ProgramCompletionGrid` (restored circular SVG progress ring), `TrendsBar`, and `TrackCompletionGrid`.
+  - `features/dashboard/components/DashboardStudio.tsx`: Restored `#page-dashboard` container classes and `grid grid-cols-1 md:grid-cols-3 gap-6 w-full mb-6`.
+- **Files Modified**:
+  - `app/globals.css`
+  - `app/layout.tsx`
+  - `components/shell/AppShell.tsx`
+  - `components/shell/Sidebar.tsx`
+  - `components/shell/TopStatsBar.tsx`
+  - `components/shell/MobileHeader.tsx`
+  - `features/dashboard/components/PaceTimelineCard.tsx`
+  - `features/dashboard/components/CompactHeatmapCard.tsx`
+  - `features/dashboard/components/MonthlyTargetsCard.tsx`
+  - `features/dashboard/components/GlobalCompletionCard.tsx`
+  - `features/dashboard/components/ActiveNowCard.tsx`
+  - `features/dashboard/components/DailyTargetsCard.tsx`
+  - `features/dashboard/components/WeeklyTargetsCard.tsx`
+  - `features/dashboard/components/DailyActionsCard.tsx`
+  - `features/dashboard/components/UpcomingExamsCard.tsx`
+  - `features/dashboard/components/PassedSubjectsCard.tsx`
+  - `features/dashboard/components/ProgramCompletionGrid.tsx`
+  - `features/dashboard/components/TrendsBar.tsx`
+  - `features/dashboard/components/DashboardStudio.tsx`
+  - `docs/RULES.md`
+  - `docs/DESIGN-PARITY.md`
+  - `docs/MEMORY.md`
+  - `docs/TASKS.md`
+  - `docs/MIGRATION-LOG.md`
+- **Tests & Verification**:
+  - `npm run typecheck`: 0 errors (`tsc --noEmit` exited cleanly).
+  - `npm run test:unit`: 27 / 27 tests passed (0 failures).
+  - `npm run build`: Turbopack build compiled successfully in 2.4s (14 static pages generated).
+  - Live Browser Subagent verification: Tested Desktop (1440px), Tablet (768px), and Mobile (390px) viewports; validated live toggle interactions, responsive drawer, countdown timer, and 100% visual parity against original reference app.
+- **Result**: STEP 012 Design Parity Recovery is 100% complete and verified. Forward progression halted per user directive until next phase approval.
 
 

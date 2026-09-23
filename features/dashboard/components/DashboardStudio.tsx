@@ -3,7 +3,7 @@
 /**
  * X-29 Dashboard Studio Component (features/dashboard/components/DashboardStudio.tsx)
  * 
- * Modular dashboard coordinating responsive card grid:
+ * Modular dashboard coordinating exact legacy responsive card grid:
  * - PaceTimelineCard
  * - CompactHeatmapCard
  * - MonthlyTargetsCard
@@ -80,9 +80,9 @@ export const DashboardStudio: React.FC = () => {
   ]);
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-300">
-      {/* 3-Column Responsive Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
+    <div id="page-dashboard" className="space-y-6 md:space-y-8 animate-page-enter">
+      {/* Responsive Grid for Dashboard Cards: 3 columns on md+ */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full mb-6">
         {/* Row 1 */}
         <PaceTimelineCard />
         <CompactHeatmapCard />
@@ -106,7 +106,7 @@ export const DashboardStudio: React.FC = () => {
       {/* Program Completion Section */}
       <ProgramCompletionGrid />
 
-      {/* X Bar — Baseline & Velocity Trends */}
+      {/* X Bar at the bottom of the dashboard */}
       <TrendsBar />
 
       {/* Track Completion Section */}
