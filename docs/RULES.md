@@ -1,12 +1,32 @@
 # X-29 Advance — Permanent Engineering & AI Control Rules (RULES.md)
 
-> **CRITICAL DIRECTIVE**: This is the authoritative governance document for all development on X-29 Advance.
-> Every AI agent and human engineer MUST strictly comply with every rule in this document.
+> **CRITICAL DIRECTIVE**: This is the authoritative governance document for all development on X-29 Advance.  
+> Every AI agent and human engineer MUST strictly comply with every rule in this document.  
 > Convenience, speed, or subjective design preferences NEVER supersede these rules.
 
 ---
 
-## 1. ABSOLUTE DESIGN PRESERVATION RULES
+## 1. THE 15 PERMANENT AI ENGINEERING RULES (NON-NEGOTIABLE)
+
+1. **Existing X-29 design is the visual source of truth.**
+2. **Do NOT redesign.** Never make the interface "better looking", minimalist, or generic corporate.
+3. **Do NOT remove functionality.** Never drop buttons, filters, modals, audio chimes, or settings.
+4. **Do NOT change behavior without explicit user approval.** Preserve all calculations, workflows, and edge cases.
+5. **Do NOT change Firebase data structure casually.** Preserve all collection paths, document schemas, and field types.
+6. **Do NOT expose secrets.** Never send service account keys, admin secrets, or private credentials to the browser or git.
+7. **Do NOT perform giant blind rewrites.** Never convert entire projects at once; migrate incrementally.
+8. **Work strictly one numbered step at a time.** Never execute multiple numbered steps simultaneously.
+9. **Test every step thoroughly.** Verify functionality, visual parity, responsive behavior, and performance before completing any step.
+10. **Update documentation after every step.** Keep `MODERNIZATION-PLAN.md`, `TASKS.md`, `MEMORY.md`, `PERFORMANCE.md`, and `MIGRATION-LOG.md` synchronized.
+11. **Create a Git checkpoint for every major completed step.** Never proceed without a clean, recoverable commit.
+12. **Never silently skip a step.** If a step is blocked, mark it `BLOCKED`, document the blocker, and stop.
+13. **Never silently mark a step complete.** Completion requires passing automated tests, browser verification, and parity sign-off.
+14. **Read documentation before continuing a previous step.** Always read `CURRENT-STATE.md`, `ARCHITECTURE.md`, `RULES.md`, `DESIGN-PARITY.md`, `TASKS.md`, and `MEMORY.md` first.
+15. **Prefer measurable performance improvements.** Optimize based on measured data, not guesswork.
+
+---
+
+## 2. ABSOLUTE DESIGN PRESERVATION RULES
 
 1. **Zero Unsolicited Redesign**:
    - The existing HTML/CSS/JS application is the immutable visual source of truth.
@@ -14,15 +34,15 @@
    - Do NOT replace the established X-29 visual language with generic Tailwind UI, shadcn defaults, or minimalist corporate themes.
 2. **Visual Parity is Mandatory**:
    - Every modernized React/Next.js component must visually match its legacy counterpart down to the pixel.
-   - Preserve all dark theme color hex codes (e.g. background `#0b0f19`, card `#0f172a`, border `#1e293b`).
-   - Preserve glassmorphism: `backdrop-filter: blur(20px)`, border `rgba(255, 255, 255, 0.08)`, and custom glowing focus states.
+   - Preserve all dark theme color hex codes: root background `#0b0f19`, card surface `#0f172a`, border `#1e293b`.
+   - Preserve glassmorphism: `backdrop-filter: blur(20px)`, border `rgba(255, 255, 255, 0.08)`, and custom glowing focus states (`glowing-input:focus`).
 3. **Exact Animations & Micro-Interactions**:
    - Preserve `pageEnter`, `auraPulse`, `shimmer-flow`, `premium-pulse`, and chronograph dial rotations.
    - Preserve button hover scales, checkbox strike-through animations, and modal transition curves.
 
 ---
 
-## 2. FUNCTIONALITY & MATHEMATICAL PARITY RULES
+## 3. FUNCTIONALITY & MATHEMATICAL PARITY RULES
 
 1. **Preserve Business Logic Intact**:
    - Do NOT modify or "simplify" calculations for:
@@ -40,24 +60,20 @@
 
 ---
 
-## 3. MIGRATION & SAFETY RULES
+## 4. MIGRATION & SAFETY RULES
 
 1. **Understand -> Audit -> Plan -> Implement -> Test -> Compare -> Verify**:
    - Never jump straight from legacy code to a rewrite.
    - Always analyze module dependencies before touching code.
-2. **Never Perform Big-Bang Rewrites**:
-   - Migration MUST be incremental: one domain, one feature slice, one component at a time.
-   - Keep the existing application fully functional and runnable throughout the entire modernization process.
-3. **Protect the Working Reference**:
+2. **Protect the Working Reference**:
    - Do NOT delete any legacy HTML, JS, or CSS file until the new React implementation has achieved 100% functional, visual, and performance parity verified by browser testing.
    - Always verify that all automated test suites pass before and after every phase.
-4. **Git Checkpoints**:
-   - Ensure a clean git status or commit before initiating any major migration phase.
-   - Test and verify thoroughly before committing phase results.
+3. **Reversible Execution**:
+   - Ensure every migration step can be rolled back without data loss.
 
 ---
 
-## 4. NEXT.JS & REACT ARCHITECTURAL RULES
+## 5. NEXT.JS & REACT ARCHITECTURAL RULES
 
 1. **Server Components by Default**:
    - Keep layouts, static shells, and metadata as Server Components.
@@ -75,7 +91,7 @@
 
 ---
 
-## 5. STATE MANAGEMENT & DATA PERSISTENCE RULES
+## 6. STATE MANAGEMENT & DATA PERSISTENCE RULES
 
 1. **Domain-Specific Zustand Stores**:
    - Do NOT create a giant `useAppState` store duplicating `window.AppState`.
@@ -100,7 +116,7 @@
 
 ---
 
-## 6. FIREBASE & SECURITY RULES
+## 7. FIREBASE & SECURITY RULES
 
 1. **Zero Credential Exposure**:
    - NEVER expose `firebase-service-account.json`, admin credentials, or private keys to client code or Git.
@@ -117,25 +133,13 @@
 
 ---
 
-## 7. PERFORMANCE & BUNDLE SIZE RULES
-
-1. **Zero Runtime Compiler in Production**:
-   - Never use `cdn.tailwindcss.com` in modernized code. Use PostCSS build-time generation.
-2. **Lazy-Load Heavy Features**:
-   - Dynamic import (`next/dynamic` with `ssr: false`) for Chart.js, canvas heatmaps, and complex visualization studio components.
-3. **Prevent Timer Drift & Render Storms**:
-   - Timers must be timestamp-based (`Date.now() - startTime`).
-   - Only the timer digits and chronograph needles should re-render on active ticks; never re-render the outer page or layout.
-
----
-
 ## 8. MOBILE & RESPONSIVENESS RULES
 
 1. **Mobile is First-Class**:
    - Every layout and dialog must be verified across: `360px`, `390px`, `414px`, `768px`, `1024px`, and `1280px+`.
    - Zero horizontal page overflow (`overflow-x: hidden`).
    - Touch targets must be at least 44x44px.
-   - Form inputs on mobile must have font-size >= 16px to prevent iOS auto-zoom.
+   - Form inputs on mobile must have `font-size: 16px` to prevent iOS auto-zoom.
 
 ---
 
@@ -149,10 +153,11 @@
 
 ---
 
-## 10. CROSS-FILE SYNCHRONIZATION RULES
+## 10. STOP CONDITIONS
 
-1. **Complete Reference Updates**:
-   - When modifying any function signature, store action, or component interface, locate and update all call sites across the codebase.
-   - Never leave dead CSS selectors, broken imports, or orphaned event handlers.
-2. **Reusability**:
-   - Reuse existing utilities (e.g. `hashStringToColor`, `hexToRgba`, `formatTimerDigits`, `calculateCompletionRate`) rather than duplicating code.
+STOP and report to user immediately when:
+- Data integrity is uncertain or there is a risk of data loss.
+- A security boundary is unclear or credentials might be exposed.
+- Two implementations conflict and the authoritative behavior cannot be verified.
+- A build or runtime blocker exists that prevents verification.
+- An architectural decision would materially alter user workflow or interface appearance.

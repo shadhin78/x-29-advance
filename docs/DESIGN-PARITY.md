@@ -1,0 +1,271 @@
+# X-29 Advance — Permanent Design & Behavioral Parity Checklist (DESIGN-PARITY.md)
+
+> **CRITICAL MANDATE**: The legacy X-29 application is the immutable visual and functional source of truth.  
+> Technical modernization must reproduce the existing design byte-for-byte.  
+> Redesigns, minimalist corporate palettes, or generic Tailwind/shadcn defaults are strictly forbidden.  
+> Every component must achieve: **Visual Parity (100%)**, **Behavioral Parity (100%)**, and **Responsive Parity (100%)**.
+
+---
+
+## 1. Visual Design System Invariant Tokens
+
+Every React component must match these exact design tokens:
+
+### 1.1. Color Palette Tokens
+| Token | Value | Target Usage |
+|---|---|---|
+| `bg-deep-space` | `#0b0f19` | Global root page background |
+| `surface-dark` | `#0f172a` | Card backgrounds, dialog containers |
+| `surface-elevated` | `#1e293b` | Interactive card headers, input backgrounds |
+| `border-subtle` | `rgba(255, 255, 255, 0.08)` | Glass card edges, divider lines |
+| `border-active` | `#334155` | Focused borders, active tabs, modal borders |
+| `text-primary` | `#f8fafc` | Headings, critical metrics, high-emphasis text |
+| `text-secondary` | `#94a3b8` | Subtitles, labels, timestamps, metadata |
+| `text-muted` | `#64748b` | Disabled labels, placeholder text, secondary icons |
+
+### 1.2. Canonical 14-Subject Color Palette (`js/utils/colors.js`)
+Deterministic hashing (`hashStringToColor`) assigns each subject/track consistently to:
+```javascript
+['#ef4444', '#f97316', '#eab308', '#84cc16', '#22c55e', '#14b8a6', '#06b6d4', '#3b82f6', '#6366f1', '#8b5cf6', '#a855f7', '#d946ef', '#ec4899', '#f43f5e']
+```
+
+### 1.3. Glassmorphism & Keyframe Animations
+```css
+/* Glass Card Specification */
+.glass-card {
+    background: rgba(30, 41, 59, 0.45);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+/* Animations: pageEnter (0.4s cubic-bezier), auraPulse (4s infinite), shimmer-flow (1.5s infinite) */
+---
+
+## 2. Page & Component Parity Checklist
+
+### Page 1: Authentication (`/login` vs `login.html`)
+- [x] **Visual Parity**:
+  - Deep space `#0b0f19` background with ambient radial glow pulses (`#1e3a8a` blur 120px).
+  - Centered glass card (`rounded-[2rem]`, `p-6 md:p-8`, border `rgba(255,255,255,0.08)`).
+  - Logo sticker badge (96x96px) with gradient pill tag: "PRIVATE ACCESS SYSTEM".
+  - Gradient header text: `bg-gradient-to-b from-white to-slate-400`.
+  - Icon-prefixed inputs for email and password with glowing blue focus ring (`#3b82f6`).
+  - Gradient sign-in button: `from-blue-600 to-indigo-600` with uppercase tracking.
+- [x] **Behavioral Parity**:
+  - Real-time client validation and friendly error banner with `AlertCircle`.
+  - Firebase Auth `signInWithEmailAndPassword` session establishment.
+  - Auto-redirect to `/` if session is already active.
+  - Keyboard `Enter` triggers submission.
+  - Query parameter `?error=denied` displays "Access denied. X-29 is private." banner.
+- [x] **Responsive Parity**:
+  - Full viewport centering on mobile (360px) without horizontal scrolling.
+  - Inputs set to `font-size: 16px` on mobile preventing iOS auto-zoom.
+- **Status**: **COMPLETED (STEP 011 VERIFIED)**
+- **Notes**: Verified via headless and live browser subagent; error banner and redirects operational.
+
+---
+
+
+### Page 2: Dashboard Overview (`/` vs `pages/Dashboard/Dashboard.html`)
+- [ ] **Visual Parity**:
+  - 3-column responsive card grid matching legacy dimensions and order.
+  - Card 1: Pace & Velocity Timeline card with days left and required pace badge.
+  - Card 2: Compact Heatmap card showing recent study intensity tiers.
+  - Card 3: Monthly Targets card showing active monthly completion progress.
+  - Card 4: Global Completion card with circular SVG gauge and total chapters count.
+  - Card 5: Outcome & CGPA Overview card with current CGPA and pass freeze badges.
+  - Card 6: Active Now card displaying current 24h schedule slot and subject tag.
+  - Card 7: Daily Targets checklist with instant optimistic checkboxes.
+  - Card 8: Weekly Targets overview card with fraction progress.
+  - Card 9: Daily Actions & Habits adherence card.
+  - Card 10: Upcoming Exams card with live countdown pill.
+  - Card 11: Passed Subjects badge cloud.
+  - Bottom Section: Multi-track Program Completion Grid with track color bars.
+- [ ] **Behavioral Parity**:
+  - All numbers calculate from active stores (Tasks, Targets, Pace, Schedule, Outcome).
+  - Checkbox toggling updates completion percentage and triggers local-first sync.
+  - Clicking on widgets navigates to respective deep-dive feature pages.
+- [ ] **Responsive Parity**:
+  - Desktop (> 1024px): 3-column layout.
+  - Tablet (768px - 1024px): 2-column layout.
+  - Mobile (< 768px): 1-column vertical stack with `px-4` side margins.
+- **Status**: **PENDING VERIFICATION (STEP 012)**
+- **Notes**: Scaffolded in `features/dashboard/components/*`.
+
+---
+
+### Page 3: Focus & Timer (`/focus` vs `pages/Focus/Focus.html`)
+- [ ] **Visual Parity**:
+  - Central SVG Chronograph Dial with seconds needle (emerald), minutes needle (blue), and illuminated tick marks.
+  - Large tabular digital readout (`font-countdown`, `tabular-nums`) formatted as `00:00:00`.
+  - Mode toggle: Stopwatch vs Countdown.
+  - Subject selector dropdown with colored left-borders matching subject palette.
+  - Start / Pause / Reset button row with high-contrast emerald and slate styles.
+  - Session history slide-out drawer with chronological study logs.
+- [ ] **Behavioral Parity**:
+  - Timestamp-based elapsed math: `Date.now() - startTime` (zero interval drift).
+  - Web Audio API chimes play on session start, pause, and countdown completion.
+  - Study logs automatically saved to IndexedDB and Firestore on completion.
+  - Fullscreen mode toggle via Fullscreen API.
+  - Timer tick triggers updates ONLY on dial needles and digital numbers (zero layout re-render).
+- [ ] **Responsive Parity**:
+  - Dial scales smoothly from 320px diameter on desktop down to 240px on mobile without clipping.
+- **Status**: **PENDING VERIFICATION (STEP 013)**
+- **Notes**: Engine tested in `tests/timer-engine.test.mjs`.
+
+---
+
+### Page 4: Subjects & Syllabus (`/subjects` vs `pages/Subjects/Subjects.html`)
+- [ ] **Visual Parity**:
+  - Program -> Track -> Subject card hierarchy.
+  - Deterministic 14-subject color accents on card borders and tags.
+  - Progress bar showing completed chapters fraction (e.g. `14 / 28`).
+  - Passed subject badge ("PASSED" in emerald with lock icon).
+  - Chapter Checklist Modal showing scrollable list of all chapters with status pills.
+- [ ] **Behavioral Parity**:
+  - Chapter checkbox toggle updates task and taxonomy stores immediately.
+  - Mark Subject as Passed locks chapters and recalculates CGPA/Success metrics.
+  - Search filter input filters subjects by name and track in real-time.
+- [ ] **Responsive Parity**:
+  - Grid shifts from 3 columns to 2 columns to 1 column on mobile.
+  - Chapter checklist modal fits on mobile screens without overflowing.
+- **Status**: **PENDING VERIFICATION (STEP 014)**
+- **Notes**: Scaffolded in `features/subjects/components/*`.
+
+---
+
+### Page 5: Daily Actions & Targets (`/daily-actions` vs `pages/Daily Actions/*`)
+- [ ] **Visual Parity**:
+  - Daily Habits checklist (DADB) with streak counters and fire icons.
+  - Habit Radar Modal showing polar SVG radar chart with monthly commitment curves.
+  - Monthly Target Setup Modal with batch allocator, chapter fractions, and auto-spread toggle.
+  - Target database table with status badges (Pending, In Progress, Completed).
+- [ ] **Behavioral Parity**:
+  - Toggling daily habits calculates monthly adherence percentage.
+  - Auto-spread engine assigns chapters evenly across available calendar days.
+  - Cascades changes from Monthly -> Weekly -> Daily target databases cleanly.
+- [ ] **Responsive Parity**:
+  - Table scrolls horizontally with sleek custom scrollbar on mobile; cards remain full-width.
+- **Status**: **PENDING VERIFICATION (STEP 015)**
+- **Notes**: Scaffolded in `features/daily-actions/components/*`.
+
+---
+
+### Page 6: Daily Schedule (`/schedule` vs `pages/Daily Schedule/*`)
+- [ ] **Visual Parity**:
+  - 24-hour visual timeline grid segmented into 1-hour slots.
+  - Active time slot highlighted with glowing neon cyan border and "ACTIVE NOW" badge.
+  - Schedule block cards with color-coded category tags (Study, Routine, Exam, Rest).
+  - Routine Allocation summary card showing total hours per activity.
+- [ ] **Behavioral Parity**:
+  - ScheduleBlockModal allows creating, editing, and deleting 24h blocks.
+  - Active slot updates dynamically based on system clock.
+  - Validates non-overlapping block boundaries.
+- [ ] **Responsive Parity**:
+  - Timeline grid wraps or scrolls cleanly; time labels remain visible on small screens.
+- **Status**: **PENDING VERIFICATION (STEP 016)**
+- **Notes**: Scaffolded in `features/schedule/components/*`.
+
+---
+
+### Page 7: Pace Management (`/pace` vs `pages/Pace Management/*`)
+- [ ] **Visual Parity**:
+  - PaceStatsBanner with 3 primary metrics: Required Pace (chapters/day), Current Velocity, Forecast Date.
+  - Grid of PaceGoalCards for individual subjects with circular completion rings.
+  - AddPaceGoalModal with target date picker and velocity calculator.
+- [ ] **Behavioral Parity**:
+  - Pace velocity formula strictly preserved: `remainingChapters / remainingDays`.
+  - Adjusting target date recomputes required pace in real-time.
+- [ ] **Responsive Parity**:
+  - Banner metrics stack vertically on mobile (360px) and display inline on desktop.
+- **Status**: **PENDING VERIFICATION (STEP 017)**
+- **Notes**: Scaffolded in `features/pace/components/*`.
+
+---
+
+### Page 8: Outcome & CGPA (`/outcome` vs `pages/Outcome/*`)
+- [ ] **Visual Parity**:
+  - CGPA summary hero card with large numerical score (e.g. `3.85 / 4.00`) and letter grade badge.
+  - PassFreezeSection: List of completed courses with locked grades and credit hours.
+  - CelebrationSection: Target threshold gauge, celebration mode toggle, and confetti burst.
+  - ResultEntryModal for adding/editing semester course grades.
+- [ ] **Behavioral Parity**:
+  - 4.00-scale CGPA conversion formula matches legacy engine exactly.
+  - Celebration mode triggers confetti animation when CGPA target is reached.
+- [ ] **Responsive Parity**:
+  - Hero card and tables adapt smoothly to mobile viewports without clipped scores.
+- **Status**: **PENDING VERIFICATION (STEP 018)**
+- **Notes**: Scaffolded in `features/outcome/components/*`.
+
+---
+
+### Page 9: Exam Routine (`/exam` vs `pages/Exam Routine/*`)
+- [ ] **Visual Parity**:
+  - CountdownHero card with large tabular countdown digits (`days : hours : mins : secs`).
+  - ExamRoutineTable with subject name, date, time slot, venue, and status pills.
+  - ExamModal for adding and editing exam routine entries.
+- [ ] **Behavioral Parity**:
+  - Selecting an active exam sets it as the system-wide countdown featured in the top header.
+  - Countdown updates every second using tabular numbers without jitter.
+- [ ] **Responsive Parity**:
+  - Table transforms to mobile card view on small screens (< 640px).
+- **Status**: **PENDING VERIFICATION (STEP 019)**
+- **Notes**: Scaffolded in `features/exam/components/*`.
+
+---
+
+### Page 10: Master Config (`/master-config` vs `pages/Master Config/*`)
+- [ ] **Visual Parity**:
+  - System configuration panel with program visibility toggles and track order.
+  - Track & Program editor with color swatch selector and chapter count inputs.
+  - Backup & Restore card with JSON download and upload buttons.
+- [ ] **Behavioral Parity**:
+  - Toggling program visibility immediately updates sidebar and dashboard filters.
+  - JSON backup produces complete export matching legacy backup format.
+- [ ] **Responsive Parity**:
+  - Controls, inputs, and toggle switches meet 44x44px touch ergonomics.
+- **Status**: **PENDING VERIFICATION (STEP 020)**
+- **Notes**: Scaffolded in `features/config/components/*`.
+
+---
+
+### Page 11: Spectra Analytics (`/analytics` vs `pages/Analytics/*`)
+- [ ] **Visual Parity**:
+  - FocusHeatmapCard: Multi-week matrix with 5 color intensity tiers for study hours.
+  - HabitRadarSection: Polar SVG radar chart with smooth curves for habit dimensions.
+  - ChapterMapSection: Stacked progress bars per subject and track.
+  - StatFilterToolbar: Range pills (7D, 30D, 90D, All) and grouping toggles.
+- [ ] **Behavioral Parity**:
+  - Heatmap calculates exact study hours from `timerLogs`.
+  - Date range filters update chart data smoothly without full page reload.
+- [ ] **Responsive Parity**:
+  - Heatmap scrolls horizontally with custom scrollbar on mobile; radar scales smoothly.
+- **Status**: **PENDING VERIFICATION (STEP 021)**
+- **Notes**: Scaffolded in `features/analytics/components/*`.
+
+---
+
+## 3. Shell & Global Chrome Parity
+
+| Component | Visual Standard | Behavior Standard | Status |
+|---|---|---|---|
+| **Header Bar** | Fixed 64px, logo sticker, live exam countdown, sync pill | Real-time countdown tick, cloud sync status indicator | Scaffolded |
+| **Sidebar Navigation** | 240px expanded, glassmorphism, active blue pill | Route transition without page reload, user profile card | Scaffolded |
+| **Mobile Header** | 56px compact header with menu toggle and countdown | Slide-out drawer or bottom navigation on screens < 768px | Scaffolded |
+| **Dialog Overlays** | Radix UI dialog with backdrop blur and `Escape` dismiss | Focus trap, keyboard navigation, zero body scroll when open | Scaffolded |
+
+---
+
+## 4. Verification Protocol for Each Step
+
+Before marking any page step COMPLETED:
+1. Open the legacy page in one browser window (`npm run dev:legacy` on port 3000).
+2. Open the modern page in an adjacent window (`npm run dev` on port 3001).
+3. Compare layout, typography, hex colors, shadows, borders, and margins side-by-side.
+4. Perform user actions (click, edit, toggle, save) in both; confirm identical results.
+5. Resize viewport to 360px, 390px, 768px, 1024px, and 1440px.
+6. Check browser console: **0 errors, 0 warnings, 0 layout shifts**.
+7. Run `npm run typecheck` and `npm run test:unit`.
+8. Check off items in this document and update `MEMORY.md`.
