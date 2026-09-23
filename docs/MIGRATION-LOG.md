@@ -195,6 +195,6 @@
   - `npm run build`: Compiled in 1.7s with Turbopack (14 static pages).
   - Live Browser Subagent verification: PASS (1920x945 full viewport audit).
 - **Result**: STEP 012 completed with 100% visual, behavioral, and responsive parity.
-- **Git Checkpoint**: Ready to commit.
+- **Git Checkpoint**: `4fd5cc7` (`feat: achieve 100% visual and behavioral parity for / dashboard (STEP 012)`)
 
 
