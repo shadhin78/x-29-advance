@@ -203,10 +203,10 @@ global.getAllPrograms = function () {
     return list;
 };
 
-// Load modules under test
-require('../js/features/config/tracksConfig.js');
-require('../js/features/config/priorityConfig.js');
-require('../js/features/config/masterConfig.js');
+// Load modules under test from archive
+require('../archive/legacy-js/js/features/config/tracksConfig.js');
+require('../archive/legacy-js/js/features/config/priorityConfig.js');
+require('../archive/legacy-js/js/features/config/masterConfig.js');
 
 let passedTests = 0;
 let totalTests = 0;

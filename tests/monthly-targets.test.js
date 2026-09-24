@@ -310,9 +310,9 @@ global.syllabusStructure = {
 global.getAllSubjects = () => ['Physics 1st Paper', 'Higher Math'];
 global.getChaptersForSubject = (track, subject) => ['Ch. 1', 'Ch. 2'];
 
-// 2. Load Extracted Module & Dependencies
-const WeeklyTargets = require('../js/features/targets/weeklyTargets.js');
-const MonthlyTargets = require('../js/features/targets/monthlyTargets.js');
+// 2. Load Extracted Module & Dependencies from archive
+const WeeklyTargets = require('../archive/legacy-js/js/features/targets/weeklyTargets.js');
+const MonthlyTargets = require('../archive/legacy-js/js/features/targets/monthlyTargets.js');
 
 // ============================================================================
 // TEST SUITE EXECUTION

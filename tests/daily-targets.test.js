@@ -197,11 +197,13 @@ global.formatDateRangeKey = (start, end) => {
 global.getAllocatedSizeForWeeklyTarget = (wt, weekKey) => 5;
 global.getWeeklyTargetProgress = (wt, weekKey) => ({ percent: 100, done: 10, total: 10 });
 
-// Load the extracted DailyTargets module
-const DailyTargets = require('../js/features/targets/dailyTargets.js');
+// Load the extracted DailyTargets module from archive
+const DailyTargets = require('../archive/legacy-js/js/features/targets/dailyTargets.js');
 
-// Load Dashboard for checklist test
-require('../pages/Dashboard/Dashboard.js');
+// Load Dashboard for checklist test from archive
+global.safeGetEl = require('../js/utils/dom.js').safeGetEl;
+require('../archive/legacy-js/js/features/dashboard/dashboard.js');
+require('../archive/legacy-js/pages/Dashboard/Dashboard.js');
 
 console.log('=== X-29 Advance — Phase 2 / Batch 7 Test Suite ===\n');
 

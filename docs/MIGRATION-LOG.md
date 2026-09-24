@@ -753,3 +753,26 @@
   - Production build: `npm run build` compiled successfully with 14/14 static routes prerendered.
 - **Result**: STEP 022 is 100% complete and verified. Next step in queue: STEP 023 (Decommissioning & Archiving of Monolithic Legacy JavaScript Files).
 
+---
+
+### Milestone: Decommissioning & Archiving of Monolithic Legacy JavaScript Files (STEP 023)
+- **Date**: 2026-09-25
+- **Step**: STEP 023 (Phase 11 / Optimization & Production Hardening)
+- **Scope & Changes**:
+  - Audited legacy script references across the modern codebase; confirmed zero imports or references in modern Next.js/TypeScript code (`app/`, `components/`, `features/`, `services/`, `stores/`, `lib/`, `types/`).
+  - Created lossless archival engine `scripts/archive-legacy-js.mjs` verifying SHA-256 checksums before deleting any source file.
+  - Safely archived 41 unminified monolithic legacy JavaScript files (2.08 MB) into `archive/legacy-js/`:
+    - `js/features/` (29 files across analytics, config, dashboard, exam, habits, outcome, pace, schedule, targets, tasks) -> `archive/legacy-js/js/features/`
+    - `pages/*/*.js` (11 page scripts across Analytics, Daily Actions, Monthly Target Setup, Daily Schedule, Dashboard, Exam Routine, Focus, Master Config, Outcome, Pace Management, Subjects) -> `archive/legacy-js/pages/`
+    - `shared/services/timerService.js` (1 file) -> `archive/legacy-js/shared/services/timerService.js`
+    - Preserved `archive/legacy-js/js/utils/` to ensure archived legacy scripts remain self-contained for historical execution and testing.
+  - Active CSS stylesheets (`pages/*/*.css` and `css/style.css`) and HTML templates (`pages/*/*.html`) strictly preserved for active visual styling and STEP 024 reference.
+  - Reconciled legacy test suite require paths (`tests/*.test.js` and `js/core/app.js`) to point to `../archive/legacy-js/...`.
+- **Validation**:
+  - Unit test suite: `npm run test:unit` passed 62 / 62 tests across all domains (100%).
+  - Integration test suite: `npm test` passed 10 / 10 batch test suites (100%).
+  - TypeScript typecheck: `npm run typecheck` passed with 0 errors (`tsc --noEmit`).
+  - Production build: `npm run build` compiled successfully in 1.2s with 14/14 static routes prerendered.
+  - Automated CDP responsive verification: `scripts/verify-responsive-cdp.mjs` passed 72 / 72 tests (100% zero overflow).
+- **Result**: All 41 legacy JavaScript files safely decommissioned and archived with zero regression and 100% test integrity. Next step in queue: STEP 024 (Elimination of Legacy Monolithic HTML Shell).
+

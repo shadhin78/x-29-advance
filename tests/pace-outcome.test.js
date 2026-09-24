@@ -283,13 +283,13 @@ global.celebrationTargets = {
 global.paceGoals = [];
 global.successResults = [];
 
-// 3. Load Modules
-const PaceEstimator = require('../js/features/pace/paceEstimator.js');
-const PaceManager = require('../js/features/pace/paceManager.js');
-const OutcomeResults = require('../js/features/outcome/outcomeResults.js');
-const OutcomeAnalytics = require('../js/features/outcome/outcomeAnalytics.js');
-const OutcomePassConfig = require('../js/features/outcome/outcomePassConfig.js');
-const OutcomeCelebration = require('../js/features/outcome/outcomeCelebration.js');
+// 3. Load Modules from archive
+const PaceEstimator = require('../archive/legacy-js/js/features/pace/paceEstimator.js');
+const PaceManager = require('../archive/legacy-js/js/features/pace/paceManager.js');
+const OutcomeResults = require('../archive/legacy-js/js/features/outcome/outcomeResults.js');
+const OutcomeAnalytics = require('../archive/legacy-js/js/features/outcome/outcomeAnalytics.js');
+const OutcomePassConfig = require('../archive/legacy-js/js/features/outcome/outcomePassConfig.js');
+const OutcomeCelebration = require('../archive/legacy-js/js/features/outcome/outcomeCelebration.js');
 
 (async () => {
 console.log('--- STARTING PACE & OUTCOME TEST SUITE ---');

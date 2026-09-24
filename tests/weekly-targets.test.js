@@ -243,8 +243,8 @@ global.DailyTargets = {
     }
 };
 
-// Load extracted WeeklyTargets module
-const WeeklyTargets = require('../js/features/targets/weeklyTargets.js');
+// Load extracted WeeklyTargets module from archive
+const WeeklyTargets = require('../archive/legacy-js/js/features/targets/weeklyTargets.js');
 
 console.log('=== X-29 Advance — Phase 2 / Batch 8 Test Suite ===\n');
 

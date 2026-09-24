@@ -313,11 +313,11 @@ global.getChapterStatus = (sub, ch) => {
     return 'incomplete';
 };
 
-// Require the 4 analytics feature modules
-const ChapterMap = require('../js/features/analytics/chapterMap.js');
-const HeatmapAnalytics = require('../js/features/analytics/heatmap.js');
-const GlobalHistoryAnalytics = require('../js/features/analytics/history.js');
-const SpectraAnalytics = require('../js/features/analytics/spectra.js');
+// Require the 4 analytics feature modules from archive
+const ChapterMap = require('../archive/legacy-js/js/features/analytics/chapterMap.js');
+const HeatmapAnalytics = require('../archive/legacy-js/js/features/analytics/heatmap.js');
+const GlobalHistoryAnalytics = require('../archive/legacy-js/js/features/analytics/history.js');
+const SpectraAnalytics = require('../archive/legacy-js/js/features/analytics/spectra.js');
 
 let passedTests = 0;
 let totalTests = 0;

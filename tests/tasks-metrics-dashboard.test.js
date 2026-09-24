@@ -254,12 +254,12 @@ global.examDatabase = [
     { id: 'exam-1', name: '47th BCS Preli', date: '2026-02-15', track: 'bcs', program: 'Preliminary' }
 ];
 
-// Load Modules under test
-const TaskEngine = require('../js/features/tasks/taskEngine.js');
-const SubjectGoals = require('../js/features/tasks/subjectGoals.js');
+// Load Modules under test from archive
+const TaskEngine = require('../archive/legacy-js/js/features/tasks/taskEngine.js');
+const SubjectGoals = require('../archive/legacy-js/js/features/tasks/subjectGoals.js');
 const Metrics = require('../js/core/metrics.js');
-const DashboardCore = require('../js/features/dashboard/dashboard.js');
-const DashboardPage = require('../pages/Dashboard/Dashboard.js');
+const DashboardCore = require('../archive/legacy-js/js/features/dashboard/dashboard.js');
+const DashboardPage = require('../archive/legacy-js/pages/Dashboard/Dashboard.js');
 
 console.log('=== X-29 Advance — Phase 2 / Batch 10 Test Suite ===\n');
 

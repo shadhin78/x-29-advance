@@ -36,7 +36,7 @@ PAGE-BY-PAGE PARITY VERIFICATION (IN PROGRESS)
 
 OPTIMIZATION & PRODUCTION HARDENING (IN PROGRESS)
 [x] STEP 022 — Comprehensive Cross-Device & Responsive Verification (360px - 1440px)
-[ ] STEP 023 — Decommissioning & Archiving of Monolithic Legacy JavaScript Files
+[x] STEP 023 — Decommissioning & Archiving of Monolithic Legacy JavaScript Files
 [ ] STEP 024 — Elimination of Legacy Monolithic HTML Shell (index.html, login.html)
 [ ] STEP 025 — Bundle Splitting & Client JavaScript Reduction (< 350 KB Gzip)
 [ ] STEP 026 — Core Web Vitals & Rendering Performance Optimization (LCP < 2.0s, FCP < 1.0s)
@@ -441,7 +441,7 @@ OPTIMIZATION & PRODUCTION HARDENING (IN PROGRESS)
 - **Risk**: Inadvertently removing a script still referenced by a legacy fallback.
 - **Validation method**: Run full test suite; verify Next.js build and browser navigation.
 - **Completion criteria**: All legacy JS safely archived with zero regression.
-- **Status**: **NOT STARTED**
+- **Status**: **COMPLETED**
 
 ---
 
