@@ -14,6 +14,7 @@
 @import "../pages/Daily Actions/Daily Actions.css";
 @import "../pages/Daily Actions/monthly target setup/monthly target setup.css";
 @import "../pages/Daily Schedule/Daily Schedule.css";
+@import "../pages/Pace Management/Pace Management.css";
 
 @layer base {
   :root {

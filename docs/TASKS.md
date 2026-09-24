@@ -31,8 +31,8 @@ PAGE-BY-PAGE PARITY VERIFICATION
 [x] STEP 014 — Page-by-Page Migration & Visual Parity: /subjects (Taxonomy Tree & Chapter Checklist) (COMPLETED & VERIFIED)
 [x] STEP 015 — Page-by-Page Migration & Visual Parity: /daily-actions & Monthly Target Setup (COMPLETED & VERIFIED)
 [x] STEP 016 — Page-by-Page Migration & Visual Parity: /schedule (24h Daily Timeline & Active Slot) (COMPLETED & VERIFIED)
-[ ] STEP 017 — Page-by-Page Migration & Visual Parity: /pace (Velocity Metrics & Completion Forecasts) (NEXT IN QUEUE)
-[ ] STEP 018 — Page-by-Page Migration & Visual Parity: /outcome (CGPA Simulator & Celebration Mode)
+[x] STEP 017 — Page-by-Page Migration & Visual Parity: /pace (Velocity Metrics & Completion Forecasts) (COMPLETED & VERIFIED)
+[ ] STEP 018 — Page-by-Page Migration & Visual Parity: /outcome (CGPA Simulator & Celebration Mode) (NEXT IN QUEUE)
 [ ] STEP 019 — Page-by-Page Migration & Visual Parity: /exam (Exam Routine & Countdown Selection)
 [ ] STEP 020 — Page-by-Page Migration & Visual Parity: /master-config (Taxonomy & System Config)
 [ ] STEP 021 — Page-by-Page Migration & Visual Parity: /analytics (Spectra Studio, Heatmap & Habit Radar)
@@ -215,13 +215,13 @@ OPTIMIZATION & PRODUCTION HARDENING (PENDING)
 ---
 
 ### STEP 017 — Page-by-Page Migration & Visual Parity: /pace (Velocity Metrics & Completion Forecasts)
-- [ ] Verify PaceStatsBanner metrics (Required Pace, Current Velocity, Forecast Date).
-- [ ] Verify PaceGoalCards for individual subjects with progress rings.
-- [ ] Test AddPaceGoalModal and date adjustments.
-- [ ] Confirm pace math matches legacy formulas exactly.
-- [ ] Update `DESIGN-PARITY.md` and `MEMORY.md`.
-- [ ] Git commit checkpoint for STEP 017.
-- **Status**: **NOT STARTED**
+- [x] Verify PaceStatsBanner metrics (Required Pace, Current Velocity, Forecast Date).
+- [x] Verify PaceGoalCards for individual subjects with progress bars and 4 action buttons.
+- [x] Test AddPaceGoalModal / inline goal creation form and date adjustments.
+- [x] Confirm pace math matches legacy formulas exactly.
+- [x] Update `DESIGN-PARITY.md` and `MEMORY.md`.
+- [x] Git commit checkpoint for STEP 017.
+- **Status**: **COMPLETED** (2026-09-24)
 
 ---
 

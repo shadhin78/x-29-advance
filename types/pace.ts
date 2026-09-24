@@ -28,4 +28,8 @@ export interface PaceStats {
   daysNeeded: number;
   isBehind: boolean;
   status: 'finished' | 'on-track' | 'behind' | 'future' | 'overdue' | 'no-data';
+  timeGoalCountdownStr?: string;
+  finishDisplay?: string;
+  estDaysNeededStr?: string;
+  projectedDate?: string;
 }

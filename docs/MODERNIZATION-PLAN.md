@@ -28,7 +28,7 @@ PAGE-BY-PAGE PARITY VERIFICATION (IN PROGRESS)
 [x] STEP 014 — Page-by-Page Migration & Visual Parity: /subjects (Taxonomy Tree & Chapter Checklist)
 [x] STEP 015 — Page-by-Page Migration & Visual Parity: /daily-actions & Monthly Target Setup
 [x] STEP 016 — Page-by-Page Migration & Visual Parity: /schedule (24h Daily Timeline & Active Slot)
-[ ] STEP 017 — Page-by-Page Migration & Visual Parity: /pace (Velocity Metrics & Completion Forecasts)
+[x] STEP 017 — Page-by-Page Migration & Visual Parity: /pace (Velocity Metrics & Completion Forecasts)
 [ ] STEP 018 — Page-by-Page Migration & Visual Parity: /outcome (CGPA Simulator & Celebration Mode)
 [ ] STEP 019 — Page-by-Page Migration & Visual Parity: /exam (Exam Routine & Countdown Selection)
 [ ] STEP 020 — Page-by-Page Migration & Visual Parity: /master-config (Taxonomy & System Config)
@@ -328,7 +328,7 @@ OPTIMIZATION & PRODUCTION HARDENING (PENDING)
 - **Risk**: Velocity formula discrepancies compared to legacy calculations.
 - **Validation method**: Run pace tests; compare projected finish dates against legacy engine.
 - **Completion criteria**: Pace calculations and cards match legacy down to the pixel.
-- **Status**: **NOT STARTED**
+- **Status**: **COMPLETED** (2026-09-24)
 
 ---
 

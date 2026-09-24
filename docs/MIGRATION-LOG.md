@@ -444,3 +444,34 @@
   - Multi-viewport live browser inspection: Desktop (1280x800) and Mobile (390x844) zero horizontal overflow.
   - HTTP 200 on `/schedule`.
 - **Result**: STEP 016 is 100% complete and verified. Next step in queue: STEP 017 (/pace).
+
+---
+
+### Milestone: Page-by-Page Migration & Visual Parity: /pace (STEP 017)
+- **Date**: 2026-09-24
+- **Scope**:
+  - Full parity with `pages/Pace Management/Pace Management.html`, `pages/Pace Management/Pace Management.css`, `paceManager.js`, and `paceEstimator.js`.
+  - Added `@import "../pages/Pace Management/Pace Management.css";` to `app/globals.css`.
+  - Fluid full-width container (`id="page-paces-management"` with `w-full space-y-6 md:space-y-8 animate-page-enter pb-16`) replacing artificial constrained wrappers.
+  - Top Metrics Banner (`#pace-stats-section`):
+    - Global Baseline Info Card (`#pace-timeline-info`) with active timeline details and baseline dates.
+    - 3-Card Row: Required Pace (`#target-req-pace`, `#target-status-label`, `#global-days-left`), Actual Pace (`#current-pace-stat`, `#global-days-passed`), and Est. Finish (`#projected-finish`, `#global-days-needed`).
+    - Chart button (`#btn-open-pace-trend-modal`) triggering burn-up analytics.
+  - Pace Management Section (`#pace-management-section`):
+    - Header with flame icon, "Pace Management", and descriptive subtitle.
+    - Inline Add Goal Form matching legacy lines 112-161: Bundle Type select (`#add-pace-bundle-type`), Goal Name (`#add-pace-name`), Start Date (`#add-pace-start`), Deadline (`#add-pace-date`), dynamic items checklist with passed subjects/programs disabled with line-through and green "Passed" badge, and `#btn-add-pace-goal` "Create Pace Target".
+    - Active Timelines Grid (`#pace-goals-container`): Cards with Active Timeline badge, 4 hover action buttons (Pace Trend Chart, Target Breakdown Details, Edit Goal Dates, Remove Goal), category dot badges, timeline dates, progress bars with conditional gradients, and velocity boxes.
+  - Accessible Radix Modals:
+    - `EditPaceModal` (`#edit-pace-modal`): edit goal name, start date, deadline, included items checklist.
+    - `GoalDetailsModal` (`#goal-details-modal`): Target Breakdown with Required Pace, Actual Pace, Chapters Left stat boxes, and included subjects breakdown list (`#gdm-scope-list`).
+    - `PaceTrendModal` (`#pace-trend-modal`): Burn-up comparison of Required vs Actual vs Estimated trajectories with interactive SVG chart.
+    - `ConfirmDeleteModal` (`#confirm-modal`): Confirmation dialog for deleting timeline goals.
+- **Validation**:
+  - `npm run typecheck`: 0 errors (`tsc --noEmit` exited cleanly).
+  - `node --test tests/pace-engine.test.mjs`: 7 / 7 passed (100%).
+  - `npm run test:unit`: 38 / 38 passed (100%).
+  - `npm test`: 10 / 10 batch test suites passed (100%).
+  - HTTP 200 on `/pace`.
+  - Live Browser Subagent verification: Tested Desktop (1280x800) and Mobile (390x844); validated all cards, modals, form interactions, and confirmed 0 horizontal scroll overflow.
+- **Result**: STEP 017 is 100% complete and verified. Next step in queue: STEP 018 (/outcome).
+
