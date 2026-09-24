@@ -259,11 +259,7 @@ export const useDailyActionStore = create<DailyActionStoreState>((set, get) => (
     const updated = habits.map((h) => {
       if (h.id === id) {
         const history = { ...h.history };
-        if (isYes) {
-          history[activeDate] = true;
-        } else {
-          delete history[activeDate];
-        }
+        history[activeDate] = isYes;
         return { ...h, history };
       }
       return h;
@@ -283,11 +279,8 @@ export const useDailyActionStore = create<DailyActionStoreState>((set, get) => (
     const updated = habits.map((h) => {
       if (h.id === id) {
         const history = { ...h.history };
-        if (history[dateStr]) {
-          delete history[dateStr];
-        } else {
-          history[dateStr] = true;
-        }
+        const current = history[dateStr];
+        history[dateStr] = !current;
         return { ...h, history };
       }
       return h;

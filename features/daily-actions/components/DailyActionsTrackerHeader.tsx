@@ -86,7 +86,7 @@ export const DailyActionsTrackerHeader: React.FC<DailyActionsTrackerHeaderProps>
         </div>
         <span
           id="daily-actions-percent"
-          className="text-lg sm:text-xl md:text-2xl font-black text-slate-800 dark:text-slate-100 font-mono"
+          className="text-lg sm:text-xl md:text-2xl font-black text-slate-800 dark:text-slate-100"
         >
           {percentage}%
         </span>

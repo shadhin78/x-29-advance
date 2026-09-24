@@ -40,6 +40,13 @@
 3. **Exact Animations & Micro-Interactions**:
    - Preserve `pageEnter`, `auraPulse`, `shimmer-flow`, `premium-pulse`, and chronograph dial rotations.
    - Preserve button hover scales, checkbox strike-through animations, and modal transition curves.
+4. **Zero Generic Lucide Replacements for Bespoke Legacy SVGs**:
+   - Legacy SVGs possess unique stroke-widths (e.g. 2.5 or 3), specific aspect ratios, custom viewBoxes, and tailored styles.
+   - Never replace raw legacy SVGs with Lucide icon approximations.
+   - In modals, cards, buttons, and tables, preserve exact legacy SVG paths and markup.
+5. **Zero Artificial Layout Centering / Max-Width Containers**:
+   - Page root containers must be fluid (`w-full`), respecting the outer AppShell layout boundaries.
+   - Never wrap pages in `max-w-7xl mx-auto` or introduce redundant vertical padding that squashes desktop layout proportions.
 
 ---
 

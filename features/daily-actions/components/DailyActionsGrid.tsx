@@ -189,7 +189,7 @@ export const DailyActionsGrid: React.FC<DailyActionsGridProps> = ({
 
   // Generate 180 days backwards from today
   const last180Days = useMemo(() => {
-    const list: { iso: string; dayAbbr: string; dateNum: string }[] = [];
+    const list: { iso: string; monthAbbr: string; dateNum: string }[] = [];
     const now = new Date();
     now.setHours(0, 0, 0, 0);
 
@@ -199,7 +199,7 @@ export const DailyActionsGrid: React.FC<DailyActionsGridProps> = ({
       const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
       list.push({
         iso,
-        dayAbbr: d.toLocaleDateString('en-GB', { weekday: 'short' }),
+        monthAbbr: d.toLocaleDateString('en-US', { month: 'short' }),
         dateNum: String(d.getDate()),
       });
     }
@@ -213,19 +213,32 @@ export const DailyActionsGrid: React.FC<DailyActionsGridProps> = ({
       className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6 items-stretch mb-8"
     >
       {sortedActions.map((cfg) => {
-        const isDoneToday = !!cfg.history[todayStr];
+        const state = cfg.history[todayStr];
         const cMap = COLOR_MAP[cfg.color || 'blue'] || COLOR_MAP.blue;
+
+        const borderClass =
+          state === true
+            ? `${cMap.border} shadow-lg`
+            : state === false
+            ? 'border-red-500 shadow-lg shadow-red-500/10'
+            : 'border-slate-200 dark:border-slate-700';
+
+        const yesClass =
+          state === true
+            ? 'bg-gradient-to-br from-green-400 to-emerald-500 text-white shadow-[0_4px_12px_rgba(16,185,129,0.5)] scale-105'
+            : 'bg-slate-100 dark:bg-slate-700 text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600';
+
+        const noClass =
+          state === false
+            ? 'bg-gradient-to-br from-red-400 to-red-500 text-white shadow-[0_4px_12px_rgba(239,68,68,0.4)] scale-105'
+            : 'bg-slate-100 dark:bg-slate-700 text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600';
 
         return (
           <div
             key={cfg.id}
             id={`daily-action-card-${cfg.id}`}
             data-action-id={cfg.id}
-            className={`bg-white dark:bg-slate-800 p-5 md:p-6 rounded-3xl md:rounded-[2rem] shadow-sm flex flex-col transition-all duration-300 min-h-[300px] border-2 ${
-              isDoneToday
-                ? `${cMap.border} shadow-lg`
-                : 'border-slate-200 dark:border-slate-700'
-            }`}
+            className={`bg-white dark:bg-slate-800 p-5 md:p-6 rounded-3xl md:rounded-[2rem] shadow-sm flex flex-col transition-all duration-300 min-h-[300px] border-2 ${borderClass}`}
           >
             {/* Card Header */}
             <div className="flex justify-between items-start mb-3 sm:mb-4">
@@ -315,11 +328,7 @@ export const DailyActionsGrid: React.FC<DailyActionsGridProps> = ({
                 type="button"
                 id={`btn-action-yes-${cfg.id}`}
                 onClick={() => setDailyState(cfg.id, true, todayStr)}
-                className={`flex-1 py-1.5 sm:py-2 md:py-2.5 text-[9px] sm:text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 active:scale-90 cursor-pointer ${
-                  isDoneToday
-                    ? 'bg-gradient-to-br from-green-400 to-emerald-500 text-white shadow-[0_4px_12px_rgba(16,185,129,0.5)] scale-105'
-                    : 'bg-slate-100 dark:bg-slate-700 text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600'
-                }`}
+                className={`flex-1 py-1.5 sm:py-2 md:py-2.5 text-[9px] sm:text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 active:scale-90 cursor-pointer ${yesClass}`}
               >
                 YES
               </button>
@@ -327,11 +336,7 @@ export const DailyActionsGrid: React.FC<DailyActionsGridProps> = ({
                 type="button"
                 id={`btn-action-no-${cfg.id}`}
                 onClick={() => setDailyState(cfg.id, false, todayStr)}
-                className={`flex-1 py-1.5 sm:py-2 md:py-2.5 text-[9px] sm:text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 active:scale-90 cursor-pointer ${
-                  !isDoneToday
-                    ? 'bg-slate-100 dark:bg-slate-700 text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600'
-                    : 'bg-slate-100 dark:bg-slate-700 text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600'
-                }`}
+                className={`flex-1 py-1.5 sm:py-2 md:py-2.5 text-[9px] sm:text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 active:scale-90 cursor-pointer ${noClass}`}
               >
                 NO
               </button>
@@ -347,7 +352,7 @@ export const DailyActionsGrid: React.FC<DailyActionsGridProps> = ({
                 style={{ maxHeight: '180px', minHeight: '150px' }}
               >
                 {last180Days.map((day) => {
-                  const done = !!cfg.history[day.iso];
+                  const done = cfg.history[day.iso] === true;
                   const bgClass = done
                     ? 'bg-gradient-to-br from-green-400 to-emerald-500 text-white shadow-[0_2px_8px_rgba(16,185,129,0.4)] border-transparent'
                     : 'bg-gradient-to-br from-red-400 to-red-500 text-white shadow-[0_2px_8px_rgba(239,68,68,0.4)] border-transparent';
@@ -357,11 +362,11 @@ export const DailyActionsGrid: React.FC<DailyActionsGridProps> = ({
                       key={day.iso}
                       type="button"
                       onClick={() => toggleHabit(cfg.id, day.iso)}
-                      title={`${day.iso} (${day.dayAbbr}): ${done ? 'YES' : 'NO'}`}
+                      title={`${day.iso} (${day.monthAbbr} ${day.dateNum}): ${done ? 'YES' : 'NO'}`}
                       className={`flex flex-col items-center justify-center p-1.5 md:p-2 rounded-xl border active:scale-90 transition-all duration-200 hover:scale-105 ${bgClass} w-full aspect-square focus:outline-none cursor-pointer`}
                     >
                       <span className="text-[7px] md:text-[8px] uppercase font-black opacity-90 mb-0.5 select-none pointer-events-none">
-                        {day.dayAbbr}
+                        {day.monthAbbr}
                       </span>
                       <span className="text-xs md:text-sm font-black leading-none select-none pointer-events-none">
                         {day.dateNum}

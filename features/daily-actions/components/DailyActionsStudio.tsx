@@ -69,7 +69,7 @@ export const DailyActionsStudio: React.FC = () => {
   return (
     <div
       id="page-daily-actions"
-      className="animate-page-enter min-h-screen max-w-7xl mx-auto px-3 sm:px-6 md:px-8 pb-20"
+      className="space-y-6 md:space-y-8 animate-page-enter w-full pb-12"
     >
       {/* Daily Actions Tracker Main Shell */}
       <div

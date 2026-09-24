@@ -15,7 +15,6 @@ import React, { useMemo } from 'react';
 import Link from 'next/link';
 import { useTargetStore } from '@/stores/useTargetStore';
 import { getMonthRangeKey } from '@/features/targets/services/targetAllocationEngine';
-import { Trash2 } from 'lucide-react';
 
 interface MonthlyTargetsSectionProps {
   onOpenMtdb: () => void;
@@ -35,6 +34,16 @@ export const MonthlyTargetsSection: React.FC<MonthlyTargetsSectionProps> = ({
 
   const currentMonthKey = useMemo(() => getMonthRangeKey(new Date()), []);
   const isPresent = selectedMonthRange === currentMonthKey;
+
+  const monthNameBadge = useMemo(() => {
+    const startStr = selectedMonthRange.split(' - ')[0];
+    const d = new Date(startStr);
+    if (!isNaN(d.getTime())) {
+      const monthYear = d.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+      return `[ ${monthYear} : ${selectedMonthRange} ]`;
+    }
+    return `[ ${selectedMonthRange} ]`;
+  }, [selectedMonthRange]);
 
   const todayDisplay = useMemo(() => {
     const today = new Date();
@@ -118,7 +127,7 @@ export const MonthlyTargetsSection: React.FC<MonthlyTargetsSectionProps> = ({
                   id="mt-selected-month-range"
                   className="text-[10px] text-indigo-600 dark:text-indigo-400 font-black tracking-wider uppercase bg-indigo-50 dark:bg-indigo-900/30 px-2 py-0.5 rounded border border-indigo-100 dark:border-indigo-800"
                 >
-                  [ {selectedMonthRange} ]
+                  {monthNameBadge}
                 </span>
                 <span
                   id="mt-today-display"
@@ -310,6 +319,15 @@ export const MonthlyTargetsSection: React.FC<MonthlyTargetsSectionProps> = ({
                   </div>
 
                   <div className="flex items-center space-x-1 shrink-0">
+                    <Link
+                      href="/daily-actions/monthly-setup"
+                      className="p-1.5 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-lg transition-all active:scale-90 shadow-sm cursor-pointer"
+                      title="Edit Monthly Target"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                      </svg>
+                    </Link>
                     <button
                       type="button"
                       onClick={() =>
@@ -318,7 +336,9 @@ export const MonthlyTargetsSection: React.FC<MonthlyTargetsSectionProps> = ({
                       className="p-1.5 hover:bg-red-50 dark:hover:bg-red-950/30 text-slate-300 hover:text-red-500 rounded-lg transition-all active:scale-90 shadow-sm cursor-pointer"
                       title="Delete Monthly Target"
                     >
-                      <Trash2 className="w-3.5 h-3.5" />
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
                     </button>
                   </div>
                 </div>

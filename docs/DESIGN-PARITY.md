@@ -64,9 +64,8 @@
 - [x] **Responsive Parity**:
   - Dial scales smoothly from 320px diameter on desktop down to 240px on mobile without clipping.
   - Grid adapts cleanly from 2-column studio layout on desktop to single column stack on mobile.
-- **Status**: **COMPLETED (STEP 013 VERIFIED)**
-- **Verification**: Exact 100% parity verified via live browser subagent (Desktop top/bottom viewports and active timer interaction). Full Chronograph SVG, CSS variables, native styles, and legacy DOM IDs restored. Engine unit tested (11/11 pure domain tests passing).
-
+- **Status**: **[PARTIALLY COMPLETE] [DESIGN PARITY REPAIR REQUIRED]**
+- **Verification**: Visual discrepancies identified in theme scoping, dial styling, contrast, and layout sizing. Parity repair audit initiated.
 
 ---
 
@@ -91,26 +90,51 @@
 - **Status**: **COMPLETED (STEP 014 VERIFIED)**
 - **Verification**: Exact 100% parity verified in live browser subagent sessions on desktop (1920x945) and mobile (390x844). Native `pages/Subjects/Subjects.css` imported. Pure domain taxonomy tests passing (6/6). Zero type errors and Turbopack compiled in 914ms.
 
-
 ---
 
 ### Page 5: Daily Actions & Targets (`/daily-actions` vs `pages/Daily Actions/*`)
 - [x] **Visual Parity**:
-  - Daily Habits checklist (DADB) with streak counters and fire icons, glowing `#daily-actions-progress` bar, and `#btn-open-dadb`.
-  - Habit cards with YES/NO toggle buttons, raw SVGs, and 180-day mini-heatmaps.
-  - Habit Radar Modal (`#analytics-modal`) showing polar SVG radar chart with monthly commitment curves, hits, and streaks.
-  - 180-Day Database Modal (`#daily-actions-db-modal`) with Date View, Action View, Trend Chart, Filter, and Sort.
+  - Fluid root container (`id="page-daily-actions"`, no artificial `max-w-7xl` or double padding).
+  - Daily Habits checklist (DADB) with streak counters, glowing `#daily-actions-progress` bar, `#btn-open-dadb`, and live adherence percent (`#daily-actions-percent`).
+  - Habit cards (`#daily-actions-grid`) with:
+    - Left icon with theme pastel background
+    - Action title and start date / track badge
+    - Analytics button and Edit button
+    - YES / NO toggle button bar with bright green (`from-green-400 to-emerald-500`) and bright red (`from-red-400 to-red-500`) active gradients with glowing box-shadows.
+    - Active card borders matching action color on YES, red on NO, slate on idle.
+    - 180-Day mini-heatmap grid (4 columns) with month abbreviation on top (`SEP`) and day number on bottom (`24`, `23`), clickable direct check-in.
+  - Action Analytics Modal (`#analytics-modal`):
+    - Header with `📊 [Action] Analytics` and raw SVG close button.
+    - 3 theme-colored stat boxes: Total Hits, Streak, Consistency %.
+    - GitHub-style 7-day row Activity Heatmap Trend with 90D/180D/1 Year selector and month labels.
+    - Recent Check-ins (Direct Toggle) grid with month and date buttons.
+  - 180-Day Database Modal (`#daily-actions-db-modal`):
+    - Date View (sortable by date/percent, filterable by habit, with colored habit pills & stat badge).
+    - Action View (per-action colored cards with progress bars and completion counts).
+    - Trend Chart (180-day completion trend bar visualization).
+  - Targets Database Modal (`#monthly-targets-db-modal`, `#weekly-targets-db-modal`, `#daily-targets-db-modal`):
+    - Exact table layout with columns: Status (checkbox), Range/Date, Program, Subject, Chapter, Delete (raw SVG).
+    - Filter toolbar: Range filter, Program filter, Status filter.
+  - Edit Daily Action Modal (`#edit-daily-action-modal`):
+    - 100% raw SVG icons (removed Lucide icons), color swatch selector, priority/order inputs.
   - Monthly, Weekly, and Daily Targets sections with Req/Act/Est finish pace cards and target checklists.
-  - Monthly Target Setup Studio (`/daily-actions/monthly-setup`) with Target Hierarchy, Scope Studio, and Daily Target Allocator.
+  - Monthly Target Setup Studio (`/daily-actions/monthly-setup`):
+    - Fluid layout container (`space-y-3.5 sm:space-y-6 md:space-y-8 animate-page-enter w-full pb-12`).
+    - 1. Target Hierarchy: Program track cards and syllabus subject cards with Select All / Clear.
+    - 2. Chapters & Scope Studio: Chapter checklist, bulk size presets, and week range assignment.
+    - 3. Daily Target Allocator: Quick divide actions (2, 3, 4, 5, 7 days), auto-spread across month / from date, fraction pills (1/2, 1/3, + Add Day), and custom daily splits.
 - [x] **Behavioral Parity**:
   - Toggling daily habits calculates monthly adherence percentage and 180-day records.
-  - Auto-spread engine assigns chapters across weeks and calendar days with fraction splits (1/2, 1/3, etc.).
+  - State stores explicit boolean `true` (YES) and `false` (NO).
+  - Auto-spread engine assigns chapters across weeks and calendar days with fraction splits.
   - Cascades changes from Monthly -> Weekly -> Daily target databases cleanly.
   - Completing daily targets updates weekly and monthly completion status.
 - [x] **Responsive Parity**:
-  - All grids, cards, modals, and allocators adapt smoothly across desktop (1280px+), tablet, and mobile (390x844) viewports without horizontal clipping.
-- **Status**: **COMPLETED (STEP 015 VERIFIED)**
-- **Verification**: Exact 100% parity verified in live browser subagent sessions on desktop (1280x800) and mobile (390x844). Native `pages/Daily Actions/Daily Actions.css` and `pages/Daily Actions/monthly target setup/monthly target setup.css` imported. Pure domain tests passing (30/30). Zero type errors and Turbopack compiled static pages in 2.9s.
+  - Tested across 360px, 390px, 414px, 768px, 1024px, 1280px, 1440px.
+  - Zero horizontal overflow.
+  - Touch-friendly 4-column date buttons, accessible modals, and sticky action buttons.
+- **Status**: **COMPLETED (VERIFIED)**
+- **Verification**: Exact 100% parity verified in live browser subagent sessions on desktop (1440x900) and mobile (390x844). Zero Lucide icon mismatches; raw SVG icons restored. All 10 test suites passing (100%). TypeScript clean, Turbopack compiled in 2.1s. Zero console errors.
 
 ---
 

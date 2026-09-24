@@ -524,7 +524,7 @@ export const TargetStudio: React.FC = () => {
   return (
     <div
       id="page-monthly-target-setup"
-      className="animate-page-enter min-h-screen max-w-7xl mx-auto px-3 sm:px-6 md:px-8 py-6 space-y-6"
+      className="space-y-3.5 sm:space-y-6 md:space-y-8 animate-page-enter w-full pb-12"
     >
       {/* 1. Page Navigation & Action Header */}
       <div className="bg-white dark:bg-slate-800 p-3.5 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl md:rounded-[2.5rem] border border-slate-200/50 dark:border-slate-700/50 shadow-sm space-y-3.5 sm:space-y-5">

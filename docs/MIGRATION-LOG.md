@@ -385,6 +385,43 @@
   - Live Browser Subagent verification: Tested Desktop (1280x800) and Mobile (390x844); validated habit toggle, DADB modal, Habit Radar modal, target creation cascade from `/daily-actions/monthly-setup`, and target checkbox toggle on `/daily-actions`.
 - **Result**: STEP 015 is 100% complete and verified. Next step in queue: STEP 016 (/schedule).
 
+---
 
-
-
+### Milestone: Full Design & Parity Restoration: Daily Actions (/daily-actions & /daily-actions/monthly-setup)
+- **Date**: 2026-09-24
+- **Trigger**: User reported unintended visual/design changes and design regression on `/daily-actions`.
+- **Regressions Identified**:
+  1. Outer page container was constrained with artificial `max-w-7xl mx-auto px-3 sm:px-6 md:px-8 pb-20`, causing centering drift and squashed desktop layout compared to original legacy full-width dashboard view.
+  2. Action card YES/NO toggle buttons had broken conditional states: NO button was not rendering its active glowing red gradient (`bg-gradient-to-br from-red-400 to-red-500`) when toggled, and YES button had incorrect hover/active interaction.
+  3. Action card border was not activating: should glow with action's theme color on YES (`cMap.border + ' shadow-lg'`) and red on NO (`border-red-500 shadow-lg shadow-red-500/10`).
+  4. 180-Day mini-heatmap day buttons: rendered arbitrary day of week instead of month name abbreviation (`SEP`) on top and day number on bottom (`24`).
+  5. Daily actions adherence percentage (`#daily-actions-percent`) incorrectly used `font-mono` instead of legacy typography (`text-lg sm:text-xl md:text-2xl font-black`).
+  6. Generic Lucide icons had replaced bespoke legacy SVGs across `MonthlyTargetsSection`, `WeeklyTargetsSection`, `DailyTargetsSection`, `EditDailyActionModal`, `ActionAnalyticsModal`, `TargetsDbModal`, and `DailyActionsDbModal`.
+  7. `ActionAnalyticsModal`: omitted the legacy direct-toggle `#am-grid` and 7-day row GitHub heatmap trend, while erroneously inserting an invented Habit Radar section.
+  8. `TargetsDbModal`: collapsed legacy tables into a generic card list view instead of the exact 6-column database table layout (`Status`, `Range`, `Program`, `Subject`, `Chapter`, `Delete`).
+  9. `TargetStudio` (`/daily-actions/monthly-setup`): container had artificial `max-w-7xl` and redundant margins.
+- **Root Cause**:
+  - Overzealous modernization replaced authentic legacy CSS structures and raw SVGs with modern abstractions, generic Lucide icons, and artificial wrapper constraints.
+- **Fixes Applied**:
+  1. `stores/useDailyActionStore.ts`: updated `setDailyState` to store explicit boolean states (`true` for YES, `false` for NO), preserving history accurately.
+  2. `features/daily-actions/components/DailyActionsStudio.tsx`: restored fluid container `id="page-daily-actions" className="space-y-6 md:space-y-8 animate-page-enter w-full pb-12"`.
+  3. `features/daily-actions/components/DailyActionsTrackerHeader.tsx`: removed `font-mono`, restoring legacy bold typography.
+  4. `features/daily-actions/components/DailyActionsGrid.tsx`: restored glowing green & red active gradients, dynamic colored card borders, and month/date mini-heatmap square buttons.
+  5. `features/daily-actions/components/MonthlyTargetsSection.tsx`: restored `monthNameBadge`, raw SVG pencil edit button, and raw SVG cross delete button.
+  6. `features/daily-actions/components/WeeklyTargetsSection.tsx`: restored raw SVG cross delete button.
+  7. `features/daily-actions/components/DailyTargetsSection.tsx`: restored raw SVG cross delete button.
+  8. `features/daily-actions/components/modals/EditDailyActionModal.tsx`: restored 100% legacy markup from `index.html` lines 760-860 with raw SVG icons.
+  9. `features/daily-actions/components/modals/ActionAnalyticsModal.tsx`: restored GitHub 7-day row Activity Heatmap Trend, 3 theme-colored stat boxes, `📊` icon, and Recent Check-ins Direct Toggle grid (`#am-grid`).
+  10. `features/daily-actions/components/modals/TargetsDbModal.tsx`: restored 6-column table layout with Status checkboxes, Range, Program, Subject, Chapter, and Delete actions with raw SVGs.
+  11. `features/daily-actions/components/modals/DailyActionsDbModal.tsx`: removed all Lucide icons; restored exact raw SVGs for header, close, filter, and sort.
+  12. `features/daily-actions/components/TargetStudio.tsx`: restored fluid layout matching `monthly target setup.html`.
+- **Validation**:
+  - `npm run typecheck`: 0 errors.
+  - `npm test`: 10 / 10 batch suites passed (100%).
+  - `npm run build`: Turbopack compiled successfully in 2.1s.
+  - Multi-viewport live browser subagent inspection (1440px desktop, 768px tablet, 390px mobile):
+    - Desktop: PASS
+    - Mobile: PASS
+    - Active YES/NO toggle states: PASS
+    - Modals (Analytics, DADB, Targets DB, Edit): PASS
+    - Console errors: 0

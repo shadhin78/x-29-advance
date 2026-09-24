@@ -1,4 +1,12 @@
 @import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@source "../features";
+@source "../components";
+@source "../pages";
+@source "../app";
+
 @import "../css/style.css";
 @import "../pages/Dashboard/Dashboard.css";
 @import "../pages/Focus/Focus.css";

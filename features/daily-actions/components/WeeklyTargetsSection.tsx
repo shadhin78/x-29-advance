@@ -13,7 +13,6 @@
 import React, { useMemo } from 'react';
 import { useTargetStore } from '@/stores/useTargetStore';
 import { getWeekRangeKey } from '@/features/targets/services/targetAllocationEngine';
-import { Trash2 } from 'lucide-react';
 
 interface WeeklyTargetsSectionProps {
   onOpenWtdb: () => void;
@@ -279,7 +278,9 @@ export const WeeklyTargetsSection: React.FC<WeeklyTargetsSectionProps> = ({
                       className="p-1.5 hover:bg-red-50 dark:hover:bg-red-950/30 text-slate-300 hover:text-red-500 rounded-lg transition-all active:scale-90 shadow-sm cursor-pointer"
                       title="Delete Weekly Target"
                     >
-                      <Trash2 className="w-3.5 h-3.5" />
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
                     </button>
                   </div>
                 </div>
