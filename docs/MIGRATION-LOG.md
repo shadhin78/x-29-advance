@@ -690,3 +690,66 @@
   - Browser Verification: Captured desktop and scrolled screenshots; validated KPI cards, dynamic chapter map filtering (global vs track view), habit radar month navigation and leader line checkboxes, focus analytics timeframe toggling, focus heatmap day inspection, and visual analysis trends.
 - **Result**: STEP 021 is 100% complete and verified. Next step in queue: STEP 022 (Comprehensive Cross-Device & Responsive Verification).
 
+---
+
+### Milestone: Comprehensive Cross-Device & Responsive Verification (360px - 1440px) (STEP 022)
+- **Date**: 2026-09-24
+- **Scope**:
+  - Comprehensive headless Chrome/Edge DevTools Protocol (CDP) automated responsive verification architecture (`scripts/verify-responsive-cdp.mjs`) checking 12 modernized routes across 6 required viewports:
+    1. `360px_CompactMobile` (360x800, scale 2, touch enabled, iOS UA)
+    2. `390px_iPhone13` (390x844, scale 3, touch enabled, iOS UA)
+    3. `414px_LargeMobile` (414x896, scale 3, touch enabled, iOS UA)
+    4. `768px_TabletPortrait` (768x1024, scale 2, touch enabled, iOS UA)
+    5. `1024px_TabletLandscape` (1024x768, scale 1, persistent sidebar)
+    6. `1440px_Desktop` (1440x900, scale 1, persistent sidebar)
+  - Evaluated exact bounding rects, `document.documentElement.scrollWidth`, `document.body.scrollWidth`, `#main-content-panel` clientWidth vs scrollWidth, touch target minimum dimensions (>= 44x44px for prominent controls, >= 32px for compact chips), and input font sizes (>= 16px to prevent iOS auto-zoom).
+  - Routes Audited:
+    - `/` (Dashboard Overview)
+    - `/focus` (Focus Timer & Chronograph Dial)
+    - `/daily-actions` (Daily Actions & Habits)
+    - `/daily-actions/monthly-setup` (Monthly Target Setup)
+    - `/schedule` (Daily Schedule 24h Timeline)
+    - `/subjects` (Curriculum & Tracks)
+    - `/pace` (Pace Velocity & Forecasts)
+    - `/outcome` (CGPA & Academic Results)
+    - `/exam` (Exam Timetable & Countdown)
+    - `/master-config` (Taxonomy & System Config)
+    - `/analytics` (Spectra Studio, Heatmap & Radar)
+    - `/login` (Login & Auth Gate)
+  - Responsive Hardening & Polish Applied:
+    - `app/layout.tsx`: Removed redundant flex wrapper on `<body>` so dialogs and root views aren't flex items.
+    - `components/shell/AppShell.tsx`: Tuned content padding from `p-4 sm:p-6 md:p-8` to `p-4 sm:p-5 md:p-6 lg:p-8` with `min-w-0` to give tablet portrait (768px with 288px sidebar) sufficient breathing room.
+    - `components/shell/MobileHeader.tsx`: Added `min-w-[44px] min-h-[44px]` touch targets to `#mobile-sidebar-toggle` and `#header-exam-countdown-compact-mobile`.
+    - `components/shell/Sidebar.tsx`: Added `min-w-[44px] min-h-[44px]` touch target to `#sidebar-close-btn` and `min-h-[44px]` to all navigation route buttons and `#btn-logout`.
+    - `components/shell/TopStatsBar.tsx`:
+      - Transitioned `<header>` layout from `flex flex-col lg:flex-row` to `flex flex-col xl:flex-row gap-3.5 md:gap-4` to prevent side-by-side squeezing at 1024px.
+      - Scaled `#header-exam-countdown-compact` visibility to `hidden lg:flex` so tablet portrait displays stats cards cleanly without header crowding.
+      - Scaled countdown typography and reduced divider padding with horizontal scroll preservation.
+    - `components/auth/AuthGate.tsx`: Added `overflow-hidden` to fixed loading container to prevent background ambient blur blobs from protruding outside mobile viewports (360px/390px).
+    - `features/daily-actions/components/DailyActionsGrid.tsx`:
+      - Scaled grid gaps from `gap-6` to `gap-3 sm:gap-4 lg:gap-6`.
+      - Reduced card padding to `p-4 sm:p-5 lg:p-6` and added `min-w-0 flex-1 truncate` to title containers.
+      - Scaled action buttons and mini-heatmap log grid to `gap-1 sm:gap-1.5 lg:gap-2` for 100% zero overflow on 768px tablet portrait with 2-column wrapping.
+    - `features/daily-actions/components/MonthlyTargetsSection.tsx` & `WeeklyTargetsSection.tsx`: Removed rigid `min-w-[80px]` on metrics panel cards so they flex fluidly.
+    - `features/dashboard/components/DashboardStudio.tsx`: Configured card grid to wrap into 2 columns on tablet (`md:grid-cols-2 xl:grid-cols-3`) per Modernization Plan specifications.
+    - `features/dashboard/components/TrackCompletionGrid.tsx` & `ProgramCompletionGrid.tsx`: Changed from `md:grid-cols-3` to `lg:grid-cols-3` for clean 2-column tablet portrait wrapping.
+    - `features/exam/components/ExamHeroCountdown.tsx`: Made Pin selector responsive (`max-w-[170px] sm:max-w-[220px] lg:max-w-sm`) and countdown boxes fluid.
+    - `features/config/components/MasterConfigStudio.tsx`:
+      - Added `w-full min-w-0` to `#page-master-config` and `#master-configuration-section`.
+      - Changed header layout to `flex flex-col lg:flex-row` with `flex-1 min-w-0 truncate` for title texts.
+      - Replaced `md:space-x-4` on tab buttons with `flex flex-wrap gap-1.5 sm:gap-2 lg:gap-3` and scaled button padding (`px-3 sm:px-4 md:px-5 py-2 sm:py-2.5`).
+    - `features/analytics/components/AnalyticsStudio.tsx`:
+      - Changed HabitRadar layout from `md:flex-row` to `xl:flex-row` with `overflow-hidden`.
+      - Scaled circular chart SVG container fluidly (`sm:w-[340px] md:w-[360px] xl:w-[420px]`).
+- **Validation**:
+  - Automated CDP Viewport Verification (`node scripts/verify-responsive-cdp.mjs`):
+    - **Total Viewport Tests: 72 (12 pages x 6 viewports)**
+    - **Passed (Zero Overflow): 72 (100%)**
+    - **Failed (Overflow): 0**
+  - Snapshots: 36 full-page screenshots captured and archived in `scratch/responsive-snapshots/` across 360px, 768px, and 1440px.
+  - `npm run typecheck`: 0 errors (`tsc --noEmit` exited cleanly).
+  - Unit tests: `npm run test:unit` passed 62 / 62 tests across all modules (100%).
+  - Integration suite: `npm test` passed 10 / 10 batch test suites (100%).
+  - Production build: `npm run build` compiled successfully with 14/14 static routes prerendered.
+- **Result**: STEP 022 is 100% complete and verified. Next step in queue: STEP 023 (Decommissioning & Archiving of Monolithic Legacy JavaScript Files).
+
