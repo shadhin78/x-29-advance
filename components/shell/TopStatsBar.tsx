@@ -186,18 +186,18 @@ export const TopStatsBar: React.FC = () => {
   }, [paceGoals, now]);
 
   return (
-    <header className="flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-4 lg:gap-6 border-b border-slate-100 dark:border-slate-800 pb-6 shrink-0 select-none">
+    <header className="flex flex-col xl:flex-row justify-between items-stretch xl:items-center gap-3.5 md:gap-4 border-b border-slate-100 dark:border-slate-800 pb-5 md:pb-6 shrink-0 select-none">
       {/* Exam Countdown Widget Container (Matching Stats Widget Size & Card Styling) */}
       <Link
         href="/exam"
         id="header-exam-countdown-compact"
-        className="hidden md:flex items-center bg-white dark:bg-slate-800/80 px-4 py-2.5 md:px-5 md:py-3 rounded-2xl md:rounded-3xl shadow-sm border border-slate-200/60 dark:border-slate-700/60 h-[64px] min-h-[64px] shrink-0 justify-center md:justify-start hover:border-rose-300 dark:hover:border-rose-800/60 transition-all duration-300 group cursor-pointer"
+        className="hidden lg:flex items-center bg-white dark:bg-slate-800/80 px-3.5 py-2.5 md:px-4 md:py-3 rounded-2xl md:rounded-3xl shadow-sm border border-slate-200/60 dark:border-slate-700/60 h-[64px] min-h-[64px] shrink-0 justify-center md:justify-start hover:border-rose-300 dark:hover:border-rose-800/60 transition-all duration-300 group cursor-pointer max-w-full overflow-hidden"
         title="View Exam Routine"
       >
-        <div className="flex items-center space-x-3 md:space-x-3.5">
+        <div className="flex items-center space-x-2.5 md:space-x-3">
           <div className="p-2 md:p-2.5 bg-gradient-to-br from-rose-50 to-rose-100/60 dark:from-rose-950/50 dark:to-rose-900/30 rounded-xl md:rounded-2xl border border-rose-200/70 dark:border-rose-800/50 shadow-[0_0_15px_rgba(244,63,94,0.15)] text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
             <svg
-              className="w-5 h-5 md:w-5.5 md:h-5.5 text-rose-600 dark:text-rose-400 animate-pulse"
+              className="w-5 h-5 text-rose-600 dark:text-rose-400 animate-pulse"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -217,28 +217,28 @@ export const TopStatsBar: React.FC = () => {
             </span>
             <span
               id="hdr-exam-cd-subject"
-              className="font-outfit font-black text-lg sm:text-xl md:text-2xl lg:text-[25px] text-slate-800 dark:text-slate-100 tracking-tight truncate max-w-[140px] lg:max-w-[210px] leading-none"
+              className="font-outfit font-black text-base sm:text-lg md:text-xl xl:text-2xl text-slate-800 dark:text-slate-100 tracking-tight truncate max-w-[100px] sm:max-w-[130px] xl:max-w-[180px] leading-none"
             >
               {examCountdownData.subject}
             </span>
-            <span className="text-slate-300 dark:text-slate-600 font-black text-lg md:text-2xl select-none px-0.5 leading-none">
+            <span className="text-slate-300 dark:text-slate-600 font-black text-base md:text-xl select-none px-0.5 leading-none">
               -
             </span>
             <div id="hdr-exam-cd-timer" className="font-countdown flex items-baseline leading-none">
               {examCountdownData.isPast ? (
-                <span className="font-countdown text-emerald-500 dark:text-emerald-400 font-black text-sm md:text-base flex items-center gap-1.5">
+                <span className="font-countdown text-emerald-500 dark:text-emerald-400 font-black text-xs md:text-sm flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>Live Now!
                 </span>
               ) : examCountdownData.segments.length > 0 ? (
                 examCountdownData.segments.map((seg, idx) => (
                   <span
                     key={seg.lbl}
-                    className={`inline-flex items-baseline font-countdown ${idx > 0 ? 'ml-1 sm:ml-1.5 md:ml-2' : ''}`}
+                    className={`inline-flex items-baseline font-countdown ${idx > 0 ? 'ml-0.5 sm:ml-1 md:ml-1.5' : ''}`}
                   >
-                    <span className="hdr-countdown-num font-black text-xl sm:text-2xl md:text-[27px] lg:text-[29px] leading-none tracking-tight text-rose-600 dark:text-rose-400 tabular-nums">
+                    <span className="hdr-countdown-num font-black text-base sm:text-lg md:text-xl xl:text-[24px] leading-none tracking-tight text-rose-600 dark:text-rose-400 tabular-nums">
                       {seg.val}
                     </span>
-                    <span className="hdr-countdown-unit text-[11px] md:text-[13px] font-extrabold text-white dark:text-white ml-0.5 leading-none select-none drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]">
+                    <span className="hdr-countdown-unit text-[9px] md:text-[11px] font-extrabold text-white dark:text-white ml-0.5 leading-none select-none drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]">
                       {seg.lbl}
                     </span>
                   </span>
@@ -254,12 +254,12 @@ export const TopStatsBar: React.FC = () => {
       </Link>
 
       {/* Stats Widgets */}
-      <div className="grid grid-cols-3 divide-x divide-slate-100 dark:divide-slate-800 md:flex md:flex-row md:items-center md:divide-x-0 bg-white dark:bg-slate-800/80 p-3 md:p-4 rounded-2xl md:rounded-3xl shadow-sm border border-slate-200/60 dark:border-slate-700/60 w-full lg:w-auto justify-center min-h-[64px]">
+      <div className="grid grid-cols-3 divide-x divide-slate-100 dark:divide-slate-800 md:flex md:flex-row md:items-center md:divide-x-0 bg-white dark:bg-slate-800/80 p-3 md:p-3.5 rounded-2xl md:rounded-3xl shadow-sm border border-slate-200/60 dark:border-slate-700/60 w-full xl:w-auto justify-center min-h-[64px] max-w-full overflow-x-auto custom-scrollbar">
         {/* Current Time */}
-        <div id="header-clock-stats" className="hidden md:block pr-3 sm:pr-5">
-          <div className="flex items-center space-x-2 md:space-x-3">
-            <div className="p-2 md:p-2.5 bg-blue-50 dark:bg-blue-950/40 rounded-lg md:rounded-xl border border-blue-100 dark:border-blue-800 shadow-sm text-blue-600 dark:text-blue-450 flex items-center justify-center">
-              <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div id="header-clock-stats" className="hidden md:block pr-2.5 sm:pr-3.5">
+          <div className="flex items-center space-x-2 md:space-x-2.5">
+            <div className="p-2 md:p-2 bg-blue-50 dark:bg-blue-950/40 rounded-lg md:rounded-xl border border-blue-100 dark:border-blue-800 shadow-sm text-blue-600 dark:text-blue-450 flex items-center justify-center">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -282,11 +282,11 @@ export const TopStatsBar: React.FC = () => {
         {/* Success Score */}
         <div
           id="success-score-stats"
-          className="border-l-0 md:border-l border-slate-200 dark:border-slate-700 pl-2 sm:pl-3 md:pl-5 pr-2 sm:pr-3 md:pr-5"
+          className="border-l-0 md:border-l border-slate-200 dark:border-slate-700 pl-2 sm:pl-2.5 md:pl-3.5 xl:pl-4 pr-2 sm:pr-2.5 md:pr-3.5 xl:pr-4"
         >
           <div className="flex items-center space-x-2 md:space-x-3 justify-center md:justify-start">
-            <div className="hidden md:flex p-2 md:p-2.5 bg-emerald-100 dark:bg-emerald-500/20 rounded-lg md:rounded-xl border border-emerald-200 dark:border-emerald-500/50 shadow-[0_0_15px_rgba(16,185,129,0.5)]">
-              <svg className="w-4 h-4 md:w-5 md:h-5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="hidden md:flex p-2 md:p-2 bg-emerald-100 dark:bg-emerald-500/20 rounded-lg md:rounded-xl border border-emerald-200 dark:border-emerald-500/50 shadow-[0_0_15px_rgba(16,185,129,0.5)]">
+              <svg className="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
@@ -304,11 +304,11 @@ export const TopStatsBar: React.FC = () => {
         {/* Time Elapsed */}
         <div
           id="time-gone-stats"
-          className="border-l-0 md:border-l border-slate-200 dark:border-slate-700 pl-2 sm:pl-3 md:pl-5 pr-2 sm:pr-3 md:pr-5"
+          className="border-l-0 md:border-l border-slate-200 dark:border-slate-700 pl-2 sm:pl-2.5 md:pl-3.5 xl:pl-4 pr-2 sm:pr-2.5 md:pr-3.5 xl:pr-4"
         >
           <div className="flex items-center space-x-2 md:space-x-3 justify-center md:justify-start">
-            <div className="hidden md:flex p-2 md:p-2.5 bg-red-100 dark:bg-red-500/20 rounded-lg md:rounded-xl border border-red-200 dark:border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.5)]">
-              <svg className="w-4 h-4 md:w-5 md:h-5 text-red-600 dark:text-red-400 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="hidden md:flex p-2 md:p-2 bg-red-100 dark:bg-red-500/20 rounded-lg md:rounded-xl border border-red-200 dark:border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.5)]">
+              <svg className="w-4 h-4 text-red-600 dark:text-red-400 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
@@ -326,7 +326,7 @@ export const TopStatsBar: React.FC = () => {
         {/* Final Deadline */}
         <div
           id="countdown-timer"
-          className="border-l-0 md:border-l border-slate-200 dark:border-slate-700 pl-2 sm:pl-3 md:pl-5 text-center md:text-right"
+          className="border-l-0 md:border-l border-slate-200 dark:border-slate-700 pl-2 sm:pl-2.5 md:pl-3.5 xl:pl-4 text-center md:text-right"
         >
           <div className="text-center md:text-right">
             <span className="block text-[8px] md:text-[10px] uppercase font-black text-slate-400 tracking-wider">

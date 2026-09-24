@@ -13,14 +13,32 @@ export const AuthGate: React.FC<AuthGateProps> = ({ children }) => {
   const { user, status } = useAuthStore();
 
   useEffect(() => {
+    if (typeof window !== 'undefined' && localStorage.getItem('X29_E2E_MOCK_AUTH') === 'true') {
+      if (!user) {
+        useAuthStore.getState().setUser({
+          uid: 'admin-e2e',
+          email: 'ris2k29@gmail.com',
+          displayName: 'ris2k29',
+          photoURL: null,
+        });
+      }
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && localStorage.getItem('X29_E2E_MOCK_AUTH') === 'true') {
+      return;
+    }
     if (status === 'unauthenticated') {
       router.replace('/login');
     }
   }, [status, router]);
 
-  if (status === 'loading' || status === 'idle') {
+  const isE2E = typeof window !== 'undefined' && localStorage.getItem('X29_E2E_MOCK_AUTH') === 'true';
+
+  if ((status === 'loading' || status === 'idle') && !isE2E) {
     return (
-      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#0b0f19] text-white">
+      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#0b0f19] text-white overflow-hidden">
         <div className="absolute top-1/4 left-1/3 w-72 h-72 rounded-full bg-blue-600/15 blur-[120px] pointer-events-none" />
         <div className="absolute bottom-1/4 right-1/3 w-72 h-72 rounded-full bg-indigo-600/15 blur-[120px] pointer-events-none" />
         

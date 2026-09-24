@@ -188,7 +188,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className = '', onNavigate, on
               <button
                 id="sidebar-close-btn"
                 onClick={onClose}
-                className="md:hidden p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 bg-slate-100 dark:bg-slate-800 rounded-xl transition-all active:scale-95 shrink-0 cursor-pointer"
+                className="md:hidden min-w-[44px] min-h-[44px] flex items-center justify-center p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 bg-slate-100 dark:bg-slate-800 rounded-xl transition-all active:scale-95 shrink-0 cursor-pointer"
                 aria-label="Close sidebar"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -207,7 +207,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className = '', onNavigate, on
                   : !!(pathname && pathname.startsWith(btn.href));
 
               const baseClass =
-                'w-full text-left border-2 px-4 py-3 rounded-2xl font-black text-xs transition-all duration-300 hover:translate-x-1.5 hover:shadow-md active:scale-98 flex items-center gap-3';
+                'w-full min-h-[44px] text-left border-2 px-4 py-3 rounded-2xl font-black text-xs transition-all duration-300 hover:translate-x-1.5 hover:shadow-md active:scale-98 flex items-center gap-3';
               const stateClass = isActive
                 ? btn.activeClass
                 : `bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700 text-slate-600 dark:text-slate-300 ${btn.hoverClass}`;
@@ -277,7 +277,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className = '', onNavigate, on
             <button
               id="btn-logout"
               onClick={handleLogout}
-              className="w-full bg-slate-50 dark:bg-slate-800/50 hover:bg-rose-50 dark:hover:bg-rose-950/20 hover:text-rose-600 border border-slate-200 dark:border-slate-800 px-4 py-3 rounded-2xl font-black text-xs text-rose-500 transition-all active:scale-95 flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
+              className="w-full min-h-[44px] bg-slate-50 dark:bg-slate-800/50 hover:bg-rose-50 dark:hover:bg-rose-950/20 hover:text-rose-600 border border-slate-200 dark:border-slate-800 px-4 py-3 rounded-2xl font-black text-xs text-rose-500 transition-all active:scale-95 flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
             >
               <svg
                 className="w-4 h-4 shrink-0"

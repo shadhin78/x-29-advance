@@ -210,7 +210,7 @@ export const DailyActionsGrid: React.FC<DailyActionsGridProps> = ({
   return (
     <div
       id="daily-actions-grid"
-      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6 items-stretch mb-8"
+      className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 items-stretch mb-8"
     >
       {sortedActions.map((cfg) => {
         const state = cfg.history[todayStr];
@@ -238,16 +238,16 @@ export const DailyActionsGrid: React.FC<DailyActionsGridProps> = ({
             key={cfg.id}
             id={`daily-action-card-${cfg.id}`}
             data-action-id={cfg.id}
-            className={`bg-white dark:bg-slate-800 p-5 md:p-6 rounded-3xl md:rounded-[2rem] shadow-sm flex flex-col transition-all duration-300 min-h-[300px] border-2 ${borderClass}`}
+            className={`bg-white dark:bg-slate-800 p-4 sm:p-5 lg:p-6 rounded-2xl md:rounded-[2rem] shadow-sm flex flex-col transition-all duration-300 min-h-[290px] border-2 ${borderClass} min-w-0`}
           >
             {/* Card Header */}
-            <div className="flex justify-between items-start mb-3 sm:mb-4">
-              <div className="flex items-center space-x-2 sm:space-x-3">
+            <div className="flex justify-between items-start gap-2 mb-3 sm:mb-4">
+              <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
                 <div
-                  className={`p-2 md:p-3 rounded-lg sm:rounded-xl md:rounded-2xl border ${cMap.iconBg} ${cMap.text} ${cMap.borderLt}`}
+                  className={`p-2 sm:p-2.5 lg:p-3 rounded-lg sm:rounded-xl lg:rounded-2xl border ${cMap.iconBg} ${cMap.text} ${cMap.borderLt} shrink-0`}
                 >
                   <svg
-                    className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6"
+                    className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -255,21 +255,21 @@ export const DailyActionsGrid: React.FC<DailyActionsGridProps> = ({
                     {renderActionIcon(cfg.icon, cfg.title || cfg.name)}
                   </svg>
                 </div>
-                <div>
-                  <h3 className="font-black text-xs sm:text-sm md:text-base tracking-tight text-slate-800 dark:text-slate-100">
+                <div className="min-w-0 flex-1">
+                  <h3 className="font-black text-xs sm:text-sm md:text-base tracking-tight text-slate-800 dark:text-slate-100 truncate">
                     {cfg.title || cfg.name}
                   </h3>
                   <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
-                    <p className="text-[8px] sm:text-[9px] md:text-[10px] text-slate-400 uppercase font-bold tracking-wider">
+                    <p className="text-[8px] sm:text-[9px] md:text-[10px] text-slate-400 uppercase font-bold tracking-wider truncate">
                       {cfg.desc || cfg.question || ''}
                     </p>
                     {cfg.startDate && (
-                      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[7px] font-black uppercase tracking-wider bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-800/50">
+                      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[7px] font-black uppercase tracking-wider bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-800/50 shrink-0">
                         Start: {cfg.startDate}
                       </span>
                     )}
                     {cfg.track && (
-                      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[7px] font-black uppercase tracking-wider bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 border border-slate-200/50 dark:border-slate-600/30">
+                      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[7px] font-black uppercase tracking-wider bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 border border-slate-200/50 dark:border-slate-600/30 shrink-0">
                         {cfg.track}
                       </span>
                     )}
@@ -282,11 +282,11 @@ export const DailyActionsGrid: React.FC<DailyActionsGridProps> = ({
                 <button
                   type="button"
                   onClick={() => onOpenAnalytics(cfg.id)}
-                  className="group flex items-center justify-center p-2 md:p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700/80 hover:bg-white dark:hover:bg-slate-800 active:scale-95 transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5 shrink-0 cursor-pointer"
+                  className="group flex items-center justify-center p-1.5 sm:p-2 lg:p-2.5 rounded-lg sm:rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700/80 hover:bg-white dark:hover:bg-slate-800 active:scale-95 transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5 shrink-0 cursor-pointer"
                   title="Analytics"
                 >
                   <svg
-                    className={`w-3.5 h-3.5 md:w-4 md:h-4 text-slate-400 group-hover:${cMap.iconColor} transition-colors`}
+                    className={`w-3.5 h-3.5 lg:w-4 lg:h-4 text-slate-400 group-hover:${cMap.iconColor} transition-colors`}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -302,11 +302,11 @@ export const DailyActionsGrid: React.FC<DailyActionsGridProps> = ({
                 <button
                   type="button"
                   onClick={() => onOpenEdit(cfg.id)}
-                  className="group flex items-center justify-center p-2 md:p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700/80 hover:bg-white dark:hover:bg-slate-800 active:scale-95 transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5 shrink-0 cursor-pointer"
+                  className="group flex items-center justify-center p-1.5 sm:p-2 lg:p-2.5 rounded-lg sm:rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700/80 hover:bg-white dark:hover:bg-slate-800 active:scale-95 transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5 shrink-0 cursor-pointer"
                   title="Edit Action"
                 >
                   <svg
-                    className="w-3.5 h-3.5 md:w-4 md:h-4 text-slate-400 group-hover:text-blue-500 transition-colors"
+                    className="w-3.5 h-3.5 lg:w-4 lg:h-4 text-slate-400 group-hover:text-blue-500 transition-colors"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -348,7 +348,7 @@ export const DailyActionsGrid: React.FC<DailyActionsGridProps> = ({
               className="flex flex-col flex-1 min-h-0 pt-2 border-t border-slate-100 dark:border-slate-700/60 mt-2"
             >
               <div
-                className="grid grid-cols-4 gap-1.5 md:gap-2 overflow-y-auto custom-scrollbar flex-1 pr-1 pb-1 content-start mt-2"
+                className="grid grid-cols-4 gap-1 sm:gap-1.5 lg:gap-2 overflow-y-auto custom-scrollbar flex-1 pr-1 pb-1 content-start mt-2"
                 style={{ maxHeight: '180px', minHeight: '150px' }}
               >
                 {last180Days.map((day) => {

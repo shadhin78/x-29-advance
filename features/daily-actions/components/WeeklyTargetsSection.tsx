@@ -182,7 +182,7 @@ export const WeeklyTargetsSection: React.FC<WeeklyTargetsSectionProps> = ({
 
         {/* Metrics panel */}
         <div className="grid grid-cols-3 gap-2 sm:gap-4 w-full xl:w-auto shrink-0">
-          <div className="bg-slate-50 dark:bg-slate-900/50 px-3 py-2 rounded-xl border border-slate-100 dark:border-slate-800/80 text-center min-w-[80px] sm:min-w-[100px]">
+          <div className="bg-slate-50 dark:bg-slate-900/50 px-2 sm:px-3 py-2 rounded-xl border border-slate-100 dark:border-slate-800/80 text-center">
             <span className="block text-[8px] font-black uppercase tracking-wider text-slate-400">
               Req. Pace
             </span>
@@ -193,7 +193,7 @@ export const WeeklyTargetsSection: React.FC<WeeklyTargetsSectionProps> = ({
               {reqPace}
             </span>
           </div>
-          <div className="bg-slate-50 dark:bg-slate-900/50 px-3 py-2 rounded-xl border border-slate-100 dark:border-slate-800/80 text-center min-w-[80px] sm:min-w-[100px]">
+          <div className="bg-slate-50 dark:bg-slate-900/50 px-2 sm:px-3 py-2 rounded-xl border border-slate-100 dark:border-slate-800/80 text-center">
             <span className="block text-[8px] font-black uppercase tracking-wider text-slate-400">
               Actual Pace
             </span>
@@ -204,7 +204,7 @@ export const WeeklyTargetsSection: React.FC<WeeklyTargetsSectionProps> = ({
               {actPace}
             </span>
           </div>
-          <div className="bg-slate-50 dark:bg-slate-900/50 px-3 py-2 rounded-xl border border-slate-100 dark:border-slate-800/80 text-center min-w-[80px] sm:min-w-[100px]">
+          <div className="bg-slate-50 dark:bg-slate-900/50 px-2 sm:px-3 py-2 rounded-xl border border-slate-100 dark:border-slate-800/80 text-center">
             <span className="block text-[8px] font-black uppercase tracking-wider text-slate-400">
               Est. Finish
             </span>

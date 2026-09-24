@@ -48,7 +48,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="bg-slate-50 dark:bg-[#0f172a] text-slate-900 dark:text-slate-100 font-sans overflow-hidden h-screen w-screen flex flex-col md:flex-row touch-action-manipulation" suppressHydrationWarning>
+      <body className="bg-slate-50 dark:bg-[#0f172a] text-slate-900 dark:text-slate-100 font-sans overflow-hidden h-screen w-screen touch-action-manipulation" suppressHydrationWarning>
         <Providers>{children}</Providers>
       </body>
     </html>

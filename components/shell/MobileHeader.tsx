@@ -102,7 +102,7 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({ onToggleMenu }) => {
         <button
           id="mobile-sidebar-toggle"
           onClick={onToggleMenu}
-          className="p-2.5 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 bg-slate-50 dark:bg-slate-800 rounded-xl transition-all active:scale-90 shadow-sm shrink-0 cursor-pointer"
+          className="min-w-[44px] min-h-[44px] flex items-center justify-center p-2.5 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 bg-slate-50 dark:bg-slate-800 rounded-xl transition-all active:scale-90 shadow-sm shrink-0 cursor-pointer"
           aria-label="Toggle navigation drawer"
         >
           <svg
@@ -122,7 +122,7 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({ onToggleMenu }) => {
           <Link
             href="/exam"
             id="header-exam-countdown-compact-mobile"
-            className="flex items-center cursor-pointer active:scale-95 transition-all"
+            className="flex items-center min-h-[44px] cursor-pointer active:scale-95 transition-all"
           >
             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-rose-500/10 dark:bg-rose-950/40 border border-rose-500/20 dark:border-rose-500/30 text-[10px] font-bold">
               <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping"></span>

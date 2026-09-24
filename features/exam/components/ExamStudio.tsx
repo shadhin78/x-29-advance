@@ -138,7 +138,7 @@ export const ExamStudio: React.FC = () => {
   return (
     <div
       id="page-exam"
-      className="space-y-6 max-w-7xl mx-auto pb-12 animate-page-enter"
+      className="space-y-6 max-w-7xl mx-auto pb-12 animate-page-enter w-full min-w-0"
     >
       {/* Top Hero Banner: Next Upcoming Exam Countdown */}
       <ExamHeroCountdown

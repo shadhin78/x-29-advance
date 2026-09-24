@@ -52,7 +52,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
       {/* Main Content Panel (Right) */}
       <div
         id="main-content-panel"
-        className="flex-1 h-full overflow-y-auto flex flex-col p-4 sm:p-6 md:p-8 space-y-6 md:space-y-8 min-w-0 custom-scrollbar"
+        className="flex-1 h-full overflow-y-auto flex flex-col p-4 sm:p-5 md:p-6 lg:p-8 space-y-5 md:space-y-6 lg:space-y-8 min-w-0 custom-scrollbar"
       >
         <TopStatsBar />
         {children}

@@ -576,7 +576,7 @@ export const AnalyticsStudio: React.FC = () => {
       </div>
 
       {/* 3. Global Chapters Goal Chart (Concentric Polar Arc Map) */}
-      <div className="relative bg-white dark:bg-slate-800 p-6 md:p-8 rounded-2xl md:rounded-[2rem] border border-slate-200/50 dark:border-slate-700/50 shadow-sm flex flex-col md:flex-row items-center justify-around gap-8 w-full">
+      <div className="relative overflow-hidden bg-white dark:bg-slate-800 p-5 sm:p-6 md:p-8 rounded-2xl md:rounded-[2rem] border border-slate-200/50 dark:border-slate-700/50 shadow-sm flex flex-col xl:flex-row items-center justify-around gap-6 md:gap-8 w-full">
         {/* Tooltip inside spectra page */}
         <div
           id="spectra-gcm-tooltip"
@@ -755,7 +755,7 @@ export const AnalyticsStudio: React.FC = () => {
 
         {/* Chart Display Container */}
         <div id="spectra-circle-chart-wrapper" className="relative flex flex-col items-center justify-center">
-          <div className="relative w-[240px] h-[240px] min-[375px]:w-[280px] min-[375px]:h-[280px] sm:w-[360px] sm:h-[360px] md:w-[420px] md:h-[420px] flex items-center justify-center shrink-0">
+          <div className="relative w-[240px] h-[240px] min-[375px]:w-[280px] min-[375px]:h-[280px] sm:w-[340px] sm:h-[340px] md:w-[360px] md:h-[360px] xl:w-[420px] xl:h-[420px] flex items-center justify-center shrink-0">
             <svg
               className="w-full h-full select-none"
               viewBox="-250 -250 500 500"

@@ -81,8 +81,8 @@ export const DashboardStudio: React.FC = () => {
 
   return (
     <div id="page-dashboard" className="space-y-6 md:space-y-8 animate-page-enter">
-      {/* Responsive Grid for Dashboard Cards: 3 columns on md+ */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full mb-6">
+      {/* Responsive Grid for Dashboard Cards: 2 columns on tablet md, 3 columns on desktop xl */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 w-full mb-6">
         {/* Row 1 */}
         <PaceTimelineCard />
         <CompactHeatmapCard />

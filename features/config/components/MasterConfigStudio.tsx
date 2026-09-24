@@ -666,7 +666,7 @@ export const MasterConfigStudio: React.FC = () => {
   };
 
   return (
-    <div id="page-master-config" className="space-y-6 max-w-7xl mx-auto pb-16 animate-page-enter">
+    <div id="page-master-config" className="w-full min-w-0 space-y-6 max-w-7xl mx-auto pb-16 animate-page-enter">
       {/* Hidden File Input for JSON Backup Import */}
       <input
         type="file"
@@ -696,13 +696,13 @@ export const MasterConfigStudio: React.FC = () => {
       {/* Main Container */}
       <div
         id="master-configuration-section"
-        className="bg-white dark:bg-slate-800 p-5 md:p-8 rounded-2xl md:rounded-[2.5rem] border border-slate-200/50 dark:border-slate-700/50 shadow-sm flex flex-col scroll-mt-24 md:scroll-mt-32 master-config-slide-up"
+        className="w-full min-w-0 bg-white dark:bg-slate-800 p-4 sm:p-5 md:p-6 lg:p-8 rounded-2xl md:rounded-[2.5rem] border border-slate-200/50 dark:border-slate-700/50 shadow-sm flex flex-col scroll-mt-24 md:scroll-mt-32 master-config-slide-up"
       >
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-slate-100 dark:border-slate-700 pb-4">
-          <div className="flex items-center space-x-3">
-            <div className="p-2.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-xl">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6 border-b border-slate-100 dark:border-slate-700 pb-4 min-w-0">
+          <div className="flex items-center space-x-2.5 sm:space-x-3 min-w-0 flex-1">
+            <div className="p-2 sm:p-2.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-xl shrink-0">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -712,22 +712,22 @@ export const MasterConfigStudio: React.FC = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
             </div>
-            <div>
-              <h1 className="text-base md:text-lg font-black dark:text-white leading-tight">
+            <div className="min-w-0 flex-1">
+              <h1 className="text-sm sm:text-base md:text-lg font-black dark:text-white leading-tight truncate">
                 Master Configuration
               </h1>
-              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-0.5">
+              <p className="text-[9px] sm:text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-0.5 truncate">
                 Manage Syllabus &amp; Daily Actions dynamically
               </p>
             </div>
           </div>
 
           {/* Backup & Restore Action Buttons */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap shrink-0">
             <button
               onClick={handleExportJSON}
               title="Export workspace backup as JSON file"
-              className="px-3.5 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider bg-slate-100 hover:bg-slate-200 dark:bg-slate-700/80 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 flex items-center gap-1.5 transition-all active:scale-95 border border-slate-200 dark:border-slate-600/60"
+              className="px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-wider bg-slate-100 hover:bg-slate-200 dark:bg-slate-700/80 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 flex items-center gap-1.5 transition-all active:scale-95 border border-slate-200 dark:border-slate-600/60 cursor-pointer"
             >
               <Download className="w-3.5 h-3.5 text-blue-500" />
               <span>Export JSON</span>
@@ -735,7 +735,7 @@ export const MasterConfigStudio: React.FC = () => {
             <button
               onClick={handleImportJSONClick}
               title="Import workspace state from JSON file"
-              className="px-3.5 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider bg-slate-100 hover:bg-slate-200 dark:bg-slate-700/80 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 flex items-center gap-1.5 transition-all active:scale-95 border border-slate-200 dark:border-slate-600/60"
+              className="px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-wider bg-slate-100 hover:bg-slate-200 dark:bg-slate-700/80 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 flex items-center gap-1.5 transition-all active:scale-95 border border-slate-200 dark:border-slate-600/60 cursor-pointer"
             >
               <Upload className="w-3.5 h-3.5 text-emerald-500" />
               <span>Import JSON</span>
@@ -744,7 +744,7 @@ export const MasterConfigStudio: React.FC = () => {
         </div>
 
         {/* Tab Headers (6 Canonical Buttons) */}
-        <div className="flex flex-wrap gap-2 md:gap-0 md:space-x-4 mb-4 md:mb-6 border-b border-slate-200 dark:border-slate-700 pb-2">
+        <div className="flex flex-wrap gap-1.5 sm:gap-2 lg:gap-3 mb-4 md:mb-6 border-b border-slate-200 dark:border-slate-700 pb-2">
           {[
             { id: 'chapter', label: 'Add Chapter', elementId: 'sys-tab-chapter' },
             { id: 'subject', label: 'Add Subject', elementId: 'sys-tab-subject' },
@@ -759,7 +759,7 @@ export const MasterConfigStudio: React.FC = () => {
                 key={tab.id}
                 id={tab.elementId}
                 onClick={() => setActiveTab(tab.id as ConfigTab)}
-                className={`px-5 py-2.5 text-[10px] md:text-xs font-black uppercase tracking-widest rounded-xl transition-all whitespace-nowrap active:scale-95 ${
+                className={`px-3.5 sm:px-4 md:px-5 py-2 sm:py-2.5 text-[10px] md:text-xs font-black uppercase tracking-widest rounded-xl transition-all whitespace-nowrap active:scale-95 cursor-pointer ${
                   isActive
                     ? 'bg-blue-600 text-white shadow-md'
                     : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
