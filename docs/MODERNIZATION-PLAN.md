@@ -310,7 +310,7 @@ OPTIMIZATION & PRODUCTION HARDENING (PENDING)
 - **Risk**: Time zone offset or 12h/24h conversion errors.
 - **Validation method**: Verify current time slot highlights in real-time; test block creation.
 - **Completion criteria**: Timeline grid and active now cards match legacy exactly.
-- **Status**: **NOT STARTED**
+- **Status**: **COMPLETED** (2026-09-24)
 
 ---
 

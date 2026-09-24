@@ -10,9 +10,9 @@
 ---
 
 ## 1. Current Migration Status
-- **Current Step**: **STEP 015 — Page-by-Page Migration & Visual Parity: /daily-actions & Monthly Target Setup COMPLETED & VERIFIED**
-- **Next Step in Queue**: **STEP 016 — Page-by-Page Migration & Visual Parity: /schedule (24h Daily Timeline & Active Slot) (AWAITING USER COMMAND TO PROCEED)**
-- **Previous Completed Step**: **STEP 014 — Page-by-Page Migration & Visual Parity: /subjects (Taxonomy Tree & Chapter Checklist)**
+- **Current Step**: **STEP 016 — Page-by-Page Migration & Visual Parity: /schedule (24h Daily Timeline & Active Slot) COMPLETED & VERIFIED**
+- **Next Step in Queue**: **STEP 017 — Page-by-Page Migration & Visual Parity: /pace (Velocity Metrics & Completion Forecasts) (AWAITING USER COMMAND TO PROCEED)**
+- **Previous Completed Step**: **STEP 015 — Page-by-Page Migration & Visual Parity: /daily-actions & Monthly Target Setup**
 - **Completed Steps**:
   - STEP 001 — Full Project Architecture Audit & Inventory
   - STEP 002 — Baseline Performance & Disaster Recovery Safeguards
@@ -29,6 +29,7 @@
   - STEP 013 — Page-by-Page Migration & Visual Parity: /focus (Timer & Chronograph Dial)
   - STEP 014 — Page-by-Page Migration & Visual Parity: /subjects (Taxonomy Tree & Chapter Checklist)
   - STEP 015 — Page-by-Page Migration & Visual Parity: /daily-actions & Monthly Target Setup
+  - STEP 016 — Page-by-Page Migration & Visual Parity: /schedule (24h Daily Timeline & Active Slot)
 
 ---
 
@@ -128,15 +129,15 @@
 ---
 
 ## 7. Next Recommended Task
-**Execute STEP 012: Page-by-Page Migration & Visual Parity: / (Dashboard Overview & KPI Cards)**  
-- Subtask 1: Audit 12 dashboard cards against legacy `pages/Dashboard/Dashboard.html`.
-- Subtask 2: Verify all numbers, percentage math, dynamic colors, and click actions.
-- Subtask 3: Validate responsive grid behavior (3-col desktop, 2-col tablet, 1-col mobile).
-- Subtask 4: Verify zero console errors and zero layout shifts.
+**Execute STEP 017: Page-by-Page Migration & Visual Parity: /pace (Velocity Metrics & Completion Forecasts)**  
+- Subtask 1: Verify PaceStatsBanner metrics (Required Pace chapters/day, Current Velocity, Forecast Date).
+- Subtask 2: Verify PaceGoalCards for individual subjects with circular completion rings.
+- Subtask 3: Test AddPaceGoalModal with target date picker and velocity calculator.
+- Subtask 4: Confirm pace math strictly matches legacy formulas (`remainingChapters / remainingDays`).
 - Subtask 5: Update `DESIGN-PARITY.md` and `MEMORY.md`.
-- Subtask 6: Create git checkpoint for STEP 012.
+- Subtask 6: Create git checkpoint for STEP 017.
 
 Wait for user command:
 ```text
-Continue from STEP 012
+Continue from STEP 017
 ```

@@ -71,11 +71,37 @@ test('calculateGroupSummaries groups tasks and accurately sums hours', () => {
 });
 
 test('getActiveScheduleSlot detects active slot correctly', () => {
-  const mockDate = new Date('2026-09-18T07:30:00');
+  const mockDate = new Date('2026-09-18T07:30:15');
   const info = getActiveScheduleSlot(DEFAULT_SCHEDULE_BLOCKS, mockDate);
   assert.ok(info.activeBlock);
   assert.equal(info.activeBlock.id, 'sched-2'); // 07:00 to 09:00
   assert.equal(info.elapsedMinutes, 30);
   assert.equal(info.remainingMinutes, 90);
   assert.equal(info.progressPercent, 25);
+  // Total remaining seconds: (9*60 - 7*60 - 30)*60 - 15 = 90*60 - 15 = 5385s = 1h 29m 45s => '01:29:45'
+  assert.equal(info.countdownStr, '01:29:45');
 });
+
+test('getActiveScheduleSlot returns null activeBlock during idle free time', () => {
+  const mockMidnight = new Date('2026-09-18T02:00:00');
+  const info = getActiveScheduleSlot(DEFAULT_SCHEDULE_BLOCKS, mockMidnight);
+  assert.equal(info.activeBlock, null);
+  assert.equal(info.remainingMinutes, 0);
+  assert.equal(info.progressPercent, 0);
+  assert.equal(info.countdownStr, '00:00:00');
+  assert.ok(info.nextBlock);
+  assert.equal(info.nextBlock.id, 'sched-1'); // next up is morning workout at 06:00
+});
+
+test('calculateTotalAllocatedHours accurately computes total schedule duration', () => {
+  const total = calculateTotalAllocatedHours(DEFAULT_SCHEDULE_BLOCKS);
+  // 1 + 2 + 1 + 3 + 1.5 + 3 + 1.5 + 3 + 1 = 17 hrs
+  assert.equal(total, 17);
+});
+
+test('formatTime12h converts 24h string into 12h AM/PM string', () => {
+  assert.equal(formatTime12h('09:00'), '9:00 AM');
+  assert.equal(formatTime12h('17:30'), '5:30 PM');
+  assert.equal(formatTime12h('00:15'), '12:15 AM');
+});
+

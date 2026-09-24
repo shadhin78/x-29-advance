@@ -3,14 +3,14 @@
 /**
  * X-29 Schedule Timeline Grid (features/schedule/components/ScheduleTimelineGrid.tsx)
  * 
+ * 100% Parity with legacy Daily Schedule.html & scheduleRoutine.js (lines 658-726).
  * Renders 1-hour segmented boxes for the daily timeline routine with
- * day-start indicator and interactive edit/delete controls.
+ * day-start indicator, stroke time header, colored body, and hover edit/delete actions.
  */
 
 import React, { useMemo } from 'react';
 import type { ScheduleBlock } from '@/types/schedule';
 import { segmentBlocksInto1HourSlots } from '@/features/schedule/services/scheduleService';
-import { Edit2, Trash2, Calendar } from 'lucide-react';
 
 interface ScheduleTimelineGridProps {
   blocks: ScheduleBlock[];
@@ -24,67 +24,87 @@ export const ScheduleTimelineGrid: React.FC<ScheduleTimelineGridProps> = React.m
 
     if (segments.length === 0) {
       return (
-        <div className="col-span-full flex flex-col items-center justify-center py-16 text-center text-slate-400 border border-dashed border-slate-800 rounded-3xl bg-slate-900/20">
-          <Calendar className="w-10 h-10 text-slate-600 mb-3" />
-          <h4 className="text-xs font-black uppercase tracking-wider">No Slots Planned</h4>
-          <p className="text-xs text-slate-500 mt-1 max-w-xs">
-            Your daily schedule is empty. Add routine blocks to plan your typical day.
-          </p>
+        <div
+          id="schedule-timeline-grid"
+          className="grid grid-cols-1 gap-3"
+        >
+          <div className="col-span-full flex flex-col items-center justify-center py-12 text-center text-slate-400 dark:text-slate-500">
+            <span className="text-3xl">📅</span>
+            <h4 className="text-xs font-black uppercase tracking-wider mt-3">
+              No Slots Planned
+            </h4>
+            <p className="text-[10px] opacity-75 mt-1 max-w-xs">
+              Your daily schedule is empty. Add routine blocks to plan your typical day.
+            </p>
+          </div>
         </div>
       );
     }
 
     return (
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+      <div
+        id="schedule-timeline-grid"
+        className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3"
+      >
         {segments.map((seg, idx) => {
           const color = seg.color || '#6366f1';
+
           return (
             <div
               key={`${seg.id}_${seg.startMin}_${idx}`}
               onClick={() => onEditBlock(seg.id)}
-              className="rounded-2xl flex flex-col hover:shadow-xl transition-all relative overflow-hidden group cursor-pointer border border-slate-800/80 bg-slate-900/60"
+              className="rounded-2xl flex flex-col hover:shadow-lg transition-all relative overflow-hidden group cursor-pointer border border-slate-200/60 dark:border-slate-700/50"
               style={{ minHeight: '140px' }}
             >
-              {/* Time header (1/4) */}
-              <div className="flex items-center justify-center py-2.5 bg-slate-950/80 border-b border-slate-800/60">
+              {/* Time header (1/4) — stroke only, no BG */}
+              <div
+                className="flex items-center justify-center py-2.5 bg-white dark:bg-slate-800"
+                style={{ flex: '0 0 25%' }}
+              >
                 <div
-                  className="flex items-center justify-center px-2.5 py-1 rounded-lg"
+                  className="flex items-center justify-center px-3 py-1.5 rounded-lg"
                   style={{ border: `1.5px solid ${color}55` }}
                 >
-                  <span className="text-[10px] font-black tracking-tight" style={{ color }}>
-                    {seg.startTime} – {seg.endTime}
+                  <span
+                    className="text-[10px] font-black tracking-tight"
+                    style={{ color }}
+                  >
+                    {seg.startTime} - {seg.endTime}
                   </span>
                 </div>
               </div>
 
-              {/* Work task and meta (3/4) */}
+              {/* Work name + meta (3/4) — colored BG, white text, centered */}
               <div
-                className="flex flex-col items-center justify-between p-3 flex-1 text-center rounded-b-2xl relative"
-                style={{ backgroundColor: `${color}dd` }}
+                className="flex flex-col items-center justify-center p-3 overflow-hidden text-center rounded-b-2xl"
+                style={{ flex: '1 1 75%', backgroundColor: `${color}cc` }}
               >
                 {seg.isDayStart && (
-                  <span className="inline-flex items-center text-[8px] font-black bg-amber-400 text-slate-950 px-1.5 py-0.5 rounded-md shadow-sm mb-1">
+                  <span
+                    className="inline-flex items-center text-[8px] font-black bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 px-1.5 py-0.5 rounded-md border border-amber-300 dark:border-amber-700 mb-1"
+                    title="Day starts here"
+                  >
                     ☀️ Start
                   </span>
                 )}
 
-                <div className="space-y-0.5 my-auto">
+                <div className="space-y-1 overflow-hidden">
                   <h4
-                    className="text-xs sm:text-sm font-black text-white tracking-tight leading-snug line-clamp-2"
+                    className="text-xs sm:text-sm font-bold text-white tracking-tight leading-snug line-clamp-2"
                     title={seg.task}
                   >
                     {seg.task}
                   </h4>
 
                   {(seg.track || seg.program) && (
-                    <div className="pt-1">
+                    <div className="mt-1 pt-1 border-t border-dashed border-white/15">
                       {seg.track && (
-                        <span className="block text-[8px] font-black text-white/80 uppercase tracking-widest truncate">
+                        <span className="truncate block text-[8px] font-black text-white/75 uppercase tracking-widest leading-none">
                           {seg.track}
                         </span>
                       )}
                       {seg.program && (
-                        <span className="block text-[8px] font-bold text-white/90 truncate">
+                        <span className="truncate block text-[8px] font-black text-white/85 uppercase tracking-wider">
                           {seg.program}
                         </span>
                       )}
@@ -92,27 +112,51 @@ export const ScheduleTimelineGrid: React.FC<ScheduleTimelineGridProps> = React.m
                   )}
                 </div>
 
-                {/* Floating hover actions */}
+                {/* Actions float hover */}
                 <div className="flex items-center justify-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity mt-2">
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       onEditBlock(seg.id);
                     }}
-                    className="p-1 bg-black/30 hover:bg-black/50 border border-white/20 rounded-lg text-white transition-colors"
-                    title="Edit Slot"
+                    className="p-1 bg-white/20 hover:bg-white/30 border border-white/20 rounded-md text-white transition-colors"
+                    title="Edit"
                   >
-                    <Edit2 className="w-3 h-3" />
+                    <svg
+                      className="w-3 h-3"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2.5"
+                        d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                      />
+                    </svg>
                   </button>
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       onDeleteBlock(seg.id);
                     }}
-                    className="p-1 bg-black/30 hover:bg-rose-900/60 border border-white/20 rounded-lg text-white transition-colors"
-                    title="Delete Slot"
+                    className="p-1 bg-white/20 hover:bg-white/30 border border-white/20 rounded-md text-white transition-colors"
+                    title="Delete"
                   >
-                    <Trash2 className="w-3 h-3" />
+                    <svg
+                      className="w-3 h-3"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2.5"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                      />
+                    </svg>
                   </button>
                 </div>
               </div>

@@ -338,6 +338,7 @@ export function getActiveScheduleSlot(
   let remainingMinutes = 0;
   let elapsedMinutes = 0;
   let progressPercent = 0;
+  let countdownStr = '00:00:00';
 
   if (activeBlock) {
     const sMin = timeToMinutes(activeBlock.startTime);
@@ -346,6 +347,13 @@ export function getActiveScheduleSlot(
     elapsedMinutes = currentMin - sMin;
     remainingMinutes = Math.max(0, eMin - currentMin);
     progressPercent = Math.min(100, Math.max(0, (elapsedMinutes / totalDuration) * 100));
+
+    const currentSec = now.getSeconds();
+    const totalRemainingSeconds = Math.max(0, (eMin - currentMin) * 60 - currentSec);
+    const remHrs = Math.floor(totalRemainingSeconds / 3600);
+    const remMins = Math.floor((totalRemainingSeconds % 3600) / 60);
+    const remSecs = totalRemainingSeconds % 60;
+    countdownStr = `${String(remHrs).padStart(2, '0')}:${String(remMins).padStart(2, '0')}:${String(remSecs < 0 ? 0 : remSecs).padStart(2, '0')}`;
   }
 
   return {
@@ -354,5 +362,6 @@ export function getActiveScheduleSlot(
     elapsedMinutes,
     progressPercent,
     nextBlock,
+    countdownStr,
   };
 }

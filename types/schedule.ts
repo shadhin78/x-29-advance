@@ -41,4 +41,5 @@ export interface ActiveSlotInfo {
   elapsedMinutes: number;
   progressPercent: number;
   nextBlock: ScheduleBlock | null;
+  countdownStr: string;
 }

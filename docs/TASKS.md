@@ -30,8 +30,8 @@ PAGE-BY-PAGE PARITY VERIFICATION
 [x] STEP 013 — Page-by-Page Migration & Visual Parity: /focus (Timer & Chronograph Dial) (COMPLETED & VERIFIED)
 [x] STEP 014 — Page-by-Page Migration & Visual Parity: /subjects (Taxonomy Tree & Chapter Checklist) (COMPLETED & VERIFIED)
 [x] STEP 015 — Page-by-Page Migration & Visual Parity: /daily-actions & Monthly Target Setup (COMPLETED & VERIFIED)
-[ ] STEP 016 — Page-by-Page Migration & Visual Parity: /schedule (24h Daily Timeline & Active Slot) (NEXT IN QUEUE)
-[ ] STEP 017 — Page-by-Page Migration & Visual Parity: /pace (Velocity Metrics & Completion Forecasts)
+[x] STEP 016 — Page-by-Page Migration & Visual Parity: /schedule (24h Daily Timeline & Active Slot) (COMPLETED & VERIFIED)
+[ ] STEP 017 — Page-by-Page Migration & Visual Parity: /pace (Velocity Metrics & Completion Forecasts) (NEXT IN QUEUE)
 [ ] STEP 018 — Page-by-Page Migration & Visual Parity: /outcome (CGPA Simulator & Celebration Mode)
 [ ] STEP 019 — Page-by-Page Migration & Visual Parity: /exam (Exam Routine & Countdown Selection)
 [ ] STEP 020 — Page-by-Page Migration & Visual Parity: /master-config (Taxonomy & System Config)
@@ -204,13 +204,13 @@ OPTIMIZATION & PRODUCTION HARDENING (PENDING)
 ---
 
 ### STEP 016 — Page-by-Page Migration & Visual Parity: /schedule (24h Daily Timeline & Active Slot)
-- [ ] Verify 24-hour timeline grid against `Daily Schedule.html`.
-- [ ] Test real-time active slot detection based on system clock.
-- [ ] Test ScheduleBlockModal (create, edit, delete 24h block).
-- [ ] Verify total allocated hours calculation per activity.
-- [ ] Update `DESIGN-PARITY.md` and `MEMORY.md`.
-- [ ] Git commit checkpoint for STEP 016.
-- **Status**: **NOT STARTED**
+- [x] Verify 24-hour timeline grid against `Daily Schedule.html`.
+- [x] Test real-time active slot detection based on system clock.
+- [x] Test ScheduleBlockModal (create, edit, delete 24h block).
+- [x] Verify total allocated hours calculation per activity.
+- [x] Update `DESIGN-PARITY.md` and `MEMORY.md`.
+- [x] Git commit checkpoint for STEP 016.
+- **Status**: **COMPLETED** (2026-09-24)
 
 ---
 

@@ -5,6 +5,7 @@
 @import "../pages/Subjects/Subjects.css";
 @import "../pages/Daily Actions/Daily Actions.css";
 @import "../pages/Daily Actions/monthly target setup/monthly target setup.css";
+@import "../pages/Daily Schedule/Daily Schedule.css";
 
 @layer base {
   :root {
