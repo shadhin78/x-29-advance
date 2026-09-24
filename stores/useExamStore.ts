@@ -1,65 +1,98 @@
 /**
  * X-29 Authoritative Exam Store (stores/useExamStore.ts)
  * 
- * Manages Exam Routine schedules, active routine set switcher (Set 1 vs Set 2),
- * and countdown exam target selection.
+ * Manages Exam Sessions, Exam Routine items, active countdown exam target selection,
+ * and multi-tier synchronization with IndexedDB and Firestore.
  */
 
 import { create } from 'zustand';
-import type { ExamRoutineItem } from '@/types/exam';
-import { DEFAULT_EXAM_ROUTINE } from '@/features/exam/services/examService';
+import type { ExamRoutineItem, ExamSession } from '@/types/exam';
+import {
+  DEFAULT_EXAM_SESSIONS,
+  DEFAULT_EXAM_ROUTINE,
+} from '@/features/exam/services/examService';
 import { idbGet, idbSet } from '@/lib/storage/indexeddb';
 import { doc, setDoc } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase/client';
 
+const KEY_EXAM_SESSIONS = 'x29_exam_sessions';
 const KEY_EXAM_ROUTINE = 'x29_exam_routine';
-const KEY_ACTIVE_SET = 'x29_exam_active_set';
 const KEY_COUNTDOWN_TARGET = 'x29_exam_countdown_id';
+const KEY_ACTIVE_SET = 'x29_exam_active_set';
 
 interface ExamStoreState {
+  examSessions: ExamSession[];
   examRoutine: ExamRoutineItem[];
-  activeRoutineSet: number;
   selectedCountdownExamId: string;
+  activeRoutineSet: number;
   isInitialized: boolean;
 
   initFromStorage: () => Promise<void>;
-  addExam: (exam: Omit<ExamRoutineItem, 'id'>) => void;
+
+  // Session Actions
+  addSession: (session: Omit<ExamSession, 'id'>) => string;
+  updateSession: (id: string, updates: Partial<ExamSession>) => void;
+  deleteSession: (id: string) => void;
+
+  // Exam Actions
+  addExam: (exam: Omit<ExamRoutineItem, 'id'>) => string;
   updateExam: (id: string, updates: Partial<ExamRoutineItem>) => void;
   deleteExam: (id: string) => void;
+  toggleExamStatus: (id: string) => void;
   toggleExamCompleted: (id: string) => void;
-  setActiveRoutineSet: (setNum: number) => void;
+
+  // Countdown & Set Actions
   setSelectedCountdownExamId: (id: string) => void;
+  setActiveRoutineSet: (setNum: number) => void;
+}
+
+function syncToWindowAppState(sessions: ExamSession[], routine: ExamRoutineItem[], targetId?: string) {
+  if (typeof window !== 'undefined' && (window as unknown as { AppState?: Record<string, unknown> }).AppState) {
+    const appState = (window as unknown as { AppState: Record<string, unknown> }).AppState;
+    appState.examSessions = sessions;
+    appState.examRoutine = routine;
+    if (targetId) appState.selectedCountdownExamId = targetId;
+  }
 }
 
 export const useExamStore = create<ExamStoreState>((set, get) => ({
+  examSessions: DEFAULT_EXAM_SESSIONS,
   examRoutine: DEFAULT_EXAM_ROUTINE,
-  activeRoutineSet: 1,
   selectedCountdownExamId: 'auto',
+  activeRoutineSet: 1,
   isInitialized: false,
 
   initFromStorage: async () => {
     if (get().isInitialized) return;
 
+    let sessions = DEFAULT_EXAM_SESSIONS;
     let routine = DEFAULT_EXAM_ROUTINE;
     let activeSet = 1;
     let targetId = 'auto';
 
     try {
-      const [idbRoutine, idbSetNum, idbTarget] = await Promise.all([
+      const [idbSessions, idbRoutine, idbSetNum, idbTarget] = await Promise.all([
+        idbGet<ExamSession[]>(KEY_EXAM_SESSIONS),
         idbGet<ExamRoutineItem[]>(KEY_EXAM_ROUTINE),
         idbGet<number>(KEY_ACTIVE_SET),
         idbGet<string>(KEY_COUNTDOWN_TARGET),
       ]);
 
+      if (Array.isArray(idbSessions) && idbSessions.length > 0) sessions = idbSessions;
       if (Array.isArray(idbRoutine) && idbRoutine.length > 0) routine = idbRoutine;
       if (idbSetNum !== null && idbSetNum !== undefined) activeSet = idbSetNum;
       if (idbTarget) targetId = idbTarget;
 
-      if (!idbRoutine && typeof window !== 'undefined') {
+      // Fallback check against localStorage legacy AppState
+      if ((!idbSessions || !idbRoutine) && typeof window !== 'undefined') {
         const raw = window.localStorage.getItem('local_app_state') || window.localStorage.getItem('appState');
         if (raw) {
           try {
             const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed.examSessions) && parsed.examSessions.length > 0) {
+              sessions = parsed.examSessions;
+              await idbSet(KEY_EXAM_SESSIONS, sessions);
+            }
             if (Array.isArray(parsed.examRoutine) && parsed.examRoutine.length > 0) {
               routine = parsed.examRoutine;
               await idbSet(KEY_EXAM_ROUTINE, routine);
@@ -79,7 +112,10 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
       console.warn('[useExamStore] Storage load error:', err);
     }
 
+    syncToWindowAppState(sessions, routine, targetId);
+
     set({
+      examSessions: sessions,
       examRoutine: routine,
       activeRoutineSet: activeSet,
       selectedCountdownExamId: targetId,
@@ -87,35 +123,111 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
     });
   },
 
+  addSession: (sessionData) => {
+    const { examSessions } = get();
+    const newId = `session_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+    const newSession: ExamSession = {
+      ...sessionData,
+      id: newId,
+      createdAt: Date.now(),
+    };
+    const updated = [...examSessions, newSession];
+
+    set({ examSessions: updated });
+    idbSet(KEY_EXAM_SESSIONS, updated);
+    syncToWindowAppState(updated, get().examRoutine);
+
+    const user = auth.currentUser;
+    if (user) {
+      setDoc(doc(db, 'users', user.uid), { examSessions: updated, updatedAt: Date.now() }, { merge: true }).catch(() => {});
+    }
+
+    return newId;
+  },
+
+  updateSession: (id, updates) => {
+    const { examSessions } = get();
+    const updated = examSessions.map((s) => {
+      if (s.id === id) {
+        return { ...s, ...updates, updatedAt: Date.now() };
+      }
+      return s;
+    });
+
+    set({ examSessions: updated });
+    idbSet(KEY_EXAM_SESSIONS, updated);
+    syncToWindowAppState(updated, get().examRoutine);
+
+    const user = auth.currentUser;
+    if (user) {
+      setDoc(doc(db, 'users', user.uid), { examSessions: updated, updatedAt: Date.now() }, { merge: true }).catch(() => {});
+    }
+  },
+
+  deleteSession: (id) => {
+    const { examSessions, examRoutine } = get();
+    const updatedSessions = examSessions.filter((s) => s.id !== id);
+    const updatedRoutine = examRoutine.filter((e) => e.sessionId !== id);
+
+    set({ examSessions: updatedSessions, examRoutine: updatedRoutine });
+    idbSet(KEY_EXAM_SESSIONS, updatedSessions);
+    idbSet(KEY_EXAM_ROUTINE, updatedRoutine);
+    syncToWindowAppState(updatedSessions, updatedRoutine);
+
+    const user = auth.currentUser;
+    if (user) {
+      setDoc(
+        doc(db, 'users', user.uid),
+        { examSessions: updatedSessions, examRoutine: updatedRoutine, updatedAt: Date.now() },
+        { merge: true }
+      ).catch(() => {});
+    }
+  },
+
   addExam: (examData) => {
     const { examRoutine, activeRoutineSet } = get();
+    const newId = `exam_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+    const isCompleted = examData.completed || examData.status === 'completed';
     const newExam: ExamRoutineItem = {
       ...examData,
-      id: `exam_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+      id: newId,
+      status: isCompleted ? 'completed' : 'upcoming',
+      completed: isCompleted,
       routineSet: examData.routineSet || activeRoutineSet,
+      createdAt: Date.now(),
     };
     const updated = [...examRoutine, newExam];
 
     set({ examRoutine: updated });
     idbSet(KEY_EXAM_ROUTINE, updated);
+    syncToWindowAppState(get().examSessions, updated);
 
     const user = auth.currentUser;
     if (user) {
       setDoc(doc(db, 'users', user.uid), { examRoutine: updated, updatedAt: Date.now() }, { merge: true }).catch(() => {});
     }
+
+    return newId;
   },
 
   updateExam: (id, updates) => {
     const { examRoutine } = get();
     const updated = examRoutine.map((item) => {
       if (item.id === id) {
-        return { ...item, ...updates };
+        const merged = { ...item, ...updates, updatedAt: Date.now() };
+        if (updates.status) {
+          merged.completed = updates.status === 'completed';
+        } else if (updates.completed !== undefined) {
+          merged.status = updates.completed ? 'completed' : 'upcoming';
+        }
+        return merged;
       }
       return item;
     });
 
     set({ examRoutine: updated });
     idbSet(KEY_EXAM_ROUTINE, updated);
+    syncToWindowAppState(get().examSessions, updated);
 
     const user = auth.currentUser;
     if (user) {
@@ -124,11 +236,46 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
   },
 
   deleteExam: (id) => {
-    const { examRoutine } = get();
+    const { examRoutine, selectedCountdownExamId } = get();
     const updated = examRoutine.filter((item) => item.id !== id);
+    const newTargetId = selectedCountdownExamId === id ? 'auto' : selectedCountdownExamId;
+
+    set({ examRoutine: updated, selectedCountdownExamId: newTargetId });
+    idbSet(KEY_EXAM_ROUTINE, updated);
+    if (newTargetId !== selectedCountdownExamId) {
+      idbSet(KEY_COUNTDOWN_TARGET, newTargetId);
+    }
+    syncToWindowAppState(get().examSessions, updated, newTargetId);
+
+    const user = auth.currentUser;
+    if (user) {
+      setDoc(
+        doc(db, 'users', user.uid),
+        { examRoutine: updated, selectedCountdownExamId: newTargetId, updatedAt: Date.now() },
+        { merge: true }
+      ).catch(() => {});
+    }
+  },
+
+  toggleExamStatus: (id) => {
+    const { examRoutine } = get();
+    const updated = examRoutine.map((item) => {
+      if (item.id === id) {
+        const isCompleted = item.status === 'completed' || item.completed;
+        const nextCompleted = !isCompleted;
+        return {
+          ...item,
+          status: nextCompleted ? ('completed' as const) : ('upcoming' as const),
+          completed: nextCompleted,
+          updatedAt: Date.now(),
+        };
+      }
+      return item;
+    });
 
     set({ examRoutine: updated });
     idbSet(KEY_EXAM_ROUTINE, updated);
+    syncToWindowAppState(get().examSessions, updated);
 
     const user = auth.currentUser;
     if (user) {
@@ -137,21 +284,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
   },
 
   toggleExamCompleted: (id) => {
-    const { examRoutine } = get();
-    const updated = examRoutine.map((item) => {
-      if (item.id === id) {
-        return { ...item, completed: !item.completed };
-      }
-      return item;
-    });
-
-    set({ examRoutine: updated });
-    idbSet(KEY_EXAM_ROUTINE, updated);
-
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(doc(db, 'users', user.uid), { examRoutine: updated, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-    }
+    get().toggleExamStatus(id);
   },
 
   setActiveRoutineSet: (setNum) => {
@@ -167,6 +300,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
   setSelectedCountdownExamId: (id) => {
     set({ selectedCountdownExamId: id });
     idbSet(KEY_COUNTDOWN_TARGET, id);
+    syncToWindowAppState(get().examSessions, get().examRoutine, id);
 
     const user = auth.currentUser;
     if (user) {

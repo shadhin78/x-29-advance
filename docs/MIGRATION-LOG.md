@@ -517,3 +517,106 @@
   - Live Browser Subagent verification: Tested desktop and mobile viewports, validated modal flows, result creation, scorecard rendering, progression trend view, pass/freeze toggling, celebration mode, and confetti trigger.
 - **Result**: STEP 018 is 100% complete and verified. Next step in queue: STEP 019 (/exam).
 
+---
+
+### Milestone: Page-by-Page Migration & Visual Parity: /exam (STEP 019)
+- **Date**: 2026-09-24
+- **Scope**:
+  - Full visual and functional parity matching `pages/Exam Routine/Exam Routine.html`, `pages/Exam Routine/Exam Routine.css`, `js/features/exam/examRoutine.js`, and `js/features/exam/countdown.js`.
+  - Added `@import "../pages/Exam Routine/Exam Routine.css";` to `app/globals.css`.
+  - Upgraded schema in `types/exam.ts` with complete `ExamSession` and `ExamRoutineItem` models matching Firestore and legacy `AppState`.
+  - Refactored `features/exam/services/examService.ts` with pure domain calculations:
+    - Calendar-accurate countdown calculation (`calculateExamTimeRemaining`) with monthly borrowing logic and 3 tiers ('years', 'months', 'days').
+    - Formatting utilities (`formatExamCountdownString`, `formatSessionDate`, `hexToRgba`).
+    - Status evaluation (`isExamDoneOrOver`, `parseExamDateTime`, `sortExams`).
+  - Refactored `stores/useExamStore.ts`:
+    - Full `examSessions` and `examRoutine` state management with IndexedDB (`x29_exam_sessions`, `x29_exam_routine`, `x29_exam_countdown_id`) and Firestore persistence.
+    - Session CRUD (`addSession`, `updateSession`, `deleteSession` with cascade to child exams).
+    - Subject routine item CRUD (`addExam`, `updateExam`, `deleteExam`, `toggleExamStatus`).
+    - Target Pin selector state (`selectedCountdownExamId`) with bidirectional sync to `TopStatsBar` and `MobileHeader`.
+  - Live Countdown Hook `features/exam/hooks/useExamCountdown.ts`:
+    - Timestamp-based 1-second ticks and visibility change resync.
+  - Pixel-matched components:
+    - `ExamHeroCountdown.tsx`:
+      - Rose/slate glowing gradient container (`#exam-countdown-hero`) with ambient background blurs.
+      - Live Countdown badge with pinging red dot.
+      - Subject/Session badge with dynamic translucent background from `getSubjectColor`.
+      - Pin selector dropdown (`Pin: ⚡ Auto (Nearest Upcoming Subject Exam)` / individual exams).
+      - Headline, target subject detail with clock icon, and date/venue metadata pills.
+      - 4-Box digital time remaining readout with tabular numerals (`.tabular-nums`) and tier handling.
+    - `ExamRoutineSection.tsx`:
+      - White / Dark Slate card container (`bg-white dark:bg-slate-800 rounded-2xl sm:rounded-3xl md:rounded-[2.5rem]`).
+      - Section header with rose calendar icon, "Exam Routine & Timetable" title, and "Add Session" button.
+      - Search box and segmented filter tabs: "All", "Upcoming", "Completed" with active highlight.
+      - Session cards: icon (🎓 / ⚙️), name, date range badge, session completed badge, upcoming/completed counts, and "Add Subject" button.
+      - Subject exam cards: live ticking countdown badge (completed, live today, countdown with spinning clock, ended), subject accent color dot, date & time, venue, "Mark Complete / Mark Pending" toggle button, edit, and delete.
+      - Contextual empty states for search queries, filter modes, and empty session blocks.
+    - Radix UI accessible modals:
+      - `SessionModal.tsx`: Program dropdown (from `useTaxonomyStore` + Non-Program Wise), session name, start date, end date, date range validation.
+      - `SubjectExamModal.tsx`: Active session display banner, mode switcher (Program Wise vs Non-Program Wise), subject select, date, time, venue.
+      - `ConfirmDeleteModal.tsx`: Accessible confirmation dialog for deleting sessions or subject routine items.
+    - Re-architected `features/exam/components/ExamStudio.tsx` to seamlessly orchestrate the hero, timetable, and modal workflows.
+- **Validation**:
+  - `npm run typecheck`: 0 errors (`tsc --noEmit` exited cleanly).
+  - Unit tests: `tests/exam-engine.test.mjs` passed 11 / 11 tests (100%).
+  - Full unit suite: `npm run test:unit` passed 51 / 51 tests across all modules (100%).
+  - Integration suite: `npm test` passed 10 / 10 batch test suites (100%).
+  - Next.js production build: `npm run build` compiled successfully in 4.3s with 14/14 static routes prerendered (including `○ /exam`).
+  - Browser Verification: Captured screenshots on desktop and mobile viewports; verified live countdown ticks, pin selector, filtering, subject completion toggling, session updates, and synchronization with top header widget.
+- **Result**: STEP 019 is 100% complete and verified. Next step in queue: STEP 020 (/master-config).
+
+---
+
+### Milestone: Page-by-Page Migration & Visual Parity: /master-config (STEP 020)
+- **Date**: 2026-09-24
+- **Scope**:
+  - Full visual and functional parity matching `pages/Master Config/Master Config.html`, `pages/Master Config/Master Config.css`, `js/features/config/tracksConfig.js`, `js/features/config/priorityConfig.js`, and `js/features/config/masterConfig.js`.
+  - Added `@import "../pages/Master Config/Master Config.css";` to `app/globals.css`.
+  - Built pure configuration and priority engine in `features/config/services/configService.ts`:
+    - Priority reordering with array boundary safety and sequential 1..N order assignment (`reorderListWithPriority`).
+    - Direct priority select dropdown shifting and re-normalization (`changePriorityInList`).
+    - Workspace JSON backup schema generator (`createBackupPayload`) and payload validator (`validateBackupPayload`).
+  - Extended domain types in `types/taxonomy.ts`:
+    - Added `priority?: number;` to `Track`.
+    - Added `DashboardHeaderConfig` interface (`topTag`, `mainTitle`, `subTitle`).
+  - Enhanced `stores/useTaxonomyStore.ts`:
+    - Added `dashboardConfig` state property with IndexedDB persistence (`x29_dashboard_config`) and Firestore sync.
+    - Added `reorderTracks`, `reorderPrograms`, `reorderAllPrograms`, `reorderSubjects`, and `reorderAllSubjects`.
+    - Added cascading operations: `renameProgram` (cascades to child subjects and passed items), `deleteProgramCascade` (deletes child subjects and passed items), and `deleteTrackCascade` (deletes child programs and subjects).
+    - Added `resetWorkspaceToCleanSlate` (purges all taxonomy stores and keys).
+    - Added `importFullTaxonomyState` for workspace backup restoration.
+  - Enhanced `stores/useDailyActionStore.ts`:
+    - Added `reorderHabits`, `resetHabitsToCleanSlate`, and `importFullHabitsState`.
+  - Upgraded `features/config/components/MasterConfigStudio.tsx`:
+    - Exact visual card container (`#master-configuration-section`) with blue gear icon, uppercase tracking-widest tabs, and active blue pill state.
+    - 6 Canonical Tabs:
+      1. `Add Chapter` (`sys-tab-chapter`): Track, Program, Subject cascading dropdowns, Ch. No, Topic Name, and "Save Chapter" button.
+      2. `Add Subject` (`sys-tab-subject`): Track, Program Link, New Subject Name, Auto-generate "Bulk Chapters" checkbox with quantity input, and "Create" button.
+      3. `Add Program` (`sys-tab-program`): Track, New Program Name, and "Create Program" button.
+      4. `Manage Data` (`sys-tab-manage`):
+         - Universal Rename and Delete for `Subject`, `Program`, and `Daily Action`.
+         - Dashboard Header Configuration inputs (`edit-header-tag`, `edit-header-title`, `edit-header-sub`, and "Update Headers" button).
+         - Danger Zone: Clean Slate Workspace Reset button (`btn-reset-clean-slate`) with warning banner and accessible confirmation dialog.
+      5. `Set Priority` (`sys-tab-priority`):
+         - Tracks Priority Order with rank badge, priority dropdown (1..N), up/down arrow buttons.
+         - Programs Priority Order (flat global list across tracks) with rank badge, priority dropdown, up/down arrows.
+         - Syllabus Subjects list with rank badge, subject accent colors, priority dropdown, up/down arrows.
+         - Daily Action Trackers list with rank badge, priority dropdown, up/down arrows.
+         - "Save & Sync Priorities" button.
+      6. `Manage Tracks` (`sys-tab-track`):
+         - Add New Track form with Track Name and Track ID inputs.
+         - Existing Tracks cards with program and subject count badges.
+         - Edit Track Name modal (`#edit-track-modal`) with track ID display, name input, Cancel, and Save.
+         - Safe cascade delete track button with confirmation.
+    - Backup & Restore tools:
+      - "Export JSON" button: downloads formatted workspace backup JSON (`x-29_backup_YYYY-MM-DD.json`).
+      - "Import JSON" button: file picker that parses, validates, and restores state into stores and IndexedDB.
+- **Validation**:
+  - `npm run typecheck`: 0 errors (`tsc --noEmit` exited cleanly).
+  - Unit tests: `tests/config-engine.test.mjs` passed 7 / 7 tests (100%).
+  - Full unit suite: `npm run test:unit` passed 58 / 58 tests across all modules (100%).
+  - Integration suite: `npm test` passed 10 / 10 batch test suites (100%).
+  - Next.js production build: `npm run build` compiled successfully in 2.8s with 14/14 static routes prerendered (including `○ /master-config`).
+  - Browser Verification: Verified all 6 tabs interactively, verified priority rank swap on down arrow click, verified track rename modal open & cancel, and verified mobile 390px viewport responsiveness.
+- **Result**: STEP 020 is 100% complete and verified. Next step in queue: STEP 021 (/analytics).
+

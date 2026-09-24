@@ -16,6 +16,7 @@ import type {
   PassedItemsState,
   SubjectTimeLink,
   RevisionDataState,
+  DashboardHeaderConfig,
 } from '@/types/taxonomy';
 import {
   DEFAULT_TRACKS,
@@ -24,7 +25,7 @@ import {
   normalizeTaxonomy,
   getSubjectColor,
 } from '@/features/taxonomy/services/taxonomyService';
-import { idbGet, idbSet } from '@/lib/storage/indexeddb';
+import { idbGet, idbSet, idbDel } from '@/lib/storage/indexeddb';
 import { doc, setDoc } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase/client';
 
@@ -35,6 +36,13 @@ const KEY_PASSED_ITEMS = 'x29_taxonomy_passed_items';
 const KEY_SUBJECT_COLORS = 'x29_taxonomy_subject_colors';
 const KEY_SUBJECT_TIME_LINKS = 'x29_taxonomy_subject_time_links';
 const KEY_REVISION_DATA = 'x29_taxonomy_revision_data';
+const KEY_DASHBOARD_CONFIG = 'x29_dashboard_config';
+
+export const DEFAULT_DASHBOARD_CONFIG: DashboardHeaderConfig = {
+  topTag: 'X-29',
+  mainTitle: 'X-29 Dashboard',
+  subTitle: 'Study Tracker Dashboard',
+};
 
 interface TaxonomyStoreState {
   tracks: Track[];
@@ -44,6 +52,7 @@ interface TaxonomyStoreState {
   subjectColors: Record<string, string>;
   subjectTimeLinks: Record<string, SubjectTimeLink>;
   revisionData: RevisionDataState;
+  dashboardConfig: DashboardHeaderConfig;
   isInitialized: boolean;
 
   // Actions
@@ -54,6 +63,8 @@ interface TaxonomyStoreState {
   deleteSubject: (trackId: string, subjectName: string) => void;
   addProgram: (trackId: string, program: Program) => void;
   deleteProgram: (trackId: string, programName: string) => void;
+  renameProgram: (trackId: string, oldName: string, newName: string) => void;
+  deleteProgramCascade: (trackId: string, programName: string) => void;
   toggleSubjectPassed: (subjectName: string) => void;
   toggleProgramPassed: (programName: string) => void;
   setSubjectColor: (subjectName: string, colorHex: string) => void;
@@ -63,7 +74,25 @@ interface TaxonomyStoreState {
   addTrack: (track: Track) => void;
   updateTrack: (trackId: string, updates: Partial<Track>) => void;
   deleteTrack: (trackId: string) => void;
+  deleteTrackCascade: (trackId: string) => void;
   addChapter: (trackId: string, subjectName: string, chapterTitle: string) => void;
+  reorderTracks: (tracks: Track[]) => void;
+  reorderPrograms: (trackId: string, programs: Program[]) => void;
+  reorderAllPrograms: (updatedProgramsMap: CustomProgramsMap) => void;
+  reorderSubjects: (trackId: string, subjects: SyllabusItem[]) => void;
+  reorderAllSubjects: (updatedSyllabus: SyllabusStructure) => void;
+  setDashboardHeaderConfig: (cfg: Partial<DashboardHeaderConfig>) => void;
+  resetWorkspaceToCleanSlate: () => Promise<void>;
+  importFullTaxonomyState: (data: {
+    tracks?: Track[];
+    customPrograms?: CustomProgramsMap;
+    syllabusStructure?: SyllabusStructure;
+    passedItems?: PassedItemsState;
+    subjectColors?: Record<string, string>;
+    subjectTimeLinks?: Record<string, SubjectTimeLink>;
+    revisionData?: RevisionDataState;
+    dashboardConfig?: DashboardHeaderConfig;
+  }) => Promise<void>;
 }
 
 export const useTaxonomyStore = create<TaxonomyStoreState>((set, get) => ({
@@ -74,6 +103,7 @@ export const useTaxonomyStore = create<TaxonomyStoreState>((set, get) => ({
   subjectColors: {},
   subjectTimeLinks: {},
   revisionData: { active: [], progress: {} },
+  dashboardConfig: DEFAULT_DASHBOARD_CONFIG,
   isInitialized: false,
 
   initFromStorage: async () => {
@@ -86,9 +116,10 @@ export const useTaxonomyStore = create<TaxonomyStoreState>((set, get) => ({
     let colors: Record<string, string> = {};
     let timeLinks: Record<string, SubjectTimeLink> = {};
     let revision: RevisionDataState = { active: [], progress: {} };
+    let dashboardConfig: DashboardHeaderConfig = DEFAULT_DASHBOARD_CONFIG;
 
     try {
-      const [idbTracks, idbSyllabus, idbPrograms, idbPassed, idbColors, idbTimeLinks, idbRevision] = await Promise.all([
+      const [idbTracks, idbSyllabus, idbPrograms, idbPassed, idbColors, idbTimeLinks, idbRevision, idbConfig] = await Promise.all([
         idbGet<Track[]>(KEY_TAXONOMY_TRACKS),
         idbGet<SyllabusStructure>(KEY_TAXONOMY_SYLLABUS),
         idbGet<CustomProgramsMap>(KEY_TAXONOMY_PROGRAMS),
@@ -96,6 +127,7 @@ export const useTaxonomyStore = create<TaxonomyStoreState>((set, get) => ({
         idbGet<Record<string, string>>(KEY_SUBJECT_COLORS),
         idbGet<Record<string, SubjectTimeLink>>(KEY_SUBJECT_TIME_LINKS),
         idbGet<RevisionDataState>(KEY_REVISION_DATA),
+        idbGet<DashboardHeaderConfig>(KEY_DASHBOARD_CONFIG),
       ]);
 
       if (idbTracks && idbTracks.length > 0) tracks = idbTracks;
@@ -105,6 +137,7 @@ export const useTaxonomyStore = create<TaxonomyStoreState>((set, get) => ({
       if (idbColors) colors = idbColors;
       if (idbTimeLinks) timeLinks = idbTimeLinks;
       if (idbRevision) revision = idbRevision;
+      if (idbConfig) dashboardConfig = idbConfig;
 
       // Check legacy local storage fallback if idb is empty
       if (!idbTracks && typeof window !== 'undefined') {
@@ -140,6 +173,10 @@ export const useTaxonomyStore = create<TaxonomyStoreState>((set, get) => ({
               revision = parsed.revisionData;
               await idbSet(KEY_REVISION_DATA, revision);
             }
+            if (parsed.dashboardConfig) {
+              dashboardConfig = { ...DEFAULT_DASHBOARD_CONFIG, ...parsed.dashboardConfig };
+              await idbSet(KEY_DASHBOARD_CONFIG, dashboardConfig);
+            }
           } catch {}
         }
       }
@@ -155,6 +192,7 @@ export const useTaxonomyStore = create<TaxonomyStoreState>((set, get) => ({
       subjectColors: colors,
       subjectTimeLinks: timeLinks,
       revisionData: revision,
+      dashboardConfig,
       isInitialized: true,
     });
   },
@@ -403,6 +441,325 @@ export const useTaxonomyStore = create<TaxonomyStoreState>((set, get) => ({
     const user = auth.currentUser;
     if (user) {
       setDoc(doc(db, 'users', user.uid), { syllabusStructure: updatedSyllabus, updatedAt: Date.now() }, { merge: true }).catch(() => {});
+    }
+  },
+
+  renameProgram: (trackId: string, oldName: string, newName: string) => {
+    const { customPrograms, syllabusStructure, passedItems } = get();
+
+    // 1. Rename in customPrograms
+    const trackPrograms = customPrograms[trackId] || [];
+    const updatedProgramsList = trackPrograms.map((p) =>
+      p.name === oldName ? { ...p, name: newName } : p
+    );
+    const updatedProgramsMap = { ...customPrograms, [trackId]: updatedProgramsList };
+
+    // 2. Cascade rename to subjects
+    const trackSubjects = syllabusStructure[trackId] || [];
+    const updatedSubjectsList = trackSubjects.map((s) =>
+      s.program === oldName ? { ...s, program: newName } : s
+    );
+    const updatedSyllabus = { ...syllabusStructure, [trackId]: updatedSubjectsList };
+
+    // 3. Cascade rename to passedItems
+    const updatedPassedPrograms = (passedItems.programs || []).map((p) =>
+      p === oldName ? newName : p
+    );
+    const updatedPassed = { ...passedItems, programs: updatedPassedPrograms };
+
+    set({
+      customPrograms: updatedProgramsMap,
+      syllabusStructure: updatedSyllabus,
+      passedItems: updatedPassed,
+    });
+
+    idbSet(KEY_TAXONOMY_PROGRAMS, updatedProgramsMap);
+    idbSet(KEY_TAXONOMY_SYLLABUS, updatedSyllabus);
+    idbSet(KEY_PASSED_ITEMS, updatedPassed);
+
+    const user = auth.currentUser;
+    if (user) {
+      setDoc(
+        doc(db, 'users', user.uid),
+        {
+          customPrograms: updatedProgramsMap,
+          syllabusStructure: updatedSyllabus,
+          passedItems: updatedPassed,
+          updatedAt: Date.now(),
+        },
+        { merge: true }
+      ).catch(() => {});
+    }
+  },
+
+  deleteProgramCascade: (trackId: string, programName: string) => {
+    const { customPrograms, syllabusStructure, passedItems } = get();
+
+    // 1. Remove from customPrograms
+    const trackPrograms = customPrograms[trackId] || [];
+    const updatedProgramsList = trackPrograms.filter((p) => p.name !== programName);
+    const updatedProgramsMap = { ...customPrograms, [trackId]: updatedProgramsList };
+
+    // 2. Cascade delete all subjects belonging to this program
+    const trackSubjects = syllabusStructure[trackId] || [];
+    const subjectsToDelete = trackSubjects
+      .filter((s) => s.program === programName)
+      .map((s) => s.subject);
+    const updatedSubjectsList = trackSubjects.filter((s) => s.program !== programName);
+    const updatedSyllabus = { ...syllabusStructure, [trackId]: updatedSubjectsList };
+
+    // 3. Clean up passedItems
+    const updatedPassedPrograms = (passedItems.programs || []).filter((p) => p !== programName);
+    const updatedPassedSubjects = (passedItems.subjects || []).filter(
+      (s) => !subjectsToDelete.includes(s)
+    );
+    const updatedPassed = {
+      programs: updatedPassedPrograms,
+      subjects: updatedPassedSubjects,
+    };
+
+    set({
+      customPrograms: updatedProgramsMap,
+      syllabusStructure: updatedSyllabus,
+      passedItems: updatedPassed,
+    });
+
+    idbSet(KEY_TAXONOMY_PROGRAMS, updatedProgramsMap);
+    idbSet(KEY_TAXONOMY_SYLLABUS, updatedSyllabus);
+    idbSet(KEY_PASSED_ITEMS, updatedPassed);
+
+    const user = auth.currentUser;
+    if (user) {
+      setDoc(
+        doc(db, 'users', user.uid),
+        {
+          customPrograms: updatedProgramsMap,
+          syllabusStructure: updatedSyllabus,
+          passedItems: updatedPassed,
+          updatedAt: Date.now(),
+        },
+        { merge: true }
+      ).catch(() => {});
+    }
+  },
+
+  deleteTrackCascade: (trackId: string) => {
+    const { tracks, customPrograms, syllabusStructure } = get();
+    const updatedTracks = tracks.filter((t) => t.id !== trackId);
+    const updatedPrograms = { ...customPrograms };
+    delete updatedPrograms[trackId];
+    const updatedSyllabus = { ...syllabusStructure };
+    delete updatedSyllabus[trackId];
+
+    set({
+      tracks: updatedTracks,
+      customPrograms: updatedPrograms,
+      syllabusStructure: updatedSyllabus,
+    });
+
+    idbSet(KEY_TAXONOMY_TRACKS, updatedTracks);
+    idbSet(KEY_TAXONOMY_PROGRAMS, updatedPrograms);
+    idbSet(KEY_TAXONOMY_SYLLABUS, updatedSyllabus);
+
+    const user = auth.currentUser;
+    if (user) {
+      setDoc(
+        doc(db, 'users', user.uid),
+        {
+          tracks: updatedTracks,
+          customPrograms: updatedPrograms,
+          syllabusStructure: updatedSyllabus,
+          updatedAt: Date.now(),
+        },
+        { merge: true }
+      ).catch(() => {});
+    }
+  },
+
+  reorderTracks: (updatedTracks: Track[]) => {
+    set({ tracks: updatedTracks });
+    idbSet(KEY_TAXONOMY_TRACKS, updatedTracks);
+
+    const user = auth.currentUser;
+    if (user) {
+      setDoc(
+        doc(db, 'users', user.uid),
+        { tracks: updatedTracks, updatedAt: Date.now() },
+        { merge: true }
+      ).catch(() => {});
+    }
+  },
+
+  reorderPrograms: (trackId: string, programs: Program[]) => {
+    const { customPrograms } = get();
+    const updatedPrograms = { ...customPrograms, [trackId]: programs };
+    set({ customPrograms: updatedPrograms });
+    idbSet(KEY_TAXONOMY_PROGRAMS, updatedPrograms);
+
+    const user = auth.currentUser;
+    if (user) {
+      setDoc(
+        doc(db, 'users', user.uid),
+        { customPrograms: updatedPrograms, updatedAt: Date.now() },
+        { merge: true }
+      ).catch(() => {});
+    }
+  },
+
+  reorderAllPrograms: (updatedProgramsMap: CustomProgramsMap) => {
+    set({ customPrograms: updatedProgramsMap });
+    idbSet(KEY_TAXONOMY_PROGRAMS, updatedProgramsMap);
+
+    const user = auth.currentUser;
+    if (user) {
+      setDoc(
+        doc(db, 'users', user.uid),
+        { customPrograms: updatedProgramsMap, updatedAt: Date.now() },
+        { merge: true }
+      ).catch(() => {});
+    }
+  },
+
+  reorderSubjects: (trackId: string, subjects: SyllabusItem[]) => {
+    const { syllabusStructure } = get();
+    const updatedSyllabus = { ...syllabusStructure, [trackId]: subjects };
+    set({ syllabusStructure: updatedSyllabus });
+    idbSet(KEY_TAXONOMY_SYLLABUS, updatedSyllabus);
+
+    const user = auth.currentUser;
+    if (user) {
+      setDoc(
+        doc(db, 'users', user.uid),
+        { syllabusStructure: updatedSyllabus, updatedAt: Date.now() },
+        { merge: true }
+      ).catch(() => {});
+    }
+  },
+
+  reorderAllSubjects: (updatedSyllabus: SyllabusStructure) => {
+    set({ syllabusStructure: updatedSyllabus });
+    idbSet(KEY_TAXONOMY_SYLLABUS, updatedSyllabus);
+
+    const user = auth.currentUser;
+    if (user) {
+      setDoc(
+        doc(db, 'users', user.uid),
+        { syllabusStructure: updatedSyllabus, updatedAt: Date.now() },
+        { merge: true }
+      ).catch(() => {});
+    }
+  },
+
+  setDashboardHeaderConfig: (cfg: Partial<DashboardHeaderConfig>) => {
+    const { dashboardConfig } = get();
+    const updated = { ...dashboardConfig, ...cfg };
+    set({ dashboardConfig: updated });
+    idbSet(KEY_DASHBOARD_CONFIG, updated);
+
+    const user = auth.currentUser;
+    if (user) {
+      setDoc(
+        doc(db, 'users', user.uid),
+        { dashboardConfig: updated, updatedAt: Date.now() },
+        { merge: true }
+      ).catch(() => {});
+    }
+  },
+
+  resetWorkspaceToCleanSlate: async () => {
+    await Promise.all([
+      idbDel(KEY_TAXONOMY_TRACKS),
+      idbDel(KEY_TAXONOMY_SYLLABUS),
+      idbDel(KEY_TAXONOMY_PROGRAMS),
+      idbDel(KEY_PASSED_ITEMS),
+      idbDel(KEY_SUBJECT_COLORS),
+      idbDel(KEY_SUBJECT_TIME_LINKS),
+      idbDel(KEY_REVISION_DATA),
+      idbDel(KEY_DASHBOARD_CONFIG),
+    ]);
+
+    set({
+      tracks: [],
+      syllabusStructure: {},
+      customPrograms: {},
+      passedItems: { programs: [], subjects: [] },
+      subjectColors: {},
+      subjectTimeLinks: {},
+      revisionData: { active: [], progress: {} },
+      dashboardConfig: DEFAULT_DASHBOARD_CONFIG,
+    });
+
+    const user = auth.currentUser;
+    if (user) {
+      setDoc(
+        doc(db, 'users', user.uid),
+        {
+          tracks: [],
+          syllabusStructure: {},
+          customPrograms: {},
+          passedItems: { programs: [], subjects: [] },
+          subjectColors: {},
+          subjectTimeLinks: {},
+          revisionData: { active: [], progress: {} },
+          dashboardConfig: DEFAULT_DASHBOARD_CONFIG,
+          updatedAt: Date.now(),
+        },
+        { merge: true }
+      ).catch(() => {});
+    }
+  },
+
+  importFullTaxonomyState: async (data) => {
+    const {
+      tracks = get().tracks,
+      customPrograms = get().customPrograms,
+      syllabusStructure = get().syllabusStructure,
+      passedItems = get().passedItems,
+      subjectColors = get().subjectColors,
+      subjectTimeLinks = get().subjectTimeLinks,
+      revisionData = get().revisionData,
+      dashboardConfig = get().dashboardConfig,
+    } = data;
+
+    await Promise.all([
+      idbSet(KEY_TAXONOMY_TRACKS, tracks),
+      idbSet(KEY_TAXONOMY_PROGRAMS, customPrograms),
+      idbSet(KEY_TAXONOMY_SYLLABUS, syllabusStructure),
+      idbSet(KEY_PASSED_ITEMS, passedItems),
+      idbSet(KEY_SUBJECT_COLORS, subjectColors),
+      idbSet(KEY_SUBJECT_TIME_LINKS, subjectTimeLinks),
+      idbSet(KEY_REVISION_DATA, revisionData),
+      idbSet(KEY_DASHBOARD_CONFIG, dashboardConfig),
+    ]);
+
+    set({
+      tracks,
+      customPrograms,
+      syllabusStructure,
+      passedItems,
+      subjectColors,
+      subjectTimeLinks,
+      revisionData,
+      dashboardConfig,
+    });
+
+    const user = auth.currentUser;
+    if (user) {
+      setDoc(
+        doc(db, 'users', user.uid),
+        {
+          tracks,
+          customPrograms,
+          syllabusStructure,
+          passedItems,
+          subjectColors,
+          subjectTimeLinks,
+          revisionData,
+          dashboardConfig,
+          updatedAt: Date.now(),
+        },
+        { merge: true }
+      ).catch(() => {});
     }
   },
 }));

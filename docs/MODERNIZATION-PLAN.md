@@ -364,9 +364,9 @@ OPTIMIZATION & PRODUCTION HARDENING (PENDING)
   3. Test ExamModal (create, edit, delete exam session) and active countdown selector.
   4. Verify header countdown widget updates when active exam is changed.
 - **Risk**: Date parsing issues across different locales.
-- **Validation method**: Add exam; verify countdown ticks accurately in hero and top header.
-- **Completion criteria**: Exam routine table and countdown hero match legacy exactly.
-- **Status**: **NOT STARTED**
+- **Validation method**: Added unit test suite `tests/exam-engine.test.mjs` (11/11 tests passing), typecheck passed (0 errors), Next.js production build succeeded (`/exam` static route), and verified live via browser screenshots for countdown ticker, pin selector, filtering, session CRUD, and header sync.
+- **Completion criteria**: Exam routine table, session blocks, and countdown hero match legacy down to the pixel.
+- **Status**: **COMPLETED** (2026-09-24)
 
 ---
 
@@ -382,9 +382,9 @@ OPTIMIZATION & PRODUCTION HARDENING (PENDING)
   2. Verify PriorityConfigSection: drag-and-drop or order adjustments for academic priorities.
   3. Verify backup & restore tools (JSON export and import).
 - **Risk**: Accidental taxonomy corruption during editing.
-- **Validation method**: Test track creation and visibility toggle; verify cloud persistence.
+- **Validation method**: Added unit test suite `tests/config-engine.test.mjs` (7/7 tests passing, 58/58 overall unit tests passing), typecheck passed (0 errors), Next.js production build succeeded (`/master-config` static route compiled in 2.8s), and verified live via browser subagent across desktop (1280px) and mobile (390px) viewports with all 6 canonical tabs, priority rank swap, edit modal, header configuration, and clean slate controls.
 - **Completion criteria**: Master config studio matches legacy interface and behavior.
-- **Status**: **NOT STARTED**
+- **Status**: **COMPLETED** (2026-09-24)
 
 ---
 

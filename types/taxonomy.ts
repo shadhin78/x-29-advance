@@ -5,9 +5,16 @@
 export interface Track {
   id: string;
   name: string;
+  priority?: number;
   order?: number;
   color?: string;
   badge?: string;
+}
+
+export interface DashboardHeaderConfig {
+  topTag: string;
+  mainTitle: string;
+  subTitle: string;
 }
 
 export interface Program {

@@ -3,15 +3,17 @@
 /**
  * X-29 Exam Countdown Hook (features/exam/hooks/useExamCountdown.ts)
  * 
- * Drives local countdown visual display without global state ticks.
+ * Drives live countdown visual display with 1-second ticks
+ * and visibility change re-synchronization.
  */
 
 import { useState, useEffect, useMemo } from 'react';
-import type { ExamRoutineItem, ExamCountdownDetails } from '@/types/exam';
+import type { ExamRoutineItem, ExamSession, ExamCountdownDetails } from '@/types/exam';
 import { calculateExamCountdown } from '@/features/exam/services/examService';
 
 export function useExamCountdown(
   exams: ExamRoutineItem[],
+  sessions: ExamSession[] = [],
   selectedExamId = 'auto'
 ): ExamCountdownDetails {
   const [nowMs, setNowMs] = useState<number>(() => Date.now());
@@ -26,6 +28,7 @@ export function useExamCountdown(
         setNowMs(Date.now());
       }
     };
+
     document.addEventListener('visibilitychange', handleVisibility);
 
     return () => {
@@ -35,6 +38,6 @@ export function useExamCountdown(
   }, []);
 
   return useMemo(() => {
-    return calculateExamCountdown(exams, selectedExamId, nowMs);
-  }, [exams, selectedExamId, nowMs]);
+    return calculateExamCountdown(exams, sessions, selectedExamId, nowMs);
+  }, [exams, sessions, selectedExamId, nowMs]);
 }

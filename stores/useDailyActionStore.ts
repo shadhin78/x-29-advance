@@ -91,8 +91,10 @@ interface DailyActionStoreState {
   deleteHabit: (id: string) => void;
   setDailyState: (id: string, isYes: boolean, dateStr?: string) => void;
   toggleHabit: (id: string, dateStr: string) => void;
-  toggleModalDay: (dateStr: string, id: string) => void;
   setDailyNote: (dateStr: string, note: string) => void;
+  reorderHabits: (habits: DailyHabit[]) => void;
+  resetHabitsToCleanSlate: () => Promise<void>;
+  importFullHabitsState: (habits: DailyHabit[], notes?: Record<string, string>) => Promise<void>;
 }
 
 export const useDailyActionStore = create<DailyActionStoreState>((set, get) => ({
@@ -295,7 +297,7 @@ export const useDailyActionStore = create<DailyActionStoreState>((set, get) => (
     }
   },
 
-  toggleModalDay: (dateStr, id) => {
+  toggleModalDay: (dateStr: string, id: string) => {
     get().toggleHabit(id, dateStr);
   },
 
@@ -309,6 +311,54 @@ export const useDailyActionStore = create<DailyActionStoreState>((set, get) => (
     const user = auth.currentUser;
     if (user) {
       setDoc(doc(db, 'users', user.uid), { dailyNotes: updated, updatedAt: Date.now() }, { merge: true }).catch(() => {});
+    }
+  },
+
+  reorderHabits: (updatedHabits) => {
+    set({ habits: updatedHabits });
+    idbSet(KEY_DAILY_HABITS, updatedHabits);
+
+    const user = auth.currentUser;
+    if (user) {
+      setDoc(
+        doc(db, 'users', user.uid),
+        { habits: updatedHabits, updatedAt: Date.now() },
+        { merge: true }
+      ).catch(() => {});
+    }
+  },
+
+  resetHabitsToCleanSlate: async () => {
+    const { idbDel } = await import('@/lib/storage/indexeddb');
+    await Promise.all([idbDel(KEY_DAILY_HABITS), idbDel(KEY_DAILY_NOTES)]);
+
+    set({ habits: [], dailyNotes: {} });
+
+    const user = auth.currentUser;
+    if (user) {
+      setDoc(
+        doc(db, 'users', user.uid),
+        { habits: [], dailyNotes: {}, updatedAt: Date.now() },
+        { merge: true }
+      ).catch(() => {});
+    }
+  },
+
+  importFullHabitsState: async (habits, notes = {}) => {
+    await Promise.all([
+      idbSet(KEY_DAILY_HABITS, habits),
+      idbSet(KEY_DAILY_NOTES, notes),
+    ]);
+
+    set({ habits, dailyNotes: notes });
+
+    const user = auth.currentUser;
+    if (user) {
+      setDoc(
+        doc(db, 'users', user.uid),
+        { habits, dailyNotes: notes, updatedAt: Date.now() },
+        { merge: true }
+      ).catch(() => {});
     }
   },
 }));

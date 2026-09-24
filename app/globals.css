@@ -16,6 +16,9 @@
 @import "../pages/Daily Schedule/Daily Schedule.css";
 @import "../pages/Pace Management/Pace Management.css";
 @import "../pages/Outcome/Outcome.css";
+@import "../pages/Exam Routine/Exam Routine.css";
+@import "../pages/Master Config/Master Config.css";
+@import "../pages/Analytics/Analytics.css";
 
 @layer base {
   :root {
