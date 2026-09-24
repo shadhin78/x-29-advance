@@ -425,3 +425,22 @@
     - Active YES/NO toggle states: PASS
     - Modals (Analytics, DADB, Targets DB, Edit): PASS
     - Console errors: 0
+
+---
+
+### Milestone: Page-by-Page Migration & Visual Parity: /schedule (STEP 016)
+- **Date**: 2026-09-24
+- **Commit**: `0293379` (`feat(schedule): complete STEP 016 visual and functional parity for /schedule with 24h timeline, active slot countdown, routine sets, and work groups`)
+- **Scope**:
+  - Parity with `pages/Daily Schedule/Daily Schedule.html` and `scheduleRoutine.js`.
+  - 24-hour timeline grid (`#schedule-timeline-grid`) with 24 1-hour slots, rotated starting from customizable day-start hour (`dayStart`).
+  - Active Now card (`#active-now-card`): dynamic current time, active block/item name, countdown clock to slot finish, and next upcoming event preview. Zero drift system clock interval.
+  - Multi-Routine switching (`Routine 1` vs `Routine 2`) with slot counter badges.
+  - Duration summaries by category/work group (`RoutineHoursSummary.tsx`) and allocation list (`RoutineAllocationList.tsx`).
+  - Modals: `ScheduleBlockModal` (add, edit, delete 24h blocks with cascading track/program dropdowns & 8-color palette) and `ScheduleGroupModal` (group management).
+- **Validation**:
+  - `npm run typecheck`: 0 errors.
+  - `node --test tests/schedule-engine.test.mjs`: 9 / 9 passed (100%).
+  - Multi-viewport live browser inspection: Desktop (1280x800) and Mobile (390x844) zero horizontal overflow.
+  - HTTP 200 on `/schedule`.
+- **Result**: STEP 016 is 100% complete and verified. Next step in queue: STEP 017 (/pace).
