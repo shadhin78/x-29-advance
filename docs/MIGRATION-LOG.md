@@ -847,4 +847,44 @@
   - Production build: `npm run build` compiled in 3.6s with 14/14 static pages generated.
 - **Result**: Bundle splitting and client JavaScript reduction successfully achieved. 100% of routes load under 253 KB Gzip. Next step in queue: STEP 026 (Core Web Vitals & Rendering Performance Optimization).
 
+---
+
+### Milestone: Core Web Vitals & Rendering Performance Optimization (LCP < 2.0s, FCP < 1.0s) (STEP 026)
+- **Date**: 2026-09-25
+- **Step**: STEP 026 (Phase 11 / Optimization & Production Hardening)
+- **Scope & Changes**:
+  - **Self-Hosted Font Optimization**:
+    - Replaced external render-blocking Google Fonts `<link rel="stylesheet">` from `fonts.googleapis.com` with Next.js build-time self-hosted fonts (`Inter`, `Outfit`, `JetBrains_Mono`, `Rajdhani`, `Chakra_Petch`) via `next/font/google`.
+    - Applied `display: 'swap'` and exported CSS variables (`--font-inter`, `--font-outfit`, `--font-jetbrains`, `--font-rajdhani`, `--font-chakra`).
+    - Mapped font variables in `css/style.css` with zero Flash of Invisible Text (FOIT) and zero external render-blocking font stylesheet network requests.
+  - **Critical Domain Preconnects**:
+    - Added `<link rel="preconnect">` and `<link rel="dns-prefetch">` for `identitytoolkit.googleapis.com` and `firestore.googleapis.com` in `app/layout.tsx`.
+  - **Asset Payload Optimization**:
+    - Backed up originals to `archive/assets/logo-sticker-original.png` and `archive/assets/x-29-adv-logo-original.jpeg`.
+    - Compressed `public/icons/logo-sticker.png` via `sharp` from **672 KB down to 5.4 KB** (99.2% payload reduction).
+    - Compressed `public/icons/x-29-adv-logo.jpeg` from **88.5 KB down to 2.8 KB**.
+    - Set `unoptimized` flag on static sticker in `app/login/page.tsx` for immediate 0ms-proxy static serving.
+  - **Layout Shift Elimination**:
+    - Enforced fixed dimensions and `min-h-[64px]` on widget headers to maintain zero layout shifts (`CLS = 0.0000`).
+  - **Core Web Vitals Audit Engine (`scripts/audit-web-vitals.mjs`)**:
+    - Implemented native Chrome DevTools Protocol (CDP) WebSocket evaluation engine running against production server (`next start`).
+- **Validation**:
+  - Empirical Real-Browser Core Web Vitals across all 11 application routes:
+    - `/login`: TTFB 52.7ms | FCP 208.0ms | **LCP 232.6ms** (Target < 2000ms: **PASS**) | **CLS 0.0000** (Target 0.00: **PASS**)
+    - `/`: TTFB 3.6ms | FCP 92.0ms | **LCP 92.0ms** (Target < 2000ms: **PASS**) | **CLS 0.0000** (Target 0.00: **PASS**)
+    - `/analytics`: TTFB 15.8ms | FCP 76.0ms | **LCP 76.0ms** (Target < 2000ms: **PASS**) | **CLS 0.0000** (Target 0.00: **PASS**)
+    - `/focus`: TTFB 8.0ms | FCP 48.0ms | **LCP 48.0ms** (Target < 2000ms: **PASS**) | **CLS 0.0000** (Target 0.00: **PASS**)
+    - `/schedule`: TTFB 9.0ms | FCP 44.0ms | **LCP 44.0ms** (Target < 2000ms: **PASS**) | **CLS 0.0000** (Target 0.00: **PASS**)
+    - `/pace`: TTFB 9.1ms | FCP 40.0ms | **LCP 40.0ms** (Target < 2000ms: **PASS**) | **CLS 0.0000** (Target 0.00: **PASS**)
+    - `/daily-actions`: TTFB 8.7ms | FCP 44.0ms | **LCP 44.0ms** (Target < 2000ms: **PASS**) | **CLS 0.0000** (Target 0.00: **PASS**)
+    - `/exam`: TTFB 11.6ms | FCP 44.0ms | **LCP 44.0ms** (Target < 2000ms: **PASS**) | **CLS 0.0000** (Target 0.00: **PASS**)
+    - `/outcome`: TTFB 8.1ms | FCP 52.0ms | **LCP 52.0ms** (Target < 2000ms: **PASS**) | **CLS 0.0000** (Target 0.00: **PASS**)
+    - `/subjects`: TTFB 8.8ms | FCP 56.0ms | **LCP 56.0ms** (Target < 2000ms: **PASS**) | **CLS 0.0000** (Target 0.00: **PASS**)
+    - `/master-config`: TTFB 7.5ms | FCP 48.0ms | **LCP 48.0ms** (Target < 2000ms: **PASS**) | **CLS 0.0000** (Target 0.00: **PASS**)
+  - TypeScript typecheck: `npm run typecheck` passed with 0 errors (`tsc --noEmit`).
+  - Unit test suite: `npm run test:unit` passed 62 / 62 domain tests (100% pass rate).
+  - Integration test suite: `npm test` passed 10 / 10 batch test suites (100% pass rate).
+- **Result**: Core Web Vitals optimization completely verified. FCP is 40–208ms (budget < 1.0s), LCP is 40–232.6ms (budget < 2.0s), CLS is 0.0000. Next step in queue: STEP 027 (Mobile & Android Low-Power Optimization).
+
+
 

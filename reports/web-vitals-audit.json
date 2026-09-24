@@ -1,0 +1,123 @@
+[
+  {
+    "name": "Login Page",
+    "path": "/login",
+    "fcp": 208,
+    "lcp": 232.59999999962747,
+    "cls": 0,
+    "ttfb": 52.69999999925494,
+    "domInteractive": 232.19999999925494,
+    "domContentLoaded": 232.59999999962747,
+    "loadEventEnd": 234.19999999925494
+  },
+  {
+    "name": "Dashboard (/)",
+    "path": "/",
+    "fcp": 92,
+    "lcp": 92,
+    "cls": 0,
+    "ttfb": 3.599999999627471,
+    "domInteractive": 38.59999999962747,
+    "domContentLoaded": 38.59999999962747,
+    "loadEventEnd": 59
+  },
+  {
+    "name": "Analytics",
+    "path": "/analytics",
+    "fcp": 76,
+    "lcp": 76,
+    "cls": 0,
+    "ttfb": 15.799999998882413,
+    "domInteractive": 26.90000000037253,
+    "domContentLoaded": 27,
+    "loadEventEnd": 56.5
+  },
+  {
+    "name": "Focus Studio",
+    "path": "/focus",
+    "fcp": 48,
+    "lcp": 48,
+    "cls": 0,
+    "ttfb": 8,
+    "domInteractive": 14.599999999627471,
+    "domContentLoaded": 14.699999999254942,
+    "loadEventEnd": 31.799999998882413
+  },
+  {
+    "name": "Daily Schedule",
+    "path": "/schedule",
+    "fcp": 44,
+    "lcp": 44,
+    "cls": 0,
+    "ttfb": 9,
+    "domInteractive": 16.09999999962747,
+    "domContentLoaded": 16.09999999962747,
+    "loadEventEnd": 30.09999999962747
+  },
+  {
+    "name": "Pace Management",
+    "path": "/pace",
+    "fcp": 40,
+    "lcp": 40,
+    "cls": 0,
+    "ttfb": 9.099999999627471,
+    "domInteractive": 15.600000001490116,
+    "domContentLoaded": 15.600000001490116,
+    "loadEventEnd": 28.600000001490116
+  },
+  {
+    "name": "Daily Actions",
+    "path": "/daily-actions",
+    "fcp": 44,
+    "lcp": 44,
+    "cls": 0,
+    "ttfb": 8.700000001117587,
+    "domInteractive": 15.800000000745058,
+    "domContentLoaded": 15.800000000745058,
+    "loadEventEnd": 36.30000000074506
+  },
+  {
+    "name": "Exam Routine",
+    "path": "/exam",
+    "fcp": 44,
+    "lcp": 44,
+    "cls": 0,
+    "ttfb": 11.599999999627471,
+    "domInteractive": 19.09999999962747,
+    "domContentLoaded": 19.09999999962747,
+    "loadEventEnd": 38.09999999962747
+  },
+  {
+    "name": "Outcome Studio",
+    "path": "/outcome",
+    "fcp": 52,
+    "lcp": 52,
+    "cls": 0,
+    "ttfb": 8.099999999627471,
+    "domInteractive": 16.299999998882413,
+    "domContentLoaded": 16.299999998882413,
+    "loadEventEnd": 34.69999999925494
+  },
+  {
+    "name": "Subjects",
+    "path": "/subjects",
+    "fcp": 56,
+    "lcp": 56,
+    "cls": 0,
+    "ttfb": 8.800000000745058,
+    "domInteractive": 17.100000001490116,
+    "domContentLoaded": 17.100000001490116,
+    "loadEventEnd": 41.80000000074506
+  },
+  {
+    "name": "Master Config",
+    "path": "/master-config",
+    "fcp": 48,
+    "lcp": 48,
+    "cls": 0,
+    "ttfb": 7.5,
+    "domInteractive": 15.199999999254942,
+    "domContentLoaded": 15.300000000745058,
+    "loadEventEnd": 31.300000000745058
+  }
+]

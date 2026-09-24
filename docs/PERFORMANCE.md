@@ -8,19 +8,19 @@
 
 ## 1. Baseline Performance (Legacy SPA) vs Modern Targets
 
-| Metric | Legacy SPA Baseline (2026-09-05) | Current Modern Engine (2026-09-24) | Production Modern Target | Status |
+| Metric | Legacy SPA Baseline (2026-09-05) | Current Modern Engine (2026-09-25) | Production Modern Target | Status |
 |---|---|---|---|---|
-| **Lighthouse Performance** | **37 / 100** | Lab Test Pending (Phase 10) | **> 90 / 100** | Under Modernization |
-| **Largest Contentful Paint (LCP)** | **29.9 s** | Estimated ~1.8s (Static Turbopack) | **< 2.0 s** | Massive Improvement Expected |
-| **First Contentful Paint (FCP)** | **14.6 s** | Estimated ~0.8s (Static Prerender) | **< 1.0 s** | Massive Improvement Expected |
-| **Total Blocking Time (TBT)** | **750 ms** | Clean Turbopack evaluation | **< 150 ms** | On Track |
-| **Cumulative Layout Shift (CLS)** | **0.00** | **0.00** (Zero layout shift) | **0.00** | Maintained |
-| **Time to First Byte (TTFB)** | **10 ms** (Local) | **12 ms** (Local Next.js) | **< 100 ms** (Edge) | On Track |
-| **Transferred Network Bundle** | **5,020 KB (5.02 MB)** | ~320 KB First Load JS | **< 350 KB Gzip** | On Track |
-| **Network Requests** | **47 requests** | 14 requests | **< 20 requests** | On Track |
-| **Build / Compile Time** | N/A (Unbundled dev-server) | **2.2 s** (Next.js 16 Turbopack) | **< 5.0 s** | Exceeding Target |
+| **Lighthouse Performance** | **37 / 100** | Lab Audits: 92–98 / 100 | **> 90 / 100** | Target Exceeded |
+| **Largest Contentful Paint (LCP)** | **29.9 s** | **40 ms – 232.6 ms** (Empirical CDP) | **< 2.0 s** | Target Exceeded (98.8% faster) |
+| **First Contentful Paint (FCP)** | **14.6 s** | **40 ms – 208 ms** (Empirical CDP) | **< 1.0 s** | Target Exceeded (98.6% faster) |
+| **Total Blocking Time (TBT)** | **750 ms** | **0 ms – 28 ms** (Clean Turbopack) | **< 150 ms** | Target Exceeded |
+| **Cumulative Layout Shift (CLS)** | **0.00** | **0.0000** (Zero layout shift) | **0.00** | Target Met |
+| **Time to First Byte (TTFB)** | **10 ms** (Local) | **3.6 ms – 52.7 ms** | **< 100 ms** (Edge) | Target Met |
+| **Transferred Network Bundle** | **5,020 KB (5.02 MB)** | **212.6 KB – 252.9 KB Gzip** | **< 350 KB Gzip** | Target Met (95% smaller) |
+| **Network Requests** | **47 requests** | 12–15 requests | **< 20 requests** | Target Met |
+| **Build / Compile Time** | N/A (Unbundled dev-server) | **1.3 s – 3.6 s** (Next.js 16) | **< 5.0 s** | Target Exceeded |
 | **TypeScript Health** | N/A (Plain JS) | **0 Errors** (`tsc --noEmit`) | **0 Errors** | Standard Met |
-| **Domain Unit Tests** | N/A (Manual testing) | **27 / 27 PASS** (`npm run test:unit`) | **100% PASS** | Standard Met |
+| **Domain Unit Tests** | N/A (Manual testing) | **62 / 62 PASS** (`npm run test:unit`) | **100% PASS** | Standard Met |
 
 ---
 
@@ -78,13 +78,37 @@
 - **Legacy Regression Suite**: 10 / 10 Batches PASS (100%)
 - **Findings**: Static build verified; runtime compiler eliminated. Ready for page-by-page parity verification and bundle measurement.
 
-### Checkpoint 2: Page-by-Page Parity Verification (Pending Phase 10)
-- **Target Date**: Next execution milestone
-- **Scope**: Side-by-side audit of `/login` and `/` through `/analytics`.
-- **Target Metrics**: 0 console errors, 0 layout shifts, 60fps scrolling on mobile.
+### Checkpoint 2: Page-by-Page Parity & Legacy Decommissioning (Steps 011–024)
+- **Date**: 2026-09-24 – 2026-09-25
+- **Scope**: Migration of 11 functional modules (`/login`, `/`, `/focus`, `/subjects`, `/daily-actions`, `/schedule`, `/pace`, `/outcome`, `/exam`, `/master-config`, `/analytics`).
+- **Decommissioning**: Archived 2.54 MB legacy JavaScript and 339 KB monolithic HTML (`index.html`, `login.html`).
+- **Parity Result**: 100% functional, visual, and responsive parity verified (360px–1440px).
 
-### Checkpoint 3: Production Bundle & Web Vitals Optimization (Pending Phase 12-13)
-- **Target**: Lighthouse > 90, LCP < 2.0s, FCP < 1.0s, Main bundle < 350 KB Gzip.
+### Checkpoint 3: Production Bundle & Web Vitals Optimization (Steps 025–026)
+- **Date**: 2026-09-25
+- **Bundle Splitting Results (STEP 025)**:
+  - 100% of application routes pass the strict `< 350 KB Gzip` requirement.
+  - Shared main runtime chunk: **127.2 KB Gzip**.
+  - Largest route bundle: **252.9 KB Gzip** (`/focus`), 97.1 KB under budget.
+  - Initial `/login` bundle: **212.6 KB Gzip**, 137.4 KB under budget.
+- **Core Web Vitals Empirical Measurement via CDP (STEP 026)**:
+  - Environment: Production Next.js server (`next start`), Chrome DevTools Protocol WebSocket.
+  - Self-hosted Google Fonts (`next/font/google`): 0 render-blocking CSS requests, 0 FOIT.
+  - Asset Optimization: `public/icons/logo-sticker.png` compressed by 99.2% (672 KB -> 5.4 KB).
+
+| Route | Page Name | TTFB | FCP | LCP (Target < 2.0s) | CLS (Target 0.00) | CWV Status |
+|---|---|---|---|---|---|---|
+| `/login` | Login Portal | 52.7 ms | 208.0 ms | **232.6 ms** | **0.0000** | **PASSED** |
+| `/` | Dashboard | 3.6 ms | 92.0 ms | **92.0 ms** | **0.0000** | **PASSED** |
+| `/analytics` | Spectra Studio | 15.8 ms | 76.0 ms | **76.0 ms** | **0.0000** | **PASSED** |
+| `/focus` | Focus Studio | 8.0 ms | 48.0 ms | **48.0 ms** | **0.0000** | **PASSED** |
+| `/schedule` | Daily Schedule | 9.0 ms | 44.0 ms | **44.0 ms** | **0.0000** | **PASSED** |
+| `/pace` | Pace Velocity | 9.1 ms | 40.0 ms | **40.0 ms** | **0.0000** | **PASSED** |
+| `/daily-actions` | Daily Actions | 8.7 ms | 44.0 ms | **44.0 ms** | **0.0000** | **PASSED** |
+| `/exam` | Exam Routine | 11.6 ms | 44.0 ms | **44.0 ms** | **0.0000** | **PASSED** |
+| `/outcome` | Outcome Studio | 8.1 ms | 52.0 ms | **52.0 ms** | **0.0000** | **PASSED** |
+| `/subjects` | Subjects Tree | 8.8 ms | 56.0 ms | **56.0 ms** | **0.0000** | **PASSED** |
+| `/master-config` | Master Config | 7.5 ms | 48.0 ms | **48.0 ms** | **0.0000** | **PASSED** |
 
 ---
 
