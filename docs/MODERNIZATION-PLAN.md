@@ -25,7 +25,7 @@ PAGE-BY-PAGE PARITY VERIFICATION (IN PROGRESS)
 [x] STEP 011 — Page-by-Page Migration & Visual Parity: /login
 [x] STEP 012 — Page-by-Page Migration & Visual Parity: / (Dashboard Overview & KPI Cards)
 [x] STEP 013 — Page-by-Page Migration & Visual Parity: /focus (Timer & Chronograph Dial)
-[ ] STEP 014 — Page-by-Page Migration & Visual Parity: /subjects (Taxonomy Tree & Chapter Checklist)
+[x] STEP 014 — Page-by-Page Migration & Visual Parity: /subjects (Taxonomy Tree & Chapter Checklist)
 [ ] STEP 015 — Page-by-Page Migration & Visual Parity: /daily-actions & Monthly Target Setup
 [ ] STEP 016 — Page-by-Page Migration & Visual Parity: /schedule (24h Daily Timeline & Active Slot)
 [ ] STEP 017 — Page-by-Page Migration & Visual Parity: /pace (Velocity Metrics & Completion Forecasts)
@@ -273,7 +273,7 @@ OPTIMIZATION & PRODUCTION HARDENING (PENDING)
 - **Risk**: Slow rendering when expanding large subject lists with hundreds of chapters.
 - **Validation method**: Toggle chapters across multiple subjects; verify state and cloud persistence.
 - **Completion criteria**: Syllabus tree matches legacy visually; chapter checklist modal operates flawlessly.
-- **Status**: **NOT STARTED**
+- **Status**: **COMPLETED**
 
 ---
 

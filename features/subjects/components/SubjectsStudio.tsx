@@ -3,208 +3,252 @@
 /**
  * X-29 Subjects Studio (features/subjects/components/SubjectsStudio.tsx)
  * 
- * Master subjects studio view with curriculum taxonomy browsing,
- * chapter completion tracking, and search filtering.
+ * Master curriculum execution and syllabus tracking view with 100% parity
+ * to legacy pages/Subjects/Subjects.html and Subjects.js.
+ * 
+ * Features:
+ * 1. Global Overall Completion (#completion-stats-section) with Database button and circular Syllabus gauge
+ * 2. Expandable Subject Progress (#sidebar-progress-section) with track & program mini bars
+ * 3. Filter Tasks by Subject (#subject-navigation-section) with All Tasks, Revise Subject, and pill filters
+ * 4. Expandable Subject Cards (#dashboard-content -> #task-list) with 4 pace cards & chapter task checkboxes
+ * 5. Modals: SubjectTimeModal, SubjectEditModal, RevisionModal, SingleSubjectTrendModal, GlobalChaptersModal
  */
 
 import React, { useState, useMemo, useEffect } from 'react';
-import type { NormalizedSubject } from '@/types/taxonomy';
 import { useTaxonomyStore } from '@/stores/useTaxonomyStore';
 import { useTaskStore } from '@/stores/useTaskStore';
-import { calculateSubjectProgress } from '@/features/tasks/services/taskService';
-import { SubjectCard } from './SubjectCard';
-import { ChapterChecklistModal } from './ChapterChecklistModal';
-import { BookOpen, Search, CheckCircle2, Award } from 'lucide-react';
+import { usePaceStore } from '@/stores/usePaceStore';
+import { getCompletedChaptersForSubject } from '@/features/tasks/services/taskService';
+import { GlobalCompletionHeader } from './GlobalCompletionHeader';
+import { SubjectProgressAccordion } from './SubjectProgressAccordion';
+import { SubjectFilterNav } from './SubjectFilterNav';
+import { SubjectTaskList } from './SubjectTaskList';
+import { SubjectTimeModal } from './SubjectTimeModal';
+import { SubjectEditModal } from './SubjectEditModal';
+import { RevisionModal } from './RevisionModal';
+import { SingleSubjectTrendModal } from './SingleSubjectTrendModal';
+import { GlobalChaptersModal } from './GlobalChaptersModal';
 
 export const SubjectsStudio: React.FC = () => {
-  const { tracks, isInitialized: taxInit, initFromStorage: initTax, getNormalizedSubjects } = useTaxonomyStore();
-  const { tasks, isInitialized: taskInit, initFromStorage: initTasks } = useTaskStore();
+  const {
+    tracks,
+    syllabusStructure,
+    customPrograms,
+    passedItems,
+    subjectTimeLinks,
+    revisionData,
+    isInitialized: taxInit,
+    initFromStorage: initTax,
+    setSubjectTimeLink,
+    toggleRevisionSubject,
+    toggleRevisionChapter,
+    updateSubject,
+    deleteSubject,
+  } = useTaxonomyStore();
 
-  const [selectedTrack, setSelectedTrack] = useState<string>('all');
-  const [searchQuery, setSearchQuery] = useState<string>('');
-  const [activeSubjectForModal, setActiveSubjectForModal] = useState<NormalizedSubject | null>(null);
-  const [modalOpen, setModalOpen] = useState<boolean>(false);
+  const {
+    tasks,
+    isInitialized: taskInit,
+    initFromStorage: initTasks,
+    toggleChapter,
+  } = useTaskStore();
+
+  const {
+    paceGoals,
+    isInitialized: paceInit,
+    initFromStorage: initPace,
+  } = usePaceStore();
+
+  // Active filter state: 'All', or program name, or subject name
+  const [currentFilter, setCurrentFilter] = useState<string>('All');
+
+  // Modal states
+  const [syllabusModalOpen, setSyllabusModalOpen] = useState<boolean>(false);
+  const [revisionModalOpen, setRevisionModalOpen] = useState<boolean>(false);
+  const [timeModalSubject, setTimeModalSubject] = useState<string | null>(null);
+  const [editModalSubject, setEditModalSubject] = useState<{
+    subject: string;
+    program: string;
+    trackId: string;
+  } | null>(null);
+  const [trendModalSubject, setTrendModalSubject] = useState<string | null>(null);
 
   useEffect(() => {
     if (!taxInit) initTax();
     if (!taskInit) initTasks();
-  }, [taxInit, taskInit, initTax, initTasks]);
+    if (!paceInit) initPace();
+  }, [taxInit, taskInit, paceInit, initTax, initTasks, initPace]);
 
-  const allSubjects = useMemo(() => {
-    return getNormalizedSubjects();
-  }, [getNormalizedSubjects]);
-
-  // Filter subjects by track and search
-  const filteredSubjects = useMemo(() => {
-    return allSubjects.filter((s) => {
-      const matchTrack = selectedTrack === 'all' || s.trackId === selectedTrack;
-      const matchSearch =
-        !searchQuery ||
-        s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        s.program.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchTrack && matchSearch;
+  // Precompute completed chapters map per subject
+  const completedChaptersMap = useMemo(() => {
+    const map: Record<string, Set<number>> = {};
+    tracks.forEach((trackObj) => {
+      const items = syllabusStructure[trackObj.id] || [];
+      items.forEach((item) => {
+        map[item.subject] = getCompletedChaptersForSubject(tasks, item.subject);
+      });
     });
-  }, [allSubjects, selectedTrack, searchQuery]);
+    return map;
+  }, [tracks, syllabusStructure, tasks]);
 
-  // Compute aggregate stats
-  const overallStats = useMemo(() => {
-    let totalChapters = 0;
-    let completedChapters = 0;
-    let completedSubjectsCount = 0;
+  // Aggregate subject stats for progress bars
+  const subjectStats = useMemo(() => {
+    const stats: Record<string, { totalChapters: number; completedCount: number }> = {};
+    tracks.forEach((trackObj) => {
+      const items = syllabusStructure[trackObj.id] || [];
+      items.forEach((item) => {
+        const isPassed =
+          (passedItems.subjects && passedItems.subjects.includes(item.subject)) ||
+          (passedItems.programs && passedItems.programs.includes(item.program));
+        const completedCount = isPassed
+          ? item.chapters
+          : completedChaptersMap[item.subject]?.size || 0;
 
-    allSubjects.forEach((s) => {
-      totalChapters += s.chaptersCount;
-      const p = calculateSubjectProgress(tasks, s.name, s.chaptersCount);
-      completedChapters += p.completedCount;
-      if (p.status === 'completed') completedSubjectsCount++;
+        stats[item.subject] = {
+          totalChapters: item.chapters || 0,
+          completedCount,
+        };
+      });
+    });
+    return stats;
+  }, [tracks, syllabusStructure, passedItems, completedChaptersMap]);
+
+  // Global completion statistics
+  const { totalChapters, completedChapters, globalPercent } = useMemo(() => {
+    let total = 0;
+    let completed = 0;
+
+    Object.values(subjectStats).forEach((s) => {
+      total += s.totalChapters;
+      completed += s.completedCount;
     });
 
-    const percentage = totalChapters > 0 ? Math.round((completedChapters / totalChapters) * 100) : 0;
+    const percent = total > 0 ? Math.min(100, Math.round((completed / total) * 100)) : 0;
     return {
-      totalSubjects: allSubjects.length,
-      completedSubjectsCount,
-      totalChapters,
-      completedChapters,
-      percentage,
+      totalChapters: total,
+      completedChapters: completed,
+      globalPercent: percent,
     };
-  }, [allSubjects, tasks]);
+  }, [subjectStats]);
 
-  const handleOpenChecklist = (subject: NormalizedSubject) => {
-    setActiveSubjectForModal(subject);
-    setModalOpen(true);
-  };
+  const activeTrendStats = useMemo(() => {
+    if (!trendModalSubject) return { total: 0, completed: 0 };
+    const stat = subjectStats[trendModalSubject] || { totalChapters: 0, completedCount: 0 };
+    return { total: stat.totalChapters, completed: stat.completedCount };
+  }, [trendModalSubject, subjectStats]);
 
   return (
-    <div className="space-y-6 md:space-y-8 animate-page-enter">
-      {/* Overview Metric Banner */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <div className="glass-card rounded-3xl p-4 sm:p-5 border border-slate-800/80 flex items-center justify-between">
-          <div>
-            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-1">
-              Total Subjects
-            </span>
-            <p className="text-2xl sm:text-3xl font-black text-white font-mono">
-              {overallStats.totalSubjects}
-            </p>
-          </div>
-          <div className="p-3 bg-blue-500/10 text-blue-400 rounded-2xl border border-blue-500/20">
-            <BookOpen className="w-5 h-5" />
-          </div>
-        </div>
+    <div id="page-subjects" className="space-y-6 md:space-y-8 animate-page-enter w-full pb-12">
+      {/* 1. Global Overall Completion (#completion-stats-section) */}
+      <GlobalCompletionHeader
+        totalChapters={totalChapters}
+        completedChapters={completedChapters}
+        globalPercent={globalPercent}
+        onOpenSyllabusModal={() => setSyllabusModalOpen(true)}
+      />
 
-        <div className="glass-card rounded-3xl p-4 sm:p-5 border border-slate-800/80 flex items-center justify-between">
-          <div>
-            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-1">
-              Total Chapters
-            </span>
-            <p className="text-2xl sm:text-3xl font-black text-white font-mono">
-              {overallStats.totalChapters}
-            </p>
-          </div>
-          <div className="p-3 bg-indigo-500/10 text-indigo-400 rounded-2xl border border-indigo-500/20">
-            <BookOpen className="w-5 h-5" />
-          </div>
-        </div>
+      {/* 2. Expandable Subject Progress (#sidebar-progress-section) */}
+      <SubjectProgressAccordion
+        tracks={tracks}
+        syllabusStructure={syllabusStructure}
+        customPrograms={customPrograms}
+        subjectStats={subjectStats}
+      />
 
-        <div className="glass-card rounded-3xl p-4 sm:p-5 border border-slate-800/80 flex items-center justify-between">
-          <div>
-            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-1">
-              Completed Chapters
-            </span>
-            <p className="text-2xl sm:text-3xl font-black text-emerald-400 font-mono">
-              {overallStats.completedChapters}
-            </p>
-          </div>
-          <div className="p-3 bg-emerald-500/10 text-emerald-400 rounded-2xl border border-emerald-500/20">
-            <CheckCircle2 className="w-5 h-5" />
-          </div>
-        </div>
+      {/* 3. Filter Tasks by Subject (#subject-navigation-section) */}
+      <SubjectFilterNav
+        tracks={tracks}
+        syllabusStructure={syllabusStructure}
+        customPrograms={customPrograms}
+        currentFilter={currentFilter}
+        onSelectFilter={setCurrentFilter}
+        onOpenRevisionModal={() => setRevisionModalOpen(true)}
+      />
 
-        <div className="glass-card rounded-3xl p-4 sm:p-5 border border-slate-800/80 flex items-center justify-between">
-          <div>
-            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-1">
-              Syllabus Coverage
-            </span>
-            <p className="text-2xl sm:text-3xl font-black text-blue-400 font-mono">
-              {overallStats.percentage}%
-            </p>
-          </div>
-          <div className="p-3 bg-amber-500/10 text-amber-400 rounded-2xl border border-amber-500/20">
-            <Award className="w-5 h-5" />
-          </div>
-        </div>
-      </div>
+      {/* 4. Subject Task List (#dashboard-content -> #task-list) */}
+      <SubjectTaskList
+        tracks={tracks}
+        syllabusStructure={syllabusStructure}
+        customPrograms={customPrograms}
+        passedItems={passedItems}
+        subjectTimeLinks={subjectTimeLinks}
+        revisionData={revisionData}
+        paceGoals={paceGoals}
+        completedChaptersMap={completedChaptersMap}
+        currentFilter={currentFilter}
+        onToggleChapter={toggleChapter}
+        onOpenTimeModal={(sub) => setTimeModalSubject(sub)}
+        onOpenEditModal={(sub, prog, track) =>
+          setEditModalSubject({ subject: sub, program: prog, trackId: track })
+        }
+        onOpenTrendModal={(sub) => setTrendModalSubject(sub)}
+      />
 
-      {/* Filter & Search Bar */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-        {/* Track Segmented Tabs */}
-        <div className="flex items-center gap-1.5 bg-slate-950/80 p-1 rounded-2xl border border-slate-800/80 overflow-x-auto custom-scrollbar">
-          <button
-            type="button"
-            onClick={() => setSelectedTrack('all')}
-            className={`px-3 sm:px-4 py-2 text-xs font-black uppercase tracking-wider rounded-xl transition-all whitespace-nowrap ${
-              selectedTrack === 'all'
-                ? 'bg-blue-600 text-white shadow-md'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
-            }`}
-          >
-            All Tracks
-          </button>
-          {tracks.map((t) => (
-            <button
-              key={t.id}
-              type="button"
-              onClick={() => setSelectedTrack(t.id)}
-              className={`px-3 sm:px-4 py-2 text-xs font-black uppercase tracking-wider rounded-xl transition-all whitespace-nowrap ${
-                selectedTrack === t.id
-                  ? 'bg-blue-600 text-white shadow-md'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
-              }`}
-            >
-              {t.name}
-            </button>
-          ))}
-        </div>
+      {/* Modals */}
+      {/* Time Goal Setup Modal */}
+      <SubjectTimeModal
+        subject={timeModalSubject}
+        open={!!timeModalSubject}
+        onOpenChange={(open) => {
+          if (!open) setTimeModalSubject(null);
+        }}
+        currentLink={timeModalSubject ? subjectTimeLinks[timeModalSubject] : undefined}
+        paceGoals={paceGoals}
+        onSave={setSubjectTimeLink}
+      />
 
-        {/* Search Input */}
-        <div className="relative min-w-[220px]">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-          <input
-            type="text"
-            placeholder="Search subjects..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-slate-950 border border-slate-800 rounded-2xl pl-10 pr-4 py-2 text-xs text-white placeholder:text-slate-500 focus:ring-2 focus:ring-blue-500 outline-none h-[42px]"
-          />
-        </div>
-      </div>
+      {/* Subject Edit Modal */}
+      <SubjectEditModal
+        subject={editModalSubject?.subject ?? null}
+        currentProgram={editModalSubject?.program ?? ''}
+        currentTrackId={editModalSubject?.trackId ?? ''}
+        open={!!editModalSubject}
+        onOpenChange={(open) => {
+          if (!open) setEditModalSubject(null);
+        }}
+        tracks={tracks}
+        customPrograms={customPrograms}
+        onSave={(oldName, newName, trackId, prog) => {
+          updateSubject(trackId, oldName, { subject: newName, program: prog });
+        }}
+        onDelete={(trackId, sub) => {
+          deleteSubject(trackId, sub);
+        }}
+      />
 
-      {/* Subjects Grid */}
-      {filteredSubjects.length === 0 ? (
-        <div className="py-16 text-center text-slate-400 text-xs font-bold uppercase tracking-wider border border-dashed border-slate-800 rounded-3xl">
-          No subjects found matching your criteria.
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
-          {filteredSubjects.map((subject) => {
-            const progress = calculateSubjectProgress(tasks, subject.name, subject.chaptersCount);
-            return (
-              <SubjectCard
-                key={subject.id}
-                subject={subject}
-                progress={progress}
-                onOpenChecklist={handleOpenChecklist}
-              />
-            );
-          })}
-        </div>
-      )}
+      {/* Revision Modal */}
+      <RevisionModal
+        open={revisionModalOpen}
+        onOpenChange={setRevisionModalOpen}
+        tracks={tracks}
+        syllabusStructure={syllabusStructure}
+        revisionData={revisionData}
+        onToggleRevisionSubject={toggleRevisionSubject}
+        onToggleRevisionChapter={toggleRevisionChapter}
+      />
 
-      {/* Chapter Checklist Modal */}
-      <ChapterChecklistModal
-        subject={activeSubjectForModal}
-        open={modalOpen}
-        onOpenChange={setModalOpen}
+      {/* Single Subject Trend Modal */}
+      <SingleSubjectTrendModal
+        subject={trendModalSubject}
+        open={!!trendModalSubject}
+        onOpenChange={(open) => {
+          if (!open) setTrendModalSubject(null);
+        }}
+        totalChapters={activeTrendStats.total}
+        completedChapters={activeTrendStats.completed}
+      />
+
+      {/* Global Chapters Breakdown Modal */}
+      <GlobalChaptersModal
+        open={syllabusModalOpen}
+        onOpenChange={setSyllabusModalOpen}
+        tracks={tracks}
+        syllabusStructure={syllabusStructure}
+        completedChaptersMap={completedChaptersMap}
+        onSelectSubjectFilter={(sub) => {
+          setCurrentFilter(sub);
+          setSyllabusModalOpen(false);
+        }}
       />
     </div>
   );

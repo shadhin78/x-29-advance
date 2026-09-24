@@ -55,3 +55,15 @@ export interface PassedItemsState {
   programs: string[];
   subjects: string[];
 }
+
+export interface SubjectTimeLink {
+  type: 'date' | 'goal';
+  startDate?: string;
+  date?: string;
+  id?: string;
+}
+
+export interface RevisionDataState {
+  active: string[];
+  progress: Record<string, Record<number, boolean>>;
+}

@@ -14,6 +14,8 @@ import type {
   CustomProgramsMap,
   NormalizedSubject,
   PassedItemsState,
+  SubjectTimeLink,
+  RevisionDataState,
 } from '@/types/taxonomy';
 import {
   DEFAULT_TRACKS,
@@ -31,6 +33,8 @@ const KEY_TAXONOMY_SYLLABUS = 'x29_taxonomy_syllabus';
 const KEY_TAXONOMY_PROGRAMS = 'x29_taxonomy_custom_programs';
 const KEY_PASSED_ITEMS = 'x29_taxonomy_passed_items';
 const KEY_SUBJECT_COLORS = 'x29_taxonomy_subject_colors';
+const KEY_SUBJECT_TIME_LINKS = 'x29_taxonomy_subject_time_links';
+const KEY_REVISION_DATA = 'x29_taxonomy_revision_data';
 
 interface TaxonomyStoreState {
   tracks: Track[];
@@ -38,6 +42,8 @@ interface TaxonomyStoreState {
   customPrograms: CustomProgramsMap;
   passedItems: PassedItemsState;
   subjectColors: Record<string, string>;
+  subjectTimeLinks: Record<string, SubjectTimeLink>;
+  revisionData: RevisionDataState;
   isInitialized: boolean;
 
   // Actions
@@ -51,6 +57,9 @@ interface TaxonomyStoreState {
   toggleSubjectPassed: (subjectName: string) => void;
   toggleProgramPassed: (programName: string) => void;
   setSubjectColor: (subjectName: string, colorHex: string) => void;
+  setSubjectTimeLink: (subject: string, link: SubjectTimeLink | null) => void;
+  toggleRevisionSubject: (subject: string) => void;
+  toggleRevisionChapter: (subject: string, chapter: number, completed: boolean) => void;
   addTrack: (track: Track) => void;
   updateTrack: (trackId: string, updates: Partial<Track>) => void;
   deleteTrack: (trackId: string) => void;
@@ -63,6 +72,8 @@ export const useTaxonomyStore = create<TaxonomyStoreState>((set, get) => ({
   customPrograms: DEFAULT_CUSTOM_PROGRAMS,
   passedItems: { programs: [], subjects: [] },
   subjectColors: {},
+  subjectTimeLinks: {},
+  revisionData: { active: [], progress: {} },
   isInitialized: false,
 
   initFromStorage: async () => {
@@ -73,14 +84,18 @@ export const useTaxonomyStore = create<TaxonomyStoreState>((set, get) => ({
     let customPrograms = DEFAULT_CUSTOM_PROGRAMS;
     let passed: PassedItemsState = { programs: [], subjects: [] };
     let colors: Record<string, string> = {};
+    let timeLinks: Record<string, SubjectTimeLink> = {};
+    let revision: RevisionDataState = { active: [], progress: {} };
 
     try {
-      const [idbTracks, idbSyllabus, idbPrograms, idbPassed, idbColors] = await Promise.all([
+      const [idbTracks, idbSyllabus, idbPrograms, idbPassed, idbColors, idbTimeLinks, idbRevision] = await Promise.all([
         idbGet<Track[]>(KEY_TAXONOMY_TRACKS),
         idbGet<SyllabusStructure>(KEY_TAXONOMY_SYLLABUS),
         idbGet<CustomProgramsMap>(KEY_TAXONOMY_PROGRAMS),
         idbGet<PassedItemsState>(KEY_PASSED_ITEMS),
         idbGet<Record<string, string>>(KEY_SUBJECT_COLORS),
+        idbGet<Record<string, SubjectTimeLink>>(KEY_SUBJECT_TIME_LINKS),
+        idbGet<RevisionDataState>(KEY_REVISION_DATA),
       ]);
 
       if (idbTracks && idbTracks.length > 0) tracks = idbTracks;
@@ -88,6 +103,8 @@ export const useTaxonomyStore = create<TaxonomyStoreState>((set, get) => ({
       if (idbPrograms) customPrograms = idbPrograms;
       if (idbPassed) passed = idbPassed;
       if (idbColors) colors = idbColors;
+      if (idbTimeLinks) timeLinks = idbTimeLinks;
+      if (idbRevision) revision = idbRevision;
 
       // Check legacy local storage fallback if idb is empty
       if (!idbTracks && typeof window !== 'undefined') {
@@ -115,6 +132,14 @@ export const useTaxonomyStore = create<TaxonomyStoreState>((set, get) => ({
               colors = parsed.subjectColors;
               await idbSet(KEY_SUBJECT_COLORS, colors);
             }
+            if (parsed.subjectTimeLinks) {
+              timeLinks = parsed.subjectTimeLinks;
+              await idbSet(KEY_SUBJECT_TIME_LINKS, timeLinks);
+            }
+            if (parsed.revisionData) {
+              revision = parsed.revisionData;
+              await idbSet(KEY_REVISION_DATA, revision);
+            }
           } catch {}
         }
       }
@@ -128,6 +153,8 @@ export const useTaxonomyStore = create<TaxonomyStoreState>((set, get) => ({
       customPrograms,
       passedItems: passed,
       subjectColors: colors,
+      subjectTimeLinks: timeLinks,
+      revisionData: revision,
       isInitialized: true,
     });
   },
@@ -265,6 +292,60 @@ export const useTaxonomyStore = create<TaxonomyStoreState>((set, get) => ({
     const user = auth.currentUser;
     if (user) {
       setDoc(doc(db, 'users', user.uid), { subjectColors: updatedColors, updatedAt: Date.now() }, { merge: true }).catch(() => {});
+    }
+  },
+
+  setSubjectTimeLink: (subject: string, link: SubjectTimeLink | null) => {
+    const { subjectTimeLinks } = get();
+    const updated = { ...subjectTimeLinks };
+    if (!link) {
+      delete updated[subject];
+    } else {
+      updated[subject] = link;
+    }
+    set({ subjectTimeLinks: updated });
+    idbSet(KEY_SUBJECT_TIME_LINKS, updated);
+    const user = auth.currentUser;
+    if (user) {
+      setDoc(doc(db, 'users', user.uid), { subjectTimeLinks: updated, updatedAt: Date.now() }, { merge: true }).catch(() => {});
+    }
+  },
+
+  toggleRevisionSubject: (subject: string) => {
+    const { revisionData } = get();
+    const active = revisionData.active || [];
+    const isActive = active.includes(subject);
+    const nextActive = isActive ? active.filter((s) => s !== subject) : [...active, subject];
+    const updated: RevisionDataState = {
+      ...revisionData,
+      active: nextActive,
+      progress: revisionData.progress || {},
+    };
+    set({ revisionData: updated });
+    idbSet(KEY_REVISION_DATA, updated);
+    const user = auth.currentUser;
+    if (user) {
+      setDoc(doc(db, 'users', user.uid), { revisionData: updated, updatedAt: Date.now() }, { merge: true }).catch(() => {});
+    }
+  },
+
+  toggleRevisionChapter: (subject: string, chapter: number, completed: boolean) => {
+    const { revisionData } = get();
+    const currentProg = revisionData.progress || {};
+    const subProg = { ...(currentProg[subject] || {}) };
+    subProg[chapter] = completed;
+    const updated: RevisionDataState = {
+      ...revisionData,
+      progress: {
+        ...currentProg,
+        [subject]: subProg,
+      },
+    };
+    set({ revisionData: updated });
+    idbSet(KEY_REVISION_DATA, updated);
+    const user = auth.currentUser;
+    if (user) {
+      setDoc(doc(db, 'users', user.uid), { revisionData: updated, updatedAt: Date.now() }, { merge: true }).catch(() => {});
     }
   },
 

@@ -2,6 +2,7 @@
 @import "../css/style.css";
 @import "../pages/Dashboard/Dashboard.css";
 @import "../pages/Focus/Focus.css";
+@import "../pages/Subjects/Subjects.css";
 
 @layer base {
   :root {

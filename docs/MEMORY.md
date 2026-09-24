@@ -10,9 +10,9 @@
 ---
 
 ## 1. Current Migration Status
-- **Current Step**: **STEP 013 — Page-by-Page Migration & Visual Parity: /focus (Timer & Chronograph Dial) COMPLETED & VERIFIED**
-- **Next Step in Queue**: **STEP 014 — Page-by-Page Migration & Visual Parity: /subjects (Taxonomy Tree & Chapter Checklist) (AWAITING USER COMMAND TO PROCEED)**
-- **Previous Completed Step**: **STEP 012 — Page-by-Page Migration & Visual Parity: / (Dashboard Overview & KPI Cards)**
+- **Current Step**: **STEP 014 — Page-by-Page Migration & Visual Parity: /subjects (Taxonomy Tree & Chapter Checklist) COMPLETED & VERIFIED**
+- **Next Step in Queue**: **STEP 015 — Page-by-Page Migration & Visual Parity: /daily-actions & Monthly Target Setup (AWAITING USER COMMAND TO PROCEED)**
+- **Previous Completed Step**: **STEP 013 — Page-by-Page Migration & Visual Parity: /focus (Timer & Chronograph Dial)**
 - **Completed Steps**:
   - STEP 001 — Full Project Architecture Audit & Inventory
   - STEP 002 — Baseline Performance & Disaster Recovery Safeguards
@@ -27,6 +27,7 @@
   - STEP 011 — Page-by-Page Migration & Visual Parity: /login
   - STEP 012 — Page-by-Page Migration & Visual Parity: / (Dashboard Overview & KPI Cards)
   - STEP 013 — Page-by-Page Migration & Visual Parity: /focus (Timer & Chronograph Dial)
+  - STEP 014 — Page-by-Page Migration & Visual Parity: /subjects (Taxonomy Tree & Chapter Checklist)
 
 ---
 
@@ -49,6 +50,10 @@
    - Imported `pages/Focus/Focus.css` directly in `app/globals.css` ensuring `--chrono-main-hand`, `--chrono-subdial-hand`, `.timer-fullscreen` keyframe animations, and custom scrollbars render natively.
    - Preserved exact legacy element IDs, CSS variables, raw SVGs (`stroke-width="2.5"`), split digital milliseconds timer, text-only buttons, safety confirmation modal for RESET, and Active Panel top 2-column header (mode switcher + subject dropdown & fullscreen toggle).
    - Fullscreen mode toggles `.timer-fullscreen` hardware-accelerated overlay and `timer-fullscreen-active` body scroll lock.
+6. **Subjects Studio & Taxonomy Parity**:
+   - Imported `pages/Subjects/Subjects.css` directly in `app/globals.css` ensuring `.animate-page-enter`, `.subjects-slide-up`, `.task-checkbox`, and custom scrollbars render natively.
+   - Preserved exact legacy element IDs, classes, and layouts: Global Overall Completion (`#completion-stats-section`), circular Syllabus gauge button (`#btn-open-global-chapters`), expandable Subject Progress accordion (`#sidebar-progress-section`), Filter Tasks by Subject navigation (`#subject-navigation-section`), expandable subject cards (`#task-list`), 4 pace metric cards, and chapter task cards with circular checkboxes.
+   - Wired interactive modals: Time Goal modal (`SubjectTimeModal`), Edit Subject modal (`SubjectEditModal`), Revision modal (`RevisionModal`), Subject Trend modal (`SingleSubjectTrendModal`), and Syllabus modal (`GlobalChaptersModal`).
 
 
 ---

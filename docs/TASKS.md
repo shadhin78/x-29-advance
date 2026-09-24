@@ -28,8 +28,8 @@ PAGE-BY-PAGE PARITY VERIFICATION
 [x] STEP 011 — Page-by-Page Migration & Visual Parity: /login
 [x] STEP 012 — DESIGN PARITY RECOVERY: Shell, Sidebar, Header & Dashboard (/) (COMPLETED & VERIFIED)
 [x] STEP 013 — Page-by-Page Migration & Visual Parity: /focus (Timer & Chronograph Dial) (COMPLETED & VERIFIED)
-[ ] STEP 014 — Page-by-Page Migration & Visual Parity: /subjects (Taxonomy Tree & Chapter Checklist) (NOT STARTED - NEXT IN QUEUE)
-[ ] STEP 015 — Page-by-Page Migration & Visual Parity: /daily-actions & Monthly Target Setup
+[x] STEP 014 — Page-by-Page Migration & Visual Parity: /subjects (Taxonomy Tree & Chapter Checklist) (COMPLETED & VERIFIED)
+[ ] STEP 015 — Page-by-Page Migration & Visual Parity: /daily-actions & Monthly Target Setup (NOT STARTED - NEXT IN QUEUE)
 [ ] STEP 016 — Page-by-Page Migration & Visual Parity: /schedule (24h Daily Timeline & Active Slot)
 [ ] STEP 017 — Page-by-Page Migration & Visual Parity: /pace (Velocity Metrics & Completion Forecasts)
 [ ] STEP 018 — Page-by-Page Migration & Visual Parity: /outcome (CGPA Simulator & Celebration Mode)
@@ -179,13 +179,16 @@ OPTIMIZATION & PRODUCTION HARDENING (PENDING)
 ---
 
 ### STEP 014 — Page-by-Page Migration & Visual Parity: /subjects (Taxonomy Tree & Chapter Checklist)
-- [ ] Verify Program -> Track -> Subject card hierarchy against `Subjects.html`.
-- [ ] Verify 14-subject deterministic color coding.
-- [ ] Test Chapter Checklist modal, completed/in-progress toggles, and progress bars.
-- [ ] Verify instant IndexedDB write on chapter toggle.
-- [ ] Update `DESIGN-PARITY.md` and `MEMORY.md`.
-- [ ] Git commit checkpoint for STEP 014.
-- **Status**: **NOT STARTED (NEXT IN QUEUE)**
+- [x] Verify Global Overall Completion header, database link, and circular syllabus gauge against `Subjects.html`.
+- [x] Verify expandable Subject Progress accordion with track & program progress bars using canonical color pairs.
+- [x] Verify Filter Tasks by Subject navigation with `All Tasks`, `Revise Subject`, and program/subject pills.
+- [x] Verify expandable Subject Cards with 4 pace cards (Time Goal, Req Pace, Actual Pace, Est Finish).
+- [x] Verify chapter task cards with subject color top accent bar and interactive circular checkboxes (`task-checkbox`).
+- [x] Test modals: Time Goal modal (`SubjectTimeModal`), Edit Subject modal (`SubjectEditModal`), Revision modal (`RevisionModal`), Trend modal (`SingleSubjectTrendModal`), and Syllabus modal (`GlobalChaptersModal`).
+- [x] Verify instant IndexedDB write and Firestore debounced sync on chapter toggle.
+- [x] Update `DESIGN-PARITY.md` and `MEMORY.md`.
+- [x] Git commit checkpoint for STEP 014.
+- **Status**: **COMPLETED**
 
 ---
 
@@ -196,7 +199,7 @@ OPTIMIZATION & PRODUCTION HARDENING (PENDING)
 - [ ] Verify target cascading from Monthly -> Weekly -> Daily database.
 - [ ] Update `DESIGN-PARITY.md` and `MEMORY.md`.
 - [ ] Git commit checkpoint for STEP 015.
-- **Status**: **NOT STARTED**
+- **Status**: **NOT STARTED (NEXT IN QUEUE)**
 
 ---
 

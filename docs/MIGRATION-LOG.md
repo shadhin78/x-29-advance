@@ -289,5 +289,47 @@
   - Live Browser Subagent verification: Completed top/bottom viewports and active timer interaction at `http://localhost:3000/focus` (artifacts: `focus_top_view_1790220197104.png`, `focus_bottom_view_1790220277722.png`).
 - **Result**: STEP 013 is 100% complete and verified. Next step in queue: STEP 014 (/subjects).
 
+---
+
+### Milestone: Visual & Behavioral Parity: Curriculum Taxonomy & Subjects (/subjects) (STEP 014)
+- **Date**: 2026-09-24
+- **Step**: STEP 014
+- **Root Causes of Design Drift Resolved**:
+  1. *Missing Stylesheet*: `app/globals.css` was missing `@import "../pages/Subjects/Subjects.css";`. Without it, `.subjects-slide-up`, `.animate-page-enter`, custom scoped scrollbars, and `.task-checkbox` active scale animations did not load.
+  2. *Invented Redesign Discarded*: The temporary 4-card metric banner and popup checklist modal was discarded in favor of the canonical layout from `pages/Subjects/Subjects.html`.
+  3. *Restored Exact Layout Sections*:
+     - `#completion-stats-section`: 3-col Global Overall Completion card with `#btn-open-global-history` database link, percentage text, chapters fraction, and sleek progress bar; 1-col circular Syllabus completion gauge button (`#btn-open-global-chapters`).
+     - `#sidebar-progress-section`: Expandable `<details>` accordion with Track Progress cards and custom program mini progress bars using canonical color pairs (`indigo`, `emerald`, `violet`, `rose`, `amber`, `cyan`).
+     - `#subject-navigation-section`: Filter Tasks by Subject navigation with `All Tasks` button, `Revise Subject` button, program group containers, and individual subject pill filters.
+     - `#dashboard-content` -> `#task-list`: Expandable subject cards with 4 pace metric cards (Time Goal, Req Pace, Actual Pace, Est Finish) and interactive chapter task cards with circular checkboxes (`task-checkbox`).
+  4. *Restored Interactive Modals*: `SubjectTimeModal`, `SubjectEditModal`, `RevisionModal`, `SingleSubjectTrendModal`, and `GlobalChaptersModal`.
+- **Files Modified / Created**:
+  - `app/globals.css`
+  - `types/taxonomy.ts`
+  - `stores/useTaxonomyStore.ts`
+  - `features/subjects/components/GlobalCompletionHeader.tsx`
+  - `features/subjects/components/SubjectProgressAccordion.tsx`
+  - `features/subjects/components/SubjectFilterNav.tsx`
+  - `features/subjects/components/SubjectTaskList.tsx`
+  - `features/subjects/components/SubjectTimeModal.tsx`
+  - `features/subjects/components/SubjectEditModal.tsx`
+  - `features/subjects/components/RevisionModal.tsx`
+  - `features/subjects/components/SingleSubjectTrendModal.tsx`
+  - `features/subjects/components/GlobalChaptersModal.tsx`
+  - `features/subjects/components/SubjectsStudio.tsx`
+  - `docs/DESIGN-PARITY.md`
+  - `docs/MODERNIZATION-PLAN.md`
+  - `docs/TASKS.md`
+  - `docs/MEMORY.md`
+  - `docs/MIGRATION-LOG.md`
+- **Tests & Verification**:
+  - `npm run typecheck`: 0 errors (`tsc --noEmit` exited cleanly).
+  - `node tests/taxonomy-engine.test.mjs`: 6 / 6 passed (100% pure domain coverage).
+  - `npm run test:unit`: 27 / 27 passed (100%).
+  - `npm run build`: Turbopack compiled successfully in 914ms (14 static routes generated).
+  - Live Browser Subagent verification: Tested Desktop (1920x945) and Mobile (390x844); validated accordion toggle, chapter checkbox toggle with instant strike-through and progress updates, and zero layout shift.
+- **Result**: STEP 014 is 100% complete and verified. Next step in queue: STEP 015 (/daily-actions & Monthly Target Setup).
+
+
 
 
