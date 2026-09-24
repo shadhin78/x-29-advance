@@ -19,15 +19,32 @@ import { useTaxonomyStore } from '@/stores/useTaxonomyStore';
 import { useTaskStore } from '@/stores/useTaskStore';
 import { usePaceStore } from '@/stores/usePaceStore';
 import { getCompletedChaptersForSubject } from '@/features/tasks/services/taskService';
+import dynamic from 'next/dynamic';
 import { GlobalCompletionHeader } from './GlobalCompletionHeader';
 import { SubjectProgressAccordion } from './SubjectProgressAccordion';
 import { SubjectFilterNav } from './SubjectFilterNav';
 import { SubjectTaskList } from './SubjectTaskList';
-import { SubjectTimeModal } from './SubjectTimeModal';
-import { SubjectEditModal } from './SubjectEditModal';
-import { RevisionModal } from './RevisionModal';
-import { SingleSubjectTrendModal } from './SingleSubjectTrendModal';
-import { GlobalChaptersModal } from './GlobalChaptersModal';
+
+const SubjectTimeModal = dynamic(
+  () => import('./SubjectTimeModal').then((m) => m.SubjectTimeModal),
+  { ssr: false }
+);
+const SubjectEditModal = dynamic(
+  () => import('./SubjectEditModal').then((m) => m.SubjectEditModal),
+  { ssr: false }
+);
+const RevisionModal = dynamic(
+  () => import('./RevisionModal').then((m) => m.RevisionModal),
+  { ssr: false }
+);
+const SingleSubjectTrendModal = dynamic(
+  () => import('./SingleSubjectTrendModal').then((m) => m.SingleSubjectTrendModal),
+  { ssr: false }
+);
+const GlobalChaptersModal = dynamic(
+  () => import('./GlobalChaptersModal').then((m) => m.GlobalChaptersModal),
+  { ssr: false }
+);
 
 export const SubjectsStudio: React.FC = () => {
   const {
@@ -186,70 +203,80 @@ export const SubjectsStudio: React.FC = () => {
 
       {/* Modals */}
       {/* Time Goal Setup Modal */}
-      <SubjectTimeModal
-        subject={timeModalSubject}
-        open={!!timeModalSubject}
-        onOpenChange={(open) => {
-          if (!open) setTimeModalSubject(null);
-        }}
-        currentLink={timeModalSubject ? subjectTimeLinks[timeModalSubject] : undefined}
-        paceGoals={paceGoals}
-        onSave={setSubjectTimeLink}
-      />
+      {timeModalSubject && (
+        <SubjectTimeModal
+          subject={timeModalSubject}
+          open={!!timeModalSubject}
+          onOpenChange={(open) => {
+            if (!open) setTimeModalSubject(null);
+          }}
+          currentLink={timeModalSubject ? subjectTimeLinks[timeModalSubject] : undefined}
+          paceGoals={paceGoals}
+          onSave={setSubjectTimeLink}
+        />
+      )}
 
       {/* Subject Edit Modal */}
-      <SubjectEditModal
-        subject={editModalSubject?.subject ?? null}
-        currentProgram={editModalSubject?.program ?? ''}
-        currentTrackId={editModalSubject?.trackId ?? ''}
-        open={!!editModalSubject}
-        onOpenChange={(open) => {
-          if (!open) setEditModalSubject(null);
-        }}
-        tracks={tracks}
-        customPrograms={customPrograms}
-        onSave={(oldName, newName, trackId, prog) => {
-          updateSubject(trackId, oldName, { subject: newName, program: prog });
-        }}
-        onDelete={(trackId, sub) => {
-          deleteSubject(trackId, sub);
-        }}
-      />
+      {editModalSubject && (
+        <SubjectEditModal
+          subject={editModalSubject?.subject ?? null}
+          currentProgram={editModalSubject?.program ?? ''}
+          currentTrackId={editModalSubject?.trackId ?? ''}
+          open={!!editModalSubject}
+          onOpenChange={(open) => {
+            if (!open) setEditModalSubject(null);
+          }}
+          tracks={tracks}
+          customPrograms={customPrograms}
+          onSave={(oldName, newName, trackId, prog) => {
+            updateSubject(trackId, oldName, { subject: newName, program: prog });
+          }}
+          onDelete={(trackId, sub) => {
+            deleteSubject(trackId, sub);
+          }}
+        />
+      )}
 
       {/* Revision Modal */}
-      <RevisionModal
-        open={revisionModalOpen}
-        onOpenChange={setRevisionModalOpen}
-        tracks={tracks}
-        syllabusStructure={syllabusStructure}
-        revisionData={revisionData}
-        onToggleRevisionSubject={toggleRevisionSubject}
-        onToggleRevisionChapter={toggleRevisionChapter}
-      />
+      {revisionModalOpen && (
+        <RevisionModal
+          open={revisionModalOpen}
+          onOpenChange={setRevisionModalOpen}
+          tracks={tracks}
+          syllabusStructure={syllabusStructure}
+          revisionData={revisionData}
+          onToggleRevisionSubject={toggleRevisionSubject}
+          onToggleRevisionChapter={toggleRevisionChapter}
+        />
+      )}
 
       {/* Single Subject Trend Modal */}
-      <SingleSubjectTrendModal
-        subject={trendModalSubject}
-        open={!!trendModalSubject}
-        onOpenChange={(open) => {
-          if (!open) setTrendModalSubject(null);
-        }}
-        totalChapters={activeTrendStats.total}
-        completedChapters={activeTrendStats.completed}
-      />
+      {trendModalSubject && (
+        <SingleSubjectTrendModal
+          subject={trendModalSubject}
+          open={!!trendModalSubject}
+          onOpenChange={(open) => {
+            if (!open) setTrendModalSubject(null);
+          }}
+          totalChapters={activeTrendStats.total}
+          completedChapters={activeTrendStats.completed}
+        />
+      )}
 
       {/* Global Chapters Breakdown Modal */}
-      <GlobalChaptersModal
-        open={syllabusModalOpen}
-        onOpenChange={setSyllabusModalOpen}
-        tracks={tracks}
-        syllabusStructure={syllabusStructure}
-        completedChaptersMap={completedChaptersMap}
-        onSelectSubjectFilter={(sub) => {
-          setCurrentFilter(sub);
-          setSyllabusModalOpen(false);
-        }}
-      />
+      {syllabusModalOpen && (
+        <GlobalChaptersModal
+          open={syllabusModalOpen}
+          onOpenChange={setSyllabusModalOpen}
+          tracks={tracks}
+          syllabusStructure={syllabusStructure}
+          completedChaptersMap={completedChaptersMap}
+          onSelectSubjectFilter={(sub) => {
+            setCurrentFilter(sub);
+            setSyllabusModalOpen(false);
+          }}
+        />
+      )}
     </div>
   );
 };

@@ -6,8 +6,7 @@
  * NEVER writes on visual ticks.
  */
 
-import { doc, setDoc, getDoc } from 'firebase/firestore';
-import { db, auth } from '@/lib/firebase/client';
+import { auth } from '@/lib/firebase/client';
 import type { ActiveTimerState, TimerLogSession, SubjectFocusTarget } from '@/types/timer';
 
 let debounceTimer: ReturnType<typeof setTimeout> | null = null;
@@ -32,6 +31,8 @@ export async function saveTimerToCloud(payload: CloudTimerPayload, immediate = f
 
   const performWrite = async () => {
     try {
+      const { doc, setDoc } = await import('firebase/firestore');
+      const { db } = await import('@/lib/firebase/firestore');
       const userRef = doc(db, 'users', user.uid);
       const cleanPayload: Record<string, unknown> = {
         updatedAt: Date.now(),
@@ -83,6 +84,8 @@ export async function loadTimerFromCloud(): Promise<CloudTimerPayload | null> {
   }
 
   try {
+    const { doc, getDoc } = await import('firebase/firestore');
+    const { db } = await import('@/lib/firebase/firestore');
     const userRef = doc(db, 'users', user.uid);
     const snap = await getDoc(userRef);
     if (!snap.exists()) {

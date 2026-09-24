@@ -11,8 +11,7 @@
 import { create } from 'zustand';
 import type { DailyHabit } from '@/types/habits';
 import { idbGet, idbSet } from '@/lib/storage/indexeddb';
-import { doc, setDoc } from 'firebase/firestore';
-import { db, auth } from '@/lib/firebase/client';
+import { syncCloud } from '@/lib/sync/syncService';
 
 const KEY_DAILY_HABITS = 'x29_daily_habits';
 const KEY_DAILY_NOTES = 'x29_daily_notes';
@@ -212,10 +211,7 @@ export const useDailyActionStore = create<DailyActionStoreState>((set, get) => (
     set({ habits: updated });
     idbSet(KEY_DAILY_HABITS, updated);
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(doc(db, 'users', user.uid), { habits: updated, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-    }
+    syncCloud({ habits: updated });
   },
 
   updateHabit: (id, updates) => {
@@ -235,10 +231,7 @@ export const useDailyActionStore = create<DailyActionStoreState>((set, get) => (
     set({ habits: updated });
     idbSet(KEY_DAILY_HABITS, updated);
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(doc(db, 'users', user.uid), { habits: updated, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-    }
+    syncCloud({ habits: updated });
   },
 
   deleteHabit: (id) => {
@@ -248,10 +241,7 @@ export const useDailyActionStore = create<DailyActionStoreState>((set, get) => (
     set({ habits: updated });
     idbSet(KEY_DAILY_HABITS, updated);
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(doc(db, 'users', user.uid), { habits: updated, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-    }
+    syncCloud({ habits: updated });
   },
 
   setDailyState: (id, isYes, dateStr) => {
@@ -270,10 +260,7 @@ export const useDailyActionStore = create<DailyActionStoreState>((set, get) => (
     set({ habits: updated });
     idbSet(KEY_DAILY_HABITS, updated);
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(doc(db, 'users', user.uid), { habits: updated, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-    }
+    syncCloud({ habits: updated });
   },
 
   toggleHabit: (id, dateStr) => {
@@ -291,10 +278,7 @@ export const useDailyActionStore = create<DailyActionStoreState>((set, get) => (
     set({ habits: updated });
     idbSet(KEY_DAILY_HABITS, updated);
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(doc(db, 'users', user.uid), { habits: updated, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-    }
+    syncCloud({ habits: updated });
   },
 
   toggleModalDay: (dateStr: string, id: string) => {
@@ -308,24 +292,14 @@ export const useDailyActionStore = create<DailyActionStoreState>((set, get) => (
     set({ dailyNotes: updated });
     idbSet(KEY_DAILY_NOTES, updated);
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(doc(db, 'users', user.uid), { dailyNotes: updated, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-    }
+    syncCloud({ dailyNotes: updated });
   },
 
   reorderHabits: (updatedHabits) => {
     set({ habits: updatedHabits });
     idbSet(KEY_DAILY_HABITS, updatedHabits);
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(
-        doc(db, 'users', user.uid),
-        { habits: updatedHabits, updatedAt: Date.now() },
-        { merge: true }
-      ).catch(() => {});
-    }
+    syncCloud({ habits: updatedHabits });
   },
 
   resetHabitsToCleanSlate: async () => {
@@ -334,14 +308,7 @@ export const useDailyActionStore = create<DailyActionStoreState>((set, get) => (
 
     set({ habits: [], dailyNotes: {} });
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(
-        doc(db, 'users', user.uid),
-        { habits: [], dailyNotes: {}, updatedAt: Date.now() },
-        { merge: true }
-      ).catch(() => {});
-    }
+    syncCloud({ habits: [], dailyNotes: {} });
   },
 
   importFullHabitsState: async (habits, notes = {}) => {
@@ -352,13 +319,6 @@ export const useDailyActionStore = create<DailyActionStoreState>((set, get) => (
 
     set({ habits, dailyNotes: notes });
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(
-        doc(db, 'users', user.uid),
-        { habits, dailyNotes: notes, updatedAt: Date.now() },
-        { merge: true }
-      ).catch(() => {});
-    }
+    syncCloud({ habits, dailyNotes: notes });
   },
 }));

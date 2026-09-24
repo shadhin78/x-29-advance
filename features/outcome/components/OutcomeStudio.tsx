@@ -20,15 +20,29 @@ import {
   groupAndProcessResults,
   calculateCelebrationProgress,
 } from '@/features/outcome/services/outcomeEngine';
+import dynamic from 'next/dynamic';
 import { ResultCard } from './ResultCard';
 import { PassFreezeSection } from './PassFreezeSection';
 import { CelebrationSection } from './CelebrationSection';
-import { ResultEntryModal } from './ResultEntryModal';
-import { CelebrationSetupModal } from './CelebrationSetupModal';
-import { CongratsModal } from './CongratsModal';
-import { ProgramTrendModal } from './ProgramTrendModal';
 import type { SuccessResult, CelebrationTargets, OutcomeProgramGroup } from '@/types/outcome';
 import { Award, Plus, ArrowUpDown } from 'lucide-react';
+
+const ResultEntryModal = dynamic(
+  () => import('./ResultEntryModal').then((m) => m.ResultEntryModal),
+  { ssr: false }
+);
+const CelebrationSetupModal = dynamic(
+  () => import('./CelebrationSetupModal').then((m) => m.CelebrationSetupModal),
+  { ssr: false }
+);
+const CongratsModal = dynamic(
+  () => import('./CongratsModal').then((m) => m.CongratsModal),
+  { ssr: false }
+);
+const ProgramTrendModal = dynamic(
+  () => import('./ProgramTrendModal').then((m) => m.ProgramTrendModal),
+  { ssr: false }
+);
 
 export const OutcomeStudio: React.FC = () => {
   const {
@@ -300,38 +314,46 @@ export const OutcomeStudio: React.FC = () => {
       />
 
       {/* Result Entry & Edit Modal */}
-      <ResultEntryModal
-        open={resultModalOpen}
-        onOpenChange={setResultModalOpen}
-        onSave={handleSaveResults}
-        editingGroup={editingGroup}
-      />
+      {resultModalOpen && (
+        <ResultEntryModal
+          open={resultModalOpen}
+          onOpenChange={setResultModalOpen}
+          onSave={handleSaveResults}
+          editingGroup={editingGroup}
+        />
+      )}
 
       {/* Celebration Setup Modal */}
-      <CelebrationSetupModal
-        open={celebrationModalOpen}
-        onOpenChange={setCelebrationModalOpen}
-        celebrationTargets={celebrationTargets}
-        onSave={handleSaveCelebrationTargets}
-      />
+      {celebrationModalOpen && (
+        <CelebrationSetupModal
+          open={celebrationModalOpen}
+          onOpenChange={setCelebrationModalOpen}
+          celebrationTargets={celebrationTargets}
+          onSave={handleSaveCelebrationTargets}
+        />
+      )}
 
       {/* Authentic 2-Page Congratulations Modal with Confetti */}
-      <CongratsModal
-        open={congratsModalOpen}
-        onOpenChange={setCongratsModalOpen}
-        successResults={successResults}
-        successScore={celebrationProgress.percent}
-      />
+      {congratsModalOpen && (
+        <CongratsModal
+          open={congratsModalOpen}
+          onOpenChange={setCongratsModalOpen}
+          successResults={successResults}
+          successScore={celebrationProgress.percent}
+        />
+      )}
 
       {/* Program Progression Trend Modal */}
-      <ProgramTrendModal
-        open={trendModalOpen}
-        onOpenChange={setTrendModalOpen}
-        programName={trendProgram}
-        results={successResults}
-        targetCGPA={activeTrendTarget.targetCGPA}
-        targetGrade={activeTrendTarget.targetGrade}
-      />
+      {trendModalOpen && (
+        <ProgramTrendModal
+          open={trendModalOpen}
+          onOpenChange={setTrendModalOpen}
+          programName={trendProgram}
+          results={successResults}
+          targetCGPA={activeTrendTarget.targetCGPA}
+          targetGrade={activeTrendTarget.targetGrade}
+        />
+      )}
     </div>
   );
 };

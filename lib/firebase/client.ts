@@ -8,7 +8,6 @@
 
 import { initializeApp, getApps, getApp, type FirebaseApp } from 'firebase/app';
 import { getAuth, type Auth } from 'firebase/auth';
-import { getFirestore, type Firestore } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSyD7kXQe7ovTuBlcWYGJpi678idYFdSHUWs",
@@ -19,9 +18,8 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "1:277295985303:web:4c36a1105fa16e8aa16fd2"
 };
 
-// Singleton initialization
+// Singleton initialization (Auth only - Firestore isolated in lib/firebase/firestore.ts)
 export const app: FirebaseApp = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 export const auth: Auth = getAuth(app);
-export const db: Firestore = getFirestore(app);
 
 export default app;

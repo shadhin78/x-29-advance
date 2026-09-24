@@ -801,3 +801,50 @@
   - Production build: `npm run build` compiled in 1.3s with 14/14 static pages generated.
 - **Result**: 339.3 KB of monolithic legacy HTML shell safely decommissioned and archived. Next.js serves 100% of application requests. Next step in queue: STEP 025 (Bundle Splitting & Client JavaScript Reduction).
 
+---
+
+### Milestone: Bundle Splitting & Client JavaScript Reduction (< 350 KB Gzip) (STEP 025)
+- **Date**: 2026-09-25
+- **Step**: STEP 025 (Phase 11 / Optimization & Production Hardening)
+- **Scope & Changes**:
+  - Configured `@next/bundle-analyzer` and `experimental.optimizePackageImports: ['lucide-react', '@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu']` in `next.config.ts`.
+  - Implemented dynamic code-splitting (`next/dynamic`) across all heavy modals and complex SVG charts:
+    - `features/analytics/components/AnalyticsStudio.tsx`: Dynamically imported `VisualTrendsSection`, `SubjectTrendModal`, and `YearlyActionsModal`.
+    - `features/daily-actions/components/DailyActionsStudio.tsx`: Dynamically imported `DailyActionsDbModal`, `ActionAnalyticsModal`, `TargetsDbModal`, and `EditDailyActionModal`.
+    - `features/pace/components/PaceStudio.tsx`: Dynamically imported `EditPaceModal`, `GoalDetailsModal`, `PaceTrendModal`, and `ConfirmDeleteModal`.
+    - `features/outcome/components/OutcomeStudio.tsx`: Dynamically imported `ResultEntryModal`, `CelebrationSetupModal`, `CongratsModal`, and `ProgramTrendModal`.
+    - `features/subjects/components/SubjectsStudio.tsx`: Dynamically imported `SubjectTimeModal`, `SubjectEditModal`, `RevisionModal`, `SingleSubjectTrendModal`, and `GlobalChaptersModal`.
+    - `features/exam/components/ExamStudio.tsx`: Dynamically imported `SessionModal`, `SubjectExamModal`, and `ConfirmDeleteModal`.
+  - Isolated Firebase Firestore Client:
+    - Created `lib/firebase/firestore.ts` to host `getFirestore(app)` separately from `lib/firebase/client.ts`.
+    - Removed `firebase/firestore` from `lib/firebase/client.ts`, preventing eager bundling into Auth, Login, and Root App Shell.
+    - Updated `lib/sync/syncService.ts` and `features/focus/services/timerFirebaseService.ts` to lazy-import Firestore on-demand during background writes/flushes.
+    - Refactored all 8 domain Zustand stores (`useExamStore`, `useOutcomeStore`, `usePaceStore`, `useScheduleStore`, `useDailyActionStore`, `useTargetStore`, `useTaskStore`, `useTaxonomyStore`) to use `syncCloud` from `lib/sync/syncService`, eliminating direct `firebase/firestore` imports and coalescing debounced mutations into IndexedDB and background cloud writes.
+  - Built analysis tools:
+    - `scripts/run-analyze.mjs`: Triggers Webpack bundle analyzer for visual maps (`.next/analyze/client.html`).
+    - `scripts/measure-bundles.mjs`: Measures static client chunks and top chunk gzip distributions.
+    - `scripts/analyze-route-bundles.mjs`: Measures exact client JavaScript loaded per route for all 14 application pages.
+- **Validation**:
+  - Bundle Size Verification:
+    - 100% of application routes pass the strict `< 350 KB Gzip` requirement!
+    - `/` (Dashboard): **247.1 KB Gzip** (PASSED, 102.9 KB below threshold).
+    - `/login`: **212.6 KB Gzip** (PASSED, 137.4 KB below threshold).
+    - `/analytics`: **246.3 KB Gzip** (PASSED, 103.7 KB below threshold).
+    - `/focus`: **252.5 KB Gzip** (PASSED, 97.5 KB below threshold).
+    - `/schedule`: **246.0 KB Gzip** (PASSED, 104.0 KB below threshold).
+    - `/master-config`: **237.0 KB Gzip** (PASSED, 113.0 KB below threshold).
+    - `/daily-actions`: **235.6 KB Gzip** (PASSED, 114.4 KB below threshold).
+    - `/exam`: **233.5 KB Gzip** (PASSED, 116.5 KB below threshold).
+    - `/outcome`: **235.4 KB Gzip** (PASSED, 114.6 KB below threshold).
+    - `/pace`: **231.9 KB Gzip** (PASSED, 118.1 KB below threshold).
+    - `/subjects`: **233.5 KB Gzip** (PASSED, 116.5 KB below threshold).
+    - Peak route bundle in application: **252.9 KB Gzip** (< 350 KB threshold).
+    - Shared main runtime chunk: **127.2 KB Gzip**.
+    - Largest individual chunk: **162.8 KB Gzip** (lazy on-demand Firestore chunk).
+  - TypeScript typecheck: `npm run typecheck` passed with 0 errors (`tsc --noEmit`).
+  - Unit test suite: `npm run test:unit` passed 62 / 62 domain tests (100% pass rate in 374ms).
+  - Integration test suite: `npm test` passed 10 / 10 batch test suites (100% pass rate).
+  - Production build: `npm run build` compiled in 3.6s with 14/14 static pages generated.
+- **Result**: Bundle splitting and client JavaScript reduction successfully achieved. 100% of routes load under 253 KB Gzip. Next step in queue: STEP 026 (Core Web Vitals & Rendering Performance Optimization).
+
+

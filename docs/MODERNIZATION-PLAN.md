@@ -475,9 +475,9 @@ OPTIMIZATION & PRODUCTION HARDENING (IN PROGRESS)
   2. Tree-shake unused Lucide icons.
   3. Analyze bundle size with Next.js bundle analyzer.
 - **Risk**: Flash of unstyled content or delayed chart rendering.
-- **Validation method**: Bundle analyzer report confirms main chunk < 350 KB gzipped.
+- **Validation method**: Bundle analyzer report confirms main chunk and all route bundles < 350 KB gzipped.
 - **Completion criteria**: Target bundle size achieved without visual disruption.
-- **Status**: **NOT STARTED**
+- **Status**: **COMPLETED** (Peak route bundle 252.9 KB gzip; shared main bundle 127.2 KB gzip; largest chunk 162.8 KB gzip).
 
 ---
 

@@ -16,8 +16,7 @@ import {
   DEFAULT_SCHEDULE_GROUPS,
 } from '@/features/schedule/services/scheduleService';
 import { idbGet, idbSet } from '@/lib/storage/indexeddb';
-import { doc, setDoc } from 'firebase/firestore';
-import { db, auth } from '@/lib/firebase/client';
+import { syncCloud } from '@/lib/sync/syncService';
 
 const KEY_SCHEDULE_BLOCKS = 'x29_schedule_blocks';
 const KEY_SCHEDULE_BLOCKS_2 = 'x29_schedule_blocks2';
@@ -126,10 +125,7 @@ export const useScheduleStore = create<ScheduleStoreState>((set, get) => ({
       set({ scheduleBlocks2: current });
       idbSet(KEY_SCHEDULE_BLOCKS_2, current);
 
-      const user = auth.currentUser;
-      if (user) {
-        setDoc(doc(db, 'users', user.uid), { scheduleBlocks2: current, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-      }
+      syncCloud({ scheduleBlocks2: current });
     } else {
       let current = [...get().scheduleBlocks];
       if (newBlock.isDayStart) {
@@ -139,10 +135,7 @@ export const useScheduleStore = create<ScheduleStoreState>((set, get) => ({
       set({ scheduleBlocks: current });
       idbSet(KEY_SCHEDULE_BLOCKS, current);
 
-      const user = auth.currentUser;
-      if (user) {
-        setDoc(doc(db, 'users', user.uid), { scheduleBlocks: current, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-      }
+      syncCloud({ scheduleBlocks: current });
     }
   },
 
@@ -162,10 +155,7 @@ export const useScheduleStore = create<ScheduleStoreState>((set, get) => ({
       set({ scheduleBlocks2: current });
       idbSet(KEY_SCHEDULE_BLOCKS_2, current);
 
-      const user = auth.currentUser;
-      if (user) {
-        setDoc(doc(db, 'users', user.uid), { scheduleBlocks2: current, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-      }
+      syncCloud({ scheduleBlocks2: current });
     } else {
       let current = get().scheduleBlocks.map((b) => {
         if (b.id === id) {
@@ -179,10 +169,7 @@ export const useScheduleStore = create<ScheduleStoreState>((set, get) => ({
       set({ scheduleBlocks: current });
       idbSet(KEY_SCHEDULE_BLOCKS, current);
 
-      const user = auth.currentUser;
-      if (user) {
-        setDoc(doc(db, 'users', user.uid), { scheduleBlocks: current, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-      }
+      syncCloud({ scheduleBlocks: current });
     }
   },
 
@@ -194,19 +181,13 @@ export const useScheduleStore = create<ScheduleStoreState>((set, get) => ({
       set({ scheduleBlocks2: current });
       idbSet(KEY_SCHEDULE_BLOCKS_2, current);
 
-      const user = auth.currentUser;
-      if (user) {
-        setDoc(doc(db, 'users', user.uid), { scheduleBlocks2: current, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-      }
+      syncCloud({ scheduleBlocks2: current });
     } else {
       const current = get().scheduleBlocks.filter((b) => b.id !== id);
       set({ scheduleBlocks: current });
       idbSet(KEY_SCHEDULE_BLOCKS, current);
 
-      const user = auth.currentUser;
-      if (user) {
-        setDoc(doc(db, 'users', user.uid), { scheduleBlocks: current, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-      }
+      syncCloud({ scheduleBlocks: current });
     }
   },
 
@@ -229,10 +210,7 @@ export const useScheduleStore = create<ScheduleStoreState>((set, get) => ({
     set({ scheduleGroups: updated });
     idbSet(KEY_SCHEDULE_GROUPS, updated);
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(doc(db, 'users', user.uid), { scheduleGroups: updated, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-    }
+    syncCloud({ scheduleGroups: updated });
   },
 
   updateGroup: (id, name, items) => {
@@ -251,10 +229,7 @@ export const useScheduleStore = create<ScheduleStoreState>((set, get) => ({
     set({ scheduleGroups: updated });
     idbSet(KEY_SCHEDULE_GROUPS, updated);
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(doc(db, 'users', user.uid), { scheduleGroups: updated, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-    }
+    syncCloud({ scheduleGroups: updated });
   },
 
   deleteGroup: (id) => {
@@ -264,10 +239,7 @@ export const useScheduleStore = create<ScheduleStoreState>((set, get) => ({
     set({ scheduleGroups: updated });
     idbSet(KEY_SCHEDULE_GROUPS, updated);
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(doc(db, 'users', user.uid), { scheduleGroups: updated, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-    }
+    syncCloud({ scheduleGroups: updated });
   },
 
   assignItemToGroup: (itemName, groupId) => {
@@ -284,10 +256,7 @@ export const useScheduleStore = create<ScheduleStoreState>((set, get) => ({
     set({ scheduleGroups: updated });
     idbSet(KEY_SCHEDULE_GROUPS, updated);
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(doc(db, 'users', user.uid), { scheduleGroups: updated, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-    }
+    syncCloud({ scheduleGroups: updated });
   },
 
   removeItemFromGroup: (itemName) => {
@@ -300,19 +269,13 @@ export const useScheduleStore = create<ScheduleStoreState>((set, get) => ({
     set({ scheduleGroups: updated });
     idbSet(KEY_SCHEDULE_GROUPS, updated);
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(doc(db, 'users', user.uid), { scheduleGroups: updated, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-    }
+    syncCloud({ scheduleGroups: updated });
   },
 
   setActiveRoutineSet: (setNum) => {
     set({ activeRoutineSet: setNum });
     idbSet(KEY_ACTIVE_ROUTINE_SET, setNum);
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(doc(db, 'users', user.uid), { activeRoutineSet: setNum, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-    }
+    syncCloud({ activeRoutineSet: setNum });
   },
 }));

@@ -14,6 +14,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import { useDailyActionStore } from '@/stores/useDailyActionStore';
 import { useTargetStore } from '@/stores/useTargetStore';
 import { useTaxonomyStore } from '@/stores/useTaxonomyStore';
@@ -25,10 +26,22 @@ import { WeeklyTargetsSection } from './WeeklyTargetsSection';
 import { DailyTargetsSection } from './DailyTargetsSection';
 import { CreateDailyActionSection } from './CreateDailyActionSection';
 
-import { DailyActionsDbModal } from './modals/DailyActionsDbModal';
-import { ActionAnalyticsModal } from './modals/ActionAnalyticsModal';
-import { TargetsDbModal } from './modals/TargetsDbModal';
-import { EditDailyActionModal } from './modals/EditDailyActionModal';
+const DailyActionsDbModal = dynamic(
+  () => import('./modals/DailyActionsDbModal').then((m) => m.DailyActionsDbModal),
+  { ssr: false }
+);
+const ActionAnalyticsModal = dynamic(
+  () => import('./modals/ActionAnalyticsModal').then((m) => m.ActionAnalyticsModal),
+  { ssr: false }
+);
+const TargetsDbModal = dynamic(
+  () => import('./modals/TargetsDbModal').then((m) => m.TargetsDbModal),
+  { ssr: false }
+);
+const EditDailyActionModal = dynamic(
+  () => import('./modals/EditDailyActionModal').then((m) => m.EditDailyActionModal),
+  { ssr: false }
+);
 
 export const DailyActionsStudio: React.FC = () => {
   const { initFromStorage: initHabits } = useDailyActionStore();
@@ -99,28 +112,36 @@ export const DailyActionsStudio: React.FC = () => {
       </div>
 
       {/* Modals */}
-      <DailyActionsDbModal
-        isOpen={isDadbOpen}
-        onClose={() => setIsDadbOpen(false)}
-      />
+      {isDadbOpen && (
+        <DailyActionsDbModal
+          isOpen={isDadbOpen}
+          onClose={() => setIsDadbOpen(false)}
+        />
+      )}
 
-      <ActionAnalyticsModal
-        isOpen={isAnalyticsOpen}
-        actionId={analyticsActionId}
-        onClose={() => setIsAnalyticsOpen(false)}
-      />
+      {isAnalyticsOpen && (
+        <ActionAnalyticsModal
+          isOpen={isAnalyticsOpen}
+          actionId={analyticsActionId}
+          onClose={() => setIsAnalyticsOpen(false)}
+        />
+      )}
 
-      <TargetsDbModal
-        isOpen={isTargetsDbOpen}
-        initialTab={targetsDbTab}
-        onClose={() => setIsTargetsDbOpen(false)}
-      />
+      {isTargetsDbOpen && (
+        <TargetsDbModal
+          isOpen={isTargetsDbOpen}
+          initialTab={targetsDbTab}
+          onClose={() => setIsTargetsDbOpen(false)}
+        />
+      )}
 
-      <EditDailyActionModal
-        isOpen={isEditOpen}
-        actionId={editActionId}
-        onClose={() => setIsEditOpen(false)}
-      />
+      {isEditOpen && (
+        <EditDailyActionModal
+          isOpen={isEditOpen}
+          actionId={editActionId}
+          onClose={() => setIsEditOpen(false)}
+        />
+      )}
     </div>
   );
 };

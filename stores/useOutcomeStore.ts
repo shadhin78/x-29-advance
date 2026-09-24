@@ -11,8 +11,7 @@
 import { create } from 'zustand';
 import type { SuccessResult, CelebrationTargets } from '@/types/outcome';
 import { idbGet, idbSet } from '@/lib/storage/indexeddb';
-import { doc, setDoc } from 'firebase/firestore';
-import { db, auth } from '@/lib/firebase/client';
+import { syncCloud } from '@/lib/sync/syncService';
 
 const KEY_SUCCESS_RESULTS = 'x29_success_results';
 const KEY_CELEBRATION_TARGETS = 'x29_celebration_targets';
@@ -98,10 +97,7 @@ export const useOutcomeStore = create<OutcomeStoreState>((set, get) => ({
     set({ successResults: updated });
     idbSet(KEY_SUCCESS_RESULTS, updated);
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(doc(db, 'users', user.uid), { successResults: updated, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-    }
+    syncCloud({ successResults: updated });
   },
 
   addBatchResults: (resultsList) => {
@@ -115,10 +111,7 @@ export const useOutcomeStore = create<OutcomeStoreState>((set, get) => ({
     set({ successResults: updated });
     idbSet(KEY_SUCCESS_RESULTS, updated);
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(doc(db, 'users', user.uid), { successResults: updated, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-    }
+    syncCloud({ successResults: updated });
   },
 
   updateResult: (id, updates) => {
@@ -128,10 +121,7 @@ export const useOutcomeStore = create<OutcomeStoreState>((set, get) => ({
     set({ successResults: updated });
     idbSet(KEY_SUCCESS_RESULTS, updated);
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(doc(db, 'users', user.uid), { successResults: updated, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-    }
+    syncCloud({ successResults: updated });
   },
 
   deleteResult: (id) => {
@@ -141,10 +131,7 @@ export const useOutcomeStore = create<OutcomeStoreState>((set, get) => ({
     set({ successResults: updated });
     idbSet(KEY_SUCCESS_RESULTS, updated);
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(doc(db, 'users', user.uid), { successResults: updated, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-    }
+    syncCloud({ successResults: updated });
   },
 
   deleteProgramGroup: (programName, date) => {
@@ -159,20 +146,14 @@ export const useOutcomeStore = create<OutcomeStoreState>((set, get) => ({
     set({ successResults: updated });
     idbSet(KEY_SUCCESS_RESULTS, updated);
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(doc(db, 'users', user.uid), { successResults: updated, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-    }
+    syncCloud({ successResults: updated });
   },
 
   setCelebrationTargets: (targets) => {
     set({ celebrationTargets: targets });
     idbSet(KEY_CELEBRATION_TARGETS, targets);
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(doc(db, 'users', user.uid), { celebrationTargets: targets, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-    }
+    syncCloud({ celebrationTargets: targets });
   },
 
   toggleDateSortOrder: () => {

@@ -11,14 +11,25 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
+import dynamic from 'next/dynamic';
 import { useExamStore } from '@/stores/useExamStore';
 import { useTaxonomyStore } from '@/stores/useTaxonomyStore';
 import { ExamHeroCountdown } from './ExamHeroCountdown';
 import { ExamRoutineSection } from './ExamRoutineSection';
-import { SessionModal } from './SessionModal';
-import { SubjectExamModal } from './SubjectExamModal';
-import { ConfirmDeleteModal } from './ConfirmDeleteModal';
 import type { ExamRoutineItem, ExamSession } from '@/types/exam';
+
+const SessionModal = dynamic(
+  () => import('./SessionModal').then((m) => m.SessionModal),
+  { ssr: false }
+);
+const SubjectExamModal = dynamic(
+  () => import('./SubjectExamModal').then((m) => m.SubjectExamModal),
+  { ssr: false }
+);
+const ConfirmDeleteModal = dynamic(
+  () => import('./ConfirmDeleteModal').then((m) => m.ConfirmDeleteModal),
+  { ssr: false }
+);
 
 export const ExamStudio: React.FC = () => {
   const {
@@ -162,31 +173,37 @@ export const ExamStudio: React.FC = () => {
       />
 
       {/* Add / Edit Session Modal */}
-      <SessionModal
-        open={sessionModalOpen}
-        onOpenChange={setSessionModalOpen}
-        sessionToEdit={sessionToEdit}
-        onSave={handleSaveSession}
-      />
+      {sessionModalOpen && (
+        <SessionModal
+          open={sessionModalOpen}
+          onOpenChange={setSessionModalOpen}
+          sessionToEdit={sessionToEdit}
+          onSave={handleSaveSession}
+        />
+      )}
 
       {/* Add / Edit Exam Modal */}
-      <SubjectExamModal
-        open={examModalOpen}
-        onOpenChange={setExamModalOpen}
-        examToEdit={examToEdit}
-        targetSessionId={targetSessionId}
-        sessions={examSessions}
-        onSave={handleSaveExam}
-      />
+      {examModalOpen && (
+        <SubjectExamModal
+          open={examModalOpen}
+          onOpenChange={setExamModalOpen}
+          examToEdit={examToEdit}
+          targetSessionId={targetSessionId}
+          sessions={examSessions}
+          onSave={handleSaveExam}
+        />
+      )}
 
       {/* Confirm Deletion Dialog */}
-      <ConfirmDeleteModal
-        open={deleteModalOpen}
-        onOpenChange={setDeleteModalOpen}
-        title={deleteModalConfig.title}
-        message={deleteModalConfig.message}
-        onConfirm={deleteModalConfig.onConfirm}
-      />
+      {deleteModalOpen && (
+        <ConfirmDeleteModal
+          open={deleteModalOpen}
+          onOpenChange={setDeleteModalOpen}
+          title={deleteModalConfig.title}
+          message={deleteModalConfig.message}
+          onConfirm={deleteModalConfig.onConfirm}
+        />
+      )}
     </div>
   );
 };

@@ -11,8 +11,7 @@ import { create } from 'zustand';
 import type { PaceGoal } from '@/types/pace';
 import { DEFAULT_PACE_GOALS } from '@/features/pace/services/paceEngine';
 import { idbGet, idbSet } from '@/lib/storage/indexeddb';
-import { doc, setDoc } from 'firebase/firestore';
-import { db, auth } from '@/lib/firebase/client';
+import { syncCloud } from '@/lib/sync/syncService';
 
 const KEY_PACE_GOALS = 'x29_pace_goals';
 const KEY_ACTIVE_GOAL_ID = 'x29_pace_active_goal_id';
@@ -84,10 +83,7 @@ export const usePaceStore = create<PaceStoreState>((set, get) => ({
     set({ paceGoals: updated });
     idbSet(KEY_PACE_GOALS, updated);
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(doc(db, 'users', user.uid), { paceGoals: updated, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-    }
+    syncCloud({ paceGoals: updated });
   },
 
   updateGoal: (id, updates) => {
@@ -97,10 +93,7 @@ export const usePaceStore = create<PaceStoreState>((set, get) => ({
     set({ paceGoals: updated });
     idbSet(KEY_PACE_GOALS, updated);
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(doc(db, 'users', user.uid), { paceGoals: updated, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-    }
+    syncCloud({ paceGoals: updated });
   },
 
   deleteGoal: (id) => {
@@ -116,10 +109,7 @@ export const usePaceStore = create<PaceStoreState>((set, get) => ({
     idbSet(KEY_PACE_GOALS, updated);
     idbSet(KEY_ACTIVE_GOAL_ID, nextActive);
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(doc(db, 'users', user.uid), { paceGoals: updated, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-    }
+    syncCloud({ paceGoals: updated });
   },
 
   setActiveGoalId: (id) => {

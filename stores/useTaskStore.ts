@@ -8,8 +8,7 @@ import { create } from 'zustand';
 import type { StudyTask } from '@/types/task';
 import { toggleChapterTask } from '@/features/tasks/services/taskService';
 import { idbGet, idbSet } from '@/lib/storage/indexeddb';
-import { doc, setDoc } from 'firebase/firestore';
-import { db, auth } from '@/lib/firebase/client';
+import { queueCloudSync } from '@/lib/sync/syncService';
 
 const KEY_TASKS = 'x29_study_tasks';
 
@@ -73,11 +72,7 @@ export const useTaskStore = create<TaskStoreState>((set, get) => ({
 
     set({ tasks: updated });
     idbSet(KEY_TASKS, updated);
-
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(doc(db, 'users', user.uid), { tasks: updated, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-    }
+    queueCloudSync({ tasks: updated });
   },
 
   toggleChapter: (subject: string, chapter: number, trackId?: string) => {
@@ -86,11 +81,7 @@ export const useTaskStore = create<TaskStoreState>((set, get) => ({
 
     set({ tasks: updated });
     idbSet(KEY_TASKS, updated);
-
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(doc(db, 'users', user.uid), { tasks: updated, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-    }
+    queueCloudSync({ tasks: updated });
   },
 
   addTask: (taskData) => {
@@ -104,11 +95,7 @@ export const useTaskStore = create<TaskStoreState>((set, get) => ({
 
     set({ tasks: updated });
     idbSet(KEY_TASKS, updated);
-
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(doc(db, 'users', user.uid), { tasks: updated, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-    }
+    queueCloudSync({ tasks: updated });
   },
 
   deleteTask: (id: string | number) => {
@@ -117,10 +104,6 @@ export const useTaskStore = create<TaskStoreState>((set, get) => ({
 
     set({ tasks: updated });
     idbSet(KEY_TASKS, updated);
-
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(doc(db, 'users', user.uid), { tasks: updated, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-    }
+    queueCloudSync({ tasks: updated });
   },
 }));

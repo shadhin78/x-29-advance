@@ -21,13 +21,27 @@ import {
   resolveTargetedSubjects,
   calculatePaceStats,
 } from '@/features/pace/services/paceEngine';
+import dynamic from 'next/dynamic';
 import { PaceStatsBanner } from './PaceStatsBanner';
 import { PaceGoalCard } from './PaceGoalCard';
-import { EditPaceModal } from './modals/EditPaceModal';
-import { GoalDetailsModal } from './modals/GoalDetailsModal';
-import { PaceTrendModal } from './modals/PaceTrendModal';
-import { ConfirmDeleteModal } from './modals/ConfirmDeleteModal';
 import type { PaceGoal } from '@/types/pace';
+
+const EditPaceModal = dynamic(
+  () => import('./modals/EditPaceModal').then((m) => m.EditPaceModal),
+  { ssr: false }
+);
+const GoalDetailsModal = dynamic(
+  () => import('./modals/GoalDetailsModal').then((m) => m.GoalDetailsModal),
+  { ssr: false }
+);
+const PaceTrendModal = dynamic(
+  () => import('./modals/PaceTrendModal').then((m) => m.PaceTrendModal),
+  { ssr: false }
+);
+const ConfirmDeleteModal = dynamic(
+  () => import('./modals/ConfirmDeleteModal').then((m) => m.ConfirmDeleteModal),
+  { ssr: false }
+);
 
 export const PaceStudio: React.FC = () => {
   const {
@@ -485,35 +499,43 @@ export const PaceStudio: React.FC = () => {
       </div>
 
       {/* Modals */}
-      <PaceTrendModal
-        open={trendModalOpen}
-        onOpenChange={setTrendModalOpen}
-        goal={trendGoal}
-        stats={trendGoalStats}
-      />
+      {trendModalOpen && (
+        <PaceTrendModal
+          open={trendModalOpen}
+          onOpenChange={setTrendModalOpen}
+          goal={trendGoal}
+          stats={trendGoalStats}
+        />
+      )}
 
-      <GoalDetailsModal
-        open={detailsModalOpen}
-        onOpenChange={setDetailsModalOpen}
-        goal={detailsGoal}
-        stats={detailsGoalStats}
-        subjectStats={subjectStats}
-      />
+      {detailsModalOpen && (
+        <GoalDetailsModal
+          open={detailsModalOpen}
+          onOpenChange={setDetailsModalOpen}
+          goal={detailsGoal}
+          stats={detailsGoalStats}
+          subjectStats={subjectStats}
+        />
+      )}
 
-      <EditPaceModal
-        open={editModalOpen}
-        onOpenChange={setEditModalOpen}
-        goal={editGoal}
-        onSave={handleSaveEdit}
-      />
+      {editModalOpen && (
+        <EditPaceModal
+          open={editModalOpen}
+          onOpenChange={setEditModalOpen}
+          goal={editGoal}
+          onSave={handleSaveEdit}
+        />
+      )}
 
-      <ConfirmDeleteModal
-        open={deleteConfirmOpen}
-        onOpenChange={setDeleteConfirmOpen}
-        title="Delete Pace Target"
-        message="Are you sure you want to remove this pace timeline goal? This action cannot be undone."
-        onConfirm={handleConfirmDelete}
-      />
+      {deleteConfirmOpen && (
+        <ConfirmDeleteModal
+          open={deleteConfirmOpen}
+          onOpenChange={setDeleteConfirmOpen}
+          title="Delete Pace Target"
+          message="Are you sure you want to remove this pace timeline goal? This action cannot be undone."
+          onConfirm={handleConfirmDelete}
+        />
+      )}
     </div>
   );
 };

@@ -21,8 +21,7 @@ import type {
 } from '@/types/targets';
 import { getMonthRangeKey, getWeekRangeKey } from '@/features/targets/services/targetAllocationEngine';
 import { idbGet, idbSet } from '@/lib/storage/indexeddb';
-import { doc, setDoc } from 'firebase/firestore';
-import { db, auth } from '@/lib/firebase/client';
+import { syncCloud } from '@/lib/sync/syncService';
 
 const KEY_MONTHLY_TARGETS = 'x29_monthly_targets';
 const KEY_WEEKLY_TARGETS = 'x29_weekly_targets';
@@ -126,11 +125,7 @@ export const useTargetStore = create<TargetStoreState>((set, get) => ({
 
     set({ monthlyTargetsDatabase: updated });
     idbSet(KEY_MONTHLY_TARGETS, updated);
-
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(doc(db, 'users', user.uid), { monthlyTargetsDatabase: updated, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-    }
+    syncCloud({ monthlyTargetsDatabase: updated });
   },
 
   addBatchAllocation: (result) => {
@@ -164,19 +159,11 @@ export const useTargetStore = create<TargetStoreState>((set, get) => ({
     idbSet(KEY_WEEKLY_TARGETS, updatedWeekly);
     idbSet(KEY_DAILY_TARGETS, updatedDaily);
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(
-        doc(db, 'users', user.uid),
-        {
-          monthlyTargetsDatabase: updatedMonthly,
-          weeklyTargetsDatabase: updatedWeekly,
-          dailyTargetsDatabase: updatedDaily,
-          updatedAt: Date.now(),
-        },
-        { merge: true }
-      ).catch(() => {});
-    }
+    syncCloud({
+      monthlyTargetsDatabase: updatedMonthly,
+      weeklyTargetsDatabase: updatedWeekly,
+      dailyTargetsDatabase: updatedDaily,
+    });
   },
 
   updateMonthlyTarget: (monthKey, id, updates) => {
@@ -187,11 +174,7 @@ export const useTargetStore = create<TargetStoreState>((set, get) => ({
 
     set({ monthlyTargetsDatabase: updated });
     idbSet(KEY_MONTHLY_TARGETS, updated);
-
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(doc(db, 'users', user.uid), { monthlyTargetsDatabase: updated, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-    }
+    syncCloud({ monthlyTargetsDatabase: updated });
   },
 
   deleteMonthlyTarget: (monthKey, id) => {
@@ -221,19 +204,11 @@ export const useTargetStore = create<TargetStoreState>((set, get) => ({
     idbSet(KEY_WEEKLY_TARGETS, updatedWeekly);
     idbSet(KEY_DAILY_TARGETS, updatedDaily);
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(
-        doc(db, 'users', user.uid),
-        {
-          monthlyTargetsDatabase: updatedMonthly,
-          weeklyTargetsDatabase: updatedWeekly,
-          dailyTargetsDatabase: updatedDaily,
-          updatedAt: Date.now(),
-        },
-        { merge: true }
-      ).catch(() => {});
-    }
+    syncCloud({
+      monthlyTargetsDatabase: updatedMonthly,
+      weeklyTargetsDatabase: updatedWeekly,
+      dailyTargetsDatabase: updatedDaily,
+    });
   },
 
   deleteWeeklyTarget: (weekKey, id) => {
@@ -244,11 +219,7 @@ export const useTargetStore = create<TargetStoreState>((set, get) => ({
 
     set({ weeklyTargetsDatabase: updatedWeekly });
     idbSet(KEY_WEEKLY_TARGETS, updatedWeekly);
-
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(doc(db, 'users', user.uid), { weeklyTargetsDatabase: updatedWeekly, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-    }
+    syncCloud({ weeklyTargetsDatabase: updatedWeekly });
   },
 
   deleteDailyTarget: (dateKey, id) => {
@@ -259,11 +230,7 @@ export const useTargetStore = create<TargetStoreState>((set, get) => ({
 
     set({ dailyTargetsDatabase: updatedDaily });
     idbSet(KEY_DAILY_TARGETS, updatedDaily);
-
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(doc(db, 'users', user.uid), { dailyTargetsDatabase: updatedDaily, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-    }
+    syncCloud({ dailyTargetsDatabase: updatedDaily });
   },
 
   toggleMonthlyTargetCompleted: (monthKey, id) => {
@@ -276,11 +243,7 @@ export const useTargetStore = create<TargetStoreState>((set, get) => ({
 
     set({ monthlyTargetsDatabase: updated });
     idbSet(KEY_MONTHLY_TARGETS, updated);
-
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(doc(db, 'users', user.uid), { monthlyTargetsDatabase: updated, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-    }
+    syncCloud({ monthlyTargetsDatabase: updated });
   },
 
   toggleWeeklyTargetCompleted: (weekKey, id) => {
@@ -293,11 +256,7 @@ export const useTargetStore = create<TargetStoreState>((set, get) => ({
 
     set({ weeklyTargetsDatabase: updated });
     idbSet(KEY_WEEKLY_TARGETS, updated);
-
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(doc(db, 'users', user.uid), { weeklyTargetsDatabase: updated, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-    }
+    syncCloud({ weeklyTargetsDatabase: updated });
   },
 
   toggleDailyTargetCompleted: (dateKey, id) => {
@@ -357,18 +316,10 @@ export const useTargetStore = create<TargetStoreState>((set, get) => ({
       idbSet(KEY_MONTHLY_TARGETS, updatedMonthly);
     }
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(
-        doc(db, 'users', user.uid),
-        {
-          dailyTargetsDatabase: updatedDaily,
-          monthlyTargetsDatabase: updatedMonthly,
-          updatedAt: Date.now(),
-        },
-        { merge: true }
-      ).catch(() => {});
-    }
+    syncCloud({
+      dailyTargetsDatabase: updatedDaily,
+      monthlyTargetsDatabase: updatedMonthly,
+    });
   },
 
   setSelectedMonthRange: (range) => {

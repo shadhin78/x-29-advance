@@ -26,8 +26,7 @@ import {
   getSubjectColor,
 } from '@/features/taxonomy/services/taxonomyService';
 import { idbGet, idbSet, idbDel } from '@/lib/storage/indexeddb';
-import { doc, setDoc } from 'firebase/firestore';
-import { db, auth } from '@/lib/firebase/client';
+import { syncCloud } from '@/lib/sync/syncService';
 
 const KEY_TAXONOMY_TRACKS = 'x29_taxonomy_tracks';
 const KEY_TAXONOMY_SYLLABUS = 'x29_taxonomy_syllabus';
@@ -211,10 +210,7 @@ export const useTaxonomyStore = create<TaxonomyStoreState>((set, get) => ({
     set({ syllabusStructure: updatedSyllabus });
     idbSet(KEY_TAXONOMY_SYLLABUS, updatedSyllabus);
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(doc(db, 'users', user.uid), { syllabusStructure: updatedSyllabus, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-    }
+    syncCloud({ syllabusStructure: updatedSyllabus });
   },
 
   updateSubject: (trackId: string, subjectName: string, updates: Partial<SyllabusItem>) => {
@@ -231,10 +227,7 @@ export const useTaxonomyStore = create<TaxonomyStoreState>((set, get) => ({
     set({ syllabusStructure: updatedSyllabus });
     idbSet(KEY_TAXONOMY_SYLLABUS, updatedSyllabus);
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(doc(db, 'users', user.uid), { syllabusStructure: updatedSyllabus, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-    }
+    syncCloud({ syllabusStructure: updatedSyllabus });
   },
 
   deleteSubject: (trackId: string, subjectName: string) => {
@@ -246,10 +239,7 @@ export const useTaxonomyStore = create<TaxonomyStoreState>((set, get) => ({
     set({ syllabusStructure: updatedSyllabus });
     idbSet(KEY_TAXONOMY_SYLLABUS, updatedSyllabus);
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(doc(db, 'users', user.uid), { syllabusStructure: updatedSyllabus, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-    }
+    syncCloud({ syllabusStructure: updatedSyllabus });
   },
 
   addProgram: (trackId: string, program: Program) => {
@@ -261,10 +251,7 @@ export const useTaxonomyStore = create<TaxonomyStoreState>((set, get) => ({
     set({ customPrograms: updatedPrograms });
     idbSet(KEY_TAXONOMY_PROGRAMS, updatedPrograms);
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(doc(db, 'users', user.uid), { customPrograms: updatedPrograms, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-    }
+    syncCloud({ customPrograms: updatedPrograms });
   },
 
   deleteProgram: (trackId: string, programName: string) => {
@@ -276,10 +263,7 @@ export const useTaxonomyStore = create<TaxonomyStoreState>((set, get) => ({
     set({ customPrograms: updatedPrograms });
     idbSet(KEY_TAXONOMY_PROGRAMS, updatedPrograms);
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(doc(db, 'users', user.uid), { customPrograms: updatedPrograms, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-    }
+    syncCloud({ customPrograms: updatedPrograms });
   },
 
   toggleSubjectPassed: (subjectName: string) => {
@@ -295,10 +279,7 @@ export const useTaxonomyStore = create<TaxonomyStoreState>((set, get) => ({
     set({ passedItems: updatedPassed });
     idbSet(KEY_PASSED_ITEMS, updatedPassed);
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(doc(db, 'users', user.uid), { passedItems: updatedPassed, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-    }
+    syncCloud({ passedItems: updatedPassed });
   },
 
   toggleProgramPassed: (programName: string) => {
@@ -314,10 +295,7 @@ export const useTaxonomyStore = create<TaxonomyStoreState>((set, get) => ({
     set({ passedItems: updatedPassed });
     idbSet(KEY_PASSED_ITEMS, updatedPassed);
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(doc(db, 'users', user.uid), { passedItems: updatedPassed, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-    }
+    syncCloud({ passedItems: updatedPassed });
   },
 
   setSubjectColor: (subjectName: string, colorHex: string) => {
@@ -327,10 +305,7 @@ export const useTaxonomyStore = create<TaxonomyStoreState>((set, get) => ({
     set({ subjectColors: updatedColors });
     idbSet(KEY_SUBJECT_COLORS, updatedColors);
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(doc(db, 'users', user.uid), { subjectColors: updatedColors, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-    }
+    syncCloud({ subjectColors: updatedColors });
   },
 
   setSubjectTimeLink: (subject: string, link: SubjectTimeLink | null) => {
@@ -343,10 +318,7 @@ export const useTaxonomyStore = create<TaxonomyStoreState>((set, get) => ({
     }
     set({ subjectTimeLinks: updated });
     idbSet(KEY_SUBJECT_TIME_LINKS, updated);
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(doc(db, 'users', user.uid), { subjectTimeLinks: updated, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-    }
+    syncCloud({ subjectTimeLinks: updated });
   },
 
   toggleRevisionSubject: (subject: string) => {
@@ -361,10 +333,7 @@ export const useTaxonomyStore = create<TaxonomyStoreState>((set, get) => ({
     };
     set({ revisionData: updated });
     idbSet(KEY_REVISION_DATA, updated);
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(doc(db, 'users', user.uid), { revisionData: updated, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-    }
+    syncCloud({ revisionData: updated });
   },
 
   toggleRevisionChapter: (subject: string, chapter: number, completed: boolean) => {
@@ -381,10 +350,7 @@ export const useTaxonomyStore = create<TaxonomyStoreState>((set, get) => ({
     };
     set({ revisionData: updated });
     idbSet(KEY_REVISION_DATA, updated);
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(doc(db, 'users', user.uid), { revisionData: updated, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-    }
+    syncCloud({ revisionData: updated });
   },
 
   addTrack: (track: Track) => {
@@ -393,10 +359,7 @@ export const useTaxonomyStore = create<TaxonomyStoreState>((set, get) => ({
     set({ tracks: updated });
     idbSet(KEY_TAXONOMY_TRACKS, updated);
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(doc(db, 'users', user.uid), { tracks: updated, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-    }
+    syncCloud({ tracks: updated });
   },
 
   updateTrack: (trackId: string, updates: Partial<Track>) => {
@@ -405,10 +368,7 @@ export const useTaxonomyStore = create<TaxonomyStoreState>((set, get) => ({
     set({ tracks: updated });
     idbSet(KEY_TAXONOMY_TRACKS, updated);
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(doc(db, 'users', user.uid), { tracks: updated, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-    }
+    syncCloud({ tracks: updated });
   },
 
   deleteTrack: (trackId: string) => {
@@ -417,10 +377,7 @@ export const useTaxonomyStore = create<TaxonomyStoreState>((set, get) => ({
     set({ tracks: updated });
     idbSet(KEY_TAXONOMY_TRACKS, updated);
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(doc(db, 'users', user.uid), { tracks: updated, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-    }
+    syncCloud({ tracks: updated });
   },
 
   addChapter: (trackId: string, subjectName: string, chapterTitle: string) => {
@@ -438,10 +395,7 @@ export const useTaxonomyStore = create<TaxonomyStoreState>((set, get) => ({
     set({ syllabusStructure: updatedSyllabus });
     idbSet(KEY_TAXONOMY_SYLLABUS, updatedSyllabus);
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(doc(db, 'users', user.uid), { syllabusStructure: updatedSyllabus, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-    }
+    syncCloud({ syllabusStructure: updatedSyllabus });
   },
 
   renameProgram: (trackId: string, oldName: string, newName: string) => {
@@ -477,19 +431,9 @@ export const useTaxonomyStore = create<TaxonomyStoreState>((set, get) => ({
     idbSet(KEY_TAXONOMY_SYLLABUS, updatedSyllabus);
     idbSet(KEY_PASSED_ITEMS, updatedPassed);
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(
-        doc(db, 'users', user.uid),
-        {
-          customPrograms: updatedProgramsMap,
+    syncCloud({ customPrograms: updatedProgramsMap,
           syllabusStructure: updatedSyllabus,
-          passedItems: updatedPassed,
-          updatedAt: Date.now(),
-        },
-        { merge: true }
-      ).catch(() => {});
-    }
+          passedItems: updatedPassed, });
   },
 
   deleteProgramCascade: (trackId: string, programName: string) => {
@@ -528,19 +472,9 @@ export const useTaxonomyStore = create<TaxonomyStoreState>((set, get) => ({
     idbSet(KEY_TAXONOMY_SYLLABUS, updatedSyllabus);
     idbSet(KEY_PASSED_ITEMS, updatedPassed);
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(
-        doc(db, 'users', user.uid),
-        {
-          customPrograms: updatedProgramsMap,
+    syncCloud({ customPrograms: updatedProgramsMap,
           syllabusStructure: updatedSyllabus,
-          passedItems: updatedPassed,
-          updatedAt: Date.now(),
-        },
-        { merge: true }
-      ).catch(() => {});
-    }
+          passedItems: updatedPassed, });
   },
 
   deleteTrackCascade: (trackId: string) => {
@@ -561,33 +495,16 @@ export const useTaxonomyStore = create<TaxonomyStoreState>((set, get) => ({
     idbSet(KEY_TAXONOMY_PROGRAMS, updatedPrograms);
     idbSet(KEY_TAXONOMY_SYLLABUS, updatedSyllabus);
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(
-        doc(db, 'users', user.uid),
-        {
-          tracks: updatedTracks,
+    syncCloud({ tracks: updatedTracks,
           customPrograms: updatedPrograms,
-          syllabusStructure: updatedSyllabus,
-          updatedAt: Date.now(),
-        },
-        { merge: true }
-      ).catch(() => {});
-    }
+          syllabusStructure: updatedSyllabus, });
   },
 
   reorderTracks: (updatedTracks: Track[]) => {
     set({ tracks: updatedTracks });
     idbSet(KEY_TAXONOMY_TRACKS, updatedTracks);
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(
-        doc(db, 'users', user.uid),
-        { tracks: updatedTracks, updatedAt: Date.now() },
-        { merge: true }
-      ).catch(() => {});
-    }
+    syncCloud({ tracks: updatedTracks });
   },
 
   reorderPrograms: (trackId: string, programs: Program[]) => {
@@ -596,28 +513,14 @@ export const useTaxonomyStore = create<TaxonomyStoreState>((set, get) => ({
     set({ customPrograms: updatedPrograms });
     idbSet(KEY_TAXONOMY_PROGRAMS, updatedPrograms);
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(
-        doc(db, 'users', user.uid),
-        { customPrograms: updatedPrograms, updatedAt: Date.now() },
-        { merge: true }
-      ).catch(() => {});
-    }
+    syncCloud({ customPrograms: updatedPrograms });
   },
 
   reorderAllPrograms: (updatedProgramsMap: CustomProgramsMap) => {
     set({ customPrograms: updatedProgramsMap });
     idbSet(KEY_TAXONOMY_PROGRAMS, updatedProgramsMap);
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(
-        doc(db, 'users', user.uid),
-        { customPrograms: updatedProgramsMap, updatedAt: Date.now() },
-        { merge: true }
-      ).catch(() => {});
-    }
+    syncCloud({ customPrograms: updatedProgramsMap });
   },
 
   reorderSubjects: (trackId: string, subjects: SyllabusItem[]) => {
@@ -626,28 +529,14 @@ export const useTaxonomyStore = create<TaxonomyStoreState>((set, get) => ({
     set({ syllabusStructure: updatedSyllabus });
     idbSet(KEY_TAXONOMY_SYLLABUS, updatedSyllabus);
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(
-        doc(db, 'users', user.uid),
-        { syllabusStructure: updatedSyllabus, updatedAt: Date.now() },
-        { merge: true }
-      ).catch(() => {});
-    }
+    syncCloud({ syllabusStructure: updatedSyllabus });
   },
 
   reorderAllSubjects: (updatedSyllabus: SyllabusStructure) => {
     set({ syllabusStructure: updatedSyllabus });
     idbSet(KEY_TAXONOMY_SYLLABUS, updatedSyllabus);
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(
-        doc(db, 'users', user.uid),
-        { syllabusStructure: updatedSyllabus, updatedAt: Date.now() },
-        { merge: true }
-      ).catch(() => {});
-    }
+    syncCloud({ syllabusStructure: updatedSyllabus });
   },
 
   setDashboardHeaderConfig: (cfg: Partial<DashboardHeaderConfig>) => {
@@ -656,14 +545,7 @@ export const useTaxonomyStore = create<TaxonomyStoreState>((set, get) => ({
     set({ dashboardConfig: updated });
     idbSet(KEY_DASHBOARD_CONFIG, updated);
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(
-        doc(db, 'users', user.uid),
-        { dashboardConfig: updated, updatedAt: Date.now() },
-        { merge: true }
-      ).catch(() => {});
-    }
+    syncCloud({ dashboardConfig: updated });
   },
 
   resetWorkspaceToCleanSlate: async () => {
@@ -689,24 +571,16 @@ export const useTaxonomyStore = create<TaxonomyStoreState>((set, get) => ({
       dashboardConfig: DEFAULT_DASHBOARD_CONFIG,
     });
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(
-        doc(db, 'users', user.uid),
-        {
-          tracks: [],
-          syllabusStructure: {},
-          customPrograms: {},
-          passedItems: { programs: [], subjects: [] },
-          subjectColors: {},
-          subjectTimeLinks: {},
-          revisionData: { active: [], progress: {} },
-          dashboardConfig: DEFAULT_DASHBOARD_CONFIG,
-          updatedAt: Date.now(),
-        },
-        { merge: true }
-      ).catch(() => {});
-    }
+    syncCloud({
+      tracks: [],
+      syllabusStructure: {},
+      customPrograms: {},
+      passedItems: { programs: [], subjects: [] },
+      subjectColors: {},
+      subjectTimeLinks: {},
+      revisionData: { active: [], progress: {} },
+      dashboardConfig: DEFAULT_DASHBOARD_CONFIG,
+    });
   },
 
   importFullTaxonomyState: async (data) => {
@@ -743,23 +617,13 @@ export const useTaxonomyStore = create<TaxonomyStoreState>((set, get) => ({
       dashboardConfig,
     });
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(
-        doc(db, 'users', user.uid),
-        {
-          tracks,
+    syncCloud({ tracks,
           customPrograms,
           syllabusStructure,
           passedItems,
           subjectColors,
           subjectTimeLinks,
           revisionData,
-          dashboardConfig,
-          updatedAt: Date.now(),
-        },
-        { merge: true }
-      ).catch(() => {});
-    }
+          dashboardConfig, });
   },
 }));

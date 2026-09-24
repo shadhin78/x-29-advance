@@ -12,8 +12,7 @@ import {
   DEFAULT_EXAM_ROUTINE,
 } from '@/features/exam/services/examService';
 import { idbGet, idbSet } from '@/lib/storage/indexeddb';
-import { doc, setDoc } from 'firebase/firestore';
-import { db, auth } from '@/lib/firebase/client';
+import { syncCloud } from '@/lib/sync/syncService';
 
 const KEY_EXAM_SESSIONS = 'x29_exam_sessions';
 const KEY_EXAM_ROUTINE = 'x29_exam_routine';
@@ -137,10 +136,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
     idbSet(KEY_EXAM_SESSIONS, updated);
     syncToWindowAppState(updated, get().examRoutine);
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(doc(db, 'users', user.uid), { examSessions: updated, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-    }
+    syncCloud({ examSessions: updated });
 
     return newId;
   },
@@ -158,10 +154,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
     idbSet(KEY_EXAM_SESSIONS, updated);
     syncToWindowAppState(updated, get().examRoutine);
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(doc(db, 'users', user.uid), { examSessions: updated, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-    }
+    syncCloud({ examSessions: updated });
   },
 
   deleteSession: (id) => {
@@ -174,14 +167,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
     idbSet(KEY_EXAM_ROUTINE, updatedRoutine);
     syncToWindowAppState(updatedSessions, updatedRoutine);
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(
-        doc(db, 'users', user.uid),
-        { examSessions: updatedSessions, examRoutine: updatedRoutine, updatedAt: Date.now() },
-        { merge: true }
-      ).catch(() => {});
-    }
+    syncCloud({ examSessions: updatedSessions, examRoutine: updatedRoutine });
   },
 
   addExam: (examData) => {
@@ -202,10 +188,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
     idbSet(KEY_EXAM_ROUTINE, updated);
     syncToWindowAppState(get().examSessions, updated);
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(doc(db, 'users', user.uid), { examRoutine: updated, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-    }
+    syncCloud({ examRoutine: updated });
 
     return newId;
   },
@@ -229,10 +212,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
     idbSet(KEY_EXAM_ROUTINE, updated);
     syncToWindowAppState(get().examSessions, updated);
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(doc(db, 'users', user.uid), { examRoutine: updated, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-    }
+    syncCloud({ examRoutine: updated });
   },
 
   deleteExam: (id) => {
@@ -247,14 +227,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
     }
     syncToWindowAppState(get().examSessions, updated, newTargetId);
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(
-        doc(db, 'users', user.uid),
-        { examRoutine: updated, selectedCountdownExamId: newTargetId, updatedAt: Date.now() },
-        { merge: true }
-      ).catch(() => {});
-    }
+    syncCloud({ examRoutine: updated, selectedCountdownExamId: newTargetId });
   },
 
   toggleExamStatus: (id) => {
@@ -277,10 +250,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
     idbSet(KEY_EXAM_ROUTINE, updated);
     syncToWindowAppState(get().examSessions, updated);
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(doc(db, 'users', user.uid), { examRoutine: updated, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-    }
+    syncCloud({ examRoutine: updated });
   },
 
   toggleExamCompleted: (id) => {
@@ -291,10 +261,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
     set({ activeRoutineSet: setNum });
     idbSet(KEY_ACTIVE_SET, setNum);
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(doc(db, 'users', user.uid), { activeRoutineSet: setNum, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-    }
+    syncCloud({ activeRoutineSet: setNum });
   },
 
   setSelectedCountdownExamId: (id) => {
@@ -302,9 +269,6 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
     idbSet(KEY_COUNTDOWN_TARGET, id);
     syncToWindowAppState(get().examSessions, get().examRoutine, id);
 
-    const user = auth.currentUser;
-    if (user) {
-      setDoc(doc(db, 'users', user.uid), { selectedCountdownExamId: id, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-    }
+    syncCloud({ selectedCountdownExamId: id });
   },
 }));

@@ -8,8 +8,7 @@
  * - Array reconciliation with tombstones & timestamps
  */
 
-import { doc, setDoc, getDoc } from 'firebase/firestore';
-import { db, auth } from '@/lib/firebase/client';
+import { auth } from '@/lib/firebase/client';
 import { idbGet, idbSet } from '@/lib/storage/indexeddb';
 import type { SyncStatus } from '@/types/sync';
 
@@ -70,6 +69,14 @@ export async function queueCloudSync(patch: Record<string, unknown>): Promise<vo
 }
 
 /**
+ * Direct fire-and-forget sync helper for stores.
+ * Queues state patches into IndexedDB and coalesces debounced Firestore writes.
+ */
+export function syncCloud(patch: Record<string, unknown>): void {
+  queueCloudSync(patch).catch(() => {});
+}
+
+/**
  * Flushes all pending mutations from the queue to Firestore
  */
 export async function flushSyncQueue(): Promise<void> {
@@ -94,6 +101,8 @@ export async function flushSyncQueue(): Promise<void> {
   mergedPatch.updatedAt = Date.now();
 
   try {
+    const { doc, setDoc } = await import('firebase/firestore');
+    const { db } = await import('@/lib/firebase/firestore');
     const userDocRef = doc(db, 'users', user.uid);
     await setDoc(userDocRef, mergedPatch, { merge: true });
 
