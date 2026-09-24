@@ -10,9 +10,9 @@
 ---
 
 ## 1. Current Migration Status
-- **Current Step**: **STEP 023 — Decommissioning & Archiving of Monolithic Legacy JavaScript Files (COMPLETED & VERIFIED)**
-- **Next Step in Queue**: **STEP 024 — Elimination of Legacy Monolithic HTML Shell (index.html, login.html)**
-- **Previous Completed Step**: **STEP 022 — Comprehensive Cross-Device & Responsive Verification (360px - 1440px)**
+- **Current Step**: **STEP 024 — Elimination of Legacy Monolithic HTML Shell (index.html, login.html) (COMPLETED & VERIFIED)**
+- **Next Step in Queue**: **STEP 025 — Bundle Splitting & Client JavaScript Reduction (< 350 KB Gzip)**
+- **Previous Completed Step**: **STEP 023 — Decommissioning & Archiving of Monolithic Legacy JavaScript Files**
 - **Completed Steps**:
   - STEP 001 — Full Project Architecture Audit & Inventory
   - STEP 002 — Baseline Performance & Disaster Recovery Safeguards
@@ -37,6 +37,7 @@
   - STEP 021 — Page-by-Page Migration & Visual Parity: /analytics (Spectra Studio, Heatmap & Habit Radar)
   - STEP 022 — Comprehensive Cross-Device & Responsive Verification (360px - 1440px)
   - STEP 023 — Decommissioning & Archiving of Monolithic Legacy JavaScript Files
+  - STEP 024 — Elimination of Legacy Monolithic HTML Shell (index.html, login.html)
 
 ---
 

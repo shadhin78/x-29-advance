@@ -40,8 +40,8 @@ PAGE-BY-PAGE PARITY VERIFICATION
 OPTIMIZATION & PRODUCTION HARDENING
 [x] STEP 022 — Comprehensive Cross-Device & Responsive Verification (360px - 1440px) (COMPLETED & VERIFIED)
 [x] STEP 023 — Decommissioning & Archiving of Monolithic Legacy JavaScript Files (COMPLETED & VERIFIED)
-[ ] STEP 024 — Elimination of Legacy Monolithic HTML Shell (index.html, login.html) (NEXT IN QUEUE)
-[ ] STEP 025 — Bundle Splitting & Client JavaScript Reduction (< 350 KB Gzip)
+[x] STEP 024 — Elimination of Legacy Monolithic HTML Shell (index.html, login.html) (COMPLETED & VERIFIED)
+[ ] STEP 025 — Bundle Splitting & Client JavaScript Reduction (< 350 KB Gzip) (NEXT IN QUEUE)
 [ ] STEP 026 — Core Web Vitals & Rendering Performance Optimization (LCP < 2.0s, FCP < 1.0s)
 [ ] STEP 027 — Mobile & Android Low-Power Optimization (Touch Latency & Background Timers)
 [ ] STEP 028 — Modern Accessibility & ARIA Modernization (WCAG 2.1 AA)
@@ -287,11 +287,11 @@ OPTIMIZATION & PRODUCTION HARDENING
 ---
 
 ### STEP 024 — Elimination of Legacy Monolithic HTML Shell (index.html, login.html)
-- [ ] Confirm Next.js handles 100% of routes and traffic.
-- [ ] Move `index.html` and `login.html` into `archive/legacy-html/`.
-- [ ] Verify Next.js production server functions independently.
-- [ ] Update `MEMORY.md` and `MIGRATION-LOG.md`.
-- **Status**: **NOT STARTED**
+- [x] Confirm Next.js handles 100% of routes and traffic.
+- [x] Move `index.html` and `login.html` into `archive/legacy-html/`.
+- [x] Verify Next.js production server functions independently.
+- [x] Update `MEMORY.md` and `MIGRATION-LOG.md`.
+- **Status**: **COMPLETED**
 
 ---
 

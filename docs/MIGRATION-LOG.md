@@ -776,3 +776,28 @@
   - Automated CDP responsive verification: `scripts/verify-responsive-cdp.mjs` passed 72 / 72 tests (100% zero overflow).
 - **Result**: All 41 legacy JavaScript files safely decommissioned and archived with zero regression and 100% test integrity. Next step in queue: STEP 024 (Elimination of Legacy Monolithic HTML Shell).
 
+---
+
+### Milestone: Elimination of Legacy Monolithic HTML Shell (index.html, login.html) (STEP 024)
+- **Date**: 2026-09-25
+- **Step**: STEP 024 (Phase 11 / Optimization & Production Hardening)
+- **Scope & Changes**:
+  - Confirmed Next.js App Router root `/` and `/login` handle 100% of application traffic with zero dependencies on root HTML files.
+  - Built lossless archival engine `scripts/archive-legacy-html.mjs` with cryptographic SHA-256 validation.
+  - Safely archived monolithic HTML shell files into `archive/legacy-html/`:
+    - `index.html` (294.6 KB / 294,684 bytes) -> `archive/legacy-html/index.html`
+    - `login.html` (7.0 KB / 7,037 bytes) -> `archive/legacy-html/login.html`
+    - `router/router.js` (37.6 KB / 37,625 bytes) -> `archive/legacy-html/router.js` & `archive/legacy-js/router/router.js`
+  - Safely unlinked the original files from workspace root and removed empty `router/` directory.
+  - Updated `vercel.json` to remove the legacy `{ "source": "/login", "destination": "/login.html" }` rewrite, allowing Next.js App Router to natively serve `/login`.
+  - Updated `js/dev-server.js` with fallback paths to `archive/legacy-html/` to safeguard legacy local testing without risk.
+  - Updated `tests/modals.test.js` to inspect `archive/legacy-html/index.html` with graceful root fallback.
+  - Reconciled `js/core/app.js` import for `router/router.js` to point to `../../archive/legacy-js/router/router.js`.
+- **Validation**:
+  - Live Server Route Test: Next.js production server (`next start -p 3005`) served HTTP 200 `text/html; charset=utf-8` on `/`, `/login`, `/focus`, `/analytics`, `/schedule`, `/subjects`, `/pace`, `/outcome`, `/exam`, `/master-config`.
+  - TypeScript typecheck: `npm run typecheck` passed with 0 errors (`tsc --noEmit`).
+  - Unit test suite: `npm run test:unit` passed 62 / 62 domain tests (100% pass rate in 358ms).
+  - Integration test suite: `npm test` passed 10 / 10 batch test suites (100% pass rate).
+  - Production build: `npm run build` compiled in 1.3s with 14/14 static pages generated.
+- **Result**: 339.3 KB of monolithic legacy HTML shell safely decommissioned and archived. Next.js serves 100% of application requests. Next step in queue: STEP 025 (Bundle Splitting & Client JavaScript Reduction).
+

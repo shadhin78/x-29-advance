@@ -104,7 +104,8 @@ console.log('\n=== X-29 Advance — Modals & Deletion Architecture Test Suite ==
 // 3. Verify HTML modal integrity
 {
     console.log('\n3. Verifying All Modals in index.html Have Valid Closers...');
-    const html = fs.readFileSync('index.html', 'utf8');
+    const htmlPath = fs.existsSync('index.html') ? 'index.html' : 'archive/legacy-html/index.html';
+    const html = fs.readFileSync(htmlPath, 'utf8');
     assert(!html.includes('data-close-modal='), 'All data-close-modal attributes must be standardized to data-modal-close');
     assert(html.includes('data-modal-close="daily-actions-db-modal"'), 'Actions database modal has data-modal-close');
     assert(html.includes('data-modal-close="subject-target-modal"'), 'Subject target modal has data-modal-close');

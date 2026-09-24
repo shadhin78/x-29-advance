@@ -37,7 +37,7 @@ PAGE-BY-PAGE PARITY VERIFICATION (IN PROGRESS)
 OPTIMIZATION & PRODUCTION HARDENING (IN PROGRESS)
 [x] STEP 022 — Comprehensive Cross-Device & Responsive Verification (360px - 1440px)
 [x] STEP 023 — Decommissioning & Archiving of Monolithic Legacy JavaScript Files
-[ ] STEP 024 — Elimination of Legacy Monolithic HTML Shell (index.html, login.html)
+[x] STEP 024 — Elimination of Legacy Monolithic HTML Shell (index.html, login.html)
 [ ] STEP 025 — Bundle Splitting & Client JavaScript Reduction (< 350 KB Gzip)
 [ ] STEP 026 — Core Web Vitals & Rendering Performance Optimization (LCP < 2.0s, FCP < 1.0s)
 [ ] STEP 027 — Mobile & Android Low-Power Optimization (Touch Latency & Background Timers)
@@ -459,7 +459,7 @@ OPTIMIZATION & PRODUCTION HARDENING (IN PROGRESS)
 - **Risk**: Broken legacy dev server fallback.
 - **Validation method**: Confirm Next.js server serves all routes without index.html.
 - **Completion criteria**: Legacy HTML archived; Next.js serves 100% of application requests.
-- **Status**: **NOT STARTED**
+- **Status**: **COMPLETED**
 
 ---
 

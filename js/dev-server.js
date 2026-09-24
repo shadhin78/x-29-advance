@@ -61,12 +61,12 @@ const server = http.createServer((req, res) => {
 
   // Handle clean URLs (e.g. /login -> login.html)
   if (url === '/login') {
-    url = '/login.html';
+    url = fs.existsSync(path.join(ROOT_DIR, 'login.html')) ? '/login.html' : '/archive/legacy-html/login.html';
   }
 
   // Default to index.html
   if (url === '/') {
-    url = '/index.html';
+    url = fs.existsSync(path.join(ROOT_DIR, 'index.html')) ? '/index.html' : '/archive/legacy-html/index.html';
   }
 
   const filePath = path.join(ROOT_DIR, url);
