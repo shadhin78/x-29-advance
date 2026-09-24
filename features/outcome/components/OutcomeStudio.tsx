@@ -4,30 +4,31 @@
  * X-29 Outcome Studio Component (features/outcome/components/OutcomeStudio.tsx)
  * 
  * Main page coordinator for Success & Results:
- * - Program CGPA & Exam scorecards
+ * - Program CGPA & Exam scorecards matching Outcome.html
+ * - Outcome Programs Toggle Bar & Date Sort controls
  * - Target comparison & achievement badges
  * - Pass / Freeze configuration checklist
  * - Milestone celebration criteria & live progress
+ * - Authentic 2-page CongratsModal with full-screen canvas confetti
+ * - Program progression trend modal
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useOutcomeStore } from '@/stores/useOutcomeStore';
 import { useTaxonomyStore } from '@/stores/useTaxonomyStore';
-import { groupAndProcessResults } from '@/features/outcome/services/outcomeEngine';
+import {
+  groupAndProcessResults,
+  calculateCelebrationProgress,
+} from '@/features/outcome/services/outcomeEngine';
 import { ResultCard } from './ResultCard';
 import { PassFreezeSection } from './PassFreezeSection';
 import { CelebrationSection } from './CelebrationSection';
 import { ResultEntryModal } from './ResultEntryModal';
 import { CelebrationSetupModal } from './CelebrationSetupModal';
-import type { SuccessResult, CelebrationTargets } from '@/types/outcome';
-import {
-  Award,
-  Plus,
-  ArrowUpDown,
-  Calendar,
-  Sparkles,
-  Trophy,
-} from 'lucide-react';
+import { CongratsModal } from './CongratsModal';
+import { ProgramTrendModal } from './ProgramTrendModal';
+import type { SuccessResult, CelebrationTargets, OutcomeProgramGroup } from '@/types/outcome';
+import { Award, Plus, ArrowUpDown } from 'lucide-react';
 
 export const OutcomeStudio: React.FC = () => {
   const {
@@ -43,19 +44,24 @@ export const OutcomeStudio: React.FC = () => {
     setSelectedProgramFilter,
   } = useOutcomeStore();
 
-  const { tracks, customPrograms, syllabusStructure, initFromStorage: initTaxonomy } =
+  const { tracks, customPrograms, syllabusStructure, passedItems, initFromStorage: initTaxonomy } =
     useTaxonomyStore();
 
   const [resultModalOpen, setResultModalOpen] = useState(false);
+  const [editingGroup, setEditingGroup] = useState<OutcomeProgramGroup | null>(null);
+
   const [celebrationModalOpen, setCelebrationModalOpen] = useState(false);
-  const [showCelebrationBanner, setShowCelebrationBanner] = useState(false);
+  const [congratsModalOpen, setCongratsModalOpen] = useState(false);
+
+  const [trendModalOpen, setTrendModalOpen] = useState(false);
+  const [trendProgram, setTrendProgram] = useState('');
 
   useEffect(() => {
     initFromStorage();
     initTaxonomy();
   }, [initFromStorage, initTaxonomy]);
 
-  // Unique list of programs
+  // Unique list of programs across all tracks
   const programsList = useMemo(() => {
     const list: string[] = [];
     tracks.forEach((t) => {
@@ -68,7 +74,7 @@ export const OutcomeStudio: React.FC = () => {
     return list;
   }, [tracks, customPrograms]);
 
-  // Flattened all subjects
+  // Flattened all subjects across syllabus structure
   const allSubjects = useMemo(() => {
     const list: { subject: string; program: string }[] = [];
     tracks.forEach((t) => {
@@ -97,77 +103,111 @@ export const OutcomeStudio: React.FC = () => {
     return groups;
   }, [successResults, allSubjects, customPrograms, selectedProgramFilter, dateSortOrder]);
 
-  const handleSaveResults = (results: Omit<SuccessResult, 'id'>[]) => {
-    addBatchResults(results);
-  };
+  // Calculate live celebration score
+  const celebrationProgress = useMemo(() => {
+    return calculateCelebrationProgress(allSubjects, celebrationTargets, passedItems);
+  }, [allSubjects, celebrationTargets, passedItems]);
 
-  const handleDeleteGroup = (programName: string, date: string) => {
-    if (window.confirm(`Delete results for ${programName} on ${date}?`)) {
-      deleteProgramGroup(programName, date);
-    }
-  };
+  const handleSaveResults = useCallback(
+    (
+      resultsToSave: Omit<SuccessResult, 'id'>[],
+      isEdit?: boolean,
+      oldProgramName?: string,
+      oldDate?: string
+    ) => {
+      if (isEdit && oldProgramName) {
+        deleteProgramGroup(oldProgramName, oldDate);
+      }
+      addBatchResults(resultsToSave);
+      setEditingGroup(null);
+    },
+    [addBatchResults, deleteProgramGroup]
+  );
 
-  const handleSaveCelebrationTargets = (targets: CelebrationTargets) => {
-    setCelebrationTargets(targets);
-  };
+  const handleDeleteGroup = useCallback(
+    (programName: string, date: string) => {
+      if (window.confirm(`Delete results for ${programName} on ${date}?`)) {
+        deleteProgramGroup(programName, date);
+      }
+    },
+    [deleteProgramGroup]
+  );
 
-  const handlePreviewCelebration = () => {
-    setShowCelebrationBanner(true);
-    setTimeout(() => {
-      setShowCelebrationBanner(false);
-    }, 6000);
-  };
+  const handleEditGroup = useCallback((group: OutcomeProgramGroup) => {
+    setEditingGroup(group);
+    setResultModalOpen(true);
+  }, []);
+
+  const handleViewAnalytics = useCallback((programName: string) => {
+    setTrendProgram(programName);
+    setTrendModalOpen(true);
+  }, []);
+
+  const handleSaveCelebrationTargets = useCallback(
+    (targets: CelebrationTargets) => {
+      setCelebrationTargets(targets);
+    },
+    [setCelebrationTargets]
+  );
+
+  const handlePreviewCelebration = useCallback(() => {
+    setCongratsModalOpen(true);
+  }, []);
+
+  const activeTrendTarget = useMemo(() => {
+    if (!trendProgram) return { targetCGPA: '', targetGrade: '' };
+    const grp = processedGroups.find((g) => g.program === trendProgram);
+    return {
+      targetCGPA: grp?.targetCGPA || '',
+      targetGrade: grp?.targetGrade || '',
+    };
+  }, [trendProgram, processedGroups]);
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto pb-16">
-      {/* Celebration Preview Toast / Banner */}
-      {showCelebrationBanner && (
-        <div className="fixed top-20 right-6 z-50 p-5 rounded-3xl bg-gradient-to-r from-amber-500 to-emerald-500 text-slate-950 shadow-2xl border border-white/20 animate-in slide-in-from-top-4 flex items-center gap-3 max-w-md">
-          <Trophy className="w-8 h-8 text-amber-950 shrink-0" />
-          <div>
-            <h4 className="text-sm font-black uppercase tracking-wider">🎉 Milestone Reached!</h4>
-            <p className="text-xs font-bold mt-0.5">
-              Congratulations! All core courses required for celebration have been completed.
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* Main Success & Results Card */}
-      <div className="bg-slate-900/60 border border-slate-800/80 rounded-3xl p-5 sm:p-8 shadow-sm space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/80 pb-5">
-          <div className="flex items-center space-x-3.5">
-            <div className="p-3 bg-amber-950/60 text-amber-400 border border-amber-800/60 rounded-2xl">
-              <Award className="w-6 h-6" />
+    <div id="page-outcome" className="w-full space-y-6 md:space-y-8 animate-page-enter pb-16">
+      {/* Success & Results Section */}
+      <div
+        id="success-results-section"
+        className="bg-white dark:bg-slate-800 p-5 md:p-8 rounded-2xl md:rounded-[2.5rem] border border-slate-200/50 dark:border-slate-700/50 shadow-sm flex flex-col scroll-mt-24 md:scroll-mt-32"
+      >
+        {/* Header Bar */}
+        <div className="flex justify-between items-center mb-6 border-b border-slate-100 dark:border-slate-700 pb-4 flex-wrap gap-4">
+          <div className="flex items-center space-x-3">
+            <div className="p-2.5 bg-yellow-50 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400 rounded-xl">
+              <Award className="w-5 h-5" />
             </div>
             <div>
-              <h1 className="text-xl sm:text-2xl font-black text-white leading-tight">
+              <h3 className="text-base md:text-lg font-black dark:text-white leading-tight">
                 Success & Results
-              </h1>
-              <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mt-0.5">
-                Log Program CGPAs and Major Academic Milestones
+              </h3>
+              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-0.5">
+                Log Program CGPAs and Major Achievements
               </p>
             </div>
           </div>
 
           <button
-            onClick={() => setResultModalOpen(true)}
-            className="px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs uppercase tracking-widest rounded-xl transition-all shadow-md active:scale-95 flex items-center gap-2 self-start sm:self-auto"
+            id="btn-open-result-modal"
+            onClick={() => {
+              setEditingGroup(null);
+              setResultModalOpen(true);
+            }}
+            className="bg-yellow-500 hover:bg-yellow-600 text-white font-black text-[10px] md:text-xs uppercase tracking-widest px-4 py-2 md:px-5 md:py-2.5 rounded-xl transition-all shadow-md active:scale-95 flex items-center gap-2 whitespace-nowrap cursor-pointer"
           >
-            <Plus className="w-4 h-4" />
-            <span>Add Result</span>
+            <Plus className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Add Result</span>
           </button>
         </div>
 
-        {/* Program Filter Pills */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 custom-scrollbar">
+        {/* Outcome Programs Toggle Bar */}
+        <div id="outcome-programs-toggle-bar" className="flex flex-wrap items-center gap-2 mb-6">
           <button
+            type="button"
             onClick={() => setSelectedProgramFilter('ALL')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all whitespace-nowrap ${
+            className={`px-3 py-1.5 rounded-xl text-[10px] md:text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
               selectedProgramFilter === 'ALL'
-                ? 'bg-amber-500 text-slate-950 shadow-sm'
-                : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
+                ? 'bg-yellow-500 text-white shadow-sm'
+                : 'bg-slate-100 dark:bg-slate-700/60 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
             }`}
           >
             All Programs
@@ -175,11 +215,12 @@ export const OutcomeStudio: React.FC = () => {
           {programsList.map((prog) => (
             <button
               key={prog}
+              type="button"
               onClick={() => setSelectedProgramFilter(prog)}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all whitespace-nowrap ${
+              className={`px-3 py-1.5 rounded-xl text-[10px] md:text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
                 selectedProgramFilter === prog
-                  ? 'bg-amber-500 text-slate-950 shadow-sm'
-                  : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
+                  ? 'bg-yellow-500 text-white shadow-sm'
+                  : 'bg-slate-100 dark:bg-slate-700/60 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
               }`}
             >
               {prog}
@@ -187,67 +228,109 @@ export const OutcomeStudio: React.FC = () => {
           ))}
         </div>
 
-        {/* Sort & Count Controls */}
-        <div className="flex items-center justify-between gap-3 pt-2">
+        {/* Results Header & Date Sort Controls Bar */}
+        <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-black uppercase tracking-widest text-slate-400">
+            <span className="text-[10px] md:text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">
               Logged Results
             </span>
-            <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-slate-950 border border-slate-800 text-slate-300">
+            <span
+              id="outcome-results-count-badge"
+              className="text-[9px] font-black px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300"
+            >
               {processedGroups.length}
             </span>
           </div>
 
-          <button
-            onClick={toggleDateSortOrder}
-            className="px-3.5 py-1.5 rounded-xl border border-slate-800 bg-slate-950 hover:bg-slate-800 text-slate-300 text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2"
-          >
-            <span className="text-slate-500">Sort:</span>
-            <span>Date: {dateSortOrder === 'newest' ? 'Newest First' : 'Oldest First'}</span>
-            <ArrowUpDown className="w-3.5 h-3.5 text-amber-500" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              id="outcome-date-sort-btn"
+              onClick={toggleDateSortOrder}
+              className="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/60 text-slate-700 dark:text-slate-200 text-[10px] md:text-xs font-black uppercase tracking-wider transition-all shadow-2xs active:scale-95 flex items-center gap-2 cursor-pointer group"
+              title="Toggle date sort order (Newest / Oldest)"
+            >
+              <span className="text-slate-400 dark:text-slate-500 group-hover:text-yellow-500 transition-colors">
+                Sort:
+              </span>
+              <span id="outcome-date-sort-text" className="text-slate-800 dark:text-slate-100">
+                Date: {dateSortOrder === 'newest' ? 'Newest First' : 'Oldest First'}
+              </span>
+              <ArrowUpDown
+                className={`w-3.5 h-3.5 text-yellow-500 transition-transform duration-200 ${
+                  dateSortOrder === 'oldest' ? 'rotate-180' : ''
+                }`}
+              />
+            </button>
+          </div>
         </div>
 
-        {/* Results Scorecards Grid */}
-        {processedGroups.length === 0 ? (
-          <div className="p-16 text-center border border-dashed border-slate-800 rounded-3xl bg-slate-950/20">
-            <Award className="w-10 h-10 text-slate-600 mx-auto mb-3" />
-            <h4 className="text-sm font-black text-slate-400">No Outcome Results Recorded</h4>
-            <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
-              Click &quot;Add Result&quot; to log your semester GPA, overall program CGPA, or exam
-              grades.
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5">
-            {processedGroups.map((grp) => (
-              <ResultCard key={grp.id} group={grp} onDeleteGroup={handleDeleteGroup} />
-            ))}
-          </div>
-        )}
+        {/* Results Grid */}
+        <div
+          id="results-container"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5"
+        >
+          {processedGroups.length === 0 ? (
+            <div className="col-span-full py-12 flex flex-col items-center justify-center border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl">
+              <span className="text-4xl mb-3 grayscale opacity-50 select-none">🌟</span>
+              <p className="text-slate-400 text-[10px] md:text-xs font-black uppercase tracking-widest text-center">
+                No results logged yet. Add your first achievement!
+              </p>
+            </div>
+          ) : (
+            processedGroups.map((grp) => (
+              <ResultCard
+                key={grp.id}
+                group={grp}
+                onDeleteGroup={handleDeleteGroup}
+                onEdit={handleEditGroup}
+                onViewAnalytics={handleViewAnalytics}
+              />
+            ))
+          )}
+        </div>
       </div>
 
       {/* Pass / Freeze Section */}
       <PassFreezeSection />
 
-      {/* Milestone Celebration Section */}
+      {/* Milestone Celebration Criteria Section */}
       <CelebrationSection
         onOpenSetupModal={() => setCelebrationModalOpen(true)}
         onPreviewCelebration={handlePreviewCelebration}
       />
 
-      {/* Modals */}
+      {/* Result Entry & Edit Modal */}
       <ResultEntryModal
         open={resultModalOpen}
         onOpenChange={setResultModalOpen}
         onSave={handleSaveResults}
+        editingGroup={editingGroup}
       />
 
+      {/* Celebration Setup Modal */}
       <CelebrationSetupModal
         open={celebrationModalOpen}
         onOpenChange={setCelebrationModalOpen}
         celebrationTargets={celebrationTargets}
         onSave={handleSaveCelebrationTargets}
+      />
+
+      {/* Authentic 2-Page Congratulations Modal with Confetti */}
+      <CongratsModal
+        open={congratsModalOpen}
+        onOpenChange={setCongratsModalOpen}
+        successResults={successResults}
+        successScore={celebrationProgress.percent}
+      />
+
+      {/* Program Progression Trend Modal */}
+      <ProgramTrendModal
+        open={trendModalOpen}
+        onOpenChange={setTrendModalOpen}
+        programName={trendProgram}
+        results={successResults}
+        targetCGPA={activeTrendTarget.targetCGPA}
+        targetGrade={activeTrendTarget.targetGrade}
       />
     </div>
   );

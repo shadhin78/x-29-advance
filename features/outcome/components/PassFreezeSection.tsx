@@ -5,11 +5,13 @@
  * 
  * Allows marking entire programs or individual subjects as "Passed" / "Frozen".
  * Synchronizes with useTaxonomyStore.passedItems.
+ * 
+ * Direct visual & functional parity with Outcome.html lines 96-131.
  */
 
 import React, { useState } from 'react';
 import { useTaxonomyStore } from '@/stores/useTaxonomyStore';
-import { ShieldCheck, ChevronDown, ChevronUp, CheckSquare, Square } from 'lucide-react';
+import { Shield, ChevronDown } from 'lucide-react';
 
 export const PassFreezeSection: React.FC = () => {
   const { tracks, customPrograms, syllabusStructure, passedItems, toggleProgramPassed, toggleSubjectPassed } =
@@ -30,42 +32,49 @@ export const PassFreezeSection: React.FC = () => {
     isProgramPassed(progName) || passedItems.subjects.includes(subName);
 
   return (
-    <div className="bg-slate-900/60 rounded-3xl border border-slate-800/80 shadow-sm overflow-hidden transition-all">
+    <div
+      id="outcome-pass-freeze-section"
+      className="mt-8 md:mt-12 bg-white dark:bg-slate-800 rounded-2xl md:rounded-[2.5rem] border border-slate-200/50 dark:border-slate-700/50 shadow-sm flex flex-col scroll-mt-24 md:scroll-mt-32 overflow-hidden transition-all"
+    >
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full p-5 sm:p-7 flex items-center justify-between hover:bg-slate-800/40 transition-colors text-left"
+        className="w-full cursor-pointer p-5 md:p-8 outline-none select-none flex items-center justify-between border-b border-slate-100 dark:border-slate-700/60 hover:bg-slate-50/50 dark:hover:bg-slate-800/80 transition-colors text-left"
       >
-        <div className="flex items-center space-x-3.5">
-          <div className="p-2.5 bg-emerald-950/60 text-emerald-400 border border-emerald-800/60 rounded-2xl">
-            <ShieldCheck className="w-5 h-5" />
+        <div className="flex items-center space-x-3">
+          <div className="p-2.5 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-xl">
+            <Shield className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-base sm:text-lg font-black text-white leading-tight">
+            <h3 className="text-base md:text-lg font-black dark:text-white leading-tight">
               Pass / Freeze Configuration
             </h3>
-            <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mt-0.5">
-              Freeze completed programs or subjects to satisfy pacing
+            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-0.5">
+              Click to view program or subject freeze settings
             </p>
           </div>
         </div>
 
-        <div className="p-2 rounded-xl bg-slate-800 text-slate-400">
-          {isOpen ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+        <div
+          className={`p-2 rounded-xl bg-slate-100 dark:bg-slate-700/50 text-slate-400 transition-all duration-300 shrink-0 border border-slate-200/50 dark:border-slate-600/30 ${
+            isOpen ? 'rotate-180' : ''
+          }`}
+        >
+          <ChevronDown className="w-5 h-5" />
         </div>
       </button>
 
       {isOpen && (
-        <div className="p-5 sm:p-7 pt-2 border-t border-slate-800 space-y-6">
-          <p className="text-xs text-slate-400 font-medium">
+        <div className="p-5 md:p-8 space-y-6 animate-in slide-in-from-top-2 duration-200">
+          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
             Mark entire programs or specific subjects as &quot;Passed&quot;. This freezes them in the
             study dashboard, compacts their UI in the Task Checklist, and fulfills their pacing targets.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
             {/* Column 1: Programs (Freeze All Subs) */}
-            <div className="bg-slate-950/60 p-4 sm:p-5 rounded-2xl border border-slate-800">
-              <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-800 pb-2 mb-3">
+            <div className="bg-slate-50/60 dark:bg-slate-950/60 p-4 sm:p-5 rounded-2xl border border-slate-200/60 dark:border-slate-800">
+              <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-200 dark:border-slate-800 pb-2 mb-3">
                 Programs (Freeze All Subs)
               </h4>
               <div className="space-y-3 max-h-80 overflow-y-auto custom-scrollbar pr-2">
@@ -83,17 +92,17 @@ export const PassFreezeSection: React.FC = () => {
                         return (
                           <label
                             key={`${pName}_${idx}`}
-                            className={`flex items-center space-x-3 p-2 rounded-xl border transition-all cursor-pointer ${
+                            className={`flex items-center space-x-3 p-2.5 rounded-xl border transition-all cursor-pointer ${
                               checked
-                                ? 'bg-emerald-950/30 border-emerald-800/80 text-white'
-                                : 'bg-slate-900/50 border-slate-800/80 text-slate-300 hover:bg-slate-800'
+                                ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-800/80 text-emerald-900 dark:text-white'
+                                : 'bg-white dark:bg-slate-900/50 border-slate-200 dark:border-slate-800/80 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
                             }`}
                           >
                             <input
                               type="checkbox"
                               checked={checked}
                               onChange={() => toggleProgramPassed(pName)}
-                              className="w-4 h-4 rounded border-slate-700 bg-slate-900 text-emerald-500 focus:ring-emerald-500 cursor-pointer"
+                              className="w-4 h-4 rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-emerald-500 focus:ring-emerald-500 cursor-pointer"
                             />
                             <span className="text-xs font-bold truncate">{pName}</span>
                           </label>
@@ -106,8 +115,8 @@ export const PassFreezeSection: React.FC = () => {
             </div>
 
             {/* Column 2: Individual Subjects */}
-            <div className="bg-slate-950/60 p-4 sm:p-5 rounded-2xl border border-slate-800">
-              <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-800 pb-2 mb-3">
+            <div className="bg-slate-50/60 dark:bg-slate-950/60 p-4 sm:p-5 rounded-2xl border border-slate-200/60 dark:border-slate-800">
+              <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-200 dark:border-slate-800 pb-2 mb-3">
                 Individual Subjects
               </h4>
               <div className="space-y-3 max-h-80 overflow-y-auto custom-scrollbar pr-2">
@@ -126,27 +135,29 @@ export const PassFreezeSection: React.FC = () => {
                     return (
                       <div
                         key={`${pName}_sub_${idx}`}
-                        className="border border-slate-800 rounded-xl overflow-hidden bg-slate-900/50"
+                        className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden bg-white dark:bg-slate-900/50"
                       >
                         <div
                           onClick={() => toggleProgramAccordion(pName)}
-                          className="flex items-center justify-between p-2.5 bg-slate-900 cursor-pointer hover:bg-slate-800 transition-colors"
+                          className="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-900 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                         >
                           <div className="flex items-center space-x-2">
-                            <span className="text-xs font-black text-white">{pName}</span>
-                            <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-950/60 text-emerald-400 border border-emerald-800/50">
+                            <span className="text-xs font-black text-slate-800 dark:text-white">
+                              {pName}
+                            </span>
+                            <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50">
                               {subs.length} Subs
                             </span>
                           </div>
-                          {progOpen ? (
-                            <ChevronUp className="w-3.5 h-3.5 text-slate-400" />
-                          ) : (
-                            <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
-                          )}
+                          <ChevronDown
+                            className={`w-3.5 h-3.5 text-slate-400 transition-transform ${
+                              progOpen ? 'rotate-180' : ''
+                            }`}
+                          />
                         </div>
 
                         {progOpen && (
-                          <div className="p-2 space-y-1 bg-slate-950/40 border-t border-slate-800">
+                          <div className="p-2 space-y-1 bg-slate-50/50 dark:bg-slate-950/40 border-t border-slate-200 dark:border-slate-800">
                             {subs.map((s) => {
                               const checked = isSubjectPassed(pName, s.subject);
                               return (
@@ -154,8 +165,8 @@ export const PassFreezeSection: React.FC = () => {
                                   key={s.subject}
                                   className={`flex items-center space-x-2.5 p-2 rounded-lg border transition-all cursor-pointer ${
                                     checked
-                                      ? 'bg-emerald-950/20 border-emerald-800/60 text-white'
-                                      : 'bg-slate-900/40 border-slate-800/60 text-slate-400 hover:text-slate-200'
+                                      ? 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-300 dark:border-emerald-800/60 text-emerald-900 dark:text-white'
+                                      : 'bg-white dark:bg-slate-900/40 border-slate-200 dark:border-slate-800/60 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                                   }`}
                                 >
                                   <input
@@ -163,7 +174,7 @@ export const PassFreezeSection: React.FC = () => {
                                     checked={checked}
                                     disabled={progPassed}
                                     onChange={() => toggleSubjectPassed(s.subject)}
-                                    className="w-3.5 h-3.5 rounded border-slate-700 bg-slate-900 text-emerald-500 focus:ring-emerald-500 cursor-pointer disabled:opacity-50"
+                                    className="w-3.5 h-3.5 rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-emerald-500 focus:ring-emerald-500 cursor-pointer disabled:opacity-50"
                                   />
                                   <span className="text-xs font-bold truncate">{s.subject}</span>
                                 </label>

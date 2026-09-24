@@ -475,3 +475,45 @@
   - Live Browser Subagent verification: Tested Desktop (1280x800) and Mobile (390x844); validated all cards, modals, form interactions, and confirmed 0 horizontal scroll overflow.
 - **Result**: STEP 017 is 100% complete and verified. Next step in queue: STEP 018 (/outcome).
 
+---
+
+### Milestone: Page-by-Page Migration & Visual Parity: /outcome (STEP 018)
+- **Date**: 2026-09-24
+- **Scope**:
+  - Full visual and functional parity matching `pages/Outcome/Outcome.html`, `pages/Outcome/Outcome.css`, `js/features/outcome/outcomeResults.js`, `outcomeCelebration.js`, `outcomePassConfig.js`, and `index.html` lines 3741–3804 (`#congrats-modal`).
+  - Added `@import "../pages/Outcome/Outcome.css";` to `app/globals.css`.
+  - Fluid responsive container (`id="page-outcome"` with `w-full space-y-6 md:space-y-8 animate-page-enter pb-16`) replacing constrained wrapper.
+  - Main Success & Results Section (`#success-results-section`):
+    - Header with trophy/star icon, title "Success & Results", subtitle, and yellow Add Result button (`#btn-open-result-modal`).
+    - Program filter pills (`#outcome-programs-toggle-bar`) with "All Programs" and per-program filters.
+    - Results Header & Date Sort Controls (`#outcome-date-sort-btn`) with rotating arrow icon and logged count badge (`#outcome-results-count-badge`).
+  - Scorecard Card (`ResultCard.tsx`):
+    - Program dot color using `getOutcomeProgramColor`.
+    - Program Card badge, formatted date (en-GB), title with `[Goal Met]` / `[Not Met]` badges.
+    - Hover action buttons: Progression Trend (analytics icon), Edit (pencil icon), and Delete (trash icon).
+    - Overall Program Score Banner with Grade-Based/CGPA-Based, Estimated/Manual, and PASS/FAIL badges.
+    - Target display, score display with proper color coding, and match status indicator (`✓` / `✕`).
+    - Scrollable Subject Grades list with individual targets, grades, and PASS/FAIL badges.
+  - Pass / Freeze Configuration (`#outcome-pass-freeze-section`):
+    - Expandable accordion with green shield icon and descriptive subtitle.
+    - Programs column (Freeze All Subs) and Individual Subjects column with expandable program groups.
+    - Direct bi-directional reactivity syncing with `useTaxonomyStore.passedItems` (`toggleProgramPassed`, `toggleSubjectPassed`).
+  - Milestone Celebration Criteria Section (`#outcome-celebration-section`):
+    - Expandable accordion with amber star icon, "Core Targets" badge, and subtitle.
+    - Setup Criteria button, Preview Celebration button, Reset button.
+    - Live criteria progress gauge with custom vs default indicator.
+  - Accessible Radix Modals:
+    - `ResultEntryModal`: Log or edit exam/semester results with evaluation system switcher (CGPA Scale vs Letter Grade Scale), Overall Score & Target, and live "Estimate Overall" calculator from subject scores.
+    - `CelebrationSetupModal`: Multi-select dialog for defining required core programs and subjects for milestone celebration.
+    - `CongratsModal`: Authentic 2-page celebration dialog matching `index.html` lines 3741–3804:
+      - Page 1: Greeting with bouncing trophy emoji 🏆, "X-29 Complete!" gradient text, journey timeline subtext, and "Final Status: X% Success Score" badge.
+      - Page 2: "Your Achievements" gradient title, fruits of your labor subtitle, and scrollable summary list of completed achievements and scorecards.
+      - Full-screen high-performance canvas confetti animation (`fireConfetti`) with burst and raining flower particles.
+    - `ProgramTrendModal`: Program progression trend dialog showing historical records, target benchmark, and latest score.
+- **Validation**:
+  - `npm run typecheck`: 0 errors (`tsc --noEmit` exited cleanly).
+  - `npm run test:unit`: 40 / 40 passed (100%), including new edge-case tests (all A+, mixed grades, failed courses, target resolution).
+  - `npm test`: 10 / 10 batch test suites passed (100%).
+  - Live Browser Subagent verification: Tested desktop and mobile viewports, validated modal flows, result creation, scorecard rendering, progression trend view, pass/freeze toggling, celebration mode, and confetti trigger.
+- **Result**: STEP 018 is 100% complete and verified. Next step in queue: STEP 019 (/exam).
+

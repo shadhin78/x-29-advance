@@ -4,6 +4,7 @@ import {
   mapCgpaToGrade,
   mapGradeToNumeric,
   validateAndFormatCgpa,
+  getProgramTarget,
   groupAndProcessResults,
   calculateCelebrationProgress,
 } from '../features/outcome/services/outcomeEngine.ts';
@@ -59,37 +60,62 @@ test('validateAndFormatCgpa constrains values to 0.00 - 4.00 with 2 decimals', (
   assert.equal(validateAndFormatCgpa(''), '');
 });
 
-test('groupAndProcessResults groups program records and calculates averages', () => {
+test('getProgramTarget resolves target CGPA and grade correctly', () => {
+  const customProgs = {
+    track1: [{ name: 'BSc CSE', targetCGPA: '3.75' }],
+  };
+  const target = getProgramTarget('BSc CSE', customProgs, []);
+  assert.equal(target.targetCGPA, '3.75');
+  assert.equal(target.targetGrade, 'A');
+
+  // Fallback to historical results if not in customPrograms
+  const history = [
+    { id: '1', type: 'cgpa', title: 'MSc Data', targetCGPA: '3.90', date: '2026-01-01' },
+  ];
+  const targetHistory = getProgramTarget('MSc Data', {}, history);
+  assert.equal(targetHistory.targetCGPA, '3.90');
+  assert.equal(targetHistory.targetGrade, 'A');
+});
+
+test('groupAndProcessResults: edge case with all A+ courses', () => {
   const mockRawResults = [
-    {
-      id: 'res-1',
-      type: 'cgpa',
-      title: 'BSc CSE',
-      subject: 'Algorithms',
-      value: '3.80',
-      date: '2026-06-01',
-    },
-    {
-      id: 'res-2',
-      type: 'cgpa',
-      title: 'BSc CSE',
-      subject: 'Operating Systems',
-      value: '3.40',
-      date: '2026-06-01',
-    },
+    { id: '1', type: 'cgpa', title: 'Top Program', subject: 'Course 1', value: '4.00', date: '2026-06-01' },
+    { id: '2', type: 'cgpa', title: 'Top Program', subject: 'Course 2', value: '4.00', date: '2026-06-01' },
   ];
-
   const allSubs = [
-    { program: 'BSc CSE', subject: 'Algorithms' },
-    { program: 'BSc CSE', subject: 'Operating Systems' },
+    { program: 'Top Program', subject: 'Course 1' },
+    { program: 'Top Program', subject: 'Course 2' },
   ];
+  const customProgs = {
+    track1: [{ name: 'Top Program', targetCGPA: '3.80' }],
+  };
 
-  const processed = groupAndProcessResults(mockRawResults, allSubs, {});
+  const processed = groupAndProcessResults(mockRawResults, allSubs, customProgs);
   assert.equal(processed.length, 1);
-  assert.equal(processed[0].program, 'BSc CSE');
-  assert.equal(processed[0].computedCgpa, '3.60'); // (3.80 + 3.40) / 2
-  assert.equal(processed[0].computedGrade, 'A-'); // 3.60 -> A-
-  assert.equal(processed[0].subjects.length, 2);
+  assert.equal(processed[0].computedCgpa, '4.00');
+  assert.equal(processed[0].computedGrade, 'A+');
+  assert.equal(processed[0].isGoalMet, true);
+});
+
+test('groupAndProcessResults: edge case with mixed grades and failed courses', () => {
+  const mockRawResults = [
+    { id: '1', type: 'cgpa', title: 'Mixed Program', subject: 'Math', value: '3.75', date: '2026-06-01' },
+    { id: '2', type: 'cgpa', title: 'Mixed Program', subject: 'Physics', value: '0.00', grade: 'F', date: '2026-06-01' },
+  ];
+  const allSubs = [
+    { program: 'Mixed Program', subject: 'Math' },
+    { program: 'Mixed Program', subject: 'Physics' },
+  ];
+  const customProgs = {
+    track1: [{ name: 'Mixed Program', targetCGPA: '3.00' }],
+  };
+
+  const processed = groupAndProcessResults(mockRawResults, allSubs, customProgs);
+  assert.equal(processed.length, 1);
+  // (3.75 + 0.00) / 2 = 1.875 -> '1.88'
+  assert.equal(processed[0].computedCgpa, '1.88');
+  assert.equal(processed[0].computedGrade, 'F'); // < 2.0 -> F
+  assert.equal(processed[0].isGoalMet, false); // 1.88 < 3.00
 });
 
 test('calculateCelebrationProgress measures core course completion', () => {

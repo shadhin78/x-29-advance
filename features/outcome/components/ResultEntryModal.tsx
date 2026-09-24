@@ -3,12 +3,16 @@
 /**
  * X-29 Result Entry Modal (features/outcome/components/ResultEntryModal.tsx)
  * 
- * Accessible dialog for logging semester exam results with overall score,
- * evaluation type switcher (CGPA vs Grade), and subject-by-subject score inputs.
+ * Accessible dialog for logging or editing exam/semester results:
+ * - Program & Date selectors
+ * - Evaluation system switcher (CGPA Scale vs Letter Grade Scale)
+ * - Overall Program score & Target CGPA
+ * - Live estimate calculation from subject scores
+ * - Subject-by-subject score inputs
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
-import type { SuccessResult } from '@/types/outcome';
+import type { SuccessResult, OutcomeProgramGroup } from '@/types/outcome';
 import { useTaxonomyStore } from '@/stores/useTaxonomyStore';
 import {
   mapCgpaToGrade,
@@ -21,16 +25,17 @@ import { X, Award, Calculator } from 'lucide-react';
 interface ResultEntryModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (results: Omit<SuccessResult, 'id'>[]) => void;
+  onSave: (results: Omit<SuccessResult, 'id'>[], isEdit?: boolean, oldProgramName?: string, oldDate?: string) => void;
+  editingGroup?: OutcomeProgramGroup | null;
 }
 
-const GRADE_OPTIONS = ['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'D', 'F'];
 const SIMPLE_GRADE_OPTIONS = ['A', 'B', 'C', 'D', 'E', 'F'];
 
 export const ResultEntryModal: React.FC<ResultEntryModalProps> = ({
   open,
   onOpenChange,
   onSave,
+  editingGroup,
 }) => {
   const { tracks, customPrograms, syllabusStructure } = useTaxonomyStore();
 
@@ -41,8 +46,9 @@ export const ResultEntryModal: React.FC<ResultEntryModalProps> = ({
   const [overallGrade, setOverallGrade] = useState('');
   const [targetCGPA, setTargetCGPA] = useState('');
   const [subjectScores, setSubjectScores] = useState<Record<string, { value: string; grade: string }>>({});
+  const [errorMsg, setErrorMsg] = useState('');
 
-  // Collect all programs
+  // Collect all unique programs across taxonomy tracks
   const allPrograms = useMemo(() => {
     const list: string[] = [];
     tracks.forEach((t) => {
@@ -72,22 +78,47 @@ export const ResultEntryModal: React.FC<ResultEntryModalProps> = ({
 
   useEffect(() => {
     if (open) {
-      if (allPrograms.length > 0 && !selectedProgram) {
-        setSelectedProgram(allPrograms[0]);
+      setErrorMsg('');
+      if (editingGroup) {
+        setSelectedProgram(editingGroup.program);
+        setDate(editingGroup.date || new Date().toISOString().slice(0, 10));
+        setEvalType(editingGroup.evaluationType || 'cgpa');
+        setOverallValue(editingGroup.computedCgpa || '');
+        setOverallGrade(editingGroup.computedGrade || '');
+        setTargetCGPA(editingGroup.targetCGPA || '3.80');
+
+        const map: Record<string, { value: string; grade: string }> = {};
+        editingGroup.subjects.forEach((s) => {
+          if (s.subject) {
+            map[s.subject] = {
+              value: s.value || '',
+              grade: s.grade || '',
+            };
+          }
+        });
+        setSubjectScores(map);
+      } else {
+        if (allPrograms.length > 0 && !selectedProgram) {
+          setSelectedProgram(allPrograms[0]);
+        }
+        setDate(new Date().toISOString().slice(0, 10));
+        setOverallValue('');
+        setOverallGrade('');
+        setTargetCGPA('3.80');
+        setSubjectScores({});
       }
-      setDate(new Date().toISOString().slice(0, 10));
-      setOverallValue('');
-      setOverallGrade('');
-      setTargetCGPA('3.80');
-      setSubjectScores({});
     }
-  }, [open, allPrograms, selectedProgram]);
+  }, [open, editingGroup, allPrograms, selectedProgram]);
 
   const handleOverallValueChange = (val: string) => {
     setOverallValue(val);
     if (evalType === 'cgpa') {
-      const g = mapCgpaToGrade(val, 'cgpa');
-      setOverallGrade(g);
+      const formatted = validateAndFormatCgpa(val);
+      if (formatted) {
+        setOverallGrade(mapCgpaToGrade(formatted, 'cgpa'));
+      }
+    } else {
+      setOverallGrade(val.toUpperCase());
     }
   };
 
@@ -136,18 +167,35 @@ export const ResultEntryModal: React.FC<ResultEntryModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedProgram || !date) return;
+    setErrorMsg('');
+
+    if (!selectedProgram || !date) {
+      setErrorMsg('Please select a program and date.');
+      return;
+    }
+
+    const hasAnySubjectScore = Object.values(subjectScores).some(
+      (s) => (s.value && s.value.trim() !== '') || (s.grade && s.grade.trim() !== '')
+    );
+
+    if (!overallValue && !hasAnySubjectScore) {
+      setErrorMsg('Please enter an overall score or at least one subject score.');
+      return;
+    }
 
     const resultsToSave: Omit<SuccessResult, 'id'>[] = [];
 
     // 1. Overall Program Result
+    const formattedOverall = evalType === 'cgpa' ? validateAndFormatCgpa(overallValue) : overallValue;
+    const finalOverallGrade = overallGrade || (formattedOverall ? mapCgpaToGrade(formattedOverall, evalType) : undefined);
+
     resultsToSave.push({
       type: 'cgpa',
       evaluationType: evalType,
       title: selectedProgram,
       subject: '',
-      value: overallValue || undefined,
-      grade: overallGrade || undefined,
+      value: formattedOverall || undefined,
+      grade: finalOverallGrade,
       targetCGPA: targetCGPA || undefined,
       targetGrade: targetCGPA ? mapCgpaToGrade(targetCGPA, evalType) : undefined,
       date,
@@ -158,19 +206,27 @@ export const ResultEntryModal: React.FC<ResultEntryModalProps> = ({
     programSubjects.forEach((subName) => {
       const entry = subjectScores[subName];
       if (entry && (entry.value || entry.grade)) {
+        const val = evalType === 'cgpa' ? validateAndFormatCgpa(entry.value) : entry.value;
         resultsToSave.push({
           type: 'cgpa',
           evaluationType: evalType,
           title: selectedProgram,
           subject: subName,
-          value: entry.value || undefined,
+          value: val || undefined,
           grade: entry.grade || undefined,
+          targetCGPA: targetCGPA || undefined,
+          targetGrade: targetCGPA ? mapCgpaToGrade(targetCGPA, evalType) : undefined,
           date,
         });
       }
     });
 
-    onSave(resultsToSave);
+    onSave(
+      resultsToSave,
+      !!editingGroup,
+      editingGroup?.program,
+      editingGroup?.date
+    );
     onOpenChange(false);
   };
 
@@ -178,31 +234,37 @@ export const ResultEntryModal: React.FC<ResultEntryModalProps> = ({
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 animate-in fade-in" />
-        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[92vw] max-w-lg bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-7 shadow-2xl z-50 text-white focus:outline-none animate-in zoom-in-95 max-h-[90vh] overflow-y-auto custom-scrollbar">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[92vw] max-w-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl p-6 sm:p-7 shadow-2xl z-50 text-slate-900 dark:text-white focus:outline-none animate-in zoom-in-95 max-h-[90vh] overflow-y-auto custom-scrollbar">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-700">
             <div className="flex items-center gap-2">
               <Award className="w-5 h-5 text-amber-500" />
               <Dialog.Title className="text-base font-black uppercase tracking-wider">
-                Log Exam / Semester Result
+                {editingGroup ? 'Edit Exam / Semester Result' : 'Log Exam / Semester Result'}
               </Dialog.Title>
             </div>
-            <Dialog.Close className="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors">
+            <Dialog.Close className="p-1 text-slate-400 hover:text-slate-700 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
               <X className="w-5 h-5" />
             </Dialog.Close>
           </div>
+
+          {errorMsg && (
+            <div className="mt-3 p-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400 text-xs font-bold">
+              {errorMsg}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="mt-5 space-y-4 text-left">
             {/* Program & Date Selection */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <label className="text-xs font-black uppercase tracking-widest text-slate-400">
+                <label className="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
                   Program
                 </label>
                 <select
                   value={selectedProgram}
                   onChange={(e) => setSelectedProgram(e.target.value)}
                   required
-                  className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-2.5 text-xs font-bold text-white focus:ring-2 focus:ring-amber-500 outline-none"
+                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-2.5 text-xs font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-amber-500 outline-none"
                 >
                   {allPrograms.map((p) => (
                     <option key={p} value={p}>
@@ -213,7 +275,7 @@ export const ResultEntryModal: React.FC<ResultEntryModalProps> = ({
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-black uppercase tracking-widest text-slate-400">
+                <label className="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
                   Result Date
                 </label>
                 <input
@@ -221,24 +283,24 @@ export const ResultEntryModal: React.FC<ResultEntryModalProps> = ({
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
                   required
-                  className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-2.5 text-xs font-bold text-white focus:ring-2 focus:ring-amber-500 outline-none"
+                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-2.5 text-xs font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-amber-500 outline-none"
                 />
               </div>
             </div>
 
             {/* Evaluation Type Switcher */}
             <div className="space-y-1.5">
-              <label className="text-xs font-black uppercase tracking-widest text-slate-400">
+              <label className="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
                 Evaluation System
               </label>
-              <div className="grid grid-cols-2 gap-2 bg-slate-950 p-1 rounded-xl border border-slate-800">
+              <div className="grid grid-cols-2 gap-2 bg-slate-100 dark:bg-slate-950 p-1 rounded-xl border border-slate-200 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setEvalType('cgpa')}
-                  className={`py-2 rounded-lg text-xs font-black transition-all ${
+                  className={`py-2 rounded-lg text-xs font-black transition-all cursor-pointer ${
                     evalType === 'cgpa'
                       ? 'bg-amber-500 text-slate-950 shadow-sm'
-                      : 'text-slate-400 hover:text-white'
+                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                   }`}
                 >
                   CGPA Scale (0.00 – 4.00)
@@ -246,10 +308,10 @@ export const ResultEntryModal: React.FC<ResultEntryModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setEvalType('grade')}
-                  className={`py-2 rounded-lg text-xs font-black transition-all ${
+                  className={`py-2 rounded-lg text-xs font-black transition-all cursor-pointer ${
                     evalType === 'grade'
                       ? 'bg-amber-500 text-slate-950 shadow-sm'
-                      : 'text-slate-400 hover:text-white'
+                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                   }`}
                 >
                   Letter Grade Scale (A, B, C...)
@@ -260,7 +322,7 @@ export const ResultEntryModal: React.FC<ResultEntryModalProps> = ({
             {/* Overall Score & Target */}
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <label className="text-xs font-black uppercase tracking-widest text-slate-400">
+                <label className="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
                   Overall Score {overallGrade && `(${overallGrade})`}
                 </label>
                 <input
@@ -268,12 +330,12 @@ export const ResultEntryModal: React.FC<ResultEntryModalProps> = ({
                   placeholder={evalType === 'cgpa' ? 'e.g. 3.85' : 'e.g. A'}
                   value={overallValue}
                   onChange={(e) => handleOverallValueChange(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-3 text-sm font-bold text-white focus:ring-2 focus:ring-amber-500 outline-none"
+                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-3 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-amber-500 outline-none"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-black uppercase tracking-widest text-slate-400">
+                <label className="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
                   Target CGPA
                 </label>
                 <input
@@ -281,22 +343,22 @@ export const ResultEntryModal: React.FC<ResultEntryModalProps> = ({
                   placeholder="e.g. 3.80"
                   value={targetCGPA}
                   onChange={(e) => setTargetCGPA(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-3 text-sm font-bold text-white focus:ring-2 focus:ring-amber-500 outline-none"
+                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-3 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-amber-500 outline-none"
                 />
               </div>
             </div>
 
             {/* Individual Subject Scores */}
             {programSubjects.length > 0 && (
-              <div className="space-y-2 pt-2 border-t border-slate-800">
+              <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-black uppercase tracking-widest text-slate-400">
+                  <span className="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
                     Subject Scores (Optional)
                   </span>
                   <button
                     type="button"
                     onClick={handleEstimateFromSubjects}
-                    className="text-[10px] font-black uppercase tracking-wider text-amber-400 hover:text-amber-300 flex items-center gap-1"
+                    className="text-[10px] font-black uppercase tracking-wider text-amber-500 hover:text-amber-600 dark:text-amber-400 dark:hover:text-amber-300 flex items-center gap-1 cursor-pointer"
                   >
                     <Calculator className="w-3.5 h-3.5" />
                     <span>Estimate Overall</span>
@@ -309,9 +371,9 @@ export const ResultEntryModal: React.FC<ResultEntryModalProps> = ({
                     return (
                       <div
                         key={sub}
-                        className="flex items-center justify-between gap-3 p-2 bg-slate-950/60 border border-slate-800/80 rounded-xl"
+                        className="flex items-center justify-between gap-3 p-2 bg-slate-50/70 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800/80 rounded-xl"
                       >
-                        <span className="text-xs font-bold text-slate-300 truncate max-w-[200px]">
+                        <span className="text-xs font-bold text-slate-700 dark:text-slate-300 truncate max-w-[200px]">
                           {sub}
                         </span>
                         {evalType === 'cgpa' ? (
@@ -320,13 +382,13 @@ export const ResultEntryModal: React.FC<ResultEntryModalProps> = ({
                             placeholder="0.00"
                             value={currentScore}
                             onChange={(e) => handleSubjectScoreChange(sub, e.target.value)}
-                            className="w-20 bg-slate-900 border border-slate-700 rounded-lg p-1.5 text-xs font-mono font-bold text-white text-center outline-none focus:ring-1 focus:ring-amber-500"
+                            className="w-20 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg p-1.5 text-xs font-mono font-bold text-slate-900 dark:text-white text-center outline-none focus:ring-1 focus:ring-amber-500"
                           />
                         ) : (
                           <select
                             value={currentScore}
                             onChange={(e) => handleSubjectScoreChange(sub, e.target.value)}
-                            className="w-20 bg-slate-900 border border-slate-700 rounded-lg p-1.5 text-xs font-bold text-white text-center outline-none focus:ring-1 focus:ring-amber-500"
+                            className="w-20 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg p-1.5 text-xs font-bold text-slate-900 dark:text-white text-center outline-none focus:ring-1 focus:ring-amber-500"
                           >
                             <option value="">—</option>
                             {SIMPLE_GRADE_OPTIONS.map((g) => (
@@ -348,13 +410,13 @@ export const ResultEntryModal: React.FC<ResultEntryModalProps> = ({
               <button
                 type="button"
                 onClick={() => onOpenChange(false)}
-                className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-black uppercase tracking-wider transition-all"
+                className="flex-1 py-3 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="flex-1 py-3 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider transition-all shadow-lg active:scale-95"
+                className="flex-1 py-3 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider transition-all shadow-lg active:scale-95 cursor-pointer"
               >
                 Save Result
               </button>
