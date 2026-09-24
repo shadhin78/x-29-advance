@@ -330,6 +330,61 @@
   - Live Browser Subagent verification: Tested Desktop (1920x945) and Mobile (390x844); validated accordion toggle, chapter checkbox toggle with instant strike-through and progress updates, and zero layout shift.
 - **Result**: STEP 014 is 100% complete and verified. Next step in queue: STEP 015 (/daily-actions & Monthly Target Setup).
 
+---
+
+### Milestone: Visual & Behavioral Parity: Daily Actions & Monthly Target Setup (/daily-actions & /daily-actions/monthly-setup) (STEP 015)
+- **Date**: 2026-09-24
+- **Step**: STEP 015
+- **Accomplishments & Parity Restorations**:
+  1. *Stylesheets Integrated*: Added `@import "../pages/Daily Actions/Daily Actions.css";` and `@import "../pages/Daily Actions/monthly target setup/monthly target setup.css";` in `app/globals.css`.
+  2. *Daily Actions Tracker & DADB*:
+     - Restored exact glowing `#daily-actions-progress` bar and `#btn-open-dadb` in `DailyActionsTrackerHeader`.
+     - Restored `#daily-actions-grid` habit cards with YES/NO toggles, 180-day mini-heatmaps, Action Analytics, and Action Edit buttons.
+     - Restored `DailyActionsDbModal` (`#daily-actions-db-modal`): 180-day historical logs with Date View, Action View, Trend Chart, Filter dropdown, and Sort dropdown.
+     - Restored `ActionAnalyticsModal` (`#analytics-modal`): Total Hits, Streak, Consistency stats, 90D/180D/365D heatmaps, and polar Habit Radar chart comparison.
+     - Restored `EditDailyActionModal` and `CreateDailyActionSection` (`#add-daily-action-section`).
+  3. *Targets Cascade Sections*:
+     - Restored `#monthly-targets-section` with Past/Present/Future navigation, Req/Act/Est finish pace cards, target checklist, and MTDB modal link.
+     - Restored `#weekly-targets-section` with week-by-week navigation, pace cards, and target checklist.
+     - Restored `#daily-targets-setup-section` with day-by-day navigation and daily split checklist.
+  4. *Monthly Target Setup Studio (`/daily-actions/monthly-setup`)*:
+     - 1. Target Hierarchy: Program track cards and syllabus subject cards with Select All / Clear.
+     - 2. Chapters & Scope Studio: Chapter checklist, bulk size presets, and week range assignment.
+     - 3. Daily Target Allocator: Quick divide actions (2, 3, 4, 5, 7 days), auto-spread across month / from date, fraction pills (1/2, 1/3, + Add Day), and custom daily splits.
+     - Complete cascading target generation: synchronizes monthly target, weekly targets, and daily targets into `useTargetStore`, IndexedDB, and Firestore.
+- **Files Modified / Created**:
+  - `app/globals.css`
+  - `types/habits.ts`
+  - `types/targets.ts`
+  - `stores/useDailyActionStore.ts`
+  - `stores/useTargetStore.ts`
+  - `features/targets/services/targetAllocationEngine.ts`
+  - `features/daily-actions/components/DailyActionsStudio.tsx`
+  - `features/daily-actions/components/DailyActionsTrackerHeader.tsx`
+  - `features/daily-actions/components/DailyActionsGrid.tsx`
+  - `features/daily-actions/components/MonthlyTargetsSection.tsx`
+  - `features/daily-actions/components/WeeklyTargetsSection.tsx`
+  - `features/daily-actions/components/DailyTargetsSection.tsx`
+  - `features/daily-actions/components/CreateDailyActionSection.tsx`
+  - `features/daily-actions/components/TargetStudio.tsx`
+  - `features/daily-actions/components/modals/DailyActionsDbModal.tsx`
+  - `features/daily-actions/components/modals/ActionAnalyticsModal.tsx`
+  - `features/daily-actions/components/modals/TargetsDbModal.tsx`
+  - `features/daily-actions/components/modals/EditDailyActionModal.tsx`
+  - `tests/daily-actions-targets.test.mjs`
+  - `docs/MODERNIZATION-PLAN.md`
+  - `docs/TASKS.md`
+  - `docs/MEMORY.md`
+  - `docs/MIGRATION-LOG.md`
+  - `docs/DESIGN-PARITY.md`
+- **Tests & Verification**:
+  - `npm run typecheck`: 0 errors (`tsc --noEmit` exited cleanly).
+  - `node --test tests/daily-actions-targets.test.mjs`: 3 / 3 passed.
+  - `npm run test:unit`: 30 / 30 passed (100%).
+  - `npm run build`: Turbopack compiled successfully in 2.9s (14 static routes generated).
+  - Live Browser Subagent verification: Tested Desktop (1280x800) and Mobile (390x844); validated habit toggle, DADB modal, Habit Radar modal, target creation cascade from `/daily-actions/monthly-setup`, and target checkbox toggle on `/daily-actions`.
+- **Result**: STEP 015 is 100% complete and verified. Next step in queue: STEP 016 (/schedule).
+
 
 
 

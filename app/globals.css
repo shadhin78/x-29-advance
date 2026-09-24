@@ -3,6 +3,8 @@
 @import "../pages/Dashboard/Dashboard.css";
 @import "../pages/Focus/Focus.css";
 @import "../pages/Subjects/Subjects.css";
+@import "../pages/Daily Actions/Daily Actions.css";
+@import "../pages/Daily Actions/monthly target setup/monthly target setup.css";
 
 @layer base {
   :root {

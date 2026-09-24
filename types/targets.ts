@@ -11,6 +11,8 @@ export interface MonthlyTarget {
   totalChapterSize: number;
   targetWeek?: string;
   targetMonth: string; // e.g. '01 Sep 2026 - 30 Sep 2026'
+  targetType?: 'chapter' | 'subject';
+  scope?: string;
   completed?: boolean;
   notes?: string;
   dailyAllocations?: Record<string, number>; // date 'YYYY-MM-DD' -> portion size

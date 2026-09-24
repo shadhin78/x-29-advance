@@ -193,13 +193,13 @@ OPTIMIZATION & PRODUCTION HARDENING (PENDING)
 ---
 
 ### STEP 015 — Page-by-Page Migration & Visual Parity: /daily-actions & Monthly Target Setup
-- [ ] Verify Daily Habits checklist (DADB) and streak counters against `Daily Actions.html`.
-- [ ] Verify Habit Radar modal with polar SVG radar chart.
-- [ ] Verify Monthly Target Setup modal: batch allocator, fractions, and auto-spread engine.
-- [ ] Verify target cascading from Monthly -> Weekly -> Daily database.
-- [ ] Update `DESIGN-PARITY.md` and `MEMORY.md`.
-- [ ] Git commit checkpoint for STEP 015.
-- **Status**: **NOT STARTED (NEXT IN QUEUE)**
+- [x] Verify Daily Habits checklist (DADB) and streak counters against `Daily Actions.html`.
+- [x] Verify Habit Radar modal with polar SVG radar chart.
+- [x] Verify Monthly Target Setup modal: batch allocator, fractions, and auto-spread engine.
+- [x] Verify target cascading from Monthly -> Weekly -> Daily database.
+- [x] Update `DESIGN-PARITY.md` and `MEMORY.md`.
+- [x] Git commit checkpoint for STEP 015.
+- **Status**: **COMPLETED** (2026-09-24)
 
 ---
 

@@ -176,11 +176,13 @@ export function autoSpreadChapters(input: TargetAllocationInput): AllocationResu
     if (mode === 'single-day') {
       const targetDay = targetDate || startDate;
       const weekKey = getWeekRangeKey(targetDay);
+      const wtId = `wt_${Date.now()}_${idx}`;
       mt.targetWeek = weekKey;
 
       dailyTargets.push({
         id: `dt_${Date.now()}_${idx}`,
         monthlyTargetId: mtId,
+        weeklyTargetId: wtId,
         track: ch.track,
         program: ch.program,
         subject: ch.subject,
@@ -191,7 +193,7 @@ export function autoSpreadChapters(input: TargetAllocationInput): AllocationResu
       });
 
       weeklyTargets.push({
-        id: `wt_${Date.now()}_${idx}`,
+        id: wtId,
         monthlyTargetId: mtId,
         source: 'monthly',
         track: ch.track,
@@ -210,11 +212,13 @@ export function autoSpreadChapters(input: TargetAllocationInput): AllocationResu
 
       const dateStr = chStartDate.toISOString().slice(0, 10);
       const weekKey = getWeekRangeKey(dateStr);
+      const wtId = `wt_${Date.now()}_${idx}`;
       mt.targetWeek = weekKey;
 
       dailyTargets.push({
         id: `dt_${Date.now()}_${idx}`,
         monthlyTargetId: mtId,
+        weeklyTargetId: wtId,
         track: ch.track,
         program: ch.program,
         subject: ch.subject,
@@ -225,7 +229,7 @@ export function autoSpreadChapters(input: TargetAllocationInput): AllocationResu
       });
 
       weeklyTargets.push({
-        id: `wt_${Date.now()}_${idx}`,
+        id: wtId,
         monthlyTargetId: mtId,
         source: 'monthly',
         track: ch.track,

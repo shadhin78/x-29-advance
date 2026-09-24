@@ -3,8 +3,9 @@
  * 
  * Manages:
  * - monthlyTargetsDatabase, weeklyTargetsDatabase, dailyTargetsDatabase
- * - Active month range selection
+ * - Active month range, week range, and daily date selection
  * - Synchronized allocation additions, deletions, and completion toggles
+ * - Cascade consistency: Monthly -> Weekly -> Daily
  * - Local-first IndexedDB persistence with Firestore synchronization
  */
 
@@ -18,7 +19,7 @@ import type {
   DailyTargetsDatabase,
   AllocationResult,
 } from '@/types/targets';
-import { getMonthRangeKey } from '@/features/targets/services/targetAllocationEngine';
+import { getMonthRangeKey, getWeekRangeKey } from '@/features/targets/services/targetAllocationEngine';
 import { idbGet, idbSet } from '@/lib/storage/indexeddb';
 import { doc, setDoc } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase/client';
@@ -32,6 +33,8 @@ interface TargetStoreState {
   weeklyTargetsDatabase: WeeklyTargetsDatabase;
   dailyTargetsDatabase: DailyTargetsDatabase;
   selectedMonthRange: string;
+  selectedWeekRange: string;
+  selectedDailyDate: string;
   isInitialized: boolean;
 
   initFromStorage: () => Promise<void>;
@@ -39,10 +42,17 @@ interface TargetStoreState {
   addBatchAllocation: (result: AllocationResult) => void;
   updateMonthlyTarget: (monthKey: string, id: string, updates: Partial<MonthlyTarget>) => void;
   deleteMonthlyTarget: (monthKey: string, id: string) => void;
+  deleteWeeklyTarget: (weekKey: string, id: string) => void;
+  deleteDailyTarget: (dateKey: string, id: string) => void;
   toggleMonthlyTargetCompleted: (monthKey: string, id: string) => void;
   toggleWeeklyTargetCompleted: (weekKey: string, id: string) => void;
   toggleDailyTargetCompleted: (dateKey: string, id: string) => void;
   setSelectedMonthRange: (range: string) => void;
+  setSelectedWeekRange: (range: string) => void;
+  setSelectedDailyDate: (date: string) => void;
+  navigateMonth: (direction: 'past' | 'present' | 'future') => void;
+  navigateWeek: (direction: 'past' | 'present' | 'future') => void;
+  navigateDay: (direction: 'past' | 'present' | 'future') => void;
 }
 
 export const useTargetStore = create<TargetStoreState>((set, get) => ({
@@ -50,6 +60,8 @@ export const useTargetStore = create<TargetStoreState>((set, get) => ({
   weeklyTargetsDatabase: {},
   dailyTargetsDatabase: {},
   selectedMonthRange: getMonthRangeKey(),
+  selectedWeekRange: getWeekRangeKey(),
+  selectedDailyDate: new Date().toISOString().slice(0, 10),
   isInitialized: false,
 
   initFromStorage: async () => {
@@ -224,6 +236,36 @@ export const useTargetStore = create<TargetStoreState>((set, get) => ({
     }
   },
 
+  deleteWeeklyTarget: (weekKey, id) => {
+    const { weeklyTargetsDatabase } = get();
+    const list = weeklyTargetsDatabase[weekKey] || [];
+    const updatedList = list.filter((item) => item.id !== id);
+    const updatedWeekly = { ...weeklyTargetsDatabase, [weekKey]: updatedList };
+
+    set({ weeklyTargetsDatabase: updatedWeekly });
+    idbSet(KEY_WEEKLY_TARGETS, updatedWeekly);
+
+    const user = auth.currentUser;
+    if (user) {
+      setDoc(doc(db, 'users', user.uid), { weeklyTargetsDatabase: updatedWeekly, updatedAt: Date.now() }, { merge: true }).catch(() => {});
+    }
+  },
+
+  deleteDailyTarget: (dateKey, id) => {
+    const { dailyTargetsDatabase } = get();
+    const list = dailyTargetsDatabase[dateKey] || [];
+    const updatedList = list.filter((item) => item.id !== id);
+    const updatedDaily = { ...dailyTargetsDatabase, [dateKey]: updatedList };
+
+    set({ dailyTargetsDatabase: updatedDaily });
+    idbSet(KEY_DAILY_TARGETS, updatedDaily);
+
+    const user = auth.currentUser;
+    if (user) {
+      setDoc(doc(db, 'users', user.uid), { dailyTargetsDatabase: updatedDaily, updatedAt: Date.now() }, { merge: true }).catch(() => {});
+    }
+  },
+
   toggleMonthlyTargetCompleted: (monthKey, id) => {
     const { monthlyTargetsDatabase } = get();
     const list = monthlyTargetsDatabase[monthKey] || [];
@@ -259,23 +301,136 @@ export const useTargetStore = create<TargetStoreState>((set, get) => ({
   },
 
   toggleDailyTargetCompleted: (dateKey, id) => {
-    const { dailyTargetsDatabase } = get();
+    const { dailyTargetsDatabase, monthlyTargetsDatabase } = get();
     const list = dailyTargetsDatabase[dateKey] || [];
-    const updatedList = list.map((item) =>
-      item.id === id ? { ...item, completed: !item.completed } : item
-    );
-    const updated = { ...dailyTargetsDatabase, [dateKey]: updatedList };
+    let toggledItem: DailyTarget | undefined;
 
-    set({ dailyTargetsDatabase: updated });
-    idbSet(KEY_DAILY_TARGETS, updated);
+    const updatedList = list.map((item) => {
+      if (item.id === id) {
+        const nextState = !item.completed;
+        toggledItem = { ...item, completed: nextState };
+        return toggledItem;
+      }
+      return item;
+    });
+
+    const updatedDaily = { ...dailyTargetsDatabase, [dateKey]: updatedList };
+
+    // Cascade: check if this completes the associated MonthlyTarget
+    let updatedMonthly = monthlyTargetsDatabase;
+    if (toggledItem?.monthlyTargetId) {
+      const mId = toggledItem.monthlyTargetId;
+      // Gather all daily targets for this monthlyTargetId across all dates
+      let allDone = true;
+      let targetFound = false;
+
+      for (const dKey in updatedDaily) {
+        for (const dt of updatedDaily[dKey]) {
+          if (dt.monthlyTargetId === mId) {
+            targetFound = true;
+            if (!dt.completed) {
+              allDone = false;
+              break;
+            }
+          }
+        }
+        if (!allDone) break;
+      }
+
+      if (targetFound) {
+        updatedMonthly = { ...monthlyTargetsDatabase };
+        for (const mKey in updatedMonthly) {
+          updatedMonthly[mKey] = updatedMonthly[mKey].map((mt) =>
+            mt.id === mId ? { ...mt, completed: allDone } : mt
+          );
+        }
+      }
+    }
+
+    set({
+      dailyTargetsDatabase: updatedDaily,
+      monthlyTargetsDatabase: updatedMonthly,
+    });
+
+    idbSet(KEY_DAILY_TARGETS, updatedDaily);
+    if (updatedMonthly !== monthlyTargetsDatabase) {
+      idbSet(KEY_MONTHLY_TARGETS, updatedMonthly);
+    }
 
     const user = auth.currentUser;
     if (user) {
-      setDoc(doc(db, 'users', user.uid), { dailyTargetsDatabase: updated, updatedAt: Date.now() }, { merge: true }).catch(() => {});
+      setDoc(
+        doc(db, 'users', user.uid),
+        {
+          dailyTargetsDatabase: updatedDaily,
+          monthlyTargetsDatabase: updatedMonthly,
+          updatedAt: Date.now(),
+        },
+        { merge: true }
+      ).catch(() => {});
     }
   },
 
   setSelectedMonthRange: (range) => {
     set({ selectedMonthRange: range });
+  },
+
+  setSelectedWeekRange: (range) => {
+    set({ selectedWeekRange: range });
+  },
+
+  setSelectedDailyDate: (date) => {
+    set({ selectedDailyDate: date });
+  },
+
+  navigateMonth: (direction) => {
+    const { selectedMonthRange } = get();
+    // Parse current range start date
+    const parts = selectedMonthRange.split(' - ');
+    const startDate = parts[0] ? new Date(parts[0]) : new Date();
+    const d = isNaN(startDate.getTime()) ? new Date() : startDate;
+
+    if (direction === 'present') {
+      set({ selectedMonthRange: getMonthRangeKey(new Date()) });
+    } else if (direction === 'past') {
+      d.setMonth(d.getMonth() - 1);
+      set({ selectedMonthRange: getMonthRangeKey(d) });
+    } else if (direction === 'future') {
+      d.setMonth(d.getMonth() + 1);
+      set({ selectedMonthRange: getMonthRangeKey(d) });
+    }
+  },
+
+  navigateWeek: (direction) => {
+    const { selectedWeekRange } = get();
+    const parts = selectedWeekRange.split(' - ');
+    const startDate = parts[0] ? new Date(parts[0]) : new Date();
+    const d = isNaN(startDate.getTime()) ? new Date() : startDate;
+
+    if (direction === 'present') {
+      set({ selectedWeekRange: getWeekRangeKey(new Date()) });
+    } else if (direction === 'past') {
+      d.setDate(d.getDate() - 7);
+      set({ selectedWeekRange: getWeekRangeKey(d) });
+    } else if (direction === 'future') {
+      d.setDate(d.getDate() + 7);
+      set({ selectedWeekRange: getWeekRangeKey(d) });
+    }
+  },
+
+  navigateDay: (direction) => {
+    const { selectedDailyDate } = get();
+    const d = new Date(selectedDailyDate);
+    const validD = isNaN(d.getTime()) ? new Date() : d;
+
+    if (direction === 'present') {
+      set({ selectedDailyDate: new Date().toISOString().slice(0, 10) });
+    } else if (direction === 'past') {
+      validD.setDate(validD.getDate() - 1);
+      set({ selectedDailyDate: validD.toISOString().slice(0, 10) });
+    } else if (direction === 'future') {
+      validD.setDate(validD.getDate() + 1);
+      set({ selectedDailyDate: validD.toISOString().slice(0, 10) });
+    }
   },
 }));
