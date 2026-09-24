@@ -248,4 +248,46 @@
   - Live Browser Subagent verification: Tested Desktop (1440px), Tablet (768px), and Mobile (390px) viewports; validated live toggle interactions, responsive drawer, countdown timer, and 100% visual parity against original reference app.
 - **Result**: STEP 012 Design Parity Recovery is 100% complete and verified. Forward progression halted per user directive until next phase approval.
 
+---
+
+### Milestone: Visual & Behavioral Parity: Focus Studio & Chronograph Dial (/focus) (STEP 013)
+- **Date**: 2026-09-24
+- **Step**: STEP 013
+- **Root Causes of Design Drift Resolved**:
+  1. *Missing Stylesheet*: `app/globals.css` was missing `@import "../pages/Focus/Focus.css";`. Without it, CSS variables like `--chrono-main-hand`, `--chrono-subdial-hand`, `--chrono-tick-major`, `--chrono-tick-minor`, and hardware-accelerated `.timer-fullscreen` keyframes did not load.
+  2. *Container Width Constraint*: `max-w-7xl mx-auto` artificially capped desktop width; restored fluid `#page-timer` matching legacy layout.
+  3. *Active Panel Top Grid Alignment*: In legacy `Focus.html`, the top row inside `#timer-active-panel` is a 2-column grid uniting `#timer-mode-switcher` and `#timer-subject-select-container` (with `#timer-btn-fullscreen` beside the dropdown). Placing the dropdown down in SubjectTargetLive had caused duplication and visual drift.
+  4. *Extraneous Stats Widget*: Legacy `Focus.html` does NOT have a "Daily Target Goal" progress bar in the right column—it contains only Today, Week, Month cards and Subject Time Breakdown.
+- **Corrections Applied**:
+  - `app/globals.css`: Added `@import "../pages/Focus/Focus.css";` to load all native Chronograph dial variables, keyframe animations, and custom scrollbars.
+  - `features/focus/components/ChronographDial.tsx`: Restored exact SVG structure, needle drop shadows, tick marks (`#chrono-tick-*`), hour numbers (`#chrono-num-*`), and CSS variable stroke colors.
+  - `features/focus/components/TimerDisplay.tsx`: Aligned DOM structure (`#timer-digital-display-container`, `#timer-clock-text-split`, `#timer-clock-hhmm`, `#timer-clock-ssms`, `#timer-status-text`).
+  - `features/focus/components/TimerControls.tsx`: Restored text-only buttons (`RESET`, `START` / `PAUSE` / `RESUME`, `SAVE`) matching legacy classes, while preserving the reset safety confirmation modal.
+  - `features/focus/components/FocusStats.tsx`: Removed the un-requested "Daily Target Goal" card; restored raw SVGs with `stroke-width="2.5"` for Today, Weekly, and Monthly cards; aligned Subject Time Breakdown with `#timer-subject-breakdown-container`.
+  - `features/focus/components/SubjectTargetLive.tsx`: Removed duplicated top subject dropdown and fullscreen button (relocated to the Active Panel); restored exact target card structure (`#stt-*-card`, `#stt-*-done`, `#stt-*-remain`, `#stt-*-target`, `#stt-*-badge`, `#stt-*-bar`), filter pills (`#st-filter-uncompleted`, `#st-filter-done`), deterministic sorting, and raw SVGs.
+  - `features/focus/components/SessionHistory.tsx`: Added `#timer-btn-open-analytics` button linking to `/analytics` with its raw SVG (`stroke-width="2.5"`); aligned table headers, rows, filter pills (`#sh-filter-*`), and total time badges.
+  - `features/focus/components/FocusStudio.tsx`: Removed artificial `max-w-7xl mx-auto` width constraint to restore fluid layout (`#page-timer`); aligned `#timer-active-panel` top 2-column grid (`#timer-mode-switcher` alongside `#timer-subject-select-container` and `#timer-btn-fullscreen`); wired `.timer-fullscreen` and body scroll lock (`timer-fullscreen-active`).
+- **Files Modified**:
+  - `app/globals.css`
+  - `features/focus/components/ChronographDial.tsx`
+  - `features/focus/components/TimerDisplay.tsx`
+  - `features/focus/components/TimerControls.tsx`
+  - `features/focus/components/FocusStats.tsx`
+  - `features/focus/components/SubjectTargetLive.tsx`
+  - `features/focus/components/SessionHistory.tsx`
+  - `features/focus/components/FocusStudio.tsx`
+  - `docs/DESIGN-PARITY.md`
+  - `docs/MODERNIZATION-PLAN.md`
+  - `docs/TASKS.md`
+  - `docs/MEMORY.md`
+  - `docs/MIGRATION-LOG.md`
+- **Tests & Verification**:
+  - `npm run typecheck`: 0 errors (`tsc --noEmit` exited cleanly).
+  - `node tests/timer-engine.test.mjs`: 11 / 11 passed (100% pure domain coverage).
+  - `npm run test:unit`: 27 / 27 passed (100%).
+  - `npm run build`: Turbopack compiled successfully in 2.8s (14 static routes generated).
+  - Live Browser Subagent verification: Completed top/bottom viewports and active timer interaction at `http://localhost:3000/focus` (artifacts: `focus_top_view_1790220197104.png`, `focus_bottom_view_1790220277722.png`).
+- **Result**: STEP 013 is 100% complete and verified. Next step in queue: STEP 014 (/subjects).
+
+
 

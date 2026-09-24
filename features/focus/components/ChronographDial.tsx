@@ -69,15 +69,17 @@ export const ChronographDial: React.FC<ChronographDialProps> = React.memo(functi
 
   return (
     <div
-      className={`relative flex items-center justify-center w-64 h-64 xs:w-72 xs:h-72 sm:w-80 sm:h-80 md:w-96 md:h-96 transition-all duration-300 select-none rounded-full bg-transparent ${className}`}
+      id="timer-clock-container"
+      className={`relative flex items-center justify-center w-64 h-64 xs:w-72 xs:h-72 sm:w-80 sm:h-80 md:w-96 md:h-96 transition-all duration-500 select-none rounded-full bg-transparent my-1 sm:my-2 ${className}`}
       role="img"
       aria-label={`Chronograph dial: ${mode} mode`}
     >
       <svg
+        id="chronograph-svg"
         className="w-full h-full overflow-visible"
         viewBox="0 0 300 300"
       >
-        {/* Outer subtle glow circle */}
+        {/* Outer subtle guide circle */}
         <circle
           cx="150"
           cy="150"
@@ -92,8 +94,8 @@ export const ChronographDial: React.FC<ChronographDialProps> = React.memo(functi
         {/* 60 Main Dial Ticks */}
         <g id="chrono-ticks-container">
           {MAIN_TICKS.map((t) => {
-            let strokeColor = t.isMajor ? 'currentColor' : 'currentColor';
-            let strokeOpacity = t.isMajor ? 0.8 : 0.4;
+            let strokeColor = t.isMajor ? 'var(--chrono-tick-major)' : 'var(--chrono-tick-minor)';
+            let strokeOpacity = t.isMajor ? 0.9 : 0.6;
 
             if (tickHighlight.isTargeted) {
               const isHighlighted = tickHighlight.isForwardFill
@@ -111,6 +113,7 @@ export const ChronographDial: React.FC<ChronographDialProps> = React.memo(functi
             return (
               <line
                 key={t.index}
+                id={`chrono-tick-${t.index}`}
                 x1="150"
                 y1="12"
                 x2="150"
@@ -123,7 +126,7 @@ export const ChronographDial: React.FC<ChronographDialProps> = React.memo(functi
                   transformOrigin: '150px 150px',
                   transform: `rotate(${t.angle}deg)`,
                 }}
-                className="transition-colors duration-150 text-slate-700 dark:text-slate-300"
+                className="transition-colors duration-150"
               />
             );
           })}
@@ -132,8 +135,8 @@ export const ChronographDial: React.FC<ChronographDialProps> = React.memo(functi
         {/* 12 Main Dial Radial Numbers */}
         <g id="chrono-numbers-container">
           {MAIN_NUMBERS.map((n) => {
-            let fillColor = 'currentColor';
-            let fillOpacity = 0.9;
+            let fillColor = 'var(--chrono-text-number)';
+            let fillOpacity = 1;
 
             if (tickHighlight.isTargeted) {
               const isHighlighted = tickHighlight.isForwardFill
@@ -151,6 +154,7 @@ export const ChronographDial: React.FC<ChronographDialProps> = React.memo(functi
             return (
               <text
                 key={n.tickIndex}
+                id={`chrono-num-${n.tickIndex}`}
                 x={n.nx}
                 y={n.ny}
                 fill={fillColor}
@@ -160,7 +164,7 @@ export const ChronographDial: React.FC<ChronographDialProps> = React.memo(functi
                 fontFamily="system-ui, -apple-system, sans-serif"
                 textAnchor="middle"
                 dominantBaseline="central"
-                className="transition-colors duration-150 text-slate-800 dark:text-slate-200"
+                className="transition-colors duration-150"
               >
                 {n.text}
               </text>
@@ -183,51 +187,54 @@ export const ChronographDial: React.FC<ChronographDialProps> = React.memo(functi
           />
 
           {/* Subdial 30 ticks */}
-          {SUBDIAL_TICKS.map((st) => (
-            <line
-              key={st.index}
-              x1="150"
-              y1="170"
-              x2="150"
-              y2={st.y2}
-              stroke="currentColor"
-              strokeWidth={st.strokeWidth}
-              strokeOpacity={st.isMajor ? 0.7 : 0.35}
-              strokeLinecap="round"
-              style={{
-                transformOrigin: '150px 205px',
-                transform: `rotate(${st.angle}deg)`,
-              }}
-              className="text-slate-600 dark:text-slate-400"
-            />
-          ))}
+          <g id="chrono-subdial-ticks">
+            {SUBDIAL_TICKS.map((st) => (
+              <line
+                key={st.index}
+                x1="150"
+                y1="170"
+                x2="150"
+                y2={st.y2}
+                stroke={st.isMajor ? 'var(--chrono-subdial-tick-major)' : 'var(--chrono-subdial-tick-minor)'}
+                strokeWidth={st.strokeWidth}
+                strokeOpacity={st.isMajor ? 0.7 : 0.35}
+                strokeLinecap="round"
+                style={{
+                  transformOrigin: '150px 205px',
+                  transform: `rotate(${st.angle}deg)`,
+                }}
+              />
+            ))}
+          </g>
 
           {/* Subdial 6 numbers (30, 5, 10, 15, 20, 25) */}
-          {SUBDIAL_NUMBERS.map((sn, idx) => (
-            <text
-              key={idx}
-              x={sn.snx}
-              y={sn.sny}
-              fill="currentColor"
-              fillOpacity="0.8"
-              fontSize="8"
-              fontWeight="700"
-              fontFamily="system-ui, -apple-system, sans-serif"
-              textAnchor="middle"
-              dominantBaseline="central"
-              className="text-slate-600 dark:text-slate-400"
-            >
-              {sn.text}
-            </text>
-          ))}
+          <g id="chrono-subdial-numbers">
+            {SUBDIAL_NUMBERS.map((sn, idx) => (
+              <text
+                key={idx}
+                x={sn.snx}
+                y={sn.sny}
+                fill="var(--chrono-subdial-text)"
+                fillOpacity="0.8"
+                fontSize="8"
+                fontWeight="700"
+                fontFamily="system-ui, -apple-system, sans-serif"
+                textAnchor="middle"
+                dominantBaseline="central"
+              >
+                {sn.text}
+              </text>
+            ))}
+          </g>
 
           {/* Subdial Needle - Rotates smoothly at (150, 205) */}
           <line
+            id="chrono-subdial-hand"
             x1="150"
             y1="205"
             x2="150"
             y2="175"
-            stroke="#f59e0b"
+            stroke="var(--chrono-subdial-hand)"
             strokeWidth="2"
             strokeLinecap="round"
             style={{
@@ -236,31 +243,31 @@ export const ChronographDial: React.FC<ChronographDialProps> = React.memo(functi
               transition: 'transform 0.05s linear',
             }}
           />
-          <circle cx="150" cy="205" r="2.5" fill="#f59e0b" />
+          <circle cx="150" cy="205" r="2.5" fill="var(--chrono-subdial-hand)" />
         </g>
 
-        {/* Center Axle Outer & Inner Hub */}
+        {/* Center Axle Pivot Dot */}
         <circle
           cx="150"
           cy="150"
           r="6"
-          fill="currentColor"
-          className="text-slate-400 dark:text-slate-600"
+          fill="var(--chrono-center-hub-outer)"
         />
         <circle
           cx="150"
           cy="150"
           r="3"
-          fill="#3b82f6"
+          fill="var(--chrono-center-hub-inner)"
         />
 
-        {/* Main Sweep Hand Needle - Pivot (150, 150) -> Top (150, 22) */}
+        {/* Electric Blue Sweep Hand Needle - Pivot (150, 150) -> Top (150, 22) */}
         <line
+          id="chrono-main-hand"
           x1="150"
           y1="150"
           x2="150"
           y2="22"
-          stroke="#3b82f6"
+          stroke="var(--chrono-main-hand)"
           strokeWidth="2.5"
           strokeLinecap="round"
           style={{

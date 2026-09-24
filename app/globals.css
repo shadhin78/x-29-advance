@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "../css/style.css";
 @import "../pages/Dashboard/Dashboard.css";
+@import "../pages/Focus/Focus.css";
 
 @layer base {
   :root {

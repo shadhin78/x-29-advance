@@ -61,7 +61,7 @@ export const TimerControls: React.FC<TimerControlsProps> = React.memo(function T
     <>
       <div
         id="timer-control-buttons-bar"
-        className="flex gap-2 sm:gap-4 w-full max-w-xl justify-center items-center mt-2 sm:mt-3"
+        className="flex gap-2 sm:gap-4 w-full max-w-xl justify-center items-center mt-1 sm:mt-2"
         role="group"
         aria-label="Timer Controls"
       >
@@ -70,10 +70,9 @@ export const TimerControls: React.FC<TimerControlsProps> = React.memo(function T
           id="timer-btn-reset"
           type="button"
           onClick={handleResetClick}
-          className="flex-1 py-3 sm:py-3.5 bg-slate-800/90 hover:bg-slate-700 border border-slate-700/60 text-xs font-black uppercase tracking-widest rounded-2xl active:scale-95 transition-all text-slate-300 hover:text-white touch-manipulation min-h-[44px] flex items-center justify-center gap-1.5 shadow-sm"
+          className="flex-1 py-3 sm:py-3.5 bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/60 text-xs font-black uppercase tracking-widest rounded-2xl active:scale-95 transition-all text-slate-300 touch-manipulation min-h-[44px]"
         >
-          <RotateCcw className="w-3.5 h-3.5" />
-          <span>RESET</span>
+          RESET
         </button>
 
         {/* Primary Toggle (Start / Pause / Resume) */}
@@ -81,10 +80,9 @@ export const TimerControls: React.FC<TimerControlsProps> = React.memo(function T
           id="timer-btn-toggle"
           type="button"
           onClick={onToggle}
-          className={`flex-[1.5] py-3 sm:py-3.5 ${toggleBg} font-black text-xs sm:text-sm uppercase tracking-widest rounded-2xl shadow-lg active:scale-95 transition-all touch-manipulation min-h-[44px] flex items-center justify-center gap-2`}
+          className={`flex-[1.5] py-3 sm:py-3.5 ${toggleBg} font-black text-xs uppercase tracking-widest rounded-2xl shadow-lg active:scale-95 transition-all touch-manipulation min-h-[44px]`}
         >
-          <ToggleIcon className="w-4 h-4 fill-current" />
-          <span>{toggleText}</span>
+          {toggleText}
         </button>
 
         {/* Save Session Button */}
@@ -93,10 +91,9 @@ export const TimerControls: React.FC<TimerControlsProps> = React.memo(function T
           type="button"
           disabled={!canSave}
           onClick={onSave}
-          className="flex-1 py-3 sm:py-3.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 disabled:pointer-events-none text-white font-black text-xs uppercase tracking-widest rounded-2xl shadow-lg active:scale-95 transition-all touch-manipulation min-h-[44px] flex items-center justify-center gap-1.5 shadow-emerald-600/20"
+          className="flex-1 py-3 sm:py-3.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 disabled:pointer-events-none text-white font-black text-xs uppercase tracking-widest rounded-2xl shadow-lg active:scale-95 transition-all touch-manipulation min-h-[44px]"
         >
-          <BookmarkCheck className="w-3.5 h-3.5" />
-          <span>SAVE</span>
+          SAVE
         </button>
       </div>
 

@@ -27,8 +27,8 @@ FOUNDATION & ARCHITECTURE (COMPLETED)
 PAGE-BY-PAGE PARITY VERIFICATION
 [x] STEP 011 — Page-by-Page Migration & Visual Parity: /login
 [x] STEP 012 — DESIGN PARITY RECOVERY: Shell, Sidebar, Header & Dashboard (/) (COMPLETED & VERIFIED)
-[ ] STEP 013 — Page-by-Page Migration & Visual Parity: /focus (Timer & Chronograph Dial) (FROZEN - READY FOR NEXT STEP)
-[ ] STEP 014 — Page-by-Page Migration & Visual Parity: /subjects (Taxonomy Tree & Chapter Checklist)
+[x] STEP 013 — Page-by-Page Migration & Visual Parity: /focus (Timer & Chronograph Dial) (COMPLETED & VERIFIED)
+[ ] STEP 014 — Page-by-Page Migration & Visual Parity: /subjects (Taxonomy Tree & Chapter Checklist) (NOT STARTED - NEXT IN QUEUE)
 [ ] STEP 015 — Page-by-Page Migration & Visual Parity: /daily-actions & Monthly Target Setup
 [ ] STEP 016 — Page-by-Page Migration & Visual Parity: /schedule (24h Daily Timeline & Active Slot)
 [ ] STEP 017 — Page-by-Page Migration & Visual Parity: /pace (Velocity Metrics & Completion Forecasts)
@@ -167,14 +167,14 @@ OPTIMIZATION & PRODUCTION HARDENING (PENDING)
 ---
 
 ### STEP 013 — Page-by-Page Migration & Visual Parity: /focus (Timer & Chronograph Dial)
-- [ ] Audit SVG Chronograph dial needle rotation and tick marks against `Focus.html`.
-- [ ] Verify stopwatch and countdown modes with tabular font (`00:00:00`).
-- [ ] Test Web Audio API chimes and fullscreen mode.
-- [ ] Verify timer tick updates only dial needles/digits without parent tree re-rendering.
-- [ ] Verify study log persistence to IndexedDB and Firestore.
-- [ ] Update `DESIGN-PARITY.md` and `MEMORY.md`.
-- [ ] Git commit checkpoint for STEP 013.
-- **Status**: **NOT STARTED (NEXT IN QUEUE)**
+- [x] Audit SVG Chronograph dial needle rotation, drop shadows, and tick marks against `Focus.html`.
+- [x] Verify stopwatch and countdown modes with tabular font (`00:00:00`) and milliseconds split display.
+- [x] Test Web Audio API chimes and hardware-accelerated fullscreen mode (`.timer-fullscreen`).
+- [x] Verify timer tick updates only dial needles/digits without parent tree re-rendering.
+- [x] Verify study log persistence to IndexedDB and Firestore.
+- [x] Update `DESIGN-PARITY.md` and `MEMORY.md`.
+- [x] Git commit checkpoint for STEP 013.
+- **Status**: **COMPLETED**
 
 ---
 
@@ -185,7 +185,7 @@ OPTIMIZATION & PRODUCTION HARDENING (PENDING)
 - [ ] Verify instant IndexedDB write on chapter toggle.
 - [ ] Update `DESIGN-PARITY.md` and `MEMORY.md`.
 - [ ] Git commit checkpoint for STEP 014.
-- **Status**: **NOT STARTED**
+- **Status**: **NOT STARTED (NEXT IN QUEUE)**
 
 ---
 

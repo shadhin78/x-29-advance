@@ -57,31 +57,33 @@ export const TimerDisplay: React.FC<TimerDisplayProps> = React.memo(function Tim
     >
       <div
         id="timer-clock-text-split"
-        className="font-mono text-4xl xs:text-5xl sm:text-6xl md:text-7xl font-black tracking-tight drop-shadow-md leading-none flex items-baseline"
+        className="font-mono text-4xl sm:text-5xl md:text-6xl font-black tracking-tight drop-shadow-md leading-none flex items-baseline"
       >
         <span
           id="timer-clock-hhmm"
-          className="text-slate-900 dark:text-white transition-colors duration-200"
+          className="text-slate-900 dark:text-white transition-colors duration-300"
         >
           {digits.hhmm}
         </span>
         <span
           id="timer-clock-ssms"
-          className="text-blue-600 dark:text-blue-500 transition-colors duration-200"
+          className="text-blue-600 dark:text-blue-500 transition-colors duration-300"
         >
           {digits.ss}
         </span>
       </div>
 
-      <div className="flex items-center gap-1.5 mt-2 sm:mt-2.5">
-        <span className={`w-2 h-2 rounded-full ${dotColor}`} />
-        <span
-          id="timer-status-text"
-          className={`text-[10px] sm:text-xs font-bold uppercase tracking-widest ${statusClass} transition-colors duration-200`}
-        >
-          {statusText}
-        </span>
-      </div>
+      {/* Hidden fallback element for legacy selectors and fullscreen CSS */}
+      <span id="timer-clock-text" className="hidden">
+        {digits.fullClock}
+      </span>
+
+      <span
+        id="timer-status-text"
+        className={`text-[9px] sm:text-xs font-bold uppercase tracking-widest ${statusClass} mt-1.5 sm:mt-2 transition-colors duration-300`}
+      >
+        {statusText}
+      </span>
     </div>
   );
 });
