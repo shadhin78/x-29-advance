@@ -620,3 +620,73 @@
   - Browser Verification: Verified all 6 tabs interactively, verified priority rank swap on down arrow click, verified track rename modal open & cancel, and verified mobile 390px viewport responsiveness.
 - **Result**: STEP 020 is 100% complete and verified. Next step in queue: STEP 021 (/analytics).
 
+---
+
+### Milestone: Page-by-Page Migration & Visual Parity: /analytics (STEP 021)
+- **Date**: 2026-09-24
+- **Scope**:
+  - Full visual and functional parity matching `pages/Analytics/*` (`Analytics.html`, `Analytics.js`, `Analytics.css`), `js/features/analytics/spectra.js`, `chapterMap.js`, `heatmap.js`, and `history.js`.
+  - Added `@import "../pages/Analytics/Analytics.css";` to `app/globals.css`.
+  - Built comprehensive pure analytical algorithms in `features/analytics/services/analyticsService.ts`:
+    - `calculateCompletionRate`, `calculateRequiredPace`, `calculateDaysRemaining`, `getHeatmapTier`.
+    - `calculateFocusHeatmap`: multi-week calendar matrix, 8 tier stats, and active streak calculation from timer logs.
+    - `calculatePolarArc`: deterministic SVG path generation for segmented concentric circular arcs.
+    - `calculateChapterMap`: cascaded syllabus filtering (Global, Track, Program, Subject) with complete, incomplete, skipped stats.
+    - `calculateHabitRadar`: polar commitment radar with month day allocation, monthly completion percentage, total fulfilled, active streak, and days logged.
+    - `calculateFocusAnalyticsMetrics`: daywise and grouped focus duration vs benchmark target across 1D, 7D, 30D, and 6M timeframes with day offset stepper.
+    - `calculateProgramTrends`: monthly cumulative completion percentage trajectories for each program across 1Y, 2Y, 3Y, and Life Time.
+    - `calculateDailyActionMonthlyTrends`: day-by-day habit fulfillment tracking and success rates for active month.
+  - Extended domain types in `types/analytics.ts`:
+    - Added `TrendTimeFilter` ('1Y' | '2Y' | '3Y' | 'ALL').
+    - Added `ProgramTrendData`, `ProgramTrendSeries`, `DailyActionMonthlyData`, `FocusAnalyticsMetrics`, `FocusAnalyticsPoint`.
+  - Re-architected `features/analytics/components/AnalyticsStudio.tsx`:
+    - Exact page container (`#page-spectra-analytics`) with `.analytics-slide-up` and `.animate-page-enter`.
+    - Ambient glow header (`Analytical System`, `Live Sync`, `Analytics`).
+    - 4 Summary KPI Cards:
+      - `Avg Completion`: `#analytics-avg-completion` and `#analytics-avg-completion-bar`.
+      - `Logged Actions`: `#analytics-total-actions`.
+      - `Active Streak`: `#analytics-active-streak` with pulsing flame.
+      - `Days Remaining`: `#analytics-days-remaining`.
+    - Global Chapters Goal Chart:
+      - `#spectra-circle-chart-wrapper` with concentric polar arc SVG rings.
+      - Dropdown filter `#spectra-filter-dropdown-btn`, `#spectra-filter-dropdown-label`, `#spectra-filter-dropdown-menu` supporting Global View, Tracks, Programs, and Subjects.
+      - Dynamic center circle hub showing Progress (`completed/effectiveTotal`), percentage badge, and remaining count.
+      - Legend badges: `#spectra-legend-complete`, `#spectra-legend-incomplete`, `#spectra-legend-skipped`.
+      - Hovered chapter banner with subject, chapter number, and status.
+    - The X Commitments Habit Radar:
+      - Container `#spectra-commitments-chart-wrapper`.
+      - Tooltip `#spectra-commitments-tooltip`.
+      - Month Stepper (`data-commitment-prev`, `#spectra-commitments-month-label`, `data-commitment-next`).
+      - Vertical Stats: `#spectra-commitments-pct`, `#spectra-commitments-count`, `#spectra-commitments-streak`, `#spectra-commitments-days-logged`.
+      - Interactive radial SVG with left-side leader lines, checkboxes for today's status, and cell clicking calling `toggleHabit`.
+    - Embedded Focus Analytics Section:
+      - Timeframe buttons: `#spectra-tar-btn-1`, `#spectra-tar-btn-7`, `#spectra-tar-btn-30`, `#spectra-tar-btn-180`.
+      - Day Stepper: `#spectra-day-stepper`, `#spectra-day-prev-btn`, `#spectra-day-label`, `#spectra-day-next-btn`.
+      - Grouping: `#spectra-tag-btn-daily`, `#spectra-tag-btn-weekly`, `#spectra-tag-btn-monthly`.
+      - Style: `#spectra-tas-btn-combo`, `#spectra-tas-btn-bar`, `#spectra-tas-btn-line`.
+      - Responsive SVG bar/line chart with target benchmark dashed line.
+      - Metrics: Focus Target `#spectra-timer-target-input`, Average Focus `#spectra-timer-average-focus`, Peak Day `#spectra-timer-peak-date`, `#spectra-timer-peak-value`, Total Focus `#spectra-timer-total-focus`, Average Target `#spectra-timer-average-target`, Success Rate `#spectra-timer-success-rate`, `#spectra-timer-success-rate-subtitle`.
+    - Focus Matrix GitHub Box Heatmap:
+      - Timeframe: `#spectra-hm-btn-30`, `#spectra-hm-btn-90`, `#spectra-hm-btn-180`, `#spectra-hm-btn-365`.
+      - 8 Stat Badges: Active Days, Streak, 0h, 0-2h, 2-4h, >4h, ≥6h, ≥8h.
+      - GitHub-style day matrix grid (`#spectra-focus-heatmap-grid`) with scrollbar.
+      - Legend and interactive day side note (`#spectra-heatmap-footer`, `#spectra-heatmap-side-note`, `#spectra-sn-day-name`, `#spectra-sn-date`, `#spectra-sn-focus-time`, `#spectra-sn-tier-badge`, `#spectra-sn-subjects-list`, `#spectra-sn-target-pct`).
+    - Visual Analysis Trends:
+      - Time Range filter (`#tf-1Y`, `#tf-2Y`, `#tf-3Y`, `#tf-ALL`).
+      - Program Completion Trend Card (`#mainChartPrograms`, `#prog-legend`, `#prog-comment`, `#btn-open-subject-trend`).
+      - Daily Actions Month Card (`#monthlyActionsChart`, `#act-legend`, `#daily-actions-msg-bar`, `#act-comment`, `#btn-open-yearly-actions`).
+      - Active Goal Pacing Trend (X Bar) Burn-up Card (`#spectraPaceTrendCanvas`, `#spectra-pace-title`, `#spectra-pace-desc`, `#spectra-pace-req`, `#spectra-pace-act`, `#spectra-pace-finish`).
+      - Global Scope Trend Burn-up Card (`#globalPaceTrendCanvas`, `#global-pace-title`, `#global-pace-desc`, `#global-pace-req`, `#global-pace-act`, `#global-pace-finish`).
+    - Drilldown Modals:
+      - Subject Trend modal: granular curriculum progress per subject with progress bar indicators.
+      - Yearly Actions modal: annual consistency metrics per habit.
+- **Validation**:
+  - `npm run typecheck`: 0 errors (`tsc --noEmit` exited cleanly).
+  - Unit tests: `tests/analytics-engine.test.mjs` passed 11 / 11 tests (100%).
+  - Analytics visualization suite: `npm run test:analytics` passed 24 / 24 tests (100%).
+  - Unit suite: `npm run test:unit` passed 62 / 62 tests across all modules (100%).
+  - Integration suite: `npm test` passed 10 / 10 batch test suites (100%).
+  - Next.js production build: `npm run build` compiled successfully in 2.8s with 14/14 static routes prerendered (including `○ /analytics`).
+  - Browser Verification: Captured desktop and scrolled screenshots; validated KPI cards, dynamic chapter map filtering (global vs track view), habit radar month navigation and leader line checkboxes, focus analytics timeframe toggling, focus heatmap day inspection, and visual analysis trends.
+- **Result**: STEP 021 is 100% complete and verified. Next step in queue: STEP 022 (Comprehensive Cross-Device & Responsive Verification).
+

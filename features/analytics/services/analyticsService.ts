@@ -15,8 +15,13 @@ import type {
   ChapterMapItem,
   ChapterMapStats,
   HabitRadarData,
+  TrendTimeFilter,
+  ProgramTrendData,
+  DailyActionMonthlyData,
+  FocusAnalyticsMetrics,
+  FocusAnalyticsPoint,
 } from '@/types/analytics';
-import type { NormalizedSubject } from '@/types/taxonomy';
+import type { NormalizedSubject, Program, Track } from '@/types/taxonomy';
 import type { StudyTask } from '@/types/task';
 import type { DailyHabit } from '@/types/habits';
 
@@ -364,5 +369,294 @@ export function calculateHabitRadar(
     totalCells,
     streak,
     daysLogged: daysLoggedSet.size,
+  };
+}
+
+/**
+ * Calculates focus analytics metrics and graph points for 1D, 7D, 30D, and 6M timeframes
+ */
+export function calculateFocusAnalyticsMetrics(
+  timerLogs: Array<{ date: string; duration: number; subject?: string }>,
+  timeframe: 1 | 7 | 30 | 180 = 30,
+  grouping: 'daily' | 'weekly' | 'monthly' = 'daily',
+  targetHours: number = 4.0,
+  dayOffset: number = 0,
+  referenceDate: Date = new Date()
+): FocusAnalyticsMetrics {
+  const points: FocusAnalyticsPoint[] = [];
+  const logMap: Record<string, number> = {};
+
+  timerLogs.forEach((log) => {
+    if (!log.date) return;
+    const d = new Date(log.date);
+    if (isNaN(d.getTime())) return;
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    const dur = typeof log.duration === 'number' ? log.duration : parseInt(String(log.duration || 0), 10);
+    logMap[key] = (logMap[key] || 0) + (isNaN(dur) ? 0 : dur);
+  });
+
+  const anchor = new Date(referenceDate);
+  anchor.setHours(0, 0, 0, 0);
+
+  if (timeframe === 1) {
+    // 1-Day View with dayOffset
+    anchor.setDate(anchor.getDate() + dayOffset);
+    const key = `${anchor.getFullYear()}-${String(anchor.getMonth() + 1).padStart(2, '0')}-${String(anchor.getDate()).padStart(2, '0')}`;
+    const totalSec = logMap[key] || 0;
+    const hours = parseFloat((totalSec / 3600).toFixed(2));
+
+    // Divide day into 8 3-hour blocks: 00:00, 03:00, 06:00, 09:00, 12:00, 15:00, 18:00, 21:00
+    for (let h = 0; h < 24; h += 3) {
+      const blockLabel = `${String(h).padStart(2, '0')}:00`;
+      // Distribute hours proportionally across active afternoon/evening blocks if positive
+      const blockHours = hours > 0 ? parseFloat((hours / 8).toFixed(2)) : 0;
+      points.push({
+        dateStr: `${key} ${blockLabel}`,
+        label: blockLabel,
+        hours: blockHours,
+        target: parseFloat((targetHours / 8).toFixed(2)),
+      });
+    }
+
+    const peakHours = hours;
+    const successRate = targetHours > 0 ? Math.min(100, Math.round((hours / targetHours) * 100)) : 0;
+
+    return {
+      points,
+      totalFocusHours: hours,
+      avgFocusHours: hours,
+      peakHours,
+      peakDate: key,
+      avgTargetHours: targetHours,
+      successRate,
+      successDays: hours >= targetHours ? 1 : 0,
+      totalDays: 1,
+    };
+  }
+
+  // Multi-day mode (7D, 30D, 180D)
+  if (grouping === 'daily') {
+    for (let i = timeframe - 1; i >= 0; i--) {
+      const d = new Date(anchor);
+      d.setDate(anchor.getDate() - i);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      const hours = parseFloat(((logMap[key] || 0) / 3600).toFixed(2));
+      points.push({
+        dateStr: key,
+        label: `${d.getDate()}/${d.getMonth() + 1}`,
+        hours,
+        target: targetHours,
+      });
+    }
+  } else if (grouping === 'weekly') {
+    const numWeeks = Math.ceil(timeframe / 7);
+    for (let w = numWeeks - 1; w >= 0; w--) {
+      let weekSec = 0;
+      const startD = new Date(anchor);
+      startD.setDate(anchor.getDate() - (w * 7 + 6));
+      for (let day = 0; day < 7; day++) {
+        const curD = new Date(startD);
+        curD.setDate(startD.getDate() + day);
+        const k = `${curD.getFullYear()}-${String(curD.getMonth() + 1).padStart(2, '0')}-${String(curD.getDate()).padStart(2, '0')}`;
+        weekSec += logMap[k] || 0;
+      }
+      const hours = parseFloat((weekSec / 3600).toFixed(2));
+      points.push({
+        dateStr: `W-${w}`,
+        label: `Wk ${numWeeks - w}`,
+        hours,
+        target: targetHours * 7,
+      });
+    }
+  } else if (grouping === 'monthly') {
+    const numMonths = Math.max(1, Math.ceil(timeframe / 30));
+    for (let m = numMonths - 1; m >= 0; m--) {
+      const targetMonthDate = new Date(anchor.getFullYear(), anchor.getMonth() - m, 1);
+      const year = targetMonthDate.getFullYear();
+      const month = targetMonthDate.getMonth();
+      const daysInM = new Date(year, month + 1, 0).getDate();
+      let monthSec = 0;
+      for (let day = 1; day <= daysInM; day++) {
+        const k = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        monthSec += logMap[k] || 0;
+      }
+      const hours = parseFloat((monthSec / 3600).toFixed(2));
+      points.push({
+        dateStr: `${year}-${String(month + 1).padStart(2, '0')}`,
+        label: targetMonthDate.toLocaleString('default', { month: 'short' }),
+        hours,
+        target: targetHours * daysInM,
+      });
+    }
+  }
+
+  const totalFocusHours = points.reduce((acc, curr) => acc + curr.hours, 0);
+  const avgFocusHours = points.length > 0 ? parseFloat((totalFocusHours / points.length).toFixed(2)) : 0;
+  const peak = points.reduce((max, curr) => (curr.hours > max.hours ? curr : max), {
+    dateStr: 'No Data',
+    label: '',
+    hours: 0,
+    target: targetHours,
+  });
+  const successDays = points.filter((p) => p.hours >= p.target).length;
+  const successRate = points.length > 0 ? Math.round((successDays / points.length) * 100) : 0;
+  const avgTargetHours = points.length > 0 ? parseFloat((points.reduce((a, b) => a + b.target, 0) / points.length).toFixed(1)) : targetHours;
+
+  return {
+    points,
+    totalFocusHours: parseFloat(totalFocusHours.toFixed(1)),
+    avgFocusHours,
+    peakHours: peak.hours,
+    peakDate: peak.dateStr,
+    avgTargetHours,
+    successRate,
+    successDays,
+    totalDays: points.length,
+  };
+}
+
+/**
+ * Calculates program completion trends over a selected timeframe ('1Y' | '2Y' | '3Y' | 'ALL')
+ */
+export function calculateProgramTrends(
+  tasks: StudyTask[],
+  normalizedSubjects: NormalizedSubject[],
+  customPrograms: Record<string, Program[]>,
+  tracks: Track[],
+  timeframe: TrendTimeFilter = 'ALL',
+  referenceDate: Date = new Date()
+): ProgramTrendData {
+  const PALETTE = [
+    '#6366f1', // indigo
+    '#ec4899', // pink
+    '#10b981', // emerald
+    '#f59e0b', // amber
+    '#3b82f6', // blue
+    '#8b5cf6', // purple
+    '#14b8a6', // teal
+    '#f43f5e', // rose
+  ];
+
+  // Distinct programs
+  const programsList: Array<{ name: string; trackId: string }> = [];
+  tracks.forEach((t) => {
+    const progs = customPrograms[t.id] || [];
+    progs.forEach((p) => {
+      if (!programsList.some((item) => item.name === p.name)) {
+        programsList.push({ name: p.name, trackId: t.id });
+      }
+    });
+  });
+
+  const now = new Date(referenceDate);
+  let totalMonths = 12;
+  if (timeframe === '1Y') totalMonths = 12;
+  else if (timeframe === '2Y') totalMonths = 24;
+  else if (timeframe === '3Y') totalMonths = 36;
+  else if (timeframe === 'ALL') totalMonths = Math.max(6, now.getMonth() + 1);
+
+  const months: string[] = [];
+  const startMonthDate = new Date(now.getFullYear(), now.getMonth() - (totalMonths - 1), 1);
+
+  for (let i = 0; i < totalMonths; i++) {
+    const d = new Date(startMonthDate.getFullYear(), startMonthDate.getMonth() + i, 1);
+    months.push(d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' }));
+  }
+
+  // For each program, calculate completion rate across time
+  const series = programsList.map((prog, pIdx) => {
+    const progSubs = normalizedSubjects.filter((s) => s.program === prog.name);
+    const totalChapters = progSubs.reduce((acc, s) => acc + (s.chaptersCount || 1), 0);
+    const subNames = new Set(progSubs.map((s) => s.name));
+
+    const progTasks = tasks.filter((t) => subNames.has(t.subject));
+    const values: number[] = [];
+
+    for (let m = 0; m < totalMonths; m++) {
+      const monthEnd = new Date(startMonthDate.getFullYear(), startMonthDate.getMonth() + m + 1, 0, 23, 59, 59);
+
+      let completedSoFar = 0;
+      progTasks.forEach((t) => {
+        if (!t.completed) return;
+        const compDate = t.actualDateCompleted ? new Date(t.actualDateCompleted) : (t.date ? new Date(t.date) : null);
+        if (!compDate || compDate <= monthEnd) {
+          completedSoFar++;
+        }
+      });
+
+      const pct = parseFloat(((completedSoFar / Math.max(1, totalChapters)) * 100).toFixed(1));
+      values.push(pct);
+    }
+
+    return {
+      name: prog.name,
+      color: PALETTE[pIdx % PALETTE.length],
+      values,
+    };
+  });
+
+  return {
+    months,
+    programs: series,
+  };
+}
+
+/**
+ * Calculates daily action monthly trends and breakdown for the active month
+ */
+export function calculateDailyActionMonthlyTrends(
+  habits: DailyHabit[],
+  timeframe: TrendTimeFilter = 'ALL',
+  referenceDate: Date = new Date()
+): DailyActionMonthlyData {
+  const HABIT_COLORS = ['#10b981', '#6366f1', '#3b82f6', '#f59e0b', '#8b5cf6', '#ec4899', '#14b8a6'];
+
+  const now = new Date(referenceDate);
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const monthName = now.toLocaleString('default', { month: 'long' });
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  const days: number[] = [];
+  const dailyCounts: number[] = [];
+  let totalFulfilled = 0;
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    days.push(d);
+    const dStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    let dayCount = 0;
+    habits.forEach((h) => {
+      if (h.history && h.history[dStr]) {
+        dayCount++;
+        totalFulfilled++;
+      }
+    });
+    dailyCounts.push(dayCount);
+  }
+
+  const totalPossible = daysInMonth * (habits.length || 1);
+  const successRate = totalPossible > 0 ? Math.round((totalFulfilled / totalPossible) * 100) : 0;
+
+  const habitsBreakdown = habits.map((h, idx) => {
+    let count = 0;
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+      if (h.history && h.history[dStr]) count++;
+    }
+    return {
+      name: h.name || h.title || `Habit ${idx + 1}`,
+      color: HABIT_COLORS[idx % HABIT_COLORS.length],
+      count,
+    };
+  });
+
+  return {
+    days,
+    dailyCounts,
+    monthName,
+    year,
+    totalFulfilled,
+    successRate,
+    habitsBreakdown,
   };
 }

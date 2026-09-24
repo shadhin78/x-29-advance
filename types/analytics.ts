@@ -61,3 +61,45 @@ export interface HabitRadarData {
   streak: number;
   daysLogged: number;
 }
+
+export type TrendTimeFilter = '1Y' | '2Y' | '3Y' | 'ALL';
+
+export interface ProgramTrendSeries {
+  name: string;
+  color: string;
+  values: number[];
+}
+
+export interface ProgramTrendData {
+  months: string[];
+  programs: ProgramTrendSeries[];
+}
+
+export interface DailyActionMonthlyData {
+  days: number[];
+  dailyCounts: number[];
+  monthName: string;
+  year: number;
+  totalFulfilled: number;
+  successRate: number;
+  habitsBreakdown: Array<{ name: string; color: string; count: number }>;
+}
+
+export interface FocusAnalyticsPoint {
+  dateStr: string;
+  label: string;
+  hours: number;
+  target: number;
+}
+
+export interface FocusAnalyticsMetrics {
+  points: FocusAnalyticsPoint[];
+  totalFocusHours: number;
+  avgFocusHours: number;
+  peakHours: number;
+  peakDate: string;
+  avgTargetHours: number;
+  successRate: number;
+  successDays: number;
+  totalDays: number;
+}
