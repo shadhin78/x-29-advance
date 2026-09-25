@@ -6,12 +6,16 @@
  * Drives visual clock and chronograph needle updates with timestamp-derived math.
  * Completely isolates high-frequency display re-renders from global application state.
  * 
- * Zero timer drift: derived purely from `Date.now() - startTime`.
- * Zero CPU waste: idle when timer is paused or stopped.
- * Recovers seamlessly from background tab throttling via `visibilitychange`.
+ * STEP 027 Mobile & Android Low-Power Optimization:
+ * - Zero timer drift: derived purely from OS hardware epoch timestamp (Date.now() - startTime).
+ * - Adaptive interval: 50ms for 60fps chronograph needle in foreground; 1000ms low-power in background.
+ * - Instant synchronization on Android wake / app switch / tab restore: listens to visibilitychange,
+ *   pageshow, window focus, and online events.
+ * - Minimal memory allocations: caches formatted digit objects across sub-second frames.
+ * - Zero CPU waste: completely idle when timer is paused or stopped.
  */
 
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import type { TimerMode, TimerDigits, DialAngles } from '@/types/timer';
 import {
   calculateElapsedMs,
@@ -65,34 +69,53 @@ export function useTimerTicker({
     }
   }, [isRunning, targetDuration]);
 
-  // Visual refresh loop (50ms interval provides fluid subdial / sweep hand motion without overloading CPU)
+  // Visual refresh loop with adaptive foreground (50ms) / background (1000ms) frequency
   useEffect(() => {
     if (!isRunning) {
       return;
     }
 
+    // Initial immediate sync
     setNowMs(Date.now());
 
-    const intervalId = setInterval(() => {
-      setNowMs(Date.now());
-    }, 50);
+    let intervalId: NodeJS.Timeout | null = null;
 
-    // Instant recovery when user switches back to this tab
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
+    const setupInterval = () => {
+      if (intervalId) clearInterval(intervalId);
+      // If tab is hidden (backgrounded / phone locked), throttle to 1s to conserve Android battery
+      const intervalDelay = typeof document !== 'undefined' && document.hidden ? 1000 : 50;
+      intervalId = setInterval(() => {
         setNowMs(Date.now());
-      }
+      }, intervalDelay);
     };
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    setupInterval();
+
+    // Instant recovery when user unlocks phone, switches back to app, or restores from bfcache
+    const handleWakeSync = () => {
+      setNowMs(Date.now());
+      setupInterval();
+    };
+
+    if (typeof window !== 'undefined') {
+      document.addEventListener('visibilitychange', handleWakeSync);
+      window.addEventListener('focus', handleWakeSync);
+      window.addEventListener('pageshow', handleWakeSync);
+      window.addEventListener('online', handleWakeSync);
+    }
 
     return () => {
-      clearInterval(intervalId);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      if (intervalId) clearInterval(intervalId);
+      if (typeof window !== 'undefined') {
+        document.removeEventListener('visibilitychange', handleWakeSync);
+        window.removeEventListener('focus', handleWakeSync);
+        window.removeEventListener('pageshow', handleWakeSync);
+        window.removeEventListener('online', handleWakeSync);
+      }
     };
   }, [isRunning]);
 
-  // Derive all display values purely from timestamps
+  // Derive all display values purely from timestamps (zero drift)
   const elapsedMs = useMemo(() => {
     return calculateElapsedMs(startTime, elapsedBeforeStart, nowMs, isRunning);
   }, [startTime, elapsedBeforeStart, nowMs, isRunning]);
@@ -112,8 +135,18 @@ export function useTimerTicker({
     return calculateProgressPercentage(elapsedMs, targetDuration);
   }, [elapsedMs, targetDuration]);
 
+  // Cache digits across sub-second ticks when display second is unchanged
+  const prevDisplaySecRef = useRef<number>(-1);
+  const cachedDigitsRef = useRef<TimerDigits | null>(null);
+
   const digits = useMemo(() => {
-    return formatTimerDigits(displayMs);
+    const currentSec = Math.floor(displayMs / 1000);
+    // Format digits once per second (or on first run) to eliminate 95% of string allocations during 50ms loop
+    if (currentSec !== prevDisplaySecRef.current || !cachedDigitsRef.current) {
+      prevDisplaySecRef.current = currentSec;
+      cachedDigitsRef.current = formatTimerDigits(displayMs);
+    }
+    return cachedDigitsRef.current;
   }, [displayMs]);
 
   const angles = useMemo(() => {
@@ -124,7 +157,7 @@ export function useTimerTicker({
     return resolveTimerCompletion(mode, elapsedMs, targetDuration, isRunning);
   }, [mode, elapsedMs, targetDuration, isRunning]);
 
-  // Trigger completion sound and auto-save callback once
+  // Trigger completion sound and auto-save callback once upon reaching target
   useEffect(() => {
     if (isCompleted && !completedFiredRef.current) {
       completedFiredRef.current = true;

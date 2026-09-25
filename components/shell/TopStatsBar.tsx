@@ -186,12 +186,17 @@ export const TopStatsBar: React.FC = () => {
   }, [paceGoals, now]);
 
   return (
-    <header className="flex flex-col xl:flex-row justify-between items-stretch xl:items-center gap-3.5 md:gap-4 border-b border-slate-100 dark:border-slate-800 pb-5 md:pb-6 shrink-0 select-none">
+    <header
+      id="top-stats-bar"
+      aria-label="Executive Statistics and Exam Countdown"
+      className="flex flex-col xl:flex-row justify-between items-stretch xl:items-center gap-3.5 md:gap-4 border-b border-slate-100 dark:border-slate-800 pb-5 md:pb-6 shrink-0 select-none"
+    >
       {/* Exam Countdown Widget Container (Matching Stats Widget Size & Card Styling) */}
       <Link
         href="/exam"
         id="header-exam-countdown-compact"
-        className="hidden lg:flex items-center bg-white dark:bg-slate-800/80 px-3.5 py-2.5 md:px-4 md:py-3 rounded-2xl md:rounded-3xl shadow-sm border border-slate-200/60 dark:border-slate-700/60 h-[64px] min-h-[64px] shrink-0 justify-center md:justify-start hover:border-rose-300 dark:hover:border-rose-800/60 transition-all duration-300 group cursor-pointer max-w-full overflow-hidden"
+        aria-label={`Upcoming exam countdown for ${examCountdownData.subject}`}
+        className="hidden lg:flex items-center bg-white dark:bg-slate-800/80 px-3.5 py-2.5 md:px-4 md:py-3 rounded-2xl md:rounded-3xl shadow-sm border border-slate-200/60 dark:border-slate-700/60 h-[64px] min-h-[64px] shrink-0 justify-center md:justify-start hover:border-rose-300 dark:hover:border-rose-800/60 transition-all duration-300 group cursor-pointer max-w-full overflow-hidden focus:outline-none focus:ring-2 focus:ring-rose-500"
         title="View Exam Routine"
       >
         <div className="flex items-center space-x-2.5 md:space-x-3">

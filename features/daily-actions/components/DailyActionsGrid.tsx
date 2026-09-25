@@ -223,13 +223,16 @@ export const DailyActionsGrid: React.FC<DailyActionsGridProps> = ({
             ? 'border-red-500 shadow-lg shadow-red-500/10'
             : 'border-slate-200 dark:border-slate-700';
 
+        const isYes = state === true;
+        const isNo = state === false;
+
         const yesClass =
-          state === true
+          isYes
             ? 'bg-gradient-to-br from-green-400 to-emerald-500 text-white shadow-[0_4px_12px_rgba(16,185,129,0.5)] scale-105'
             : 'bg-slate-100 dark:bg-slate-700 text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600';
 
         const noClass =
-          state === false
+          isNo
             ? 'bg-gradient-to-br from-red-400 to-red-500 text-white shadow-[0_4px_12px_rgba(239,68,68,0.4)] scale-105'
             : 'bg-slate-100 dark:bg-slate-700 text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600';
 
@@ -282,7 +285,8 @@ export const DailyActionsGrid: React.FC<DailyActionsGridProps> = ({
                 <button
                   type="button"
                   onClick={() => onOpenAnalytics(cfg.id)}
-                  className="group flex items-center justify-center p-1.5 sm:p-2 lg:p-2.5 rounded-lg sm:rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700/80 hover:bg-white dark:hover:bg-slate-800 active:scale-95 transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5 shrink-0 cursor-pointer"
+                  aria-label={`View analytics for ${cfg.title || cfg.name}`}
+                  className="group flex items-center justify-center p-1.5 sm:p-2 lg:p-2.5 rounded-lg sm:rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700/80 hover:bg-white dark:hover:bg-slate-800 active:scale-95 transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5 shrink-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500"
                   title="Analytics"
                 >
                   <svg
@@ -290,6 +294,7 @@ export const DailyActionsGrid: React.FC<DailyActionsGridProps> = ({
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
+                    aria-hidden="true"
                   >
                     <path
                       strokeLinecap="round"
@@ -302,7 +307,8 @@ export const DailyActionsGrid: React.FC<DailyActionsGridProps> = ({
                 <button
                   type="button"
                   onClick={() => onOpenEdit(cfg.id)}
-                  className="group flex items-center justify-center p-1.5 sm:p-2 lg:p-2.5 rounded-lg sm:rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700/80 hover:bg-white dark:hover:bg-slate-800 active:scale-95 transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5 shrink-0 cursor-pointer"
+                  aria-label={`Edit action ${cfg.title || cfg.name}`}
+                  className="group flex items-center justify-center p-1.5 sm:p-2 lg:p-2.5 rounded-lg sm:rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700/80 hover:bg-white dark:hover:bg-slate-800 active:scale-95 transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5 shrink-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500"
                   title="Edit Action"
                 >
                   <svg
@@ -310,6 +316,7 @@ export const DailyActionsGrid: React.FC<DailyActionsGridProps> = ({
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
+                    aria-hidden="true"
                   >
                     <path
                       strokeLinecap="round"
@@ -327,16 +334,20 @@ export const DailyActionsGrid: React.FC<DailyActionsGridProps> = ({
               <button
                 type="button"
                 id={`btn-action-yes-${cfg.id}`}
+                aria-pressed={isYes}
+                aria-label={`Mark ${cfg.title || cfg.name} as done for today`}
                 onClick={() => setDailyState(cfg.id, true, todayStr)}
-                className={`flex-1 py-1.5 sm:py-2 md:py-2.5 text-[9px] sm:text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 active:scale-90 cursor-pointer ${yesClass}`}
+                className={`flex-1 py-1.5 sm:py-2 md:py-2.5 text-[9px] sm:text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 active:scale-90 cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500 ${yesClass}`}
               >
                 YES
               </button>
               <button
                 type="button"
                 id={`btn-action-no-${cfg.id}`}
+                aria-pressed={isNo}
+                aria-label={`Mark ${cfg.title || cfg.name} as not done for today`}
                 onClick={() => setDailyState(cfg.id, false, todayStr)}
-                className={`flex-1 py-1.5 sm:py-2 md:py-2.5 text-[9px] sm:text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 active:scale-90 cursor-pointer ${noClass}`}
+                className={`flex-1 py-1.5 sm:py-2 md:py-2.5 text-[9px] sm:text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 active:scale-90 cursor-pointer focus:outline-none focus:ring-2 focus:ring-rose-500 ${noClass}`}
               >
                 NO
               </button>
@@ -362,13 +373,14 @@ export const DailyActionsGrid: React.FC<DailyActionsGridProps> = ({
                       key={day.iso}
                       type="button"
                       onClick={() => toggleHabit(cfg.id, day.iso)}
+                      aria-label={`${cfg.title || cfg.name} on ${day.iso}: ${done ? 'Completed (YES)' : 'Missed (NO)'}`}
                       title={`${day.iso} (${day.monthAbbr} ${day.dateNum}): ${done ? 'YES' : 'NO'}`}
-                      className={`flex flex-col items-center justify-center p-1.5 md:p-2 rounded-xl border active:scale-90 transition-all duration-200 hover:scale-105 ${bgClass} w-full aspect-square focus:outline-none cursor-pointer`}
+                      className={`flex flex-col items-center justify-center p-1.5 md:p-2 rounded-xl border active:scale-90 transition-all duration-200 hover:scale-105 ${bgClass} w-full aspect-square focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer`}
                     >
-                      <span className="text-[7px] md:text-[8px] uppercase font-black opacity-90 mb-0.5 select-none pointer-events-none">
+                      <span className="text-[7px] md:text-[8px] uppercase font-black opacity-90 mb-0.5 select-none pointer-events-none" aria-hidden="true">
                         {day.monthAbbr}
                       </span>
-                      <span className="text-xs md:text-sm font-black leading-none select-none pointer-events-none">
+                      <span className="text-xs md:text-sm font-black leading-none select-none pointer-events-none" aria-hidden="true">
                         {day.dateNum}
                       </span>
                     </button>

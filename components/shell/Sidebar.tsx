@@ -159,6 +159,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className = '', onNavigate, on
   return (
     <aside
       id="sidebar-container"
+      aria-label="Sidebar Navigation"
       className={`flex flex-col w-72 h-screen bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 shrink-0 select-none ${className}`}
     >
       <div className="flex flex-col h-full min-h-0 justify-between p-5 md:p-6 overflow-y-auto custom-scrollbar">
@@ -167,7 +168,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className = '', onNavigate, on
           <div className="flex items-center justify-between gap-4">
             {/* Branding Tag with Aura Glow */}
             <div className="relative group flex-1">
-              <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-500 to-violet-600 opacity-70 blur-xl animate-aura"></div>
+              <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-500 to-violet-600 opacity-70 blur-xl animate-aura" aria-hidden="true"></div>
               <div className="relative px-5 py-3 bg-slate-950/80 border border-white/10 backdrop-blur-md rounded-2xl shadow-2xl flex items-center justify-center gap-2.5">
                 <img
                   src="/icons/logo-sticker.png"
@@ -188,10 +189,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ className = '', onNavigate, on
               <button
                 id="sidebar-close-btn"
                 onClick={onClose}
-                className="md:hidden min-w-[44px] min-h-[44px] flex items-center justify-center p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 bg-slate-100 dark:bg-slate-800 rounded-xl transition-all active:scale-95 shrink-0 cursor-pointer"
+                className="md:hidden min-w-[44px] min-h-[44px] flex items-center justify-center p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 bg-slate-100 dark:bg-slate-800 rounded-xl transition-all active:scale-95 shrink-0 cursor-pointer touch-manipulation focus:ring-2 focus:ring-blue-500"
                 aria-label="Close sidebar"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
@@ -199,7 +200,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className = '', onNavigate, on
           </div>
 
           {/* Navigation List */}
-          <nav className="flex flex-col gap-2.5 mt-8 border-t border-slate-100 dark:border-slate-800/60 pt-6">
+          <nav aria-label="Main Navigation" className="flex flex-col gap-2.5 mt-8 border-t border-slate-100 dark:border-slate-800/60 pt-6">
             {NAV_BUTTONS.map((btn) => {
               const isActive =
                 btn.href === '/'
@@ -207,7 +208,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className = '', onNavigate, on
                   : !!(pathname && pathname.startsWith(btn.href));
 
               const baseClass =
-                'w-full min-h-[44px] text-left border-2 px-4 py-3 rounded-2xl font-black text-xs transition-all duration-300 hover:translate-x-1.5 hover:shadow-md active:scale-98 flex items-center gap-3';
+                'w-full min-h-[44px] text-left border-2 px-4 py-3 rounded-2xl font-black text-xs transition-all duration-200 hover:translate-x-1.5 hover:shadow-md active:scale-95 touch-manipulation flex items-center gap-3 focus:outline-none focus:ring-2 focus:ring-blue-500';
               const stateClass = isActive
                 ? btn.activeClass
                 : `bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700 text-slate-600 dark:text-slate-300 ${btn.hoverClass}`;
@@ -217,6 +218,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ className = '', onNavigate, on
                   key={btn.id}
                   id={`btn-nav-${btn.id}`}
                   href={btn.href}
+                  aria-label={btn.label}
+                  aria-current={isActive ? 'page' : undefined}
                   onClick={() => {
                     if (onNavigate) onNavigate();
                     if (onClose) onClose();
@@ -237,9 +240,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ className = '', onNavigate, on
           <div className="flex flex-col gap-2">
             <div
               id="sync-status"
+              role="status"
+              aria-live="polite"
               className="flex items-center justify-center space-x-1.5 px-3 py-1.5 bg-slate-100/50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 transition-all opacity-100 scale-100 duration-300"
             >
-              <svg className="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
               </svg>
               <span
@@ -255,10 +260,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ className = '', onNavigate, on
           <div className="border-t border-slate-100 dark:border-slate-800 pt-4 space-y-3">
             <div
               id="profile-card-btn"
-              className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-2xl cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors group"
+              role="region"
+              aria-label={`User Profile: ${displayName}`}
+              className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-2xl cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors group touch-manipulation active:scale-[0.98]"
             >
               <div
                 id="profile-avatar"
+                aria-hidden="true"
                 className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center font-bold text-white uppercase text-sm shrink-0 shadow-sm"
               >
                 {initial}
@@ -277,7 +285,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ className = '', onNavigate, on
             <button
               id="btn-logout"
               onClick={handleLogout}
-              className="w-full min-h-[44px] bg-slate-50 dark:bg-slate-800/50 hover:bg-rose-50 dark:hover:bg-rose-950/20 hover:text-rose-600 border border-slate-200 dark:border-slate-800 px-4 py-3 rounded-2xl font-black text-xs text-rose-500 transition-all active:scale-95 flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
+              aria-label="Log out of account"
+              className="w-full min-h-[44px] bg-slate-50 dark:bg-slate-800/50 hover:bg-rose-50 dark:hover:bg-rose-950/20 hover:text-rose-600 border border-slate-200 dark:border-slate-800 px-4 py-3 rounded-2xl font-black text-xs text-rose-500 transition-all active:scale-95 flex items-center justify-center gap-1.5 shadow-sm cursor-pointer touch-manipulation focus:ring-2 focus:ring-rose-500"
             >
               <svg
                 className="w-4 h-4 shrink-0"

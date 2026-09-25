@@ -22,7 +22,8 @@ export const FocusStats: React.FC<FocusStatsProps> = React.memo(function FocusSt
   timerLogs,
   activeRunningElapsedSec,
 }) {
-  const stats = useMemo(() => {
+  // 1. Memoize historical logs calculation (runs ONLY when timerLogs changes, NOT on every tick)
+  const historicalBase = useMemo(() => {
     const now = new Date();
     const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
 
@@ -35,9 +36,9 @@ export const FocusStats: React.FC<FocusStatsProps> = React.memo(function FocusSt
     // Start of current month
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
 
-    let todaySecs = activeRunningElapsedSec;
-    let weekSecs = activeRunningElapsedSec;
-    let monthSecs = activeRunningElapsedSec;
+    let todaySecs = 0;
+    let weekSecs = 0;
+    let monthSecs = 0;
 
     const subjectMap: Record<string, number> = {};
 
@@ -80,7 +81,17 @@ export const FocusStats: React.FC<FocusStatsProps> = React.memo(function FocusSt
       monthSecs,
       breakdown,
     };
-  }, [timerLogs, activeRunningElapsedSec]);
+  }, [timerLogs]);
+
+  // 2. Derive live totals with O(1) integer arithmetic during active timer ticks
+  const stats = useMemo(() => {
+    return {
+      todaySecs: historicalBase.todaySecs + activeRunningElapsedSec,
+      weekSecs: historicalBase.weekSecs + activeRunningElapsedSec,
+      monthSecs: historicalBase.monthSecs + activeRunningElapsedSec,
+      breakdown: historicalBase.breakdown,
+    };
+  }, [historicalBase, activeRunningElapsedSec]);
 
   return (
     <div className="space-y-6">

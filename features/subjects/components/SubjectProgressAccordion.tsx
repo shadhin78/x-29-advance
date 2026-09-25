@@ -95,7 +95,14 @@ export const SubjectProgressAccordion: React.FC<SubjectProgressAccordionProps> =
                       <span className="ml-1">({Math.round(trackPerc)}%)</span>
                     </div>
                   </div>
-                  <div className="w-full bg-slate-100 dark:bg-slate-700/50 h-2 rounded-full overflow-hidden shadow-inner border border-slate-200/40 dark:border-slate-600/30">
+                  <div
+                    role="progressbar"
+                    aria-valuenow={Math.round(trackPerc)}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-label={`${trackName} track overall progress: ${Math.round(trackPerc)}%`}
+                    className="w-full bg-slate-100 dark:bg-slate-700/50 h-2 rounded-full overflow-hidden shadow-inner border border-slate-200/40 dark:border-slate-600/30"
+                  >
                     <div
                       className="bg-gradient-to-r from-blue-500 to-indigo-600 h-full rounded-full transition-all duration-700 ease-out shadow-sm"
                       style={{ width: `${trackPerc}%` }}
@@ -157,7 +164,14 @@ export const SubjectProgressAccordion: React.FC<SubjectProgressAccordionProps> =
                                     </span>
                                   </div>
                                 </div>
-                                <div className="w-full bg-slate-100 dark:bg-slate-700/50 h-2 rounded-full overflow-hidden shadow-inner border border-slate-200/40 dark:border-slate-600/30">
+                                <div
+                                  role="progressbar"
+                                  aria-valuenow={Math.round(perc)}
+                                  aria-valuemin={0}
+                                  aria-valuemax={100}
+                                  aria-label={`${cleanSubName} progress: ${Math.round(perc)}%`}
+                                  className="w-full bg-slate-100 dark:bg-slate-700/50 h-2 rounded-full overflow-hidden shadow-inner border border-slate-200/40 dark:border-slate-600/30"
+                                >
                                   <div
                                     className={`${cp.bg} h-full rounded-full transition-all duration-700 ease-out shadow-sm`}
                                     style={{ width: `${perc}%` }}

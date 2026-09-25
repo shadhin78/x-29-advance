@@ -57,7 +57,8 @@ suites.forEach(s => {
 // B. CORE TESTS
 // -------------------------------------------------------------
 console.log('\n--- B. CORE APPLICATION CHECKS ---');
-const indexHtml = fs.readFileSync('index.html', 'utf8');
+const indexHtmlPath = fs.existsSync('index.html') ? 'index.html' : 'archive/legacy-html/index.html';
+const indexHtml = fs.readFileSync(indexHtmlPath, 'utf8');
 const appJs = fs.readFileSync('js/core/app.js', 'utf8');
 const authJs = fs.readFileSync('js/services/auth.js', 'utf8');
 const fbJs = fs.readFileSync('js/firebase.js', 'utf8');

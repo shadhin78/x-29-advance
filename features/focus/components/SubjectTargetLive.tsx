@@ -58,8 +58,8 @@ export const SubjectTargetLive: React.FC<SubjectTargetLiveProps> = React.memo(fu
     return map;
   }, [timerLogs]);
 
-  // Compute target stats with deterministic sorting matching legacy Focus.js
-  const processedTargets = useMemo(() => {
+  // 1. Precompute static base stats from logs and targets (runs ONLY when targets or logs change)
+  const baseTargets = useMemo(() => {
     const entries = Object.entries(subjectFocusTargets);
     const sorted = entries.sort((a, b) => {
       const timeA = a[1].createdAt ? new Date(a[1].createdAt).getTime() : 0;
@@ -73,7 +73,7 @@ export const SubjectTargetLive: React.FC<SubjectTargetLiveProps> = React.memo(fu
       const m = Number(target.minutes) || 0;
       const targetSec = (h * 3600) + (m * 60);
 
-      let doneSec = 0;
+      let baseDoneSec = 0;
       const targetCreatedAt = target.createdAt ? new Date(target.createdAt) : null;
       if (targetCreatedAt) {
         targetCreatedAt.setHours(0, 0, 0, 0);
@@ -83,28 +83,12 @@ export const SubjectTargetLive: React.FC<SubjectTargetLiveProps> = React.memo(fu
         if ((log.subject || 'General Study') === subject) {
           const logDate = new Date(log.date);
           if (!targetCreatedAt || logDate >= targetCreatedAt) {
-            doneSec += Number(log.duration || 0);
+            baseDoneSec += Number(log.duration || 0);
           }
         }
       });
 
-      if (activeRunningSubject === subject) {
-        doneSec += activeRunningElapsedSec;
-      }
-
-      const isCompleted = targetSec > 0 && doneSec >= targetSec;
-      const remainSec = Math.max(0, targetSec - doneSec);
-      const progressPercent = targetSec > 0 ? Math.min(100, Math.round((doneSec / targetSec) * 100)) : 0;
       const color = getSubjectColor(subject);
-
-      const doneHrs = Math.floor(doneSec / 3600);
-      const doneMins = Math.floor((doneSec % 3600) / 60);
-      const doneText = `${String(doneHrs).padStart(2, '0')}h ${String(doneMins).padStart(2, '0')}m`;
-
-      const remainHrs = Math.floor(remainSec / 3600);
-      const remainMins = Math.floor((remainSec % 3600) / 60);
-      const remainText = `${String(remainHrs).padStart(2, '0')}h ${String(remainMins).padStart(2, '0')}m`;
-
       const targetText = `${String(h).padStart(2, '0')}h ${String(m).padStart(2, '0')}m`;
 
       let startDateText = 'All-time';
@@ -120,19 +104,43 @@ export const SubjectTargetLive: React.FC<SubjectTargetLiveProps> = React.memo(fu
         subject,
         target,
         targetSec,
-        doneSec,
-        remainSec,
-        progressPercent,
-        isCompleted,
+        baseDoneSec,
         color,
-        doneText,
-        remainText,
         targetText,
         startDateText,
         domId: getSubjectTargetDomId(subject),
       };
     });
-  }, [subjectFocusTargets, timerLogs, activeRunningSubject, activeRunningElapsedSec]);
+  }, [subjectFocusTargets, timerLogs]);
+
+  // 2. Derive processed targets adding live active elapsed seconds with O(1) arithmetic
+  const processedTargets = useMemo(() => {
+    return baseTargets.map((base) => {
+      const addActive = activeRunningSubject === base.subject ? activeRunningElapsedSec : 0;
+      const doneSec = base.baseDoneSec + addActive;
+      const isCompleted = base.targetSec > 0 && doneSec >= base.targetSec;
+      const remainSec = Math.max(0, base.targetSec - doneSec);
+      const progressPercent = base.targetSec > 0 ? Math.min(100, Math.round((doneSec / base.targetSec) * 100)) : 0;
+
+      const doneHrs = Math.floor(doneSec / 3600);
+      const doneMins = Math.floor((doneSec % 3600) / 60);
+      const doneText = `${String(doneHrs).padStart(2, '0')}h ${String(doneMins).padStart(2, '0')}m`;
+
+      const remainHrs = Math.floor(remainSec / 3600);
+      const remainMins = Math.floor((remainSec % 3600) / 60);
+      const remainText = `${String(remainHrs).padStart(2, '0')}h ${String(remainMins).padStart(2, '0')}m`;
+
+      return {
+        ...base,
+        doneSec,
+        remainSec,
+        progressPercent,
+        isCompleted,
+        doneText,
+        remainText,
+      };
+    });
+  }, [baseTargets, activeRunningSubject, activeRunningElapsedSec]);
 
   const uncompletedTargets = useMemo(() => processedTargets.filter((t) => !t.isCompleted), [processedTargets]);
   const completedTargets = useMemo(() => processedTargets.filter((t) => t.isCompleted), [processedTargets]);
@@ -169,11 +177,15 @@ export const SubjectTargetLive: React.FC<SubjectTargetLiveProps> = React.memo(fu
             {/* Section Filter Tabs: Uncompleted (Red) & Done (Green) */}
             <div
               id="subject-target-filter-bar"
+              role="tablist"
+              aria-label="Target status filters"
               className="flex items-center gap-1 bg-slate-100 dark:bg-slate-900/80 p-1 rounded-2xl border border-slate-200/60 dark:border-slate-800"
             >
               <button
                 id="st-filter-uncompleted"
                 type="button"
+                role="tab"
+                aria-selected={filter === 'uncompleted'}
                 onClick={() => setFilter('uncompleted')}
                 className={`flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider rounded-xl transition-all ${
                   filter === 'uncompleted'
@@ -183,6 +195,7 @@ export const SubjectTargetLive: React.FC<SubjectTargetLiveProps> = React.memo(fu
               >
                 <span
                   id="st-dot-uncompleted"
+                  aria-hidden="true"
                   className={`w-2 h-2 rounded-full ${filter === 'uncompleted' ? 'bg-rose-200 animate-pulse' : 'bg-rose-500'}`}
                 />
                 <span>Uncompleted</span>
@@ -197,6 +210,8 @@ export const SubjectTargetLive: React.FC<SubjectTargetLiveProps> = React.memo(fu
               <button
                 id="st-filter-done"
                 type="button"
+                role="tab"
+                aria-selected={filter === 'done'}
                 onClick={() => setFilter('done')}
                 className={`flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider rounded-xl transition-all ${
                   filter === 'done'
@@ -206,6 +221,7 @@ export const SubjectTargetLive: React.FC<SubjectTargetLiveProps> = React.memo(fu
               >
                 <span
                   id="st-dot-done"
+                  aria-hidden="true"
                   className={`w-2 h-2 rounded-full ${filter === 'done' ? 'bg-emerald-200 animate-pulse' : 'bg-emerald-500'}`}
                 />
                 <span>Done</span>

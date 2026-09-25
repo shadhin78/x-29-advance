@@ -205,6 +205,8 @@ export const SessionHistory: React.FC<SessionHistoryProps> = React.memo(function
             {/* Filter Buttons */}
             <div
               id="session-history-filter-bar"
+              role="tablist"
+              aria-label="Session history time range filters"
               className="flex items-center gap-1 bg-slate-100 dark:bg-slate-900/80 p-1 rounded-2xl border border-slate-200/60 dark:border-slate-800"
             >
               {FILTER_OPTIONS.map((opt) => {
@@ -214,6 +216,8 @@ export const SessionHistory: React.FC<SessionHistoryProps> = React.memo(function
                     key={opt.id}
                     id={opt.elementId}
                     type="button"
+                    role="tab"
+                    aria-selected={isActive}
                     onClick={() => onSelectFilter(opt.id)}
                     className={`px-3 py-1 text-[10px] font-black uppercase tracking-wider rounded-xl transition-all ${
                       isActive
@@ -304,10 +308,11 @@ export const SessionHistory: React.FC<SessionHistoryProps> = React.memo(function
                         <button
                           type="button"
                           onClick={() => onDeleteSession(session.id)}
-                          className="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50 dark:hover:bg-red-950/30 active:scale-95 transition-all"
+                          className="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50 dark:hover:bg-red-950/30 active:scale-95 transition-all focus:ring-2 focus:ring-red-500"
                           title="Delete session"
+                          aria-label={`Delete study session of ${session.subject} on ${formatLogDate(session.date)}`}
                         >
-                          <svg className="w-4 h-4 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-4 h-4 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                           </svg>
                         </button>
@@ -345,11 +350,19 @@ export const SessionHistory: React.FC<SessionHistoryProps> = React.memo(function
           <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 animate-in fade-in" />
           <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl z-50 text-white focus:outline-none animate-in zoom-in-95">
             <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-              <Dialog.Title className="text-base font-black uppercase tracking-wider">
-                Add Study Session
-              </Dialog.Title>
-              <Dialog.Close className="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-all">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div>
+                <Dialog.Title className="text-base font-black uppercase tracking-wider">
+                  Add Study Session
+                </Dialog.Title>
+                <Dialog.Description className="text-xs text-slate-400 mt-0.5">
+                  Record a completed study session with custom duration and subject
+                </Dialog.Description>
+              </div>
+              <Dialog.Close
+                aria-label="Close add session modal"
+                className="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-all focus:ring-2 focus:ring-blue-500"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </Dialog.Close>

@@ -258,100 +258,110 @@ export const SubjectTaskList: React.FC<SubjectTaskListProps> = ({
                     </div>
                   </div>
 
-                  {/* Middle Progress */}
-                  <div className="flex flex-col gap-2 w-full lg:w-[35%] lg:px-4">
-                    <div className="flex justify-between items-end text-[10px] font-black uppercase tracking-widest">
-                      <span id={`group-text-${safeSubId}`} className="text-slate-500 dark:text-slate-400">
-                        {completedCount} <span className="opacity-60 text-[9px] mx-0.5">/</span> {chapters}{' '}
-                        <span className="opacity-60">CH</span>
-                      </span>
-                      <span
-                        id={`group-pct-${safeSubId}`}
-                        className={`text-${colorClass}-600 dark:text-${colorClass}-400 bg-${colorClass}-50 dark:bg-${colorClass}-900/30 px-1.5 py-0.5 rounded border border-${colorClass}-100 dark:border-${colorClass}-800/50 shadow-sm`}
-                      >
-                        {progressPct}%
-                      </span>
-                    </div>
-                    <div className="w-full bg-slate-100 dark:bg-slate-700/50 h-2.5 rounded-full overflow-hidden shadow-inner border border-slate-200/50 dark:border-slate-600/30 relative">
+                    {/* Middle Progress */}
+                    <div className="flex flex-col gap-2 w-full lg:w-[35%] lg:px-4">
+                      <div className="flex justify-between items-end text-[10px] font-black uppercase tracking-widest">
+                        <span id={`group-text-${safeSubId}`} className="text-slate-500 dark:text-slate-400">
+                          {completedCount} <span className="opacity-60 text-[9px] mx-0.5">/</span> {chapters}{' '}
+                          <span className="opacity-60">CH</span>
+                        </span>
+                        <span
+                          id={`group-pct-${safeSubId}`}
+                          className={`text-${colorClass}-600 dark:text-${colorClass}-400 bg-${colorClass}-50 dark:bg-${colorClass}-900/30 px-1.5 py-0.5 rounded border border-${colorClass}-100 dark:border-${colorClass}-800/50 shadow-sm`}
+                        >
+                          {progressPct}%
+                        </span>
+                      </div>
                       <div
-                        id={`group-bar-${safeSubId}`}
-                        className={`h-full bg-gradient-to-r from-${colorClass}-400 to-${colorClass}-600 transition-all duration-700 ease-out relative`}
-                        style={{ width: `${progressPct}%` }}
+                        role="progressbar"
+                        aria-valuenow={progressPct}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                        aria-label={`${subject} progress: ${progressPct}%`}
+                        className="w-full bg-slate-100 dark:bg-slate-700/50 h-2.5 rounded-full overflow-hidden shadow-inner border border-slate-200/50 dark:border-slate-600/30 relative"
                       >
-                        <div className="absolute right-0 top-0 bottom-0 w-2 bg-white/40 rounded-full" />
+                        <div
+                          id={`group-bar-${safeSubId}`}
+                          className={`h-full bg-gradient-to-r from-${colorClass}-400 to-${colorClass}-600 transition-all duration-700 ease-out relative`}
+                          style={{ width: `${progressPct}%` }}
+                        >
+                          <div className="absolute right-0 top-0 bottom-0 w-2 bg-white/40 rounded-full" />
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Right EST Finish & Controls */}
-                  <div className="flex items-center justify-between lg:justify-end gap-4 lg:gap-6 w-full lg:w-[25%] lg:pl-0">
-                    <div className="flex flex-col text-left lg:text-right flex-1 lg:flex-none">
-                      <span className="text-[9px] uppercase tracking-widest font-black text-slate-400 mb-0.5">
-                        EST. Finish
-                      </span>
-                      <span
-                        id={`header-est-${safeSubId}`}
-                        className="text-xs md:text-sm font-black text-slate-700 dark:text-slate-200"
-                      >
-                        {estFinishStr}
-                      </span>
-                    </div>
+                    {/* Right EST Finish & Controls */}
+                    <div className="flex items-center justify-between lg:justify-end gap-4 lg:gap-6 w-full lg:w-[25%] lg:pl-0">
+                      <div className="flex flex-col text-left lg:text-right flex-1 lg:flex-none">
+                        <span className="text-[9px] uppercase tracking-widest font-black text-slate-400 mb-0.5">
+                          EST. Finish
+                        </span>
+                        <span
+                          id={`header-est-${safeSubId}`}
+                          className="text-xs md:text-sm font-black text-slate-700 dark:text-slate-200"
+                        >
+                          {estFinishStr}
+                        </span>
+                      </div>
 
-                    <div className="flex items-center gap-2 shrink-0">
-                      {/* Trend Analytics Button */}
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          onOpenTrendModal(subject);
-                        }}
-                        className="p-2 md:p-2.5 shrink-0 text-slate-400 hover:text-indigo-500 bg-white dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-xl shadow-sm transition-all border border-slate-200 dark:border-slate-600/50 active:scale-95 cursor-pointer"
-                        title="View Subject Trend"
-                      >
-                        <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2.5"
-                            d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
-                          />
-                        </svg>
-                      </button>
+                      <div className="flex items-center gap-2 shrink-0">
+                        {/* Trend Analytics Button */}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            onOpenTrendModal(subject);
+                          }}
+                          aria-label={`View performance trend for ${subject}`}
+                          className="p-2 md:p-2.5 shrink-0 text-slate-400 hover:text-indigo-500 bg-white dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-xl shadow-sm transition-all border border-slate-200 dark:border-slate-600/50 active:scale-95 cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                          title="View Subject Trend"
+                        >
+                          <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2.5"
+                              d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
+                            />
+                          </svg>
+                        </button>
 
-                      {/* Edit Subject Button */}
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          onOpenEditModal(subject, program, trackId);
-                        }}
-                        className="p-2 md:p-2.5 shrink-0 text-slate-400 hover:text-blue-500 bg-white dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-xl shadow-sm transition-all border border-slate-200 dark:border-slate-600/50 active:scale-95 cursor-pointer"
-                        title="Edit Subject Details"
-                      >
-                        <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2.5"
-                            d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                          />
-                        </svg>
-                      </button>
+                        {/* Edit Subject Button */}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            onOpenEditModal(subject, program, trackId);
+                          }}
+                          aria-label={`Edit subject details for ${subject}`}
+                          className="p-2 md:p-2.5 shrink-0 text-slate-400 hover:text-blue-500 bg-white dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-xl shadow-sm transition-all border border-slate-200 dark:border-slate-600/50 active:scale-95 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          title="Edit Subject Details"
+                        >
+                          <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2.5"
+                              d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                            />
+                          </svg>
+                        </button>
 
-                      {/* Accordion Chevron */}
-                      <div
-                        className={`p-2 md:p-2.5 rounded-xl bg-slate-100 dark:bg-slate-700/50 text-slate-400 transition-all duration-300 shrink-0 shadow-sm border border-slate-200/50 dark:border-slate-600/30 ${
-                          isOpen ? 'rotate-180 bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' : ''
-                        }`}
-                      >
-                        <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
-                        </svg>
+                        {/* Accordion Chevron */}
+                        <div
+                          aria-hidden="true"
+                          className={`p-2 md:p-2.5 rounded-xl bg-slate-100 dark:bg-slate-700/50 text-slate-400 transition-all duration-300 shrink-0 shadow-sm border border-slate-200/50 dark:border-slate-600/30 ${
+                            isOpen ? 'rotate-180 bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' : ''
+                          }`}
+                        >
+                          <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </div>
                       </div>
                     </div>
-                  </div>
                 </summary>
 
                 {/* Expanded View */}
@@ -476,10 +486,11 @@ export const SubjectTaskList: React.FC<SubjectTaskListProps> = ({
                                 e.stopPropagation();
                                 onOpenEditModal(subject, program, trackId);
                               }}
-                              className="text-slate-400 hover:text-blue-500 active:scale-90 transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100 p-2 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 cursor-pointer"
+                              aria-label={`Edit or delete Chapter ${chNum} of ${subject}`}
+                              className="text-slate-400 hover:text-blue-500 active:scale-90 transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100 p-2 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500"
                               title="Edit/Delete Task"
                             >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path
                                   strokeLinecap="round"
                                   strokeLinejoin="round"
@@ -515,13 +526,15 @@ export const SubjectTaskList: React.FC<SubjectTaskListProps> = ({
                                   type="checkbox"
                                   checked={isDone}
                                   onChange={() => onToggleChapter(subject, chNum, trackId)}
-                                  className="task-checkbox peer relative appearance-none w-6 h-6 border-2 border-slate-300 dark:border-slate-600 rounded-full bg-white dark:bg-slate-800 checked:bg-emerald-500 checked:border-emerald-500 focus:outline-none cursor-pointer transition-all shadow-sm hover:border-emerald-400"
+                                  aria-label={`Mark Chapter ${chNum} of ${subject} as ${isDone ? 'incomplete' : 'complete'}`}
+                                  className="task-checkbox peer relative appearance-none w-6 h-6 border-2 border-slate-300 dark:border-slate-600 rounded-full bg-white dark:bg-slate-800 checked:bg-emerald-500 checked:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer transition-all shadow-sm hover:border-emerald-400"
                                 />
                                 <svg
                                   className="absolute w-3.5 h-3.5 text-white pointer-events-none opacity-0 peer-checked:opacity-100 transition-opacity drop-shadow-md"
                                   fill="none"
                                   stroke="currentColor"
                                   viewBox="0 0 24 24"
+                                  aria-hidden="true"
                                 >
                                   <path
                                     strokeLinecap="round"

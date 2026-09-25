@@ -38,7 +38,13 @@ const chakraPetch = Chakra_Petch({
 export const metadata: Metadata = {
   title: 'X-29 — Tracking & Execution Workspace',
   description: 'Dynamic Multi-Track Execution & Tracking Dashboard',
+  applicationName: 'X-29',
   manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'X-29',
+  },
   icons: {
     icon: '/icons/x-29-adv-logo.jpeg',
     apple: '/icons/x-29-adv-logo.jpeg',
@@ -70,7 +76,7 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com" />
         <link rel="dns-prefetch" href="https://firestore.googleapis.com" />
       </head>
-      <body className="bg-slate-50 dark:bg-[#0f172a] text-slate-900 dark:text-slate-100 font-sans overflow-hidden h-screen w-screen touch-action-manipulation" suppressHydrationWarning>
+      <body className="bg-slate-50 dark:bg-[#0f172a] text-slate-900 dark:text-slate-100 font-sans overflow-hidden h-screen w-screen touch-manipulation" suppressHydrationWarning>
         <Providers>{children}</Providers>
       </body>
     </html>

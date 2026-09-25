@@ -53,13 +53,13 @@ export const FocusStudio: React.FC = () => {
 
   const subjectGroups = useMemo(() => getAvailableSubjectGroups(), []);
 
-  const handleToggle = () => {
+  const handleToggle = React.useCallback(() => {
     if (activeTimer.isRunning) {
       pauseTimer();
     } else {
       startTimer();
     }
-  };
+  }, [activeTimer.isRunning, pauseTimer, startTimer]);
 
   const activeRunningElapsedSec = activeTimer.isRunning
     ? Math.floor(elapsedMs / 1000)

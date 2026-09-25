@@ -82,6 +82,19 @@ export function calculateNeedleAngles(elapsedMs: number): DialAngles {
   };
 }
 
+// Pre-computed 2-digit string lookup table (00-99) for zero-allocation formatting
+const PAD_2: readonly string[] = Array.from({ length: 100 }, (_, i) => String(i).padStart(2, '0'));
+
+/**
+ * High-speed 2-digit string pad with zero allocations for values 0-99.
+ */
+export function pad2Fast(num: number): string {
+  if (num >= 0 && num < 100) {
+    return PAD_2[num] || '00';
+  }
+  return String(Math.max(0, Math.floor(num))).padStart(2, '0');
+}
+
 /**
  * Formats a duration in milliseconds into digital clock components.
  */
@@ -93,10 +106,10 @@ export function formatTimerDigits(ms: number): TimerDigits {
   const secs = totalSecs % 60;
   const hundredths = Math.floor((safeMs % 1000) / 10);
 
-  const hours = String(hrs).padStart(2, '0');
-  const minutes = String(mins).padStart(2, '0');
-  const seconds = String(secs).padStart(2, '0');
-  const hundredthsStr = String(hundredths).padStart(2, '0');
+  const hours = pad2Fast(hrs);
+  const minutes = pad2Fast(mins);
+  const seconds = pad2Fast(secs);
+  const hundredthsStr = pad2Fast(hundredths);
 
   return {
     hours,
@@ -134,7 +147,7 @@ export function formatSecondsToClock(totalSeconds: number): string {
   const hrs = Math.floor(safeSecs / 3600);
   const mins = Math.floor((safeSecs % 3600) / 60);
   const secs = safeSecs % 60;
-  return `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  return `${pad2Fast(hrs)}:${pad2Fast(mins)}:${pad2Fast(secs)}`;
 }
 
 /**
