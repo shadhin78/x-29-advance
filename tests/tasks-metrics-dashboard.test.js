@@ -257,7 +257,7 @@ global.examDatabase = [
 // Load Modules under test from archive
 const TaskEngine = require('../archive/legacy-js/js/features/tasks/taskEngine.js');
 const SubjectGoals = require('../archive/legacy-js/js/features/tasks/subjectGoals.js');
-const Metrics = require('../js/core/metrics.js');
+const Metrics = require('../archive/legacy-js/js/core/metrics.js');
 const DashboardCore = require('../archive/legacy-js/js/features/dashboard/dashboard.js');
 const DashboardPage = require('../archive/legacy-js/pages/Dashboard/Dashboard.js');
 
@@ -574,7 +574,7 @@ runTest('DashboardPage mounts and destroys cleanly', () => {
 console.log('\n10. Shared DOM Utilities (safeGetEl)');
 
 runTest('safeGetEl is exported and resolves elements properly with fallback guards', () => {
-    const { safeGetEl } = require('../js/utils/dom.js');
+    const { safeGetEl } = require('../archive/legacy-js/js/utils/dom.js');
     assert.strictEqual(typeof safeGetEl, 'function', 'safeGetEl is exported as a function');
     
     // Existing element
@@ -596,7 +596,7 @@ runTest('safeGetEl is exported and resolves elements properly with fallback guar
 console.log('\n11. Shared Color Utilities (colors.js)');
 
 runTest('Color Utilities module exports canonical palette and helper functions', () => {
-    const colorsModule = require('../js/utils/colors.js');
+    const colorsModule = require('../archive/legacy-js/js/utils/colors.js');
     assert(Array.isArray(colorsModule.SUBJECT_PALETTE_COLORS), 'SUBJECT_PALETTE_COLORS is an array');
     assert.strictEqual(colorsModule.SUBJECT_PALETTE_COLORS.length, 14, 'Canonical palette contains 14 colors');
     assert.strictEqual(typeof colorsModule.hashStringToColor, 'function', 'hashStringToColor is a function');
@@ -605,7 +605,7 @@ runTest('Color Utilities module exports canonical palette and helper functions',
 });
 
 runTest('hashStringToColor and getSubjectColor produce deterministic colors', () => {
-    const { getSubjectColor, hashStringToColor } = require('../js/utils/colors.js');
+    const { getSubjectColor, hashStringToColor } = require('../archive/legacy-js/js/utils/colors.js');
     const color1 = hashStringToColor('Audit');
     const color2 = hashStringToColor('Audit');
     assert.strictEqual(color1, color2, 'hashStringToColor is deterministic');
@@ -621,7 +621,7 @@ runTest('hashStringToColor and getSubjectColor produce deterministic colors', ()
 });
 
 runTest('hexToRgba converts 3-digit and 6-digit hex to rgba with alpha', () => {
-    const { hexToRgba } = require('../js/utils/colors.js');
+    const { hexToRgba } = require('../archive/legacy-js/js/utils/colors.js');
     assert.strictEqual(hexToRgba('#fff', 0.5), 'rgba(255, 255, 255, 0.5)');
     assert.strictEqual(hexToRgba('000', 1), 'rgba(0, 0, 0, 1)');
     assert.strictEqual(hexToRgba('#3b82f6', 0.25), 'rgba(59, 130, 246, 0.25)');
@@ -634,7 +634,7 @@ runTest('hexToRgba converts 3-digit and 6-digit hex to rgba with alpha', () => {
 });
 
 runTest('Color Utilities are exposed on Utils namespace and global/window scope', () => {
-    const utils = require('../js/utils.js');
+    const utils = require('../archive/legacy-js/js/utils.js');
     assert.strictEqual(typeof utils.getSubjectColor, 'function', 'Utils.getSubjectColor is exposed');
     assert.strictEqual(typeof utils.hexToRgba, 'function', 'Utils.hexToRgba is exposed');
     assert.strictEqual(typeof utils.hashStringToColor, 'function', 'Utils.hashStringToColor is exposed');

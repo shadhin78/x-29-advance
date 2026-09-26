@@ -201,7 +201,7 @@ global.getWeeklyTargetProgress = (wt, weekKey) => ({ percent: 100, done: 10, tot
 const DailyTargets = require('../archive/legacy-js/js/features/targets/dailyTargets.js');
 
 // Load Dashboard for checklist test from archive
-global.safeGetEl = require('../js/utils/dom.js').safeGetEl;
+global.safeGetEl = require('../archive/legacy-js/js/utils/dom.js').safeGetEl;
 require('../archive/legacy-js/js/features/dashboard/dashboard.js');
 require('../archive/legacy-js/pages/Dashboard/Dashboard.js');
 

@@ -76,7 +76,7 @@ global.window = {
 global.window.window = global.window;
 
 // 2. Load App module
-const RawApp = require('../js/core/app.js');
+const RawApp = require('../archive/legacy-js/js/core/app.js');
 const App = RawApp.App || RawApp.default || RawApp;
 
 let passedTests = 0;

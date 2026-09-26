@@ -134,10 +134,6 @@ async function main() {
       await client.send('DOM.enable');
       await client.send('Runtime.enable');
 
-      // Inject E2E Mock Auth before document loads so AuthGate lets the real page render
-      await client.send('Page.addScriptToEvaluateOnNewDocument', {
-        source: `try { localStorage.setItem('X29_E2E_MOCK_AUTH', 'true'); } catch(e){}`
-      });
 
       // Set mobile emulation
       if (vp.isMobile) {

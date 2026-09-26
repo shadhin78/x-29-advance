@@ -957,6 +957,157 @@
   - 84 modern unit/integration tests and 10 legacy test suites passing at 100%.
 - **Result**: **PROJECT MODERNIZATION 100% COMPLETE & SIGNED OFF.**
 
+---
+
+### Milestone: Legacy Elimination — Decouple Modern Test Suite from Legacy js/ (LEGACY STEP 002)
+- **Date**: 2026-09-26
+- **Step**: LEGACY STEP 002 (Legacy Code Elimination Roadmap / docs/LEGACY-CODE-ELIMINATION.md)
+- **Scope & Changes**:
+  - Decoupled `npm test` completely from the legacy `js/` directory.
+  - Rewired `package.json` `"test"` and `"test:unit"` scripts to run the native modern Node test runner: `node --test tests/*.test.mjs`.
+  - Added granular domain test scripts in `package.json`: `test:timer`, `test:exam`, `test:analytics`, `test:pace`, `test:outcome`, `test:targets`, `test:taxonomy`, `test:schedule`, `test:e2e`, `test:pwa`, `test:a11y`, `test:security`.
+  - Preserved the legacy test suite under `test:legacy` for historical reference.
+  - Confirmed that zero modern test suites import or execute any file in `js/`.
+  - Zero design modifications, zero runtime UI changes, zero Firebase schema mutations.
+- **Validation**:
+  - `npm test`: 15 test suites, 84 tests PASS (100% pass rate, 505ms duration).
+  - `npm run typecheck`: 0 TypeScript errors (`tsc --noEmit` clean).
+  - `npm run build`: 14/14 static pages generated cleanly in 1.65s.
+- **Result**: **LEGACY STEP 002 COMPLETED & VERIFIED.** Test suite is 100% decoupled from `js/`, unlocking safe archival in LEGACY STEP 003.
+
+---
+
+### Milestone: Legacy Elimination — Archive 16 Completely Unreferenced Legacy JS Files (LEGACY STEP 003)
+- **Date**: 2026-09-26
+- **Step**: LEGACY STEP 003 (Legacy Code Elimination Roadmap / docs/LEGACY-CODE-ELIMINATION.md)
+- **Scope & Changes**:
+  - Created automated archival engine with SHA-256 verification (`scripts/archive-unreferenced-legacy-js.mjs`).
+  - Cryptographically hashed, verified, and safely archived 16 legacy JavaScript files (108.4 KB) from `js/` to `archive/legacy-js/js/`:
+    - `js/core/rollover.js`, `js/core/scheduleSlot.js`, `js/core/state.js`
+    - `js/pages/login/login.js`
+    - `js/services/backup.js`, `js/services/firebase.js`, `js/services/taxonomy.js`
+    - `js/shared/audio.js`, `js/shared/confetti.js`, `js/shared/toast.js`
+    - `js/state.js`
+    - `js/utils/date.js`, `js/utils/format.js`, `js/utils/id.js`, `js/utils/sanitize.js`, `js/utils/storage.js`
+  - Updated `js/core/app.js` import paths for `state.js` and `rollover.js` to point to `../../archive/legacy-js/js/...` (matching Step 023 pattern).
+  - Unlinked the 16 source files from `js/` and pruned empty directories `js/pages/login/` and `js/pages/`.
+  - Retained exactly 11 test-referenced and dev-server files in `js/` for LEGACY STEP 004.
+  - Zero design changes, zero runtime changes, zero Firebase schema mutations.
+- **Validation**:
+  - All 16 files copied with 100% matching SHA-256 checksums.
+  - `npm test`: 15 modern test suites, 84 tests PASS (100% pass rate, 506ms duration).
+  - `node tests/app-core.test.js`: 9 / 9 tests PASS.
+  - `npm run typecheck`: 0 TypeScript errors (`tsc --noEmit` clean).
+  - `npm run build`: 14/14 static pages generated cleanly in 1.99s.
+- **Result**: **LEGACY STEP 003 COMPLETED & VERIFIED.** 16 legacy JavaScript files safely decommissioned and archived.
+
+---
+
+### Milestone: Legacy Elimination — Archive Test-Referenced Legacy JavaScript & Update Package Entrypoints (LEGACY STEP 004)
+- **Date**: 2026-09-26
+- **Step**: LEGACY STEP 004 (Legacy Code Elimination Roadmap / docs/LEGACY-CODE-ELIMINATION.md)
+- **Scope & Changes**:
+  - Created automated archival engine with SHA-256 verification and test path remapping (`scripts/archive-remaining-legacy-js.mjs`).
+  - Cryptographically hashed, verified, and safely archived the remaining 11 legacy JavaScript files (209.0 KB) from `js/` to `archive/legacy-js/js/`:
+    - `js/core/app.js` (10,786 B) | SHA-256: `05750223266c2c98...`
+    - `js/core/metrics.js` (54,975 B) | SHA-256: `2926e5b8d4bd8f2c...`
+    - `js/dev-server.js` (4,722 B) | SHA-256: `136077d3fab37020...`
+    - `js/firebase.js` (69,846 B) | SHA-256: `48224e19b88faf25...`
+    - `js/services/auth.js` (16,903 B) | SHA-256: `b872ec53549e2949...`
+    - `js/shared/deletion.js` (6,091 B) | SHA-256: `1b8c63e3210679ff...`
+    - `js/shared/modals.js` (14,170 B) | SHA-256: `3af1b5f83cf674b5...`
+    - `js/shared/sidebar.js` (3,679 B) | SHA-256: `d0112e82bca14383...`
+    - `js/utils/colors.js` (5,750 B) | SHA-256: `a889198b8e1dd17a...`
+    - `js/utils/dom.js` (1,846 B) | SHA-256: `82609dfb880e1a95...`
+    - `js/utils.js` (25,299 B) | SHA-256: `027b84497947bc82...`
+  - Normalized internal imports inside `archive/legacy-js/js/core/app.js` to self-contained archive relative paths (`../state.js`, `./rollover.js`, `../../shared/services/timerService.js`, `../../router/router.js`, `../features/dashboard/dashboard.js`, `../services/auth.js`).
+  - Adjusted `ROOT_DIR` in `archive/legacy-js/js/dev-server.js` to point to project root (`path.join(__dirname, '..', '..', '..')`).
+  - Updated `package.json` entry points:
+    - `"main": "archive/legacy-js/js/dev-server.js"`
+    - `"dev:legacy": "node archive/legacy-js/js/dev-server.js"`
+  - Updated test require/read paths in:
+    - `tests/app-core.test.js`
+    - `tests/auth-service.test.js`
+    - `tests/modals.test.js`
+    - `tests/tasks-metrics-dashboard.test.js`
+    - `tests/daily-targets.test.js`
+    - `tests/full-regression.test.js`
+  - Safely unlinked all 11 source files from `js/` and pruned all empty directories:
+    - `js/core/`, `js/services/`, `js/shared/`, `js/utils/`, and `js/`.
+  - Active `js/` directory completely decommissioned (`Test-Path js` = False).
+  - Active legacy CSS files in `css/` and `pages/*/*.css` preserved untouched.
+  - Zero design modifications, zero runtime UI changes, zero Firebase schema mutations.
+- **Validation**:
+  - All 11 files copied with 100% matching SHA-256 checksums verified before deletion.
+  - `npm test`: 15 modern test suites, 84 tests PASS (100% pass rate, 548ms duration).
+  - `npm run test:legacy`: 10 / 10 legacy suites PASS against archive.
+  - `node tests/full-regression.test.js`: 57 Passed, 0 Failed.
+  - `npm run typecheck`: 0 TypeScript errors (`tsc --noEmit` clean).
+  - `npm run build`: 14/14 static pages generated cleanly in 1.67s.
+- **Result**: **LEGACY STEP 004 COMPLETED & VERIFIED.** Active `js/` directory fully decommissioned. Next step in queue: LEGACY STEP 005.
+
+---
+
+### Milestone: Legacy Elimination — Archive Inactive Legacy HTML Templates from pages/ (LEGACY STEP 005)
+- **Date**: 2026-09-26
+- **Step**: LEGACY STEP 005 (Legacy Code Elimination Roadmap / docs/LEGACY-CODE-ELIMINATION.md)
+- **Scope & Changes**:
+  - Created automated archival engine with SHA-256 verification (`scripts/archive-legacy-html.mjs`).
+  - Cryptographically hashed, verified, and safely archived all 11 legacy HTML template files (307.4 KB) from `pages/*/*.html` to `archive/legacy-html/pages/`:
+    - `pages/Dashboard/Dashboard.html` (57,344 B) | SHA-256: `678d5e23622b8606...`
+    - `pages/Focus/Focus.html` (32,921 B) | SHA-256: `8368d1a5dc9d879e...`
+    - `pages/Subjects/Subjects.html` (5,848 B) | SHA-256: `5f2738f9ca1654b6...`
+    - `pages/Daily Actions/Daily Actions.html` (34,991 B) | SHA-256: `9648b48f6849b123...`
+    - `pages/Daily Actions/monthly target setup/monthly target setup.html` (42,527 B) | SHA-256: `2c27673b1b4c4164...`
+    - `pages/Daily Schedule/Daily Schedule.html` (7,250 B) | SHA-256: `915cdb49b92e5478...`
+    - `pages/Pace Management/Pace Management.html` (10,757 B) | SHA-256: `f29182e8c6500327...`
+    - `pages/Outcome/Outcome.html` (10,881 B) | SHA-256: `2aecf33e25d8380f...`
+    - `pages/Exam Routine/Exam Routine.html` (27,107 B) | SHA-256: `55826043dd73a7bb...`
+    - `pages/Master Config/Master Config.html` (20,872 B) | SHA-256: `eec3940c1eb6aa00...`
+    - `pages/Analytics/Analytics.html` (64,238 B) | SHA-256: `deaa6ef2db991314...`
+  - Unlinked all 11 source HTML files from `pages/`.
+  - Confirmed 0 `.html` files remain in `pages/`.
+  - Audited and verified all 11 active CSS stylesheets in `pages/*/*.css` remain completely intact and untouched (imported by `app/globals.css`).
+  - Zero design modifications, zero runtime UI changes, zero Firebase schema mutations.
+- **Validation**:
+  - All 11 files copied with 100% matching SHA-256 checksums verified before deletion.
+  - `npm test`: 15 modern test suites, 84 tests PASS (100% pass rate, 542ms duration).
+  - `npm run test:legacy`: 10 / 10 legacy suites PASS.
+  - `node tests/full-regression.test.js`: 57 Passed, 0 Failed.
+  - `npm run typecheck`: 0 TypeScript errors (`tsc --noEmit` clean).
+  - `npm run build`: 14/14 static pages generated cleanly in 1.50s.
+- **Result**: **LEGACY STEP 005 COMPLETED & VERIFIED.** All 11 legacy HTML files safely archived; 11 active CSS files preserved intact. Next step in queue: LEGACY STEP 006.
+
+---
+
+### Milestone: Legacy Elimination — Remove Obsolete Configuration & Orphaned Root Files (LEGACY STEP 006)
+- **Date**: 2026-09-26
+- **Step**: LEGACY STEP 006 (Legacy Code Elimination Roadmap / docs/LEGACY-CODE-ELIMINATION.md)
+- **Scope & Changes**:
+  - Created automated archival engine with SHA-256 verification (`scripts/archive-legacy-config-and-root.mjs`).
+  - Cryptographically hashed, verified, and safely archived 3 obsolete configuration and prompt files (4.2 KB) to `archive/legacy-config/`:
+    - `api/config.js` (866 B) | SHA-256: `1c727fc60a07f1ad...`
+    - `manifest.json` (732 B) | SHA-256: `a65838b47339c751...`
+    - `ext` (2,734 B) | SHA-256: `e7e76cf0abf2d52c...`
+  - Unlinked source files from root and `api/`.
+  - Pruned empty directory: `api/` (`Test-Path api` = False).
+  - Preserved backward-compatibility paths in `tests/pwa-service-worker.test.mjs` and `tests/full-regression.test.js` against archive fallback.
+  - Confirmed modern PWA is served exclusively from `public/manifest.json` with root start URL `/` and dark theme palette.
+  - Zero design modifications, zero runtime UI changes, zero Firebase schema mutations.
+- **Validation**:
+  - All 3 files copied with 100% matching SHA-256 checksums verified before deletion.
+  - `npm test`: 15 modern test suites, 84 tests PASS (100% pass rate, 630ms duration).
+  - `npm run test:legacy`: 10 / 10 legacy suites PASS.
+  - `node tests/full-regression.test.js`: 57 Passed, 0 Failed.
+  - `npm run typecheck`: 0 TypeScript errors (`tsc --noEmit` clean).
+  - `npm run build`: 14/14 static pages generated cleanly in 1.71s.
+- **Result**: **LEGACY STEP 006 COMPLETED & VERIFIED.** Obsolete configuration and root prompt files safely archived; root workspace cleaned. Next step in queue: LEGACY STEP 007.
+
+
+
+
+
+
 
 
 

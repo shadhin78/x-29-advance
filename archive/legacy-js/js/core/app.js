@@ -12,9 +12,9 @@
 
 import '../state.js';
 import '../services/auth.js';
-import '../../archive/legacy-js/shared/services/timerService.js';
-import '../../archive/legacy-js/router/router.js';
-import '../../archive/legacy-js/js/features/dashboard/dashboard.js';
+import '../../shared/services/timerService.js';
+import '../../router/router.js';
+import '../features/dashboard/dashboard.js';
 import './rollover.js';
 
 export const App = {

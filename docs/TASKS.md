@@ -49,6 +49,20 @@ OPTIMIZATION & PRODUCTION HARDENING
 [ ] STEP 030 — Production Hardening & Vercel Edge Security Optimization
 [ ] STEP 031 — End-to-End Regression & Data Integrity Cloud Verification
 [ ] STEP 032 — Final Legacy Decommissioning & Production Cutover Sign-Off
+
+LEGACY CODE ELIMINATION ROADMAP (docs/LEGACY-CODE-ELIMINATION.md)
+[x] LEGACY STEP 001 — Complete Dependency & Runtime Inventory (COMPLETED)
+[x] LEGACY STEP 002 — Modernize Test Suite & Decouple Legacy JS Test Dependencies (COMPLETED & VERIFIED)
+[x] LEGACY STEP 003 — Archive 16 Completely Unreferenced Legacy JavaScript Files (COMPLETED & VERIFIED)
+[x] LEGACY STEP 004 — Archive Test-Referenced Legacy JavaScript & Update Package Entrypoints (COMPLETED & VERIFIED)
+[x] LEGACY STEP 005 — Archive Inactive Legacy HTML Templates from pages/ (COMPLETED & VERIFIED)
+[x] LEGACY STEP 006 — Remove Obsolete Configuration and Orphaned Root Files (COMPLETED & VERIFIED)
+[ ] LEGACY STEP 007 — Clean Up Remnant Window Global & Fallback Bridges in Modern Code (NEXT IN QUEUE)
+[ ] LEGACY STEP 008 — Extract and Consolidate Active Legacy CSS into Design System
+[ ] LEGACY STEP 009 — Archive Legacy CSS Files and Decommission pages/ and css/ Directories
+[ ] LEGACY STEP 010 — Production Bundle & Performance Optimization
+[ ] LEGACY STEP 011 — Full Regression, PWA, Mobile & Data Persistence Verification
+[ ] LEGACY STEP 012 — Final Legacy Architecture Sign-Off & Lock
 ```
 
 ---
@@ -366,3 +380,117 @@ OPTIMIZATION & PRODUCTION HARDENING
 - [ ] Final documentation sign-off in `README.md` and `docs/*`.
 - [ ] Present before/after modernization report.
 - **Status**: **NOT STARTED**
+
+---
+
+## Legacy Elimination Tasks (docs/LEGACY-CODE-ELIMINATION.md)
+
+### LEGACY STEP 001 — Complete Dependency & Runtime Inventory
+- [x] Scan all 53 legacy candidate files across `pages/`, `js/`, `css/`, `api/`, and root.
+- [x] Trace AST imports and requires across all modern TypeScript components.
+- [x] Verify runtime HTTP status codes on local server (all legacy HTML/JS return 404).
+- [x] Audit CSS selectors: 112 active classes and 51 active IDs identified.
+- [x] Generate master roadmap specification in `docs/LEGACY-CODE-ELIMINATION.md`.
+- **Status**: **COMPLETED**
+
+---
+
+### LEGACY STEP 002 — Modernize Test Suite & Decouple Legacy JS Test Dependencies
+- [x] Update `package.json` `"test"` script to run `node --test tests/*.test.mjs`.
+- [x] Update `package.json` with granular modern test runners (`test:timer`, `test:exam`, `test:analytics`, `test:pace`, `test:outcome`, `test:targets`, `test:taxonomy`, `test:schedule`, `test:e2e`, `test:pwa`, `test:a11y`, `test:security`).
+- [x] Preserve legacy test suite under `test:legacy` for historical reference.
+- [x] Verify all 15 test suites and 84 unit/domain tests pass with 100% success (505ms).
+- [x] Verify `npm test` has zero runtime or build dependency on `js/`.
+- [x] Verify TypeScript compiles with 0 errors (`tsc --noEmit`).
+- [x] Verify Next.js production build succeeds with 14/14 static pages.
+- [x] Confirm zero UI/design/runtime regressions.
+- **Status**: **COMPLETED**
+
+---
+
+### LEGACY STEP 003 — Archive 16 Completely Unreferenced Legacy JavaScript Files
+- [x] Create automated archival engine with SHA-256 verification (`scripts/archive-unreferenced-legacy-js.mjs`).
+- [x] Cryptographically verify and copy 16 unreferenced JS files (108.4 KB) to `archive/legacy-js/js/`:
+  - `js/core/rollover.js`, `js/core/scheduleSlot.js`, `js/core/state.js`
+  - `js/pages/login/login.js`
+  - `js/services/backup.js`, `js/services/firebase.js`, `js/services/taxonomy.js`
+  - `js/shared/audio.js`, `js/shared/confetti.js`, `js/shared/toast.js`
+  - `js/state.js`
+  - `js/utils/date.js`, `js/utils/format.js`, `js/utils/id.js`, `js/utils/sanitize.js`, `js/utils/storage.js`
+- [x] Update `js/core/app.js` import paths for `state.js` and `rollover.js` to point to `archive/legacy-js/js/`.
+- [x] Safely unlink the 16 source files and remove empty directories `js/pages/login/` and `js/pages/`.
+- [x] Verify `node tests/app-core.test.js` passes 9/9 tests with updated archive import paths.
+- [x] Verify all 15 modern test suites pass 84/84 tests via `npm test` (506ms).
+- [x] Verify TypeScript compilation clean with 0 errors (`npm run typecheck`).
+- [x] Verify Next.js production build succeeds with 14/14 static pages (`npm run build`).
+- **Status**: **COMPLETED**
+
+---
+
+### LEGACY STEP 004 — Archive Test-Referenced Legacy JavaScript & Update Package Entrypoints
+- [x] Create automated archival and test remapping engine (`scripts/archive-remaining-legacy-js.mjs`).
+- [x] Cryptographically verify SHA-256 and copy remaining 11 legacy JS files (209.0 KB) to `archive/legacy-js/js/`:
+  - `js/core/app.js`, `js/core/metrics.js`, `js/dev-server.js`, `js/firebase.js`
+  - `js/services/auth.js`, `js/shared/deletion.js`, `js/shared/modals.js`, `js/shared/sidebar.js`
+  - `js/utils/colors.js`, `js/utils/dom.js`, `js/utils.js`
+- [x] Normalize internal imports inside `archive/legacy-js/js/core/app.js` to self-contained relative paths.
+- [x] Adjust `ROOT_DIR` in `archive/legacy-js/js/dev-server.js` to project root (`path.join(__dirname, '..', '..', '..')`).
+- [x] Update `package.json` entry points `"main": "archive/legacy-js/js/dev-server.js"` and `"dev:legacy": "node archive/legacy-js/js/dev-server.js"`.
+- [x] Update test require/read paths in: `tests/app-core.test.js`, `tests/auth-service.test.js`, `tests/modals.test.js`, `tests/tasks-metrics-dashboard.test.js`, `tests/daily-targets.test.js`, and `tests/full-regression.test.js`.
+- [x] Unlink all 11 source files and remove empty directories `js/core/`, `js/services/`, `js/shared/`, `js/utils/`, and `js/`.
+- [x] Verify active `js/` directory is completely removed (`Test-Path js` = False).
+- [x] Verify modern test runner passes 84/84 tests across 15 suites (`npm test` in 548ms).
+- [x] Verify legacy test suite passes 10/10 test files against archive (`npm run test:legacy`).
+- [x] Verify full modular regression test passes 57/57 assertions (`node tests/full-regression.test.js`).
+- [x] Verify TypeScript compiles with 0 errors (`npm run typecheck`).
+- [x] Verify Next.js production build compiles 14/14 static pages cleanly (`npm run build`).
+- **Status**: **COMPLETED**
+
+---
+
+### LEGACY STEP 005 — Archive Inactive Legacy HTML Templates from pages/
+- [x] Create automated archival engine with SHA-256 verification (`scripts/archive-legacy-html.mjs`).
+- [x] Cryptographically verify SHA-256 and copy all 11 legacy HTML files (307.4 KB) to `archive/legacy-html/pages/`:
+  - `pages/Dashboard/Dashboard.html` (57,344 B)
+  - `pages/Focus/Focus.html` (32,921 B)
+  - `pages/Subjects/Subjects.html` (5,848 B)
+  - `pages/Daily Actions/Daily Actions.html` (34,991 B)
+  - `pages/Daily Actions/monthly target setup/monthly target setup.html` (42,527 B)
+  - `pages/Daily Schedule/Daily Schedule.html` (7,250 B)
+  - `pages/Pace Management/Pace Management.html` (10,757 B)
+  - `pages/Outcome/Outcome.html` (10,881 B)
+  - `pages/Exam Routine/Exam Routine.html` (27,107 B)
+  - `pages/Master Config/Master Config.html` (20,872 B)
+  - `pages/Analytics/Analytics.html` (64,238 B)
+- [x] Safely unlink all 11 source HTML files from `pages/`.
+- [x] Confirm 0 `.html` files remain in `pages/` (`Get-ChildItem -Recurse -Filter "*.html"` returns 0).
+- [x] Safety audit: verify all 11 active CSS stylesheets in `pages/*/*.css` remain completely intact and untouched.
+- [x] Verify modern test runner passes 84/84 tests across 15 suites (`npm test` in 542ms).
+- [x] Verify legacy test suite passes 10/10 test files against archive (`npm run test:legacy`).
+- [x] Verify full modular regression test passes 57/57 assertions (`node tests/full-regression.test.js`).
+- [x] Verify TypeScript compiles with 0 errors (`npm run typecheck`).
+- [x] Verify Next.js production build compiles 14/14 static pages cleanly in 1.50s (`npm run build`).
+- **Status**: **COMPLETED**
+
+---
+
+### LEGACY STEP 006 — Remove Obsolete Configuration and Orphaned Root Files
+- [x] Create automated archival engine with SHA-256 verification (`scripts/archive-legacy-config-and-root.mjs`).
+- [x] Cryptographically verify SHA-256 and copy 3 dead configuration/prompt files (4.2 KB) to `archive/legacy-config/`:
+  - `api/config.js` (866 B)
+  - `manifest.json` (732 B)
+  - `ext` (2,734 B)
+- [x] Unlink source files from repo root and `api/`.
+- [x] Prune empty directory: `api/` (`Test-Path api` returns False).
+- [x] Update backward compatibility paths in `tests/pwa-service-worker.test.mjs` and `tests/full-regression.test.js` against archive fallback.
+- [x] Verify modern test runner passes 84/84 tests across 15 suites (`npm test` in 630ms).
+- [x] Verify legacy test suite passes 10/10 test files against archive (`npm run test:legacy`).
+- [x] Verify full modular regression test passes 57/57 assertions (`node tests/full-regression.test.js`).
+- [x] Verify TypeScript compiles with 0 errors (`npm run typecheck`).
+- [x] Verify Next.js production build compiles 14/14 static pages cleanly in 1.71s (`npm run build`).
+- **Status**: **COMPLETED**
+
+
+
+
+

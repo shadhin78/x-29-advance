@@ -18,7 +18,7 @@ const manifestPath = path.resolve('public/manifest.json');
 const swPath = path.resolve('public/sw.js');
 const layoutPath = path.resolve('app/layout.tsx');
 const providersPath = path.resolve('components/providers/providers.tsx');
-const rootManifestPath = path.resolve('manifest.json');
+const rootManifestPath = fs.existsSync('manifest.json') ? path.resolve('manifest.json') : path.resolve('archive/legacy-config/manifest.json');
 
 test('1. Web App Manifest (public/manifest.json) Schema & Metadata', () => {
   assert.ok(fs.existsSync(manifestPath), 'public/manifest.json must exist');

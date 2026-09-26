@@ -121,7 +121,7 @@ global.firebase = {
 global.firebase.auth.Auth = mockAuth.Auth;
 
 // Load AuthService
-const AuthService = require('../js/services/auth.js');
+const AuthService = require('../archive/legacy-js/js/services/auth.js');
 
 // Test Suite Runner
 async function runTestSuite() {

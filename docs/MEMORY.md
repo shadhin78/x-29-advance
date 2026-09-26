@@ -40,6 +40,14 @@
   - STEP 024 — Elimination of Legacy Monolithic HTML Shell (index.html, login.html)
   - STEP 025 — Bundle Splitting & Client JavaScript Reduction (< 350 KB Gzip)
   - STEP 026 — Core Web Vitals & Rendering Performance Optimization (LCP < 2.0s, FCP < 1.0s)
+- **Legacy Elimination Roadmap (docs/LEGACY-CODE-ELIMINATION.md)**:
+  - LEGACY STEP 001 — Complete Dependency & Runtime Inventory (COMPLETED)
+  - LEGACY STEP 002 — Modernize Test Suite & Decouple Legacy JS Test Dependencies (COMPLETED & VERIFIED)
+  - LEGACY STEP 003 — Archive 16 Completely Unreferenced Legacy JavaScript Files (COMPLETED & VERIFIED)
+  - LEGACY STEP 004 — Archive Test-Referenced Legacy JavaScript & Update Package Entrypoints (COMPLETED & VERIFIED — Active `js/` directory completely decommissioned)
+  - LEGACY STEP 005 — Archive Inactive Legacy HTML Templates from pages/ (COMPLETED & VERIFIED — All 11 HTML files archived, 11 active CSS stylesheets preserved intact)
+  - LEGACY STEP 006 — Remove Obsolete Configuration and Orphaned Root Files (COMPLETED & VERIFIED — api/config.js, root manifest.json, and ext safely archived)
+  - Next in Queue: LEGACY STEP 007 — Clean Up Remnant Window Global & Fallback Bridges in Modern Code
 
 ---
 
@@ -91,10 +99,11 @@
 - **Firestore Security Rules Enforce Key Whitelist**: `firestore.rules` enforces that `/users/{userId}` documents contain ONLY allowed keys (up to 48 top-level keys). Any modernization changes to payload structure must strictly adhere to this schema.
 - **Single-User Admin Identity**: The primary admin and authenticated user is `ris2k29@gmail.com`.
 - **Test Suite Health**:
-  - Legacy regression test suites (`npm run test`): **100% PASS** (all 10 batches passing).
-  - Modern ESM domain unit tests (`npm run test:unit`): **27 / 27 PASS** (0 failures, 290ms duration).
+  - Primary test runner (`npm test` / `npm run test:unit`): **84 / 84 PASS** (15 modern TypeScript domain & engine test suites, 0 failures, 505ms duration). Decoupled 100% from legacy `js/`.
+  - Granular modern runners operational: `test:timer`, `test:exam`, `test:analytics`, `test:pace`, `test:outcome`, `test:targets`, `test:taxonomy`, `test:schedule`, `test:e2e`, `test:pwa`, `test:a11y`, `test:security`.
+  - Legacy regression test suite preserved: `npm run test:legacy` (10 batches passing).
   - TypeScript compilation (`npm run typecheck`): **0 ERRORS** (`tsc --noEmit` exits cleanly).
-  - Turbopack Next.js Build (`npm run build`): **Compiled in 2.2s** (13 static routes prerendered).
+  - Turbopack Next.js Build (`npm run build`): **Compiled in 1.65s** (14 static routes prerendered).
 - **Baseline Performance Metrics**:
   - Lighthouse Performance: 37 / 100
   - LCP: 29.9s | FCP: 14.6s | TBT: 750ms | TTFB: 10ms

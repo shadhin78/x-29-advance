@@ -59,15 +59,15 @@ suites.forEach(s => {
 console.log('\n--- B. CORE APPLICATION CHECKS ---');
 const indexHtmlPath = fs.existsSync('index.html') ? 'index.html' : 'archive/legacy-html/index.html';
 const indexHtml = fs.readFileSync(indexHtmlPath, 'utf8');
-const appJs = fs.readFileSync('js/core/app.js', 'utf8');
-const authJs = fs.readFileSync('js/services/auth.js', 'utf8');
-const fbJs = fs.readFileSync('js/firebase.js', 'utf8');
+const appJs = fs.readFileSync('archive/legacy-js/js/core/app.js', 'utf8');
+const authJs = fs.readFileSync('archive/legacy-js/js/services/auth.js', 'utf8');
+const fbJs = fs.readFileSync('archive/legacy-js/js/firebase.js', 'utf8');
 
 check('Core: Application starts via Native ES Module entry point', indexHtml.includes('type="module" src="/js/core/app.js"'));
 check('Core: Authentication service supports login, logout, and getCurrentUser', authJs.includes('login:') && authJs.includes('logout:') && authJs.includes('getCurrentUser:'));
 check('Core: Admin route guard enforces ris2k29@gmail.com', appJs.includes('ris2k29@gmail.com'));
 check('Core: Logout flow exists and redirects to login.html', authJs.includes('logout') && authJs.includes('login.html'));
-check('Core: Navigation & page router registration present', fs.existsSync('router/router.js') && appJs.includes('initNavigation'));
+check('Core: Navigation & page router registration present', fs.existsSync('archive/legacy-js/router/router.js') && appJs.includes('initNavigation'));
 check('Core: Firebase connectivity, configuration & cloud methods', fbJs.includes('fetchConfig') && fbJs.includes('init') && fbJs.includes('saveToCloud'));
 check('Core: Cloud data loading and state hydration flow', fbJs.includes('loadFromCloud') || appJs.includes('initAuth'));
 check('Core: Data saving mechanism wired to state changes', fbJs.includes('saveToCloud'));
@@ -76,8 +76,8 @@ check('Core: Data saving mechanism wired to state changes', fbJs.includes('saveT
 // C. DASHBOARD CHECKS
 // -------------------------------------------------------------
 console.log('\n--- C. DASHBOARD CHECKS ---');
-const metricsJs = fs.readFileSync('js/core/metrics.js', 'utf8');
-const dashJs = fs.readFileSync('js/features/dashboard/dashboard.js', 'utf8');
+const metricsJs = fs.readFileSync('archive/legacy-js/js/core/metrics.js', 'utf8');
+const dashJs = fs.readFileSync('archive/legacy-js/js/features/dashboard/dashboard.js', 'utf8');
 
 check('Dashboard: Statistics calculations (Totals, Countdown, Success Score, Metrics)', 
     metricsJs.includes('recalculateTotals') && metricsJs.includes('updateCountdown') && metricsJs.includes('updateSuccessScore'));
@@ -90,9 +90,9 @@ check('Dashboard: Charts rendering & trend bar updates', dashJs.includes('update
 // D. ANALYTICS CHECKS
 // -------------------------------------------------------------
 console.log('\n--- D. ANALYTICS CHECKS ---');
-const paceJs = fs.readFileSync('js/features/pace/paceManager.js', 'utf8');
-const paceEstJs = fs.readFileSync('js/features/pace/paceEstimator.js', 'utf8');
-const outcomeJs = fs.readFileSync('js/features/outcome/outcomeAnalytics.js', 'utf8');
+const paceJs = fs.readFileSync('archive/legacy-js/js/features/pace/paceManager.js', 'utf8');
+const paceEstJs = fs.readFileSync('archive/legacy-js/js/features/pace/paceEstimator.js', 'utf8');
+const outcomeJs = fs.readFileSync('archive/legacy-js/js/features/outcome/outcomeAnalytics.js', 'utf8');
 
 check('Analytics: Charts rendering (Pace trend & burn-up comparison)', paceJs.includes('renderSpectraPaceTrendChart'));
 check('Analytics: Null safety guard against undefined targetedSubjects (Step 14 fix)', paceJs.includes('Array.from(stats.targetedSubjects || [])'));
@@ -103,8 +103,8 @@ check('Analytics: Program progression & trend modals', outcomeJs.includes('rende
 // E. FOCUS & TIMER CHECKS
 // -------------------------------------------------------------
 console.log('\n--- E. FOCUS & TIMER CHECKS ---');
-const timerServiceJs = fs.readFileSync('shared/services/timerService.js', 'utf8');
-const focusJs = fs.readFileSync('pages/Focus/Focus.js', 'utf8');
+const timerServiceJs = fs.readFileSync('archive/legacy-js/shared/services/timerService.js', 'utf8');
+const focusJs = fs.readFileSync('archive/legacy-js/pages/Focus/Focus.js', 'utf8');
 
 check('Focus: Focus page view and chronograph dial initialization', focusJs.includes('initChronographDial'));
 check('Focus: Focus statistics and session recording', timerServiceJs.includes('recordAutoSavedSession'));
@@ -117,7 +117,7 @@ check('Timer: Running timer status helper (isAnyTimerRunning)', timerServiceJs.i
 // F. EXAM CHECKS
 // -------------------------------------------------------------
 console.log('\n--- F. EXAM CHECKS ---');
-const examJs = fs.readFileSync('js/features/exam/examRoutine.js', 'utf8');
+const examJs = fs.readFileSync('archive/legacy-js/js/features/exam/examRoutine.js', 'utf8');
 
 check('Exam: Exam data structure & storage', examJs.includes('exam') || examJs.includes('exams'));
 check('Exam: Navigation & view renderer', examJs.includes('renderExamPage'));
@@ -127,7 +127,7 @@ check('Exam: Progress tracking and countdown display', examJs.includes('countdow
 // G. TASKS CHECKS
 // -------------------------------------------------------------
 console.log('\n--- G. TASKS CHECKS ---');
-const taskEngineJs = fs.readFileSync('js/features/tasks/taskEngine.js', 'utf8');
+const taskEngineJs = fs.readFileSync('archive/legacy-js/js/features/tasks/taskEngine.js', 'utf8');
 
 check('Tasks: Create / Generate Study Plan', taskEngineJs.includes('generateStudyPlan'));
 check('Tasks: Edit task modal & date realignment', taskEngineJs.includes('openEditModal') && taskEngineJs.includes('saveTaskEdit'));
@@ -139,9 +139,9 @@ check('Tasks: Restore / Skip task toggling', taskEngineJs.includes('toggleSkipTa
 // H. SETTINGS & CONFIGURATION CHECKS
 // -------------------------------------------------------------
 console.log('\n--- H. SETTINGS & CONFIGURATION CHECKS ---');
-const masterConfigJs = fs.readFileSync('js/features/config/masterConfig.js', 'utf8');
-const tracksConfigJs = fs.readFileSync('js/features/config/tracksConfig.js', 'utf8');
-const priorityConfigJs = fs.readFileSync('js/features/config/priorityConfig.js', 'utf8');
+const masterConfigJs = fs.readFileSync('archive/legacy-js/js/features/config/masterConfig.js', 'utf8');
+const tracksConfigJs = fs.readFileSync('archive/legacy-js/js/features/config/tracksConfig.js', 'utf8');
+const priorityConfigJs = fs.readFileSync('archive/legacy-js/js/features/config/priorityConfig.js', 'utf8');
 
 check('Settings: Master config dropdown management & initialization', masterConfigJs.includes('updateManageDropdown'));
 check('Settings: Dynamic tracks configuration (Add, Edit, Delete)', tracksConfigJs.includes('renderTrackList') && tracksConfigJs.includes('appendNewTrack'));
@@ -151,7 +151,7 @@ check('Settings: Priority configurations reordering & persistence', priorityConf
 // I. MOBILE RESPONSIVENESS CHECKS
 // -------------------------------------------------------------
 console.log('\n--- I. MOBILE RESPONSIVENESS CHECKS ---');
-const sidebarJs = fs.readFileSync('js/shared/sidebar.js', 'utf8');
+const sidebarJs = fs.readFileSync('archive/legacy-js/js/shared/sidebar.js', 'utf8');
 
 check('Mobile: Responsive viewport meta tag in index.html & login.html', 
     indexHtml.includes('name="viewport"') && indexHtml.includes('width=device-width'));
@@ -166,10 +166,11 @@ check('Mobile: Responsive hidden/block breakpoints (md:hidden, md:flex)', indexH
 // -------------------------------------------------------------
 console.log('\n--- J. PWA MANIFEST & INSTALLATION CHECKS ---');
 
-const manifestExists = fs.existsSync('manifest.json');
+const manifestPath = fs.existsSync('manifest.json') ? 'manifest.json' : 'archive/legacy-config/manifest.json';
+const manifestExists = fs.existsSync(manifestPath);
 check('PWA: manifest.json file exists', manifestExists);
 if (manifestExists) {
-    const manifest = JSON.parse(fs.readFileSync('manifest.json', 'utf8'));
+    const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
     check('PWA: Manifest name is X-29', manifest.name === 'X-29');
     check('PWA: Manifest display mode is standalone', manifest.display === 'standalone');
     check('PWA: Manifest icons defined', Array.isArray(manifest.icons) && manifest.icons.length > 0);
@@ -198,7 +199,7 @@ let match;
 while ((match = importRegex.exec(appJs)) !== null) {
     const imp = match[1] || match[2];
     let resolved = imp;
-    if (imp.startsWith('.')) resolved = path.normalize(path.join('js/core', imp));
+    if (imp.startsWith('.')) resolved = path.normalize(path.join('archive/legacy-js/js/core', imp));
     else if (imp.startsWith('/')) resolved = imp.replace(/^\//, '');
     if (!fs.existsSync(resolved)) brokenImports++;
 }
@@ -215,7 +216,7 @@ function getFiles(dir, ext = '.js') {
     return files;
 }
 
-const jsFiles = getFiles('./js');
+const jsFiles = getFiles('./archive/legacy-js/js');
 const graph = {};
 jsFiles.forEach(file => {
     const relFile = path.relative('.', file).replace(/\\/g, '/');

@@ -12,8 +12,8 @@ console.log('\n=== X-29 Advance — Modals & Deletion Architecture Test Suite ==
 // 1. Browser-like Environment (no Node global)
 {
     console.log('1. Verifying Clean Load in Pure Browser Environment (no Node "global")...');
-    const modalsCode = fs.readFileSync('js/shared/modals.js', 'utf8');
-    const deletionCode = fs.readFileSync('js/shared/deletion.js', 'utf8');
+    const modalsCode = fs.readFileSync('archive/legacy-js/js/shared/modals.js', 'utf8');
+    const deletionCode = fs.readFileSync('archive/legacy-js/js/shared/deletion.js', 'utf8');
 
     const clickListeners = [];
     const domListeners = [];
@@ -56,8 +56,8 @@ console.log('\n=== X-29 Advance — Modals & Deletion Architecture Test Suite ==
 // 2. Testing Modal Close Logic with Event Delegation
 {
     console.log('\n2. Testing Universal Modal Dismissal & Event Delegation...');
-    const Modals = require('../js/shared/modals.js');
-    const Deletion = require('../js/shared/deletion.js');
+    const Modals = require('../archive/legacy-js/js/shared/modals.js');
+    const Deletion = require('../archive/legacy-js/js/shared/deletion.js');
 
     assert(Modals.MODAL_BACKDROPS['daily-actions-db-modal'], 'daily-actions-db-modal must have backdrop entry');
     assert(Modals.MODAL_BACKDROPS['subject-target-modal'], 'subject-target-modal must have backdrop entry');
